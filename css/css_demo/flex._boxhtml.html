@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>伸缩和模型举例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;}
+        html,body {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 2rem;
+            color:green;
+        }
+        div {
+            vertical-align: middle;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            background-color: #00b3ee;
+            display: flex;
+            flex-direction: row;
+        }
+        .left-box {
+            flex:1;
+            background-color: red;
+            display: flex;
+            flex-direction: column;
+        }
+        .right-box {
+            flex:1;
+            background-color: blue;
+        }
+        .left-bottom-box {
+            flex: 1;
+            flex-direction: row;
+            display: flex;
+            background-color: black;
+        }
+        .left-bottom-left-box {
+            flex: 1;
+            background-color: #d1d1d1;
+        }
+        .left-bottom-right-box {
+            flex: 1;
+            background-color: #818181;
+        }
+        .left-middle-box {
+            flex: 1;
+            background-color: #09092d;
+        }
+        .left-top-box {
+            flex: 1;
+            background-color: #1d1d8e;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="left-box">
+        <div class="left-top-box">左上</div>
+        <div class="left-middle-box">左中</div>
+        <div class="left-bottom-box">
+            <div class="left-bottom-left-box">左下左</div>
+            <div class="left-bottom-right-box">左下右</div>
+        </div>
+    </div>
+    <div class="right-box">右边</div>
+</div>
+</body>
+</html>

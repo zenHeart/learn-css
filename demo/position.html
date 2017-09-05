@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>理解定位属性</title>
+</head>
+<style>
+    .parent-container {
+        width: 300px;
+        height: 300px;
+        margin-bottom: 1rem;
+
+        background-color:blue;
+    }
+    .children-block {
+        background-color: red;
+    }
+    .re-offset-1rem {
+        position: relative;
+        left: 1rem;
+    }
+    .ab-offset-1rem {
+        position: absolute;
+        left: 1rem;
+    }
+    .fx-offset-1rem {
+        position: fixed;
+        left: 1rem;
+    }
+</style>
+<body>
+<div class="parent-container" >
+  <div class="children-block">块级元素  static 默认布局</div>
+</div>
+<div class="parent-container" >
+    <div class="children-block re-offset-1rem">块级元素  relative 默认布局</div>
+</div>
+<div class="parent-container" >
+    <div class="children-block ab-offset-1rem">块级元素  absolute 默认布局</div>
+</div>
+<div class="parent-container" >
+    <div class="children-block fx-offset-1rem">块级元素  fixed 默认布局</div>
+</div>
+</body>
+</html>
