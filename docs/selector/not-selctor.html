@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .btn {
+            background-color: green;
+        }
+        .btn_primary {
+            width: 200px;
+        }
+        .btn_primary:not(.btn_disabled):active {
+            background-color: #000000;
+        }
+    </style>
+</head>
+<body>
+<h1>利用 not:() 模式排出某一类选择器</h1>
+<button class="btn btn_primary">使能按钮</button>
+<button class="btn btn_disabled btn_primary">未使能按钮</button>
+
+</body>
+</html>

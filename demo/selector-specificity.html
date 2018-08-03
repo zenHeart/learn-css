@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #test,#test-id {
+            color:blue;
+        }
+        .test {
+            color:green
+        }
+        [align='left'] {
+            color:yellow
+        }
+        p {
+            color:purple;
+        }
+
+        .important-test {
+            color:cyan !important;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>测试不同级别的选择器优先级,内联样式最高</h1>
+    <p style="color:red" id="test-id" class="test" align="left">采用内联样式</p>
+    <p id="test" class="test" align="left">采用 id 样式</p>
+    <p class="test" >采用类样式</p>
+    <p  align="left">采用属性选择器</p>
+    <p>采用元素选择器</p>
+</div>
+
+<div>
+    <h1>测试相同级别选择器,会采用后申明的属性</h1>
+    <p  align="left" class="test">
+        由于属性选择器和类选择器同级,而属性选择器后申明,采用该选择器!
+    </p>
+</div>
+
+<div>
+    <h1>测试 !important 选择器最大,高于内联</h1>
+    <p style="color:red" class="important-test">
+       !important 的权重最大,内联样式会失效
+    </p>
+    <p style="color:red !important;" class="important-test">
+       为了使内联样式确定生效也使用 !important 覆盖前面的样式
+    </p>
+</div>
+</body>
+</html>
