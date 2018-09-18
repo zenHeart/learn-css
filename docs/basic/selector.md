@@ -12,3 +12,8 @@ selector
 ---
 
 ### not 选择器
+
+
+## 参考资料
+* [ ] [selector](https://css4-selectors.com/selectors/)
+

@@ -27,7 +27,7 @@
 * 通用选择器 `*` 没有权重
 * 结合符对选择器没有贡献
  
-范例参考 [selecotor specificity](../../demo/selector-specificity.html)
+范例参考 [selecotor specificity](../../tests/selector-specificity.html)
 
  
 ## 参考资料
