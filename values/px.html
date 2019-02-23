@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style type="text/css">
+        .one-in {
+            font-size:96px;
+        }
+    </style>
+</head>
+<body style="position: relative">
+    <h1>验证 z-index 和父元素的 z-index 有关</h1>
+    <div style="z-index:1;position:absolute;height: 5rem;background: green;" >
+        <p style="top:0rem;z-index:2000;background: cyan;height: 2rem">父元素 z-index 低</p>
+    </div>
+    <div style="z-index:10;position:absolute;top:10px;height: 5rem;background: yellow"
+    ><p style="z-index:1000;background: red;height: 3rem">父元素 z-index 高</p></div>
+</body>
+</html>

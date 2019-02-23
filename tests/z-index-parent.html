@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .contianer {
+            position: relative;
+            background: black;
+            width: 10rem;
+            height: 10rem;
+        }
+        .parent1,.parent2 {
+            position:absolute;
+            width: 7rem;
+            height: 7rem;
+        }
+        .parent1 {
+            z-index:1;
+            background: blue;
+        }
+        .children {
+            z-index:100;
+            background: yellow;
+            width: 6rem;
+            height: 5rem;
+        }
+
+        .parent2 {
+            z-index:10;
+            left:5rem;
+            background: green
+        }
+    </style>
+</head>
+<body>
+    <h1>验证父元素对 z-index 布局影响</h1>
+    <div class="container">
+        <div class="parent1">
+            <div class="children" style="background: purple"></div>
+        </div>
+        <div class="parent2">
+                <div class="children"  style="z-index:80;background: cyan"></div>
+        </div>
+
+    </div>
+</body>
+</html>

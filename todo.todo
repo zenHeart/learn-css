@@ -1,0 +1,19 @@
+todos:
+    ☐ 完成 mdn css 系列文章学习 [css](https://developer.mozilla.org/zh-CN/docs/Web/CSS)
+    ☐  [css layout](https://github.com/Sweet-KK/css-layout/tree/master/docs)
+    ☐  css 添加层叠上下文及示例
+    ☐  display flex
+    ☐  justify-content
+    ☐  align-items
+    ☐  解决 [浮动无法基线对齐的问题](bug/float-baseline.md)
+    ☐  [理解像素](https://www.w3cplus.com/css/A-pixel-is-not-a-pixel-is-not-a-pixel.html)
+    ☐  flex  布局,列等高问题
+    ☐  [移动浏览器](https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag?redirectlocale=en-US&redirectslug=Mobile%2FViewport_meta_tag)
+    ☐  [设计指南](http://www.woshipm.com/ucd/136690.html)
+    ☐  [min-hegith 和 height 及 height 的失效条件 ]
+    ☐  [渲染进程模型](https://github.com/atotic/event-loop)
+    ☐  学习 [LULU 的 css 命名](https://l-ui.com/content/about/use.html)
+    ☐ flex 布局图片尺寸无法自适应, <https://stackoverflow.com/questions/40894381/image-height-inside-flexbox-not-working-in-chrome>
+    ☐ flex 图片自动适应, <https://stackoverflow.com/questions/38295001/make-background-image-to-fit-in-flex-container>
+    ☐ ios scrool 释放触发条件
+    
