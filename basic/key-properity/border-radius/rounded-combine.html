@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <style>
+    .round-combine {
+      position: relative;
+      padding-left: 5px;
+      background: linear-gradient(#4478f3, #3c82fa);
+      border-radius: 0 13px 0 0;
+    }
+    .round-combine::before {
+      position: absolute;
+      background: orange;
+      left:-5px;
+      content: '';
+      display: block;
+      width: 4px;
+      height: 26px;
+      border-radius: 4px 0 0 4px;
+    }
+    p {
+      line-height: 26px;
+    }
+  </style>
+  <body>
+    <h1>圆角梯形</h1>
+    <div class="round-combine">
+      <p>测试文字</p>
+    </div>
+  </body>
+</html>
