@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+  </head>
+  <style>
+    /* body {
+      counter-reset: span 
+    } */
+    span {
+      counter-increment: span 2;
+    }
+    span::before {
+      content: counter(span) '.';
+    }
+  </style>
+  <body>
+    <h1>验证 couter-increment</h1>
+    <p>
+      <span>number</span>
+    </p>
+    <p>
+      <span>number</span>
+    </p>
+    <p>
+      <span>number</span>
+    </p>
+  </body>
+</html>

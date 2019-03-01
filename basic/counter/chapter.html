@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+  </head>
+  <style>
+    body {
+      counter-reset: chapter 0;
+    }
+    h1:before {
+      counter-increment: chapter;
+      content: counter(chapter) '. ';
+    }
+    h1 {
+      counter-reset: section;
+    }
+    h2:before {
+      counter-increment: section;
+      content: counter(chapter) '. ' counter(section) '. ';
+    }
+  </style>
+  <body>
+    <h1>第一章</h1>
+    <h2>sadsa</h2>
+    <h2>段落1</h2>
+    <h2>段落2</h2>
+    <h2>段落3</h2>
+    <h1>第一章</h1>
+    <h2>sadsa</h2>
+    <h2>段落1</h2>
+    <h2>段落2</h2>
+    <h1>第一章</h1>
+    <h1>第一章</h1>
+  </body>
+</html>

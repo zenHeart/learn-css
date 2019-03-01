@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      .container {
+        border: 1px solid #000;
+      }
+      .parent {
+        margin-top: 30px;
+        border: 1px solid #000;
+      }
+      .children {
+        margin-top: 20px;
+        width: 100px;
+        height: 100px;
+        background: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>验证父元素内容宽高是子元素加 margin</h1>
+    <div class="container">
+        容器
+      <div class="parent">
+          父元素
+        <div class="children">子元素</div>
+        <p>dfs</p>
+      </div>
+    </div>
+  </body>
+</html>
