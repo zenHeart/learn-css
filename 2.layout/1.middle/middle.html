@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		.container {
+			height: 300px;
+			border: 1px solid #000;
+		}
+
+		.single-inline-content {
+			line-height:  300px;
+			text-align: center;
+		}
+
+		.multi-inline-center {
+			
+		}
+		
+		.multi-inline-content {
+			height: inherit;
+			margin-left: auto;
+			margin-right: auto;
+			display: table-cell;
+			vertical-align: middle;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>演示单行元素水平垂直居中</h1>
+	<div class="container">
+		<p class="single-inline-content">
+			<span>单行元素水平垂直居中</span>
+		</p>
+	</div>
+	<h1>多行元素块水平居中</h1>
+	<div class="container">
+		<p class="multi-inline-center">
+			<span>单行元素水平垂直居中</span>
+		</p>
+	</div>
+
+	<h1>演示多行元素水平垂直居中</h1>
+	<div class="container">
+		<p class="single-inline-content">
+			<span>单行元素水平垂直居中</span><br/>
+			<span>单行元素水平垂直居中</span>
+		</p>
+	</div>
+
+</body>
+
+</html>

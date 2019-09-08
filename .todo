@@ -16,5 +16,9 @@ todos:
     ☐  学习 [LULU 的 css 命名](https://l-ui.com/content/about/use.html)
     ☐ flex 布局图片尺寸无法自适应, <https://stackoverflow.com/questions/40894381/image-height-inside-flexbox-not-working-in-chrome>
     ☐ flex 图片自动适应, <https://stackoverflow.com/questions/38295001/make-background-image-to-fit-in-flex-container>
-    ☐ ios scrool 释放触发条件
-    
+	☐ ios scrool 释放触发条件
+	☐ 可以使用 [Stylish](https://userstyles.org/) 定制用户样式
+	
+css 设计模式:
+	☐ 原子设计延续 http://bradfrost.com/blog/post/extending-atomic-design/
+	

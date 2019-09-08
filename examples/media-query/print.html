@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		.content {
+			font-size: 14px;
+		}
+
+		@media print {
+			.content {
+				border: 1px solid #000;
+				font-size: 24px;
+				padding: 1rem;
+			}
+			.print-button {
+				display: none;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<h1>演示在打印模式下使用媒体查询,设置不同样式</h1>
+	<p class="content">
+		点击打印后由于媒体查询会隐藏按钮的显示,该功能通过设置 media type 为 print 实现
+	</p>
+	<p class="print-button"><button onclick="myFunction()">点击打印文本</button></p>
+	<script>
+		function myFunction() {
+			window.print();
+		}
+	</script>
+</body>
+
+</html>

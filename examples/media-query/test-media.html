@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		.content {
+			font-size: 14px;
+		}
+
+		@media (max-width:375px) {
+			.content {
+				border: 1px solid #000;
+				font-size: 24px;
+				padding: 1rem;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<h1>采用媒体查询监测设备</h1>
+	<p class="content"></p>
+	<p><button>取消监听事件</button></p>
+	<script>
+		//1. 挂载监测事件
+		let mql = window.matchMedia("(max-width:375px)");
+		
+		//2. 挂载监听事件
+		function watchWidth(mql) {
+			if(mql.matches) {
+				updateText('view width <= 375px')
+			} else {
+				updateText('view width > 375px')
+			}
+		}
+		function updateText(str) {
+			let el = document.getElementsByClassName('content')[0];
+			el.textContent = str;
+		}
+		function init() {
+			if(mql.matches) {
+				updateText('view width <= 375px')
+			} else {
+				updateText('view width > 375px')
+			}
+			toggleListener();
+		}
+		function toggleListener() {
+			let el = document.getElementsByTagName('button')[0];
+			let bindFlag = false;
+			el.onclick = function(e) {
+				bindFlag^=1;
+				e.target.innerText = bindFlag?'绑定宽度事件':'移除事件';
+				bindFlag?mql.removeListener(watchWidth):mql.addListener(watchWidth)
+			}
+		}
+
+		init();
+		mql.addListener(watchWidth)
+
+	</script>
+</body>
+
+</html>
