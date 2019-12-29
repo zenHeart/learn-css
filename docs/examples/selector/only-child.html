@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            /* 选中值包含元素为唯一的子节点 */
+            li:only-child {
+                background: cyan;
+            }
+        </style>
+    </head>
+    <body>
+        <ol>
+            <li>
+                First
+                <ul>
+                    <li>This list has just one element.</li>
+                </ul>
+            </li>
+            <li>
+                Second
+                <ul>
+                    <li>This list has three elements.</li>
+                    <li>This list has three elements.</li>
+                    <li>This list has three elements.</li>
+                </ul>
+            </li>
+        </ol>
+    </body>
+</html>

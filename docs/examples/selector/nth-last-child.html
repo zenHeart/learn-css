@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            tbody tr:nth-last-child(odd) {
+                background: cyan;
+            }
+            tbody tr:nth-last-child(even) {
+                background: gray;
+            }
+            tbody td:nth-last-child(3n) {
+                color: red;
+            }
+            /* 选b中头几项 */
+            tbody tr:nth-last-child(-n + 3) td:nth-last-child(2n) {
+                color: green;
+            }
+            /* 选中一个范围 */
+            tbody
+                tr:nth-last-child(n + 4):nth-last-child(-n + 8)
+                td:nth-last-child(2n) {
+                color: blue;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>:nth-last-child() 倒叙实现选中特定规则的子元素</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>第1列</th>
+                    <th>第2列</th>
+                    <th>第3列</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+                <tr>
+                    <td>第1项</td>
+                    <td>第2项</td>
+                    <td>第3项</td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

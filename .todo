@@ -1,4 +1,7 @@
 todos:
+    ☐ css 样式渲染说明 https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/
+    ☐ uncss 工具忽略无用的 css https://github.com/uncss/uncss 
+    ☐ css 复用的总结 https://adamwathan.me/css-utility-classes-and-separation-of-concerns/
     ☐ 看完 css layout 内容 [layout](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout)
     ☐ 完成 mdn css 系列文章学习 [css](https://developer.mozilla.org/zh-CN/docs/Web/CSS)
     ☐  [css layout](https://github.com/Sweet-KK/css-layout/tree/master/docs)

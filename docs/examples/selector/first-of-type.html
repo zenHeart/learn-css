@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            li:first-of-type {
+                background: cyan;
+            }
+            span:first-of-type {
+                color: green;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>:first-type-of 选中在子元素组中第一次出现的元素</h2>
+        <ul>
+            <ol>
+                <p>test</p>
+                <li>元素 1,此元素会被选中</li>
+                <li>
+                    <strong>test</strong>
+                    <span>文本 1,此元素会被选中</span>
+                    <span>文本 2</span>
+                    <span>文本 3</span>
+                </li>
+                <li>
+                    元素 3
+                </li>
+            </ol>
+        </ul>
+    </body>
+</html>

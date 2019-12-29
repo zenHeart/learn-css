@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            p[id|='link'] {
+                display: none;
+            }
+            p:target {
+                display: block;
+                background: cyan;
+            }
+            nav a {
+                display: inline-block;
+                padding: 10px 20px;
+                border: 1px solid #000;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>:target 选中 link 标签的锚值相等的特定元素</h2>
+        <nav>
+            <a href="#link-a">a</a><a href="#link-b">b</a
+            ><a href="#link-c">c</a>
+        </nav>
+        <div>
+            <p id="link-a">a</p>
+            <p id="link-b">b</p>
+            <p id="link-c">c</p>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            /* 选中除去第一个和最后一个的中间段落*/
+            p:not(:first-child):not(:last-child) {
+                background: cyan;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>:not() 伪类用于实现取反操作</h2>
+        <div>
+            <p>段落1</p>
+            <p>段落2</p>
+            <p>段落3</p>
+        </div>
+    </body>
+</html>
