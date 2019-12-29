@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>flex basic</title>
+	<style>
+		.parent {
+			display: flex;
+			background: gray;
+			height: 900px;
+			width: 600px;
+			counter-reset: item;
+		}
+
+		.children {
+			background: yellow;
+			width: 250px;
+			height: 250px;
+		}
+
+		.children::after {
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			line-height: 20px;
+			text-align: center;
+			counter-increment: item;
+			content: counter(item);
+			border-radius: 50%;
+			background: black;
+			color: red;
+		}
+
+		.children:nth-child(2n) {
+			background: green
+		}
+
+		.children:nth-child(3n) {
+			background: red
+		}
+
+		.children:nth-child(4n) {
+			background: blue
+		}
+	</style>
+</head>
+
+<body>
+	<h1>验证 flex 布局的基本特性</h1>
+	<form action="">
+		<p>
+			<label for="useFlex">是否为 flex 布局</label>
+			<input value="flex" checked type="checkbox" name="useFlex">
+			<blockquote>flex 布局后会导致子元素盒模型失效,变形为 flex 盒模型</blockquote>
+		</p>
+		<p>
+			<label for="flexDirection">flex 方向</label>
+			<select name="flexDirection">
+				<option value="row">row</option>
+				<option value="row-reverse">row-reverse</option>
+				<option value="column">column</option>
+				<option value="column-reverse">column-reverse</option>
+			</select>
+		</p>
+		<p>
+			<label for="flexDirection">flex </label>
+			<select name="flexDirection">
+				<option value="row">row</option>
+				<option value="row-reverse">row-reverse</option>
+				<option value="column">column</option>
+				<option value="column-reverse">column-reverse</option>
+			</select>
+		</p>
+	</form>
+	<div class="parent">
+		<div class="children"></div>
+		<div class="children"></div>
+		<div class="children"></div>
+		<div class="children"></div>
+		<div class="children"></div>
+	</div>
+
+</body>
+<script>
+	let parentEl = document.querySelector('.parent');
+	let formHandles = {
+		useFlex: {
+			select: 'input[name="useFlex"]',
+			eventName: 'onchange',
+			callback(e) {
+				let { checked } = e.target;
+				parentEl.style.display = checked ? 'flex' : 'block';
+			}
+		},
+		flexDirection: {
+			select: 'select[name="flexDirection"]',
+			eventName: 'onchange',
+			callback(e) {
+				let { value } = e.target;
+				parentEl.style.flexDirection = value;
+			}
+		}
+	}
+	function bindEvent() {
+		let keys = Object.keys(formHandles);
+		keys.forEach(key => {
+			let options = formHandles[key];
+			let inputEl = document.querySelector(options.select);
+			inputEl[options.eventName] = options.callback;
+		})
+	}
+	bindEvent();
+</script>
+
+</html>

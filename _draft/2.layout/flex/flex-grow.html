@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<body>
+	<h1>flex grow 用于分配剩余主轴空间</h1>
+	<p>
+		<strong>注意 felx-grow 是分配的剩余空间的比例,计算规则如下</strong>
+		<ol>
+			<li>
+				计算剩余空间 w =  500px - 100px*2 -50px*2 = 200px
+			</li>	
+			<li>
+				计算各块的分配的剩余空间尺寸 div1 = 2/(2*2+0.5*2)*w = 80px
+			</li>	
+			<li>
+				各元素块当前尺寸加上分配尺寸的出当前宽度 div1 =80px + 50px =  130px
+			</li>	
+			<i>自行计算其他元素宽度证明上述结论</i>
+		</ol>
+	</p>
+	<div class="column">
+		<div class="item" ></div>
+		<div class="item"  ></div>
+		<div class="item"  ></div>
+		<div class="item"  ></div>
+	</div>
+	<style>
+
+		.column {
+			display :flex;
+			width:500px;
+			height:50px;
+			border: 1px solid green;
+		}
+		.item {
+			width:50px;
+			flex-grow:2;
+			background: yellow;
+		}
+		.item:nth-child(2n) {
+			width:100px;
+			flex-grow:0.5;
+			background: cyan;
+		}
+	</style>
+</body>
+</html>

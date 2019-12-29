@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		.trapezium {
+			width: 100px;
+			height: 100px;
+			background: #000;
+			border-left: 30px solid red;
+			;
+			border-top: 30px solid green;
+			;
+			border-right: 30px solid yellow;
+			;
+			border-bottom: 30px solid blue;
+			;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="demo">
+		<h1>利用 border 创建三角形</h1>
+		<p>通过简单地控制各 bodrder 边对应的显示和隐藏可实现克各种常见的形状</p>
+		<form>
+			<P>
+				<label for="box">盒子尺寸:</label>
+				<input name="box" min="0" max="100" step="10" type="range" id="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="backgroundColor">
+			</P>
+			<P>
+				<label for="borderLeftWidth">左边 border 厚度:</label>
+				<input name="borderLeftWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderLeftColor">
+			</P>
+			<P>
+				<label for="borderTopWidth">顶部 border 厚度:</label>
+				<input name="borderTopWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderTopColor">
+			</P>
+			<P>
+				<label for="borderRightWidth">右边 border 厚度:</label>
+				<input name="borderRightWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderRightColor">
+
+			</P>
+			<P>
+				<label for="borderBottomWidth">底部 border 厚度:</label>
+				<input name="borderBottomWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderBottomColor">
+			</P>
+		</form>
+		<div class="trapezium"></div>
+	</div>
+	<hr>
+	<div class="demo1">
+		<h1>利用 border 创建三角形</h1>
+		<p>通过简单地控制各 bodrder 边对应的显示和隐藏可实现克各种常见的形状</p>
+		<form>
+			<P>
+				<label for="box">盒子尺寸:</label>
+				<input name="box" min="0" max="100" step="10" type="range" id="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="backgroundColor">
+			</P>
+			<P>
+				<label for="borderLeftWidth">左边 border 厚度:</label>
+				<input name="borderLeftWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderLeftColor">
+			</P>
+			<P>
+				<label for="borderTopWidth">顶部 border 厚度:</label>
+				<input name="borderTopWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderTopColor">
+			</P>
+			<P>
+				<label for="borderRightWidth">右边 border 厚度:</label>
+				<input name="borderRightWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderRightColor">
+
+			</P>
+			<P>
+				<label for="borderBottomWidth">底部 border 厚度:</label>
+				<input name="borderBottomWidth" min="0" max="30" step="3" type="range"></input>
+				<label for="hideColor">透明:</label>
+				<input type="checkbox" name="borderBottomColor">
+			</P>
+		</form>
+		<div class="trapezium"></div>
+	</div>
+	<script>
+		let el = document.getElementById('range');
+		let elTrapezium = document.getElementsByClassName('trapezium')[0];
+		let eles = document.querySelectorAll('input[name$=Width]');
+		let colorEles = document.querySelectorAll('input[name$=Color]');
+		el.onchange = function (e) {
+			let { value } = e.target;
+			console.dir(e);
+			elTrapezium.style.width = elTrapezium.style.height = `${value}px`;
+		}
+		eles.forEach(el => {
+			bindEvent(el);
+		})
+		colorEles.forEach(el => {
+			hideColor(el);
+		})
+
+		function bindEvent(el) {
+			el.onchange = (e) => {
+				elTrapezium.style[el.name] = `${e.target.value}px`;
+			}
+		}
+		function hideColor(el) {
+			el.onchange = (e) => {
+				elTrapezium.style[el.name] = e.target.checked ? 'transparent' : '';
+			}
+		}
+	</script>
+</body>
+
+</html>

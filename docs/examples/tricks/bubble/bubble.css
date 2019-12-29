@@ -1,0 +1,31 @@
+.content {
+}
+/* 
+在 dom 元素上创建一个 scc 气泡
+1. 元素框加上背景
+*/
+
+.bubble {
+    position: relative;
+    margin: 50px;
+    padding: 10px;
+    background: linear-gradient(rgb(243, 243, 174), rgb(255, 255, 0));
+}
+.bubble:after {
+    position: absolute;
+    content: '';
+    width: 0;
+    display: block;
+    bottom: -20px;
+    left: 50%;
+    border-style: solid;
+    border-width: 20px 20px 0;
+    border-color: rgb(199, 230, 23) transparent transparent transparent;
+}
+.bubble.right:after {
+    top: 50%;
+    bottom: initial;
+    left: 100%;
+    border-width: 10px;
+    border-color: transparent transparent transparent red;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+</head>
+<body>
+	<h1>验证 flex 子元素设置</h1>
+	<div class="column">
+		<div class="item">1</div>
+		<div class="item">2</div>
+		<div class="item">3</div>
+		<div class="item">4</div>
+	</div>
+	<style>
+		.column {
+			display :flex;
+			border: 1px solid green;
+		}
+		.item {
+			background: yellow;
+		}
+		.item:nth-child(2n) {
+			background: cyan;
+		}
+	</style>
+</body>
+</html>

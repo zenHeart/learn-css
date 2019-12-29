@@ -1,0 +1,31 @@
+{
+    "name": "learn-css",
+    "version": "1.0.0",
+    "description": "记录学习 css 的所有资料",
+    "main": "index.js",
+    "directories": {
+        "example": "examples",
+        "docs": "docs"
+    },
+    "scripts": {
+        "docs:dev": "gitbook serve docs",
+        "docs:deploy": "./scripts/deploy.sh",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zenHeart/learn-css.git"
+    },
+    "keywords": [],
+    "author": "zenheart <zenheart_register@163.com> (https://blog.zenheart.site/)",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/zenHeart/learn-css/issues"
+    },
+    "homepage": "https://github.com/zenHeart/learn-css#readme",
+    "dependencies": {
+        "html-loader": "^0.5.5",
+        "markdown-loader": "^5.1.0",
+        "marked": "^0.8.0"
+    }
+}

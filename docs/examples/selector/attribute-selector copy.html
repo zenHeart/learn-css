@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            li {
+                padding: 0 20px;
+                margin-bottom: 20px;
+            }
+            li strong {
+                padding-right: 20px;
+                color: black;
+            }
+            /* 匹配包含属性名的元素 */
+            li[highlight] {
+                color: red;
+                background: silver;
+            }
+            /* 匹配包含属性名的元素 */
+            li[highlight='enlarge'] {
+                font-size: 1.2rem;
+            }
+            /* 空格分隔的多个值包含 top */
+            li[highlight~='top'] {
+                border-top: 1px solid #000;
+            }
+            /* 以 start 开头的元素*/
+            li[highlight^='start'] {
+                border-left: 1px solid green;
+            }
+            /* 包含 contain 的元素*/
+            li[highlight*='contain'] {
+                outline: 4px dashed orange;
+            }
+            /* 值以 end 结尾的元素*/
+            li[highlight$='end'] {
+                border-right: 1px solid purple;
+            }
+            /* 匹配英语单词变为斜体并加粗 */
+            span[lang|='en'] {
+                font-weight: 800;
+                font-style: italic;
+            }
+
+            /* 忽略值的大小写统一转为小写进行匹配*/
+            li[Highlight*='insenSitively' i] {
+                border: 1px dashed #000;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>常用属性选择器</h2>
+        <ol>
+            <li highlight>
+                <p><strong>element[attr]</strong>匹配包含属性名的元素</p>
+            </li>
+            <li highlight="enlarge">
+                <p>
+                    <strong>element[attr=value]</strong>匹配包含属性名,且值等于
+                    value 的属性
+                </p>
+                <ol>
+                    <li>
+                        value 的值的外部可以不带引号,也不区分单引号和双引号
+                    </li>
+                </ol>
+            </li>
+            <li highlight="enlarge top">
+                <p>
+                    <strong>element[attr~=value]</strong
+                    >匹配包含属性名,且属性的值是以空格分隔的一系列值,其中包含value
+                    元素
+                </p>
+            </li>
+            <li>
+                <p>
+                    <strong>element[attr|=value]</strong
+                    >匹配包含属性名,其属性值以 value 开头并连接 - 符号
+                </p>
+                <p>
+                    多用于语言匹配例如 span[lang|=en]
+                    <span lang="en-us">english</span>
+                </p>
+            </li>
+            <li highlight="start1 enlarge ">
+                <p>
+                    <strong>element[attr^=value]</strong
+                    >匹配包含属性名且以value开头的元素
+                </p>
+            </li>
+            <li highlight="enlarge contain-1">
+                <p>
+                    <strong>element[attr*=value]</strong
+                    >匹配包含属性名且值中包含 value 的元素
+                </p>
+            </li>
+            <li highlight="enlarge end">
+                <p>
+                    <strong>element[attr$=value]</strong
+                    >匹配包含属性名且值以value结尾的元素
+                </p>
+            </li>
+            <li highLiGht="enlarge end cAse-InsenSitiVely">
+                <p>
+                    <strong>element[attr operator value i]</strong
+                    >匹配包含元素且按照匹配值且忽略值的大小写的元素
+                </p>
+            </li>
+        </ol>
+    </body>
+</html>
