@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>z-index 默认堆叠验证</title>
+        <style>
+            .container {
+                position: relative;
+                border: 1px solid #000;
+            }
+            b {
+                font-family: sans-serif;
+            }
+
+            div {
+                padding: 10px;
+                border: 1px dashed;
+                text-align: center;
+            }
+
+            .static {
+                position: static;
+                height: 80px;
+                background-color: #ffc;
+                border-color: #996;
+            }
+
+            .absolute {
+                position: absolute;
+                width: 150px;
+                height: 350px;
+                background-color: #fdd;
+                border-color: #900;
+                opacity: 0.7;
+            }
+
+            .relative {
+                position: relative;
+                height: 80px;
+                background-color: #cfc;
+                border-color: #696;
+                opacity: 0.7;
+            }
+
+            #abs1 {
+                top: 10px;
+                left: 10px;
+            }
+
+            #rel1 {
+                top: 30px;
+                margin: 0px 50px 0px 50px;
+            }
+
+            #rel2 {
+                top: 15px;
+                left: 20px;
+                margin: 0px 50px 0px 50px;
+            }
+
+            #abs2 {
+                top: 10px;
+                right: 10px;
+            }
+
+            #sta1 {
+                background-color: #ffc;
+                margin: 0px 50px 0px 50px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>验证 z-index 默认堆叠,由定位方式和申明顺序决定</h1>
+        <div class="container">
+            <div id="abs1" class="absolute">
+                <b>DIV #1</b><br />position: absolute;
+            </div>
+            <div id="rel1" class="relative">
+                <b>DIV #2</b><br />position: relative;
+            </div>
+            <div id="rel2" class="relative">
+                <b>DIV #3</b><br />position: relative;
+            </div>
+            <div id="abs2" class="absolute">
+                <b>DIV #4</b><br />position: absolute;
+            </div>
+            <div id="sta1" class="static">
+                <b>DIV #5</b><br />position: static;
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>z-index 属性何时生效</title>
+        <style>
+            .container {
+                position: relative;
+            }
+            .d1 {
+                /* position: relative; */
+                background-color: #ffc;
+                width: 200px;
+                height: 150px;
+                z-index: 1;
+                opacity: 0.8;
+                position: relative;
+            }
+            .d2 {
+                opacity: 0.8;
+                position: relative;
+                background-color: #cfc;
+                width: 200px;
+                height: 150px;
+                top: -50px;
+            }
+            input:checked ~ .d1 {
+                position: static;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>验证 z-index 的生效条件</h1>
+        <div class="container">
+            <label for="position">
+                关闭定位
+            </label>
+            <input type="checkbox" />
+            <div class="d1">
+                子元素 1
+            </div>
+            <div class="d2">
+                子元素2
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>empty</title>
+    <style>
+      li:empty {
+        background: green;
+      }
+      li:not(:empty) {
+        background: gold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>:empty 选择子节点为空的元素</h2>
+    <ul>
+      <li>包含元素</li>
+      <li></li>
+    </ul>
+  </body>
+</html>

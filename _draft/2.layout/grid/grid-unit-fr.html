@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>行列基础设置</title>
+        <style>
+            .container {
+                display: grid;
+                width: 400px;
+                grid-template-columns: 100px;
+                grid-template-rows: 100px 200px 100px;
+                border: 1px solid #000;
+            }
+            .cell {
+                background: #ffc07e;
+                border: 2px solid #c08b7d;
+            }
+        </style>
+    </head>
+    <body>
+        <label for="fr-value">fr value:</label>
+        <input
+            name="fr-value"
+            type="range"
+            value="0"
+            step="0.1"
+            min="0"
+            max="1"
+        /><span class="result">0fr</span>
+        <p class="column-width"></p>
+        <div class="container">
+            <div class="cell">1</div>
+            <div class="cell">2</div>
+            <div class="cell">3</div>
+            <div class="cell">4</div>
+            <div class="cell">5</div>
+            <div class="cell">6</div>
+            <div class="cell">7</div>
+            <div class="cell">8</div>
+            <div class="cell">9</div>
+        </div>
+        <script>
+            let config = {
+                fr: document.querySelector('input[name="fr-value"]'),
+                container: document.querySelector('.container'),
+                result: document.querySelector('.result'),
+                columnWidth: document.querySelector('.column-width'),
+                formatFr(val) {
+                    return `100px ${val}fr ${val * 2}fr`;
+                },
+                init() {
+                    this.result.innerText = this.container.style.gridTemplate = this.formatFr(
+                        this.fr.value
+                    );
+                    this.fr.onchange = e => {
+                        this.result.innerText = this.container.style.gridTemplateColumns = this.formatFr(
+                            e.target.value
+                        );
+                    };
+                }
+            };
+            config.init();
+        </script>
+    </body>
+</html>

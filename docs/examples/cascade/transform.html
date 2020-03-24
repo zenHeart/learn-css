@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            .container {
+                position: relative;
+            }
+            .d1,
+            .d2 {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100px;
+                height: 100px;
+                background: rgba(161, 245, 186, 0.5);
+            }
+            .d2 {
+                top: 50px;
+                left: 50px;
+                background: rgba(182, 72, 167, 0.5);
+            }
+            .d1 {
+                transition: transform 2s;
+            }
+            .d1:hover {
+                transform: rotate(90deg) translateX(200px);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>验证 transform 对层叠的影响</h1>
+        <div class="container">
+            <div class="d1"></div>
+            <div class="d2"></div>
+        </div>
+    </body>
+</html>

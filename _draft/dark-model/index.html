@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      :root {
+        --accent: #226997;
+        --main: #333;
+        --light: #666;
+        --lighter: #f3f3f3;
+        --border: #e6e6e6;
+        --bg: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --accent: #3493d1;
+          --main: #f3f3f3;
+          --light: #ececec;
+          --lighter: #666;
+          --border: #e6e6e6;
+          --bg: #333333;
+        }
+      }
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--main);
+      }
+      p {
+        border: 1px solid var(--light);
+      }
+    </style>
+  </head>
+  <body>
+    <p>test</p>
+  </body>
+</html>

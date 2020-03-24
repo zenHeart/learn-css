@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>行列基础设置</title>
+        <style>
+            .container {
+                display: grid;
+                grid-template-columns: 100px auto auto;
+                grid-template-rows: 100px 100px 100px;
+                border: 1px solid #000;
+            }
+            .cell {
+                background: #ffc07e;
+                border: 2px solid #c08b7d;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="cell">1</div>
+            <div class="cell">2</div>
+            <div class="cell">3</div>
+            <div class="cell">4</div>
+            <div class="cell">5</div>
+            <div class="cell">6</div>
+            <div class="cell">7</div>
+            <div class="cell">8</div>
+            <div class="cell">9</div>
+        </div>
+        <script>
+            let config = {
+                cells: document.getElementsByClassName('cell'),
+                init() {
+                    [...this.cells].forEach((ele, index) => {
+                        ele.style.width = `${50 + 50 * index}px`;
+                    });
+                }
+            };
+            config.init();
+        </script>
+    </body>
+</html>

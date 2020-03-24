@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证 float 属性值</title>
+        <style>
+            .container {
+                border: 1px solid #000;
+                position: relative;
+            }
+            .children {
+                float: right;
+                padding: 10px;
+            }
+            select[name='position'] {
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div></div>
+        <label for="scales">设置文本从右边开始</label>
+        <input type="checkbox" name="direction" />
+        <label for="position">设置浮动</label>
+        <select name="position">
+            <option value="left" selected>left</option>
+            <option value="right">right</option>
+            <option value="none">none</option>
+            <option value="inline-start">inline-start</option>
+            <option value="inline-end">inline-end</option>
+        </select>
+        <div class="container">
+            <img class="children" src="https://dummyimage.com/50x50/green" />
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Inventore consequatur perferendis, quae ad dolorum porro. Unde
+                accusamus iusto non, distinctio totam doloremque suscipit
+                nesciunt laborum numquam fugit consectetur, quod illo?
+            </p>
+        </div>
+    </body>
+    <script>
+        let float = {
+            inputPosition: document.querySelector('select[name="position"]'),
+            inputDirection: document.querySelector('input[name="direction"]'),
+            output: document.querySelector('.children'),
+            parent: document.querySelector('.container'),
+            init() {
+                this.output.style.float = this.inputPosition.value;
+                this.parent.style.direction = this.inputDirection.checked
+                    ? 'rtl'
+                    : 'initial';
+
+                this.inputPosition.onchange = e => {
+                    let val = e.target.value;
+                    this.output.style.float = val;
+                };
+                this.inputDirection.onchange = e => {
+                    let val = e.target.checked;
+                    this.parent.style.direction = val ? 'rtl' : 'initial';
+                };
+            }
+        };
+        float.init();
+    </script>
+</html>

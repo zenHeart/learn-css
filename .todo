@@ -1,6 +1,10 @@
 todos:
+    ☐ 阅读 flex solve https://philipwalton.github.io/solved-by-flexbox/
+    ☐ 增加雪碧图的详细使用说明
+    ☐ 完成 css2.2 8,9,10 三章节的总结 https://www.w3.org/TR/CSS22/syndata.html#value-def-length
     ☐ css 样式渲染说明 https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/
-    ☐ uncss 工具忽略无用的 css https://github.com/uncss/uncss 
+    ☐ uncss 工具忽略
+    `无用的 css https://github.com/uncss/uncss 
     ☐ css 复用的总结 https://adamwathan.me/css-utility-classes-and-separation-of-concerns/
     ☐ 看完 css layout 内容 [layout](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout)
     ☐ 完成 mdn css 系列文章学习 [css](https://developer.mozilla.org/zh-CN/docs/Web/CSS)

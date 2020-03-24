@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证 bfc 导致 clear 无法生效</title>
+        <style>
+            .container {
+                border: 1px solid #000;
+                position: relative;
+            }
+            .bfc {
+                border: 1px solid red;
+            }
+            .children {
+                float: left;
+                padding: 10px;
+            }
+            select[name='position'] {
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <label for="bfc">创建 bfc</label>
+            <input type="checkbox" name="bfc" />
+        </div>
+        <div>
+            <label for="float-direction">设置图形浮动方向</label>
+            <input type="checkbox" name="float-direction" />
+        </div>
+        <div>
+            <label for="position">设置 clear</label>
+            <select name="position">
+                <option value="none" selected>none</option>
+                <option value="left">left</option>
+                <option value="right">right</option>
+                <option value="both">both</option>
+            </select>
+        </div>
+        <div class="container">
+            <div class="bfc">
+                <img
+                    class="children"
+                    src="https://dummyimage.com/50x50/green"
+                />
+            </div>
+            <p class="float-adjacent">
+                浮动元素内部的元素不会影响 clear 特性
+                <img
+                    style="float:left;"
+                    src="https://dummyimage.com/10x10/black"
+                />
+            </p>
+        </div>
+    </body>
+    <script>
+        let float = {
+            inputPosition: document.querySelector('select[name="position"]'),
+            inputFloatDirection: document.querySelector(
+                'input[name="float-direction"]'
+            ),
+            inputBfc: document.querySelector('input[name="bfc"]'),
+            bfc: document.querySelector('.bfc'),
+            children: document.querySelector('.children'),
+            output: document.querySelector('.float-adjacent'),
+            init() {
+                this.output.style.clear = this.inputPosition.value;
+                this.bfc.style.display = this.inputBfc.checked
+                    ? 'inline-block'
+                    : '';
+                this.children.style.float = this.inputFloatDirection.checked
+                    ? 'left'
+                    : 'right';
+
+                this.inputPosition.onchange = e => {
+                    let val = e.target.value;
+                    this.output.style.clear = val;
+                };
+                this.inputBfc.onchange = e => {
+                    let val = e.target.checked;
+                    this.bfc.style.display = val ? 'inline-block' : '';
+                };
+                this.inputFloatDirection.onchange = e => {
+                    let val = e.target.checked;
+                    this.children.style.float = this.inputFloatDirection.checked
+                        ? 'left'
+                        : 'right';
+                };
+            }
+        };
+        float.init();
+    </script>
+</html>

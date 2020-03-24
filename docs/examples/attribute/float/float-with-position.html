@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证 float 属性</title>
+        <style>
+            .container {
+                border: 1px solid #000;
+                width: 100px;
+                height: 120vh;
+                position: relative;
+            }
+            .children {
+                width: 50px;
+                float: right;
+                left: 0;
+                top: 0;
+                background: green;
+            }
+            select[name='position'] {
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>当浮动和 absolute 或 fixed 定位同时存在时不起作用</h1>
+        <label for="position">修改定位</label>
+        <select name="position">
+            <option value="initial" selected>initial</option>
+            <option value="inherit">inherit</option>
+            <option value="unset">unset</option>
+            <option value="relative">relative</option>
+            <option value="static">static</option>
+            <option value="sticky">sticky</option>
+            <option value="fixed">fixed</option>
+            <option value="absolute">absolute</option>
+        </select>
+        <div class="container">
+            <div class="children">子元素</div>
+        </div>
+    </body>
+    <script>
+        let float = {
+            input: document.querySelector('select[name="position"]'),
+            output: document.querySelector('.children'),
+            init() {
+                this.output.style.position = this.input.value;
+                this.input.onchange = e => {
+                    let val = e.target.value;
+                    this.output.style.position = val;
+                };
+            }
+        };
+        float.init();
+    </script>
+</html>

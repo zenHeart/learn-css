@@ -5,6 +5,5 @@
 ## 基础
 
 -   [盒模型](./1.0.box-model.md)
--   [选择器](./1.1.selector.md)
-    -   [选择器特殊性](./1.1.1.selector-specificity.md)
-    -   [选择器类型](./1.1.2.selector-type.md)
+-   [选择器](./1.1.cascade.md)
+-   [选择器类型](./1.2.selector.md)

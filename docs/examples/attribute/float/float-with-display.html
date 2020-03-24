@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证父容器 display 属性对 float 的影响</title>
+        <style>
+            .container {
+                border: 1px solid #000;
+                width: 100px;
+                height: 100px;
+            }
+            .children {
+                width: 50px;
+                float: right;
+                left: 0;
+                top: 0;
+                background: green;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>验证父元素显示类型对子元素浮动的影响</h1>
+        <label for="display">选择父元素类型</label>
+        <select name="display">
+            <option value="block" selected>block</option>
+            <option value="flex">flex</option>
+        </select>
+        <div class="container">
+            <div class="children">子元素</div>
+        </div>
+    </body>
+    <script>
+        let float = {
+            input: document.querySelector('select[name="display"]'),
+            output: document.querySelector('.container'),
+            init() {
+                this.output.style.display = this.input.value;
+                this.input.onchange = e => {
+                    let val = e.target.value;
+                    this.output.style.display = val;
+                };
+            }
+        };
+        float.init();
+    </script>
+</html>

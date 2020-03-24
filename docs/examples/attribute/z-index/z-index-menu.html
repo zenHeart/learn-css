@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>z-index 属性验证</title>
+        <style>
+            .container {
+                position: relative;
+                border: 1px solid #000;
+            }
+            .menu {
+                list-style: none;
+                margin: 0;
+            }
+
+            .menu.main {
+                position: relative;
+            }
+            .menu.sub {
+                position: absolute;
+                left: 100px;
+                top: 0;
+            }
+            .menu.m3 {
+                position: absolute;
+                left: 100px;
+                top: 0;
+            }
+            .menu li {
+                min-height: 50px;
+                min-width: 300px;
+                padding: 10px;
+            }
+            .main > li {
+                background: #ccffcc;
+                border: 1px solid green;
+            }
+            .sub > li {
+                position: relative;
+                opacity: 0.9;
+                background: #ffdddd;
+                border: 1px solid red;
+            }
+            .m3 > li {
+                opacity: 0.9;
+                background: #ddddff;
+                border: 1px solid blue;
+            }
+            .sub,
+            .m3 {
+                display: none;
+            }
+            .main:hover .sub {
+                display: block;
+            }
+            .main .sub li:hover .m3 {
+                display: block;
+            }
+
+            /* 打开注释即可解决菜单层叠遮挡问题 */
+            /*.main .sub li:hover {
+                z-index: 1;
+            } */
+        </style>
+    </head>
+
+    <body>
+        <h1>验证 z-index 多级菜单问题</h1>
+        <div class="container">
+            <ul class="menu main">
+                <li>
+                    主菜单 1
+                    <ul class="menu sub">
+                        <li>
+                            二级菜单 1
+                            <ul class="menu m3">
+                                <li>三级菜单 1</li>
+                                <li>三级菜单 2</li>
+                            </ul>
+                        </li>
+                        <li>
+                            二级菜单 2
+                            <ul class="menu m3">
+                                <li>三级菜单 1</li>
+                                <li>三级菜单 2</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>主菜单 2</li>
+            </ul>
+        </div>
+    </body>
+    <script></script>
+</html>

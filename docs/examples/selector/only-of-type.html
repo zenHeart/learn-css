@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>only of type</title>
+    <style>
+      span:only-of-type {
+        background: cyan;
+      }
+      p:only-of-type {
+        background: cyan;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>:last-type-of 选中在子元素组中唯一的某类元素</h2>
+    <ul>
+      <ol>
+        <p>被选中</p>
+        <li>元素 1</li>
+        <li>
+          <strong>test</strong>
+          <span>文本 1,此元素会被选中</span>
+          <span>文本 2</span>
+          <span>文本 3</span>
+        </li>
+        <li>
+          元素 3会被选中
+          <span>唯一的 span 节点被选中</span>
+        </li>
+      </ol>
+    </ul>
+  </body>
+</html>

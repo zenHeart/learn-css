@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            p {
+                color: red;
+                border: 1px solid green;
+            }
+            .demo {
+                color: green;
+                border: 1px solid green;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>验证 unset 值的作用特性</h1>
+        <h2>继承属性设置 unset 则值作用同 inherit</h2>
+        <div class="demo">
+            <p>段落默认为红色</p>
+            <p style="color:unset">
+                color 为继承属性,颜色继承父元素绿色
+            </p>
+        </div>
+        <h2>非继承属性设置 unset 则值作用同 initial</h2>
+        <div class="demo">
+            <p>段落边框默认为绿色</p>
+            <p style="border: unset">
+                border 为非继承属性,unset 等同于 initial 边框取消
+            </p>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证 grid-template-columns 属性</title>
+        <style>
+            .container {
+                display: grid;
+                border: 2px solid #f76707;
+                border-radius: 5px;
+                background-color: #fff4e6;
+                grid-template-columns: 1fr 0.3fr;
+                width: 900px;
+            }
+            .container > div {
+                border: 2px solid #ffa94d;
+                border-radius: 5px;
+                background-color: #ffd8a8;
+                padding: 1em;
+                color: #d9480f;
+                width: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>验证 grid-template-column</h1>
+        <div class="container">
+            <div class="d1">1</div>
+            <div class="d2">2</div>
+            <div class="d3">3</div>
+            <div class="d4">4</div>
+            <div class="d5">5</div>
+            <div class="d6">6</div>
+        </div>
+    </body>
+</html>

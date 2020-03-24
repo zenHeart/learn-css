@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>验证 clear 属性值</title>
+        <style>
+            .container {
+                border: 1px solid #000;
+                position: relative;
+            }
+            .children {
+                float: left;
+                padding: 10px;
+            }
+            select[name='position'] {
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <label for="scales">设置文本从右边开始</label>
+            <input type="checkbox" name="direction" />
+        </div>
+        <div>
+            <label for="scales">设置图形浮动方向</label>
+            <input type="checkbox" name="float-direction" />
+        </div>
+        <div>
+            <label for="position">设置 clear</label>
+            <select name="position">
+                <option value="none" selected>none</option>
+                <option value="left">left</option>
+                <option value="right">right</option>
+                <option value="both">both</option>
+                <option value="inline-start">inline-start</option>
+                <option value="inline-end">inline-end</option>
+            </select>
+        </div>
+        <div class="container">
+            <img class="children" src="https://dummyimage.com/50x50/green" />
+            <p class="float-adjacent">
+                clear left,right 只会清除对应侧的浮动,both
+                会清楚两侧的浮动,inline-start,inline-end
+                则根据文本流方向确定清除方向
+            </p>
+        </div>
+    </body>
+    <script>
+        let float = {
+            inputPosition: document.querySelector('select[name="position"]'),
+            inputFloatDirection: document.querySelector(
+                'input[name="float-direction"]'
+            ),
+            inputDirection: document.querySelector('input[name="direction"]'),
+            parent: document.querySelector('.container'),
+            children: document.querySelector('.children'),
+            output: document.querySelector('.float-adjacent'),
+            init() {
+                this.output.style.clear = this.inputPosition.value;
+                this.parent.style.direction = this.inputDirection.checked
+                    ? 'rtl'
+                    : 'initial';
+                this.children.style.float = this.inputFloatDirection.checked
+                    ? 'left'
+                    : 'right';
+
+                this.inputPosition.onchange = e => {
+                    let val = e.target.value;
+                    this.output.style.clear = val;
+                };
+                this.inputDirection.onchange = e => {
+                    let val = e.target.checked;
+                    this.parent.style.direction = val ? 'rtl' : 'initial';
+                };
+                this.inputFloatDirection.onchange = e => {
+                    let val = e.target.checked;
+                    this.children.style.float = this.inputFloatDirection.checked
+                        ? 'left'
+                        : 'right';
+                };
+            }
+        };
+        float.init();
+    </script>
+</html>

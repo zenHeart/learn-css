@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>counter</title>
+        <style>
+            h1 {
+                counter-reset: h2;
+            }
+            h2 {
+                counter-reset: h3;
+            }
+            h2::before {
+                counter-increment: h2;
+                content: counter(h2) ' ';
+            }
+            h3::before {
+                counter-increment: h3;
+                content: counter(h2) '.' counter(h3) ' ';
+            }
+        </style>
+    </head>
+    <body>
+        <p>该示例利用计数器标记为文章标题添加序号</p>
+        <article>
+            <h1>一级标题</h1>
+            <p>demo</p>
+            <h2>章节一</h2>
+            <p>demo</p>
+            <h3>区块 1</h3>
+            <h3>区块 1</h3>
+            <h2>章节二</h2>
+            <h3>区块 1</h3>
+            <h3>区块 1</h3>
+        </article>
+    </body>
+</html>

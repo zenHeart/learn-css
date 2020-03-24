@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+    </head>
+    <style type="text/css">
+        ul {
+            background: yellow;
+            margin: 12px 12px 12px 12px;
+            padding: 3px 3px 3px 3px;
+        }
+        li {
+            color: white; /* text color is white */
+            background: blue; /* Content, padding will be blue */
+            margin: 12px;
+            padding: 12px 0px 12px 12px; /* Note 0px padding right */
+            list-style: none; /* no glyphs before a list item */
+            /* No borders set */
+        }
+        li.withborder {
+            border-style: dashed;
+            border-width: medium; /* sets border width on all sides */
+            border-color: lime;
+        }
+    </style>
+    <body>
+        <ul>
+            <li>First element of list</li>
+            <li class="withborder">
+                Second element of list is a bit longer to illustrate wrapping.
+            </li>
+        </ul>
+    </body>
+</html>
