@@ -1,1 +1,0 @@
-require('./docs/SUMMARY.md');
