@@ -1,0 +1,16 @@
+<h1>验证嵌套使用 var</h1>
+<p>不支持嵌套</p>
+<style>
+  :root {
+    --dark: cyan;
+    --light: red;
+    --theme: '--dark';
+    --background: var( var(--theme) );
+  }
+
+  .wrap {
+    background: var(--background);
+  }
+</style>
+
+<p class="wrap"> 警告文字</p>

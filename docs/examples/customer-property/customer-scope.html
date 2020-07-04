@@ -1,0 +1,19 @@
+<h1>利用 calc 函数组合 var 的值</h1>
+<style>
+  .parent {
+    --warn: red;
+  }
+
+  .children {
+    /* 该子元素会覆盖父元素上属性值  */
+    --warn: orange;
+  }
+
+  .parent>div {
+    color: var(--warn)
+  }
+</style>
+<div class="parent">
+  <div>test</div>
+  <div class="children">Lorem ipsum dolor sit amet consectetur.</div>
+</div>

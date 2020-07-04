@@ -1,5 +1,5 @@
 <template>
-  <details open>
+  <details>
     <summary>混入 mixin</summary>
     <details>
       <summary>
@@ -17,6 +17,23 @@
         <tr>3</tr>
         <tr>4</tr>
       </table>
+    </details>
+    <details>
+      <summary>
+        mixin 中使用 {block} 变量扩展混入时传入的内容
+        <ol>
+          <li>
+            <strong>定义混入时使用 {block} 插入混入内容</strong>
+          </li>
+          <li>
+            <strong>采用 +混入名 引用内容</strong>
+          </li>
+        </ol>
+      </summary>
+      <p class="title">
+        <span class="tag">a</span>
+      </p>
+      <span class="tag">a</span>
     </details>
     <details>
       <summary>使用多层嵌套的 mixin</summary>
@@ -76,4 +93,25 @@ highlightLabel()
 
 .highlight-label 
   highlightLabel()
+
+</style>
+
+<style lang="stylus" scoped>
+// 块混入示例
+tag()
+  .tag
+    display inline-block
+    padding 2px 10px
+    background silver
+    color red
+    // 使用 block 插入覆盖内容
+    {block}
+
+tag()
+.title
+  +tag()
+    background gray
+    color green
+
+
 </style>

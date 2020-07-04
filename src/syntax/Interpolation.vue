@@ -1,5 +1,5 @@
 <template>
-  <details open>
+  <details>
     <summary>插入 interpolation</summary>
     <details>
       <summary>替换多个值,使申明语义化</summary>

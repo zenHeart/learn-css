@@ -1,0 +1,78 @@
+<h1>验证多层 box-shadow 堆叠顺序</h1>
+<div class="parent">
+  <div class="chidren">
+
+  </div>
+</div>
+<div>
+  <p>
+    <label for="0">第一个值</label>
+    <input name="0" type="range" min="-50" max="50">
+  </p>
+  <p>
+    <label for="1">第二个值</label>
+    <input name="1" type="range" min="-50" max="50">
+  </p>
+  <p>
+    <label for="2">第三个值</label>
+    <input name="2" type="range" min="-50" max="50">
+  </p>
+  <p>
+    <label for="3">第四个值</label>
+    <input name="3" type="range" min="-50" max="50">
+  </p>
+</div>
+<script>
+  let setBoxShadow = (function () {
+    const DEFAULT_OFFSET = 12
+    let shadows = [{
+      offset: DEFAULT_OFFSET,
+      color: 'red'
+    }, {
+      offset: DEFAULT_OFFSET,
+      color: 'orange'
+    }, {
+      offset: DEFAULT_OFFSET,
+      color: 'cyan'
+    }, {
+      offset: DEFAULT_OFFSET,
+      color: 'purple'
+    }];
+    return function setShadow(i, value) {
+      shadows[i].offset = value;
+      return shadows.reduce((sum, el) => {
+        return sum += `,${el.offset}px ${el.offset}px ${el.color}`;
+      }, '').slice(1)
+    }
+  })()
+
+  let chidrenEle = document.getElementsByClassName('chidren')[0];
+
+  for (let i = 0; i < 4; i++) {
+    let ele = document.querySelectorAll(`input[name='${i}']`)[0];
+    ele.onchange = function (e) {
+      let boxShadowStyle = setBoxShadow(i, e.target.value);
+      chidrenEle.style.boxShadow = boxShadowStyle;
+    }
+  }
+
+</script>
+
+<style>
+  .parent {
+    border: 1px solid #000;
+    padding: 50px;
+    width: 100px;
+    height: 100px;
+  }
+
+  .chidren {
+    --shadow-width: 12px;
+
+    border: 1px solid green;
+    width: 100px;
+    height: 100px;
+    background: greenyellow;
+    box-shadow: 0px var(--shadow-width), 0px calc(-1 * var(--shadow-width)) orange, var(--shadow-width) 0 cyan, calc(-1 * var(--shadow-width)) 0 purple;
+  }
+</style>

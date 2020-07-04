@@ -1,0 +1,26 @@
+<h1>利用 calc 函数组合 var 的值</h1>
+<style>
+  :root {
+    --nav-width: 300px;
+  }
+
+  nav {
+    width: var(--nav-width);
+    border: 1px solid #000;
+  }
+
+  .content {
+    width: calc(100% - var(--nav-width));
+  }
+
+  .container {
+    display: flex;
+  }
+</style>
+<div class="container">
+  <nav>
+    <p>1</p>
+    <p>2</p>
+  </nav>
+  <div class="content">Lorem ipsum dolor sit amet consectetur.</div>
+</div>

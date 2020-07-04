@@ -1,5 +1,5 @@
 <template>
-  <details open>
+  <details>
     <summary>选择器 selector</summary>
     <details>
       <summary>缩进表示规则集合</summary>

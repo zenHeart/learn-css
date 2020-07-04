@@ -1,0 +1,19 @@
+<h1>示例说明自定义属性的使用</h1>
+<style>
+  /* 1. 定义自定义属性 */
+  :root {
+    --warn: red;
+    /* 注意自定义属性命名大小写敏感 */
+    --Warn: yellow;
+  }
+
+  .warn {
+    color: var(--warn)
+  }
+
+  .warn1 {
+    color: var(--Warn)
+  }
+</style>
+<p class="warn"> 警告文字</p>
+<p class="warn1"> 警告文字</p>
