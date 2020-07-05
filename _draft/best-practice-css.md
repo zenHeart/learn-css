@@ -1,17 +1,10 @@
----
-title:css_rule    
-tag:css_rule      
-birth:2016-12-09      
-modified:2016-12-09      
----
+# css 最佳实践
 
-css_rule
-===
-**前言:讲解在编写 css 中的一些经验**
+**详解 css 的书写顺序**
 
 ---
 
-# 做事的步骤
+## 做事的步骤
 在编写 css 时注意先设置通用样式。在进行局部修订。
 不要直接利用 class 进行布局。这样会导致在后续修改中基础样式被覆盖。
 
@@ -25,3 +18,27 @@ css_rule
 在任何涉及界面的事件中需要确保元素的尺寸的视图事件没有影响!
 通过键盘即可产生该效果.
 
+
+
+## 顺序
+按照 css 的布局规则,建议从布局到细节书写 css 样式。则根据引擎的布局顺序则书写顺序如下:
+
+1. 定位相关 (确定元素的定位
+   1. `position`
+   2. `z-index`
+   3. `top,right...`
+2. 布局模型相关 (盒模型从内容块向外书写)
+   1. `display`
+   2. `float`
+   3. `width,heigh`
+   4. `padding`
+   5. `border`
+   6. `margin`
+3. 样式相关
+   1. `background`
+   2. `color`
+4. 文本设置
+   1. `font-family`
+   2. `font-size`
+   3. `line-height`
+5. 其他设置
