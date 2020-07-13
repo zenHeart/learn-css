@@ -1,0 +1,29 @@
+<div>
+  <button>flex-basis: auto;</button>
+  <button>flex-basis: 0;</button>
+</div>
+<div class="parent">
+  <div class="item">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium iure corporis provident
+    tenetur! Earum suscipit quas culpa, nobis fugiat iusto corrupti voluptatum, eligendi molestias natus quos, cum et
+    quaerat perferendis!</div>
+</div>
+<style>
+  .parent {
+    display: flex;
+    background: khaki;
+  }
+
+  .item {
+    margin: 10px;
+    background-color: lemonchiffon;
+  }
+</style>
+<script>
+  let item = document.getElementsByClassName('item')[0];
+  let btns = document.getElementsByTagName('button');
+  [...btns].forEach(el => {
+    el.onclick = e => {
+      item.style.cssText = e.target.innerText;
+    }
+  })
+</script>

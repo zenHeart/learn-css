@@ -1,0 +1,47 @@
+<p>
+  <button>
+    flex-basis: 50%;
+  </button>
+  <button>
+    flex-basis: 200px;
+  </button>
+  <button>
+    flex-basis: 100px;
+  </button>
+  <button>
+    flex-basis: 0;
+  </button>
+  <button>
+    flex-basis: auto;
+  </button>
+</p>
+<div class="parent">
+  <div class="item" id="example">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+</div>
+<style>
+  .parent {
+    overflow: hidden;
+    resize: horizontal;
+    background: khaki;
+    display: flex;
+  }
+
+  .item {
+    background: lavender;
+    margin: 10px;
+    text-align: center;
+    padding: 0 10px;
+    border: 1px solid #000;
+  }
+</style>
+<script>
+  function changeFlexBasis(e) {
+    let el = document.getElementById('example');
+    el.style.cssText = e.target.innerText;
+  }
+  [...document.getElementsByTagName('button')].forEach(el => {
+    el.onclick = changeFlexBasis;
+  })
+</script>

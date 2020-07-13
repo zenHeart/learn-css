@@ -1,0 +1,61 @@
+<div>
+  <button>flex-direction:column;</button>
+  <button>flex-direction:row;</button>
+  <p><input type="checkbox" />flex-basis:150px;</p>
+  <p><input type="checkbox" />max-width:50px;</p>
+  <p><input type="checkbox" />width:100px;</p>
+  <p><input type="checkbox" />min-width:200px;</p>
+  <p><input type="checkbox" />max-height:50px;</p>
+  <p><input type="checkbox" />height:100px;</p>
+  <p><input type="checkbox" />min-height:200px;</p>
+</div>
+<div class="parent">
+  <div class="item">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+</div>
+<style>
+  .parent {
+    display: flex;
+    background: khaki;
+    min-height: 300px;
+  }
+
+  .item {
+    margin: 10px;
+    background-color: lemonchiffon;
+    overflow: hidden;
+    resize: both;
+  }
+</style>
+<script>
+  let items = document.getElementsByClassName('item');
+  let inputs = document.getElementsByTagName('input');
+  let btns = document.getElementsByTagName('button');
+  let parent = document.getElementsByClassName('parent')[0];
+  let styles = [];
+  [...inputs].forEach(el => {
+    el.onchange = e => {
+      let { checked } = e.target;
+      let innerText = e.target.nextSibling.data;
+      if (checked) {
+        if (!styles.includes(innerText)) {
+          styles.push(innerText);
+        }
+      } else {
+        let index = styles.indexOf(innerText)
+        if (index !== -1) {
+          styles.splice(index, 1)
+        }
+      };
+      [...items].forEach(item => {
+        item.style.cssText = styles.join('')
+      })
+    }
+  });
+  [...btns].forEach(el => {
+    el.onclick = e => {
+      parent.style.cssText = e.target.innerText;
+    }
+  })
+</script>

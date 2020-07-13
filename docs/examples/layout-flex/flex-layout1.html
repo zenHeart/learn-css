@@ -1,0 +1,68 @@
+<div class="wrap">
+  <div class="side">
+    拖动右下角改变元素高度, 右侧高度自适应 👇
+  </div>
+  <div class="parent">
+    <header></header>
+    <section>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+      <div class="card">
+      </div>
+    </section>
+  </div>
+</div>
+<style>
+  .wrap {
+    display: flex;
+  }
+
+  .side {
+    min-height: 200px;
+    width: 300px;
+    background: khaki;
+    margin-right: 10px;
+    overflow: hidden;
+    resize: vertical;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .parent {
+    background-color: lemonchiffon;
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+  }
+
+  header {
+    background: lightcoral;
+    border: 1px solid red;
+    height: 50px;
+  }
+
+  section {
+    background: lightcyan;
+    border: 1px solid #000;
+    flex: 1 0 0px;
+    overflow-y: auto;
+  }
+
+  .card {
+    display: inline-block;
+    width: 40px;
+    margin: 3px;
+    height: 60px;
+    background: lightpink;
+  }
+</style>
