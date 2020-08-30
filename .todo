@@ -1,4 +1,5 @@
 todos:
+    ☐ 补充 transition 和 transform 的详细属性说明和动画设计实践
     ☐ 阅读 flex solve https://philipwalton.github.io/solved-by-flexbox/
     ☐ 增加雪碧图的详细使用说明
     ☐ 完成 css2.2 8,9,10 三章节的总结 https://www.w3.org/TR/CSS22/syndata.html#value-def-length

@@ -1,0 +1,19 @@
+<h2>组合定义多个属性的过渡效果</h2>
+<div class="box">
+    box
+</div>
+<style>
+    .box {
+        width: 100px;
+        height: 100px;
+        background: cyan;
+        transition: width 2s, height 2s, background 2s,transform 2s;;
+    }
+    .box:hover {
+        width: 200px;
+        height: 200px;
+        background: coral;
+        transform: rotate(360deg);
+    }
+
+</style>

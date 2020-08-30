@@ -1,0 +1,23 @@
+<h2>使用 transition 定义属性的过渡效果</h2>
+<div class="demo">
+    <a href="http://baidu.com">链接</a>
+</div>
+<style>
+    /* 1. 定义那些属性触发过渡效果 */
+    .demo>a {
+        /* 2. 定义设置 transition 属性的初态 */
+        font-size: 14px;
+        /* 定义 font-size 触发过渡 */
+        transition-property: font-size;
+        /* 定义过渡动画从初态到结束的执行时间 */
+        transition-duration: 4s;
+        /* 定义动画的触发延迟 */
+        transition-delay: 1s;
+    }
+    .demo>a:hover {
+        /*  3. 定义设置了 transition 属性的结束态，注意动画在 hover 1s 后才会触发 */
+        font-size: 36px;
+        color: cyan
+    }
+
+</style>
