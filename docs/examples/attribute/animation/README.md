@@ -9,7 +9,7 @@
 {% include 'basic.html' %}
 
 
-## [js 控制动画](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations#Examples#Using_animation_events） 
+## [js 控制动画](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations#Examples#Using_animation_events)
 
 
 ## 动画属性详细学习
