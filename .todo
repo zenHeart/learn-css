@@ -1,5 +1,6 @@
 todos:
     ☐ 补充 transition 和 transform 的详细属性说明和动画设计实践
+    ☐ 伪元素在替换元素上不生效 https://webplatform.news/issues/2020-08-26
     ☐ 阅读 flex solve https://philipwalton.github.io/solved-by-flexbox/
     ☐ 增加雪碧图的详细使用说明
     ☐ 完成 css2.2 8,9,10 三章节的总结 https://www.w3.org/TR/CSS22/syndata.html#value-def-length
@@ -25,7 +26,8 @@ todos:
     ☐ flex 布局图片尺寸无法自适应, <https://stackoverflow.com/questions/40894381/image-height-inside-flexbox-not-working-in-chrome>
     ☐ flex 图片自动适应, <https://stackoverflow.com/questions/38295001/make-background-image-to-fit-in-flex-container>
 	☐ ios scrool 释放触发条件
-	☐ 可以使用 [Stylish](https://userstyles.org/) 定制用户样式
+    ☐ 可以使用 [Stylish](https://userstyles.org/) 定制用户样式
+    ☐ deep clone   https://zellwk.com/blog/creating-a-deep-assign-library/
 	
 css 设计模式:
 	☐ 原子设计延续 http://bradfrost.com/blog/post/extending-atomic-design/

@@ -1,0 +1,54 @@
+<h2>采用 class 触发 transition</h2>
+<p>
+    <button class="active">active</button>
+    <button class="hide">hide</button>
+</p>
+<div class="box">
+    box
+</div>
+<script>
+    let boxEl = document.getElementsByClassName('box')[0];
+    let els = [
+        {
+            el: document.getElementsByClassName('active')[0],
+            onClick:() => {
+                console.log('--')
+                boxEl.classList.toggle('active')
+                setTimeout(() => {
+                    boxEl.classList.remove('active')
+                }, 1000)
+            }
+        },
+        {
+            el: document.getElementsByClassName('hide')[0],
+            onClick:() => {
+                console.log('--')
+                boxEl.classList.toggle('hide')
+                setTimeout(() => {
+                    boxEl.classList.remove('hide')
+                }, 1000)
+            }
+        }
+    ]
+
+    els.forEach(item => {
+        item.el.onclick = item.onClick
+    })
+
+</script>
+<style>
+    .box {
+        width: 100px;
+        height: 100px;
+        background: cyan;
+        transition: all 2s;
+    }
+    .box.active {
+        transform: translateX(-30px);
+        opacity: 1;
+    }
+    .box.hide {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+</style>
