@@ -1,0 +1,31 @@
+<h2>transition-delay 控制动画的生效时间</h2>
+
+<h2>正值,动效延迟执行的时间</h2>
+<div class="box positive">
+</div>
+<h2>0 默认值立即执行</h2>
+<div class="box">
+</div>
+<h2>负值动画提前执行延迟时间</h2>
+<div class="box negative">
+</div>
+<style> 
+.box {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  transition-property: all;
+  background: black;
+  transition-duration: 5s;
+}
+.box:hover {
+  background: greenyellow;
+}
+.box.positive {
+  transition-delay: 10s;
+}
+.box.negative {
+  /* 负值超过动画持续时间则直接切换到结束状态 */
+  transition-delay: -2s;
+}
+</style>

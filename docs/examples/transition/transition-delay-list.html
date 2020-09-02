@@ -1,0 +1,37 @@
+<h2>transition-delay 实现 list 的按顺序推入效果</h2>
+
+<ul>
+  <li style="background: cyan;transition-delay: 0.5s">1</li>
+  <li  style="background: yellowgreen;transition-delay: 1s">2</li>
+  <li style="background: thistle;transition-delay: 1.5s">3</li>
+</ul>
+<style> 
+li {
+  display: inline-block;
+  list-style: none;
+  height: 300px;
+  width: 100px;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+
+}
+ul {
+  height: 300px;
+  width: 300px;
+  border: 1px solid #000;
+  padding: 0;
+  font-size: 0;
+}
+ul li {
+  opacity: 0;
+  transition: all;
+  transition-duration: 1s;
+}
+
+ul:hover li {
+  opacity: 1;
+}
+
+
+</style>
