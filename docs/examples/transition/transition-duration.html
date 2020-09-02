@@ -1,0 +1,41 @@
+<h2>transition-duraion 控制动画的执行时间</h2>
+
+<h2>默认为 0</h2>
+<div class="box">
+</div>
+<h2>支持正值</h2>
+<div class="box positive">
+</div>
+
+<h2>支持都好分隔多个值，不同属性设置不同动画时间</h2>
+<div class="box comma"></div>
+
+<h2>property 为 all 时设置多个 duration 时的顺序</h2>
+<div class="box all"></div>
+<style> 
+.box {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  background: black;
+}
+.box:hover {
+  background: greenyellow;
+  transform: rotate(360deg);
+  width: 50px;
+  height: 50px;
+}
+.box.positive {
+  transition-property: background;
+  transition-duration: 5s;
+}
+.box.comma {
+  transition-property: background, transform;
+  transition-duration: 2s,5s;
+}
+.box.all {
+  transition-property: all;
+  /* 后续设置无效，只取第一个值 */
+  transition-duration: 5s, 2s, 4s, 1s;
+}
+</style>
