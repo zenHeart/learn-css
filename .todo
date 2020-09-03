@@ -1,4 +1,5 @@
 todos:
+    ☐ 补充 transition custom property 示例 https://web.dev/at-property/
     ☐ 补充 transition 和 transform 的详细属性说明和动画设计实践
     ☐ 伪元素在替换元素上不生效 https://webplatform.news/issues/2020-08-26
     ☐ 阅读 flex solve https://philipwalton.github.io/solved-by-flexbox/

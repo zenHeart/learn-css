@@ -1,0 +1,28 @@
+<h2>transition-property 采用自定义属性控制动画</h2>
+
+<div class="box">
+  sdf
+</div>
+
+<style> 
+@property --colorPrimary {
+  syntax: '<color>';
+  initial-value: magenta;
+  inherits: false;
+}
+.box {
+  --width: 50px;
+  width: var(--width);
+  height: 100px;
+  display: inline-block;
+  background: black;
+  --colorPrimary:  magenta;
+  transition-duration: 2s;
+  color: red;
+}
+/* TODO: 为什么放进来才生效 */
+.box:hover {
+  --width: 100px;
+  transition-property:  --width;
+}
+</style>
