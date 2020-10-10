@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>transform affect fixed</title>
+</head>
+<body>
+  <h2>验证 transform 会导致子元素 postion fixed 无效</h2>
+  祖先元素使能 transform <input name="groud-parent" type="checkbox">
+  <div class="groud-parent">
+    父元素使能 transform<input name="parent" type="checkbox">
+    <div class="parent">
+      <div class="children">
+        子元素
+      </div>
+    </div>
+  </div>
+</body>
+<style>
+  input[name='groud-parent']:checked+.groud-parent {
+    transform: rotate(-10deg);
+  }
+  input[name='parent']:checked+.parent {
+    transform: rotate(-10deg);
+  }
+
+  div {
+    border: 1px solid #000;
+    padding: 100px;
+  }
+  .children {
+    padding: 10px;
+    position: fixed;
+    right: 0;
+    top: 0;
+  }
+</style>
+</html>
