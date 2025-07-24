@@ -6,7 +6,7 @@
 |---------|------|
 | **项目名称** | CSS 学习笔记网站 |
 | **项目类型** | 纯静态网站 |
-| **技术栈** | React 19 + MDX + Vite + TypeScript |
+| **技术栈** | React 19 + MDX + react-router 7.x + Vite + TypeScript |
 | **部署目标** | GitHub Pages (`http://blog.zenheart.site/learn-css/`) |
 | **开发周期** | 4个阶段，预计8-12周 |
 | **团队规模** | 1-2人开发团队 |
@@ -34,7 +34,7 @@
 - **技术栈：**
   1. React 19
   2. MDX
-  3. @tanstack/react-router
+  3. react-router 7.x
   4. Vite
   5. CodeMirror
   6. TypeScript
@@ -51,7 +51,7 @@
 
 1. **单页应用 (SPA) 与 Hash 路由**：
    - 网站将完全由静态资源组成，不依赖任何后端服务，支持高效部署和访问。
-   - **采用 `@tanstack/react-router` 作为路由库，并明确使用 Hash 路由（例如 `#/topics`），以确保在纯静态环境（如 GitHub Pages）下的可靠性。**
+   - **采用 `react-router 7.x` 作为路由库，并明确使用 Hash 路由（例如 `#/topics`），以确保在纯静态环境（如 GitHub Pages）下的可靠性。**
    - **站点将部署到 `http://blog.zenheart.site/learn-css/`，基础路径 (base path) 为 `/learn-css`。所有内部链接和资源引用将正确处理此基础路径。**
    - 考虑到 SPA 首屏加载性能，将\*\*预留代码分割（Code Splitting）\*\*的优化空间。
 2. **嵌套 Markdown 文档结构**：
@@ -333,9 +333,9 @@ my-css-notes/
 
 ```
 * [ ] **安装路由库：**
-    * 安装 `@tanstack/react-router` 及相关依赖。
+    * 安装 `react-router 7.x` 及相关依赖。
 * [ ] **定义路由结构：**
-    * 创建 `src/routes.ts` 文件。
+    * 创建 `src/router.ts` 文件。
     * 使用 `createHashRouter` 定义以下基础路由：
         * 根路由：`/` 或 `/#/` (对应 `HomePage` 组件)
         * 学习页路由：`/topics` 或 `/#/topics` (对应 `TopicsPage` 组件)
@@ -505,7 +505,7 @@ my-css-notes/
     * `src/data/allPlaygrounds.json` 已包含所有 Playground 实例的代码内容和 `mode` 信息。
 * [ ] **创建示例详情页组件：**
     * 创建 `src/pages/PlaygroundDetailPage.tsx`。
-    * 使用 `@tanstack/react-router` 获取 URL 中的 `:id` 参数。
+    * 使用 `react-router` 获取 URL 中的 `:id` 参数。
     * 根据 `:id` 从 `allPlaygrounds.json` 中查找并加载对应的示例代码。
 * [ ] **实现左侧示例导航：**
     * 在 `PlaygroundDetailPage` 中，根据 `allPlaygrounds.json` 和 MDX 的主题目录结构，渲染左侧导航。
@@ -536,7 +536,7 @@ my-css-notes/
     * 监听用户输入，使用搜索库进行实时模糊匹配查询 (200ms 防抖)。
     * 渲染搜索结果列表，显示文档标题和匹配的上下文摘要。
 * [ ] **跳转与高亮：**
-    * 点击搜索结果，使用 `@tanstack/react-router` 跳转到对应文档。
+    * 点击搜索结果，使用 `react-router` 跳转到对应文档。
     * 在目标文档页面，使用 JavaScript 高亮显示匹配的关键词。
 ```
 

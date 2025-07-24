@@ -1,0 +1,72 @@
+---
+title: "CSS 盒模型基础"
+category: "布局基础"
+tags:
+  - box-model
+  - margin
+  - padding
+  - border
+description: "详细介绍 CSS 盒模型的基本概念、组成部分及其在布局中的应用。"
+keywords: "盒模型, Box Model, margin, padding, border, content-box, border-box"
+---
+
+# CSS 盒模型基础
+
+CSS 盒模型是 CSS 布局的基础概念，理解它对于掌握 CSS 布局至关重要。
+
+## 什么是盒模型？
+
+盒模型描述了 HTML 元素如何在页面上占据空间。每个 HTML 元素都被视为一个矩形盒子，这个盒子由以下部分组成：
+
+- **内容区域 (Content)**：显示文本、图像等实际内容
+- **内边距 (Padding)**：内容周围的空白区域
+- **边框 (Border)**：内边距周围的边框
+- **外边距 (Margin)**：边框周围的空白区域
+
+## 盒模型的组成部分
+
+```css
+.box {
+  width: 200px;
+  height: 100px;
+  padding: 20px;
+  border: 2px solid #333;
+  margin: 10px;
+}
+```
+
+## 盒模型类型
+
+CSS 中有两种盒模型：
+
+1. **标准盒模型 (content-box)**：默认模式
+2. **IE 盒模型 (border-box)**：更直观的模式
+
+```css
+/* 标准盒模型 */
+.box-standard {
+  box-sizing: content-box;
+  width: 200px; /* 只包含内容宽度 */
+}
+
+/* IE 盒模型 */
+.box-border {
+  box-sizing: border-box;
+  width: 200px; /* 包含内容、内边距和边框 */
+}
+```
+
+## 实际应用
+
+理解盒模型对于以下场景特别重要：
+
+- 精确控制元素尺寸
+- 创建响应式布局
+- 调试布局问题
+- 实现设计稿要求
+
+## 小贴士
+
+- 使用 `box-sizing: border-box` 可以让布局更直观
+- 外边距可以重叠，内边距不会重叠
+- 边框会增加元素的实际尺寸 
