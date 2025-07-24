@@ -616,14 +616,7 @@ button:focus-visible {
   flex-direction: column;
 }
 
-.preview-header {
-  background-color: #f6f8fa;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #e1e4e8;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #24292e;
-}
+
 
 .preview-content {
   flex: 1;

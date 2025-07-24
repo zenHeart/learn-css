@@ -244,9 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         
         <div className="preview-panel">
-          <div className="preview-header">
-            <span>预览</span>
-          </div>
           <div className="preview-content">
             <iframe
               srcDoc={previewHtml}

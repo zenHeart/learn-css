@@ -5,40 +5,41 @@ import Sidebar from '../components/Sidebar'
 const TopicsPage: React.FC = () => {
   // 模拟从 MDX 文件加载的内容
   const mdxContent = `
-# CSS 盒模型基础
+<h1>CSS 盒模型基础</h1>
 
-CSS 盒模型是 CSS 布局的基础概念，理解它对于掌握 CSS 布局至关重要。
+<p>CSS 盒模型是 CSS 布局的基础概念，理解它对于掌握 CSS 布局至关重要。</p>
 
-## 什么是盒模型？
+<h2>什么是盒模型？</h2>
 
-盒模型描述了 HTML 元素如何在页面上占据空间。每个 HTML 元素都被视为一个矩形盒子，这个盒子由以下部分组成：
+<p>盒模型描述了 HTML 元素如何在页面上占据空间。每个 HTML 元素都被视为一个矩形盒子，这个盒子由以下部分组成：</p>
 
-- **内容区域 (Content)**：显示文本、图像等实际内容
-- **内边距 (Padding)**：内容周围的空白区域
-- **边框 (Border)**：内边距周围的边框
-- **外边距 (Margin)**：边框周围的空白区域
+<ul>
+  <li><strong>内容区域 (Content)</strong>：显示文本、图像等实际内容</li>
+  <li><strong>内边距 (Padding)</strong>：内容周围的空白区域</li>
+  <li><strong>边框 (Border)</strong>：内边距周围的边框</li>
+  <li><strong>外边距 (Margin)</strong>：边框周围的空白区域</li>
+</ul>
 
-## 盒模型的组成部分
+<h2>盒模型的组成部分</h2>
 
-\`\`\`css
-.box {
+<pre><code>.box {
   width: 200px;
   height: 100px;
   padding: 20px;
   border: 2px solid #333;
   margin: 10px;
-}
-\`\`\`
+}</code></pre>
 
-## 盒模型类型
+<h2>盒模型类型</h2>
 
-CSS 中有两种盒模型：
+<p>CSS 中有两种盒模型：</p>
 
-1. **标准盒模型 (content-box)**：默认模式
-2. **IE 盒模型 (border-box)**：更直观的模式
+<ol>
+  <li><strong>标准盒模型 (content-box)</strong>：默认模式</li>
+  <li><strong>IE 盒模型 (border-box)</strong>：更直观的模式</li>
+</ol>
 
-\`\`\`css
-/* 标准盒模型 */
+<pre><code>/* 标准盒模型 */
 .box-standard {
   box-sizing: content-box;
   width: 200px; /* 只包含内容宽度 */
@@ -48,29 +49,32 @@ CSS 中有两种盒模型：
 .box-border {
   box-sizing: border-box;
   width: 200px; /* 包含内容、内边距和边框 */
-}
-\`\`\`
+}</code></pre>
 
-## 实际应用
+<h2>实际应用</h2>
 
-理解盒模型对于以下场景特别重要：
+<p>理解盒模型对于以下场景特别重要：</p>
 
-- 精确控制元素尺寸
-- 创建响应式布局
-- 调试布局问题
-- 实现设计稿要求
+<ul>
+  <li>精确控制元素尺寸</li>
+  <li>创建响应式布局</li>
+  <li>调试布局问题</li>
+  <li>实现设计稿要求</li>
+</ul>
 
-## 交互式演示
+<h2>交互式演示</h2>
 
-下面是一个交互式的盒模型演示，你可以看到两种盒模型的区别：
+<p>下面是一个交互式的盒模型演示，你可以看到两种盒模型的区别：</p>
 
 <div class="playground-placeholder" data-playground-id="box-model-intro" data-playground-mode="demo"></div>
 
-## 小贴士
+<h2>小贴士</h2>
 
-- 使用 \`box-sizing: border-box\` 可以让布局更直观
-- 外边距可以重叠，内边距不会重叠
-- 边框会增加元素的实际尺寸
+<ul>
+  <li>使用 <code>box-sizing: border-box</code> 可以让布局更直观</li>
+  <li>外边距可以重叠，内边距不会重叠</li>
+  <li>边框会增加元素的实际尺寸</li>
+</ul>
   `
 
   const frontmatter = {

@@ -101,9 +101,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div className="code-editor">
-      <div className="editor-header">
-        <span className="language-badge">{language.toUpperCase()}</span>
-      </div>
       <div className="editor-container">
         <div ref={editorRef} className="editor-content" />
       </div>
