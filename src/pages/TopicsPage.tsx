@@ -1,5 +1,6 @@
 import React from 'react'
 import MdxRenderer from '../components/MdxRenderer'
+import Sidebar from '../components/Sidebar'
 
 const TopicsPage: React.FC = () => {
   // 模拟 MDX 内容（后续将通过 Vite 插件加载）
@@ -37,10 +38,7 @@ const TopicsPage: React.FC = () => {
 
   return (
     <div className="topics-page">
-      <div className="sidebar">
-        <h3>学习目录</h3>
-        <p>侧边栏导航将在这里显示</p>
-      </div>
+      <Sidebar depth={3} />
       
       <div className="content">
         <MdxRenderer 
