@@ -272,6 +272,13 @@ my-css-notes/
 - **默认文件名约定：** 构建系统将根据 `id` 查找 `_demos/<id>/` 文件夹，并自动读取以下文件作为**初始代码**（如果存在）：`index.html`, `style.css`, `script.js`。
 - **答案文件名约定（针对练习）：** 对于练习，除了上述初始代码文件，构建系统还将自动查找并读取以下文件作为**解决方案代码**（如果存在）：`solution.html`, `solution.css`, `solution.js`。
 
+**技术实现细节：**
+
+- **MDX Playground 声明：** 在 MDX 文件中使用特殊注释 `{/* @playground id="example-id" mode="demo" */}` 来声明 Playground 组件实例。
+- **安全沙箱：** iframe 沙箱将严格限制网络请求和本地存储 API，防止恶意代码执行。
+- **中文搜索：** 使用 FlexSearch.js 的 `tokenize: "forward"` 策略和自定义 `encode` 函数处理中文分词。
+- **部署兼容：** 通过 `public/404.html` 处理 SPA 路由在 GitHub Pages 上的兼容性问题。
+
 
 ## **P1 阶段：基础架构搭建与核心文档展示 (MVP)**
 
@@ -380,6 +387,9 @@ my-css-notes/
     * 使用 `actions/setup-node@v4` 设置 Node.js 环境。
     * 安装依赖并运行 `npm run build`。
     * 使用 `peaceiris/actions-gh-pages@v3` 部署到 `gh-pages` 分支。
+* [ ] **配置 SPA 路由处理：**
+    * 创建 `public/404.html` 文件，处理 SPA 路由的 404 问题。
+    * 在 404.html 中添加 JavaScript 重定向逻辑，将应用路由重定向到正确的 Hash 路由。
 * [ ] **验证部署：**
     * 将代码推送到 GitHub `main` 分支，观察 Actions 运行情况。
     * 验证网站能通过 `http://blog.zenheart.site/learn-css/` 访问。
@@ -426,12 +436,17 @@ my-css-notes/
     * 根据 `files` prop 渲染文件标签页。
     * 点击标签切换当前激活文件，更新 CodeMirror 的 `value`。
 * [ ] **实现重置代码功能：**
-    * 按钮点击时，将 CodeMirror 内容恢复到 `initialFiles` 状态。
+    * 按钮点击时，检查是否有未保存的更改。
+    * 如果有更改，显示确认对话框："确定要重置代码吗？所有未保存的更改将丢失。"
+    * 用户确认后，将 CodeMirror 内容恢复到 `initialFiles` 状态。
 * [ ] **实现添加新文件与自定义文件名：**
     * “+”按钮允许用户添加新的 `.html`, `.css`, `.js` 文件。
     * 用户输入文件名后，将新文件添加到 `Playground` 内部状态的 `files` 中。
 * [ ] **安全加固：**
-    * 对 `iframe` 添加必要的 `sandbox` 属性，限制不必要的权限（如 `allow-scripts`, `allow-same-origin` 等，根据需求细化）。
+    * 对 `iframe` 添加必要的 `sandbox` 属性，限制不必要的权限。
+    * **严格限制 iframe 中的 API 调用：** 禁止 `fetch`、`XMLHttpRequest`、`localStorage`、`sessionStorage` 等网络和存储 API。
+    * **注入安全脚本：** 在 iframe 中注入脚本，重写和禁用危险的全局对象和方法。
+    * **设置执行时间限制：** 为 JavaScript 代码执行设置合理的超时时间，防止无限循环。
 * [ ] **验证：**
     * 创建包含 HTML/CSS/JS 的复杂示例，验证所有功能。
 ```
@@ -440,19 +455,20 @@ my-css-notes/
 
 ```
 * [ ] **MDX 解析器配置：**
-    * 确保 MDX 插件能正确解析 `<Playground />` 组件的 `id` 和 `mode` prop。
+    * 确保 MDX 插件能正确解析 `<Playground />` 组件的 `id` 和 `mode` prop。
 * [ ] **构建时扫描 `Playground` 组件并加载代码：**
-    * **【关键】** 编写 Vite 插件或自定义 Node.js 脚本：
-        * 遍历所有 `.mdx` 文件。
-        * **扫描 MDX 内容，识别所有 `<Playground />` 组件实例，并提取它们的 `id` 和 `mode` prop。** (这可能需要解析 MDX 的 AST)
-        * 对于每个提取到的 `id`：
-            * 根据当前 MDX 文件路径和 `id`，构建出对应的示例文件夹路径（例如 `src/topics/01.basics/01.box-model/_demos/box-model-intro/`）。
-            * **自动读取该文件夹内约定的初始代码文件**（`index.html`, `style.css`, `script.js`）的内容，组合成 `initialCode: Record<string, string>` 对象。
-            * **自动读取约定的解决方案代码文件**（`solution.html`, `solution.css`, `solution.js`）的内容，组合成 `solutionCode: Record<string, string>` 对象。
-        * 将收集到的所有 Playground 实例数据（包含 `id`, `mode`, `initialCode`, `solutionCode`）统一存储到 `src/data/allPlaygrounds.json`。
+    * **【关键】** 编写 Vite 插件或自定义 Node.js 脚本：
+        * 遍历所有 `.mdx` 文件。
+        * **使用特殊注释标记识别 Playground 组件：** 在 MDX 文件中使用 `{/* @playground id="box-model-intro" mode="demo" */}` 格式的特殊注释来声明 Playground 实例。
+        * 对于每个识别到的 `id`：
+            * 根据当前 MDX 文件路径和 `id`，构建出对应的示例文件夹路径（例如 `src/topics/01.basics/01.box-model/_demos/box-model-intro/`）。
+            * **自动读取该文件夹内约定的初始代码文件**（`index.html`, `style.css`, `script.js`）的内容，组合成 `initialCode: Record<string, string>` 对象。
+            * **自动读取约定的解决方案代码文件**（`solution.html`, `solution.css`, `solution.js`）的内容，组合成 `solutionCode: Record<string, string>` 对象。
+            * **如果对应的文件夹不存在，提供默认的空文件模板并记录警告日志。**
+        * 将收集到的所有 Playground 实例数据（包含 `id`, `mode`, `initialCode`, `solutionCode`）统一存储到 `src/data/allPlaygrounds.json`。
 * [ ] **在 `MdxRenderer` 中渲染 Playground：**
-    * 修改 `MdxRenderer` 组件，根据 `Playground` 组件的 `id` prop 从 `allPlaygrounds.json` 中查找对应的代码内容。
-    * 将代码内容以及 `mode` prop 传递给 `Playground` 组件。
+    * 修改 `MdxRenderer` 组件，根据 `Playground` 组件的 `id` prop 从 `allPlaygrounds.json` 中查找对应的代码内容。
+    * 将代码内容以及 `mode` prop 传递给 `Playground` 组件。
 ```
 
 ### 10. **示例详情页 (`/#/playground/:id`) 开发**
@@ -480,12 +496,13 @@ my-css-notes/
 
 ```
 * [ ] **搜索库选型与安装：**
-    * 调研并选择对中文支持最好的前端搜索库 (例如 `FlexSearch.js`，需要了解其分词配置)。
-    * 安装选定的库。
+    * 使用 `FlexSearch.js` 作为搜索库，配置中文分词支持。
+    * 安装 `flexsearch` 库。
 * [ ] **构建搜索索引：**
     * 编写 Vite 插件或 Node.js 脚本。
     * 在构建时遍历所有 MDX 文件，提取 Frontmatter、标题和正文内容。
-    * 使用选定的搜索库生成一个优化的搜索索引 JSON 文件。
+    * **配置 FlexSearch.js 中文分词：** 使用 `tokenize: "forward"` 策略，配置 `encode` 函数处理中文字符分割。
+    * 使用 FlexSearch.js 生成一个优化的搜索索引 JSON 文件。
 * [ ] **搜索 UI 开发：**
     * 设计并开发全局搜索框组件 (可作为顶栏的一部分或弹窗)。
     * 实现 `Ctrl+K` 快捷键打开搜索面板。
@@ -527,7 +544,8 @@ my-css-notes/
     * 在 `Playground` 组件内添加“下载代码”按钮。
     * 点击按钮时，获取当前 `files` 中所有文件的内容。
     * 使用 `jszip` 创建 ZIP 文件，将文件添加进去。
-    * 使用 `file-saver` 触发浏览器下载，文件名如 `playground-example.zip`。
+    * **保持用户自定义文件名：** 如果用户修改了文件名，在 ZIP 中保持用户的自定义名称。
+    * 使用 `file-saver` 触发浏览器下载，文件名如 `playground-code.zip`。
 ```
 
 ### 14. **“小练习”模式实现**
@@ -614,3 +632,37 @@ my-css-notes/
   - 支持同义词搜索。
 - [ ] **可视化测试：**
   - 结合 Playground 验证 CSS 渲染效果是否符合预期，可能需要更专业的测试框架或工具。
+
+---
+
+## **需求文档完善说明**
+
+基于产品专家和技术专家的反馈，本需求文档已在以下关键方面进行了完善：
+
+### **技术实现细节明确化**
+
+1. **MDX 组件解析策略**：采用特殊注释标记 `{/* @playground id="example-id" mode="demo" */}` 来声明 Playground 组件实例，简化了构建时的解析逻辑。
+
+2. **安全沙箱策略**：明确了 iframe 沙箱的安全限制，包括禁止网络请求、本地存储 API 等，并添加了执行时间限制和危险 API 重写机制。
+
+3. **中文搜索实现**：指定使用 FlexSearch.js 作为搜索库，配置了中文分词策略和自定义编码函数。
+
+4. **部署兼容性**：添加了 SPA 路由在 GitHub Pages 上的 404 处理机制。
+
+### **用户体验优化**
+
+1. **重置代码确认**：添加了用户确认对话框，防止意外丢失代码更改。
+
+2. **文件下载处理**：明确了保持用户自定义文件名的逻辑。
+
+3. **错误处理机制**：完善了 iframe 沙箱中的错误捕获和日志输出机制。
+
+### **开发流程规范化**
+
+1. **构建时验证**：添加了 Playground 文件夹不存在时的默认模板和警告日志。
+
+2. **技术栈明确**：明确了所有关键依赖库的选择和配置方式。
+
+3. **部署策略**：统一使用 GitHub Pages + GitHub Actions 的部署方案。
+
+这些完善确保了项目的技术可行性和用户体验的一致性，为后续开发提供了清晰的技术指导。
