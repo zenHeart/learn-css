@@ -6,9 +6,9 @@
 
 ### 整体概述
 
-* **项目名称：** CSS 学习笔记网站
-* **项目愿景：** 旨在构建一个自用的、结构清晰、便于查阅和练习的纯静态 CSS 知识站点，同时支持公开查阅，并具备类似 Docusaurus/VitePress 的优秀用户体验。
-* **技术栈：**
+- **项目名称：** CSS 学习笔记网站
+- **项目愿景：** 旨在构建一个自用的、结构清晰、便于查阅和练习的纯静态 CSS 知识站点，同时支持公开查阅，并具备类似 Docusaurus/VitePress 的优秀用户体验。
+- **技术栈：**
   1. React 19
   2. MDX
   3. @tanstack/react-router
@@ -17,112 +17,112 @@
   6. TypeScript
   7. CSS 方案：Tailwind CSS
   8. 搜索库：FlexSearch.js 支持中文分词器集成
-* **部署目标：** GitHub Pages (`http://blog.zenheart.site/learn-css/`)
-* **开发方法：** 敏捷开发（迭代与增量交付）
+- **部署目标：** GitHub Pages (`http://blog.zenheart.site/learn-css/`)
+- **开发方法：** 敏捷开发（迭代与增量交付）
 
 ### 📌 核心特性
 
 本网站将具备以下核心功能，旨在解决传统学习资料分散、缺乏交互实践和查找效率低下的痛点，并提供良好的用户体验：
 
 1. **单页应用 (SPA) 与 Hash 路由**：
-      * 网站将完全由静态资源组成，不依赖任何后端服务，支持高效部署和访问。
-      * **采用 `@tanstack/react-router` 作为路由库，并明确使用 Hash 路由（例如 `#/topics`），以确保在纯静态环境（如 GitHub Pages）下的可靠性。**
-      * **站点将部署到 `http://blog.zenheart.site/learn-css/`，基础路径 (base path) 为 `/learn-css`。所有内部链接和资源引用将正确处理此基础路径。**
-      * 考虑到 SPA 首屏加载性能，将\*\*预留代码分割（Code Splitting）\*\*的优化空间。
+   - 网站将完全由静态资源组成，不依赖任何后端服务，支持高效部署和访问。
+   - **采用 `@tanstack/react-router` 作为路由库，并明确使用 Hash 路由（例如 `#/topics`），以确保在纯静态环境（如 GitHub Pages）下的可靠性。**
+   - **站点将部署到 `http://blog.zenheart.site/learn-css/`，基础路径 (base path) 为 `/learn-css`。所有内部链接和资源引用将正确处理此基础路径。**
+   - 考虑到 SPA 首屏加载性能，将\*\*预留代码分割（Code Splitting）\*\*的优化空间。
 2. **嵌套 Markdown 文档结构**：
-      * 内容组织将基于本地文件系统的文件夹结构，自动生成多层级的导航目录，确保知识体系的清晰与易于管理。
-      * **文件命名规范采用 `01.xx.mdx` 形式**，确保目录和内容的有序排列。
-      * **导航目录支持任意深度**，文档的侧边栏（`sidebar`）深度可配置。侧边栏位于右侧，用户无需记忆目录的展开/折叠状态。
-      * **MDX 解析和渲染将方便扩展，可参考 Docusaurus 的实现。**
-      * MDX 解析和渲染将方便扩展，可参考 Docusaurus 的实现。具体包括集成 rehype-autolink-headings 和 rehype-slug 以自动生成标题锚点。
+   - 内容组织将基于本地文件系统的文件夹结构，自动生成多层级的导航目录，确保知识体系的清晰与易于管理。
+   - **文件命名规范采用 `01.xx.mdx` 形式**，确保目录和内容的有序排列。
+   - **导航目录支持任意深度**，文档的侧边栏（`sidebar`）深度可配置。侧边栏位于右侧，用户无需记忆目录的展开/折叠状态。
+   - **MDX 解析和渲染将方便扩展，可参考 Docusaurus 的实现。**
+   - MDX 解析和渲染将方便扩展，可参考 Docusaurus 的实现。具体包括集成 rehype-autolink-headings 和 rehype-slug 以自动生成标题锚点。
 3. **可编辑示例 (Playground)**：
-      * 每篇文档均可嵌入交互式的代码示例区域。
-      * 该区域支持多文件编辑（如 `index.html`, `style.css`, `script.js`），文件间可相互引用。
-      * **代码编辑器采用 CodeMirror。**
-      * 提供**实时预览**功能，用户代码修改将即时反映在预览区，**采用 200ms 的防抖处理**。
-      * 预览区域将具备**自适应**展示能力，方便测试不同设备下的效果。
-      * **文件内容将打包为内联形式**，例如 CSS 会作为 `<style>` 标签内容注入，JavaScript 作为 `<script>` 标签内容注入。
-      * **提供“独立打开 (Open Sandbox)”功能**，将当前示例在新标签页中打开，**跳转到专属的“示例详情页”(`/#/playground/:id`)**，提供更广阔和独立的编辑空间。
-      * 具备**错误控制台 (`showConsole`) 和正常日志输出**机制，帮助用户发现并修正代码问题。
-      * 支持**重置代码**功能，一键恢复到文档定义的初始示例状态。
-      * 支持通过“+”号添加新的 HTML、CSS、JS 文件，**新建文件会在内存中保存，并支持用户自定义文件名**。
-      * **支持将 Playground 中的代码下载到本地为 ZIP 文件。**
-      * **目前不支持分享特定代码状态的功能。**
-      * **沙箱环境必须保证安全，避免 XSS 或非预期代码执行。**
-      * 技术实现将自定义开发，不直接依赖第三方库 Sandpack，但会借鉴其核心理念，基于 iframe 沙箱机制构建。建议 CodeMirror 考虑按需加载，以减少初始包体积。
-4. **主题测试 (检测模式)**：
-      * 作为 Playground 的延伸功能，允许在文档中嵌入考核性质的“小练习”模式。
-      * 提供预填代码骨架，用户需在此基础上完成任务。
-      * **目前不考虑复杂的测试运行（如单元测试），但将预留类似 `WebTest` 的口子**，方便未来扩展用于验证浏览器对某些 CSS 能力的支持。
-      * 可配置显示答案功能。
+   - 每篇文档均可嵌入交互式的代码示例区域。
+   - 该区域支持多文件编辑（如 `index.html`, `style.css`, `script.js` 等），文件间可相互引用，内容打包为内联形式（如 `<style>` 标签注入）。
+   - **代码编辑器采用 CodeMirror，并考虑按需加载。**
+   - 提供**实时预览**功能，用户代码修改将即时反映在预览区，**采用 200ms 的防抖处理**。
+   - 预览区域将具备**自适应**展示能力。
+   - **具备错误控制台 (`showConsole`) 和正常日志输出**机制。
+   - 支持**重置代码**功能。
+   - 支持通过“+”号添加新的 HTML、CSS、JS 文件，**新建文件会在内存中保存，并支持用户自定义文件名**。
+   - **支持将 Playground 中的代码下载到本地为 ZIP 文件。**
+   - **目前不支持分享特定代码状态的功能。**
+   - **沙箱环境必须保证安全，避免 XSS 或非预期代码执行。**
+   - 技术实现将**自定义开发**，不直接依赖第三方库 Sandpack，但会借鉴其核心理念，基于 `iframe` 沙箱机制构建。
+   - **模式控制：组件接收 `mode` prop (`'demo' | 'exercise' | 'test'`) 来控制其行为。**
+   - **代码加载：`Playground` 组件通过 `id` prop 引用，其对应的代码内容将通过**约定式的文件结构（MDX 文件路径下的 `_demos/<id>/` 文件夹）**在构建时自动加载和处理。**
+4. **全局搜索功能**：
+   - 作为 Playground 的延伸功能，允许在文档中嵌入**结构化的练习**。
+   - **练习模式是 `Playground` 组件在 `mode="exercise"` 时的一种行为。**
+   - 一个练习通常包含：**明确的问题描述**（在 MDX 中编写）、**可选的提示**（在 MDX 中编写），以及一个配置为 `mode="exercise"` 的 Playground 区域。
+   - Playground 区域提供预填代码骨架，用户需在此基础上完成任务。
+   - **目前不考虑复杂的自动测试运行（如单元测试），但将预留类似 `WebTest` 的口子**，方便未来扩展用于验证浏览器对某些 CSS 能力的支持。
+   - 可配置显示答案功能。
 5. **全局引用索引页 (`/#/reference`)**：
-      * 自动汇总所有文档中通过 Frontmatter 字段（如 `category`、`tags`）定义的关键词、CSS 属性、值等信息。
-      * 提供分类导航栏，按 `category` 字段对关键词进行聚类分组。
-      * 每个分类内的关键词按字母顺序排列。
-      * 点击索引项可快速跳转到对应的学习文档页面。
-      * **关键词将从文档的 YAML 配置中自动提取，如果未配置，则使用文件名作为关键词。**
-      * **搜索结果将直接显示一段文案匹配的列表，点击可跳转到文档。**
+   - 自动汇总所有文档中通过 Frontmatter 字段（如 `category`、`tags`）定义的关键词、CSS 属性、值等信息。
+   - 提供分类导航栏，按 `category` 字段对关键词进行聚类分组。
+   - 每个分类内的关键词按字母顺序排列。
+   - 点击索引项可快速跳转到对应的学习文档页面。
+   - **关键词将从文档的 YAML 配置中自动提取，如果未配置，则使用文件名作为关键词。**
+   - **搜索结果将直接显示一段文案匹配的列表，点击可跳转到文档。**
 6. **全局搜索功能**：
-      * 提供站内文档的全局搜索能力，支持模糊匹配。
-      * 搜索范围包括 MDX 文档的 YAML Frontmatter（`title`, `category`, `tags`）、各级标题和正文内容。
-      * 搜索结果实时显示，并能精准跳转到匹配关键词的文档及内容区域。
-      * 支持 `Ctrl+K` 等快捷键快速唤出搜索面板。
-      * **技术上将选择对中文支持最好的前端搜索库**，在构建时生成搜索索引。
+   - 提供站内文档的全局搜索能力，支持模糊匹配。
+   - 搜索范围包括 MDX 文档的 YAML Frontmatter（`title`, `category`, `tags`）、各级标题和正文内容。
+   - 搜索结果实时显示，并能精准跳转到匹配关键词的文档及内容区域。
+   - 支持 `Ctrl+K` 等快捷键快速唤出搜索面板。
+   - **技术上将选择对中文支持最好的前端搜索库**，在构建时生成搜索索引。
 7. **集中配置管理**：所有网站的元配置信息（如标题、GitHub 链接、侧边栏深度、默认主题、搜索开关等）统一维护在 `site.config.ts` 文件中，并**必须支持 TypeScript 类型安全**。
 8. **国际化 (i18n) 兼容性**：
-      * 项目架构设计将预留国际化能力，未来可方便地支持多语言内容。
-      * **目前默认语言为中文。**
-      * **国际化实现将参考 Docusaurus 的模式。**
-9. **非功能需求**
-      1. 可维护性： 遵循组件化、模块化原则，代码结构清晰。
-      2. 可访问性： (可选，长期目标) 遵循 WCAG 基础规范。
-      3. SEO： (可选，长期目标) 考虑生成 sitemap.xml，MDX Frontmatter 增加 description, keywords。
+   - 项目架构设计将预留国际化能力，未来可方便地支持多语言内容。
+   - **目前默认语言为中文。**
+   - **国际化实现将参考 Docusaurus 的模式。**
+9. **GitHub 集成：**
+   - 提供“在 GitHub 编辑此页”的链接，方便贡献和修正。
 
 ### 🗂 页面信息架构
 
-#### 1\. 首页 (`/` 或 `/#/`)
+#### 1. 首页 (`/` 或 `/#/`)
 
 作为网站的入口，旨在快速引导用户了解网站定位、结构和使用方法。
 
-* **模块结构**：
-  * **Hero 区**：展示网站标题、副标题及简要介绍。
-  * **网站结构说明**：通过图示（**包含一个交互式 CSS 学习路线图 / Roadmap**）或文字介绍各页面功能。
-  * **快速导航**：提供主要入口页面（如 `/#/topics`, `/#/reference`, `/#/playground`）的跳转按钮。
-  * **使用说明**：简要阐述文档格式、Playground 用法、搜索方式等。
-  * **GitHub 链接**：提供项目源码地址，并支持用户直接点击跳转到 GitHub 编辑当前文档的能力。
+- **模块结构**：
+  - **Hero 区**：展示网站标题、副标题及简要介绍。
+  - **网站结构说明**：通过图示（**包含一个交互式 CSS 学习路线图 / Roadmap**）或文字介绍各页面功能。
+  - **快速导航**：提供主要入口页面（如 `/#/topics`, `/#/reference`, `/#/playground`）的跳转按钮。
+  - **使用说明**：简要阐述文档格式、Playground 用法、搜索方式等。
+  - **GitHub 链接**：提供项目源码地址，并支持用户直接点击跳转到 GitHub 编辑当前文档的能力。
 
-#### 2\. 学习页 (`/#/topics`)
+#### 2. 学习页 (`/#/topics`)
 
 网站的核心内容展示区域，以结构化的文档形式呈现 CSS 知识。
 
-* **模块结构**：
-  * **左侧目录栏**：根据 `src/topics` 目录结构（按 `01.xx.mdx` 文件名排序）自动生成，支持任意深度嵌套和展开/折叠，并具备**响应式收起**功能。
-  * **右侧内容区**：渲染 MDX 文档内容，包括文本、图片、代码块、内嵌 Playground/检测模式。
-  * **示例区域 (Playground/检测模式)**：如“核心特性”中所述，提供可编辑、可测试的交互式代码环境，并包含\*\*“独立打开 (Open Sandbox)”按钮，将当前示例加载到`/#/playground/:id`页面。\*\*
-  * **锚点跳转**：自动为标题生成锚点，支持文档内部与全局跳转，并支持平滑滚动。
-  * **快捷键面板**：支持 `Ctrl+K` 快速打开搜索面板等快捷操作。
+- **模块结构**：
+  - **左侧目录栏**：根据 `src/topics` 目录结构（按 `01.xx.mdx` 文件名排序）自动生成，支持任意深度嵌套和展开/折叠，并具备**响应式收起**功能。
+  - **右侧内容区**：渲染 MDX 文档内容，包括文本、图片、代码块、内嵌 Playground/检测模式。
+  - **示例区域 (Playground/检测模式)**：如“核心特性”中所述，提供可编辑、可测试的交互式代码环境，并包含\*\*“独立打开 (Open Sandbox)”按钮，将当前示例加载到`/#/playground/:id`页面。\*\*
+  - **锚点跳转**：自动为标题生成锚点，支持文档内部与全局跳转，并支持平滑滚动。
+  - **快捷键面板**：支持 `Ctrl+K` 快速打开搜索面板等快捷操作。
 
-#### 3\. 示例详情页 (`/#/playground/:id`)
+#### 3. 示例详情页 (`/#/playground/:id`)
 
 为用户提供一个专注于代码实践和调试的独立环境，承载从学习页跳转而来的特定示例。
 
-* **模块结构**：
-  * **左侧示例导航**：\*\*按照类似 `/topics` 的目录结构，展示所有可用的 Playground 示例列表。\*\*用户可以在此页面左侧导航切换不同的示例。
-  * **右侧 Playground 核心区域**：
-    * 提供**更大、更独立的 CodeMirror 编辑器和预览区域**，减少干扰。
-    * 完整复用学习页内嵌 Playground 的所有功能：多文件编辑、实时预览、错误提示、重置代码、添加新文件、下载代码（ZIP）等。
-    * **提供 `showConsole` 开关以控制控制台输出显示。**
-  * **独立 URL**：每个示例在该页面都有唯一的 URL (`/#/playground/:id`)，便于分享和直接访问。
+- **模块结构**：
+  - **左侧示例导航**：\*\*按照类似 `/topics` 的目录结构，展示所有可用的 Playground 示例列表。\*\*用户可以在此页面左侧导航切换不同的示例。
+  - **右侧 Playground 核心区域**：
+    - 提供**更大、更独立的 CodeMirror 编辑器和预览区域**，减少干扰。
+    - 完整复用学习页内嵌 Playground 的所有功能：多文件编辑、实时预览、错误提示、重置代码、添加新文件、下载代码（ZIP）等。
+    - **提供 `showConsole` 开关以控制控制台输出显示。**
+  - **独立 URL**：每个示例在该页面都有唯一的 URL (`/#/playground/:id`)，便于分享和直接访问。
 
-#### 4\. 索引页 (`/#/reference`)
+#### 4. 索引页 (`/#/reference`)
 
 一个自动汇总和分类的 CSS 知识参考字典，便于快速查阅。
 
-* **模块结构**：
-  * **分类导航栏**：根据文档 Frontmatter `category` 字段对关键词进行分组。
-  * **索引表格**：每组关键词按字母排序，显示其所属文档、简要描述和跳转链接。
-  * **搜索功能**：支持对索引页内容的模糊搜索，快速定位关键词。
-  * **数据来源展示**：显示每个关键词在原始文档中的出处（文件路径、上下文段落），点击可跳转到文档内精确位置。
+- **模块结构**：
+  - **分类导航栏**：根据文档 Frontmatter `category` 字段对关键词进行分组。
+  - **索引表格**：每组关键词按字母排序，显示其所属文档、简要描述和跳转链接。
+  - **搜索功能**：支持对索引页内容的模糊搜索，快速定位关键词。
+  - **数据来源展示**：显示每个关键词在原始文档中的出处（文件路径、上下文段落），点击可跳转到文档内精确位置。
 
 ### ⚙️ 配置文件结构
 
@@ -130,26 +130,26 @@
 
 ```typescript
 export const siteConfig = {
-  title: 'CSS 学习笔记',
-  github: 'https://github.com/your-repo/css-notes', // 替换为实际仓库地址
+  title: "CSS 学习笔记",
+  github: "https://github.com/your-repo/css-notes", // 替换为实际仓库地址
   sidebarDepth: 3, // 侧边栏显示的标题深度
   showEditLink: true, // 是否显示跳转到 GitHub 编辑的链接
-  defaultTheme: 'light',
+  defaultTheme: "light",
   enableSearch: true,
   // [新增] SEO 相关元信息
-  description: '一个专注于 CSS 知识学习与实践的纯静态笔记网站。',
-  keywords: 'CSS, 学习, 教程, 笔记, 前端, 开发',
+  description: "一个专注于 CSS 知识学习与实践的纯静态笔记网站。",
+  keywords: "CSS, 学习, 教程, 笔记, 前端, 开发",
   // 国际化相关配置预留，例如：
   // i18n: {
   //   defaultLang: 'zh-CN',
   //   langs: ['zh-CN', 'en-US']
   // }
-}
+};
 ```
 
 ### 📄 文档 Frontmatter 配置
 
-每个 `.mdx` 文件都可包含一个 YAML Frontmatter 区域，用于定义文档元信息和 Playground 示例的特定配置，示例结构如下：
+每个 `.mdx` 文件可包含一个 YAML Frontmatter 区域，用于定义文档元信息。**与 Playground 代码相关的逻辑（如代码内容和模式）将直接通过 `<Playground />` 组件的 `id` 和 `mode` prop 在 MDX 内容中指定，并通过构建时的文件约定自动处理。**
 
 ```yaml
 ---
@@ -158,6 +158,14 @@ category: "布局基础" # 用于索引页的分类
 tags:
   - margin
   - padding # 用于索引页的标签
+description: "详细介绍 CSS 盒模型的基本概念、组成部分及其在布局中的应用。" # SEO 相关元信息
+keywords: "盒模型, Box Model, margin, padding, border, content-box, border-box" # SEO 相关元信息
+# [重要] playgroundId, initialCodeFiles, solutionCodeFiles 不再在此处定义，而是通过组件id和文件约定处理
+# exercise 元数据（可选，与 Playground 行为解耦，仅作信息记录）
+exercise:
+  id: "box-model-exercise-1" # 练习本身的唯一ID (与 Playground 组件的ID保持一致)
+  difficulty: "beginner"
+  type: "coding"
 ---
 ```
 
@@ -165,38 +173,111 @@ tags:
 
 项目将采用**纯静态部署方式**，主要部署目标为 **GitHub Pages**。
 
-* **部署 URL**：`http://blog.zenheart.site/learn-css/`，项目将适配 `/learn-css` 作为基础路径。
-* **自动化部署**：通过配置 GitHub Actions 等 CI/CD 工具，实现代码提交后自动构建并将静态文件部署到指定分支。
-* **构建流程**：**利用 Vite 遍历构建，生成路由、搜索索引等所有必要信息。**
-* **缓存策略**：将考虑在构建产物中使用哈希化的文件名，以配合 CDN 缓存策略，解决版本更新后的缓存失效问题。
+- **部署 URL**：`http://blog.zenheart.site/learn-css/`，项目将适配 `/learn-css` 作为基础路径。
+- **自动化部署**：通过配置 GitHub Actions 等 CI/CD 工具，实现代码提交后自动构建并将静态文件部署到指定分支。
+- **构建流程**：**利用 Vite 遍历构建，生成路由、搜索索引等所有必要信息。**
+- **缓存策略**：将考虑在构建产物中使用哈希化的文件名，以配合 CDN 缓存策略，解决版本更新后的缓存失效问题。
 
 ## **项目通用事项与规范**
 
-* **环境准备：**
-  * [ ] 安装 Node.js (推荐 v23+) 采用 pnpm
-  * [ ] 安装 Git。
-  * [ ] 配置 IDE (VS Code 推荐)，安装 ESLint, Prettier 插件。
-* **Git 流程：**
-  * [ ] 遵循 GitHub Flow：所有开发在特性分支 (`feature/xxx`, `bugfix/xxx`) 上进行。
-  * [ ] Pull Request (PR) 必须经过至少一名成员 Code Review 后合并。
-  * [ ] Commit Message 遵循 Conventional Commits 规范。
-* **代码规范：**
-  * [ ] 所有代码遵循 `.eslintrc.cjs` 和 `.prettierrc` 定义的规范。
-  * [ ] 严格遵循 TypeScript 类型定义。
-* **沟通与协作：**
-  * [ ] 每天参与站会，同步进展和阻碍。
-  * [ ] 遇到问题及时通过团队协作工具提问。
-  * [ ] 使用 GitHub Issues 进行任务分配、进度追踪和 Bug 管理。每个任务都应关联一个 Issue。
-* **文档：**
-  * [ ] 完成任务后，更新相关代码注释和技术文档（如果适用）。
+- **环境准备：**
+  - [ ] 安装 Node.js (推荐 v23+) 采用 pnpm
+  - [ ] 安装 Git。
+  - [ ] 配置 IDE (VS Code 推荐)，安装 ESLint, Prettier 插件。
+- **Git 流程：**
+  - [ ] 遵循 GitHub Flow：所有开发在特性分支 (`feature/xxx`, `bugfix/xxx`) 上进行。
+  - [ ] Pull Request (PR) 必须经过至少一名成员 Code Review 后合并。
+  - [ ] Commit Message 遵循 Conventional Commits 规范。
+- **代码规范：**
+  - [ ] 所有代码遵循 `.eslintrc.cjs` 和 `.prettierrc` 定义的规范。
+  - [ ] 严格遵循 TypeScript 类型定义。
+- **沟通与协作：**
+  - [ ] 每天参与站会，同步进展和阻碍。
+  - [ ] 遇到问题及时通过团队协作工具提问。
+  - [ ] 使用 GitHub Issues 进行任务分配、进度追踪和 Bug 管理。每个任务都应关联一个 Issue。
+- **文档：**
+  - [ ] 完成任务后，更新相关代码注释和技术文档（如果适用）。
 
------
+
+### **项目文件结构规范**
+
+为了保证项目结构清晰、内容易于管理和构建脚本的高效运行，我们将遵循以下文件和目录组织规范：
+
+```
+my-css-notes/
+├── .github/                       # GitHub Actions 工作流配置
+│   └── workflows/
+│       └── deploy.yml             # 自动化部署配置
+├── public/                        # 静态资源目录 (Vite 会直接复制)
+│   └── favicon.ico
+│   └── # 其他静态图片、字体等
+├── src/
+│   ├── assets/                    # 项目公共静态资源 (图片、图标等，Vite 会处理)
+│   │   └── styles/                # 全局 CSS 样式 (如 CSS reset, common styles)
+│   │       └── index.css
+│   ├── components/                # React UI 组件
+│   │   ├── CodeEditor.tsx         # CodeMirror 编辑器封装
+│   │   ├── MdxRenderer.tsx        # MDX 内容渲染器
+│   │   ├── Playground.tsx         # 可编辑示例核心组件
+│   │   ├── Sidebar.tsx            # 侧边栏导航组件
+│   │   └── ...                    # 其他通用组件
+│   ├── data/                      # 构建时生成或手动维护的配置/数据文件
+│   │   ├── sidebar.json           # 侧边栏导航数据 (构建时生成)
+│   │   ├── allPlaygrounds.json    # 所有 Playground 示例数据 (构建时生成)
+│   │   ├── roadmap.json           # CSS 学习路线图数据 (手动维护)
+│   │   └── search-index.json      # 全局搜索索引 (构建时生成)
+│   ├── pages/                     # 页面组件 (路由直接对应的组件)
+│   │   ├── HomePage.tsx
+│   │   ├── TopicsPage.tsx
+│   │   ├── ReferencePage.tsx
+│   │   └── PlaygroundDetailPage.tsx
+│   ├── topics/                    # **核心：所有学习文档的 MDX 源文件和相关示例**
+│   │   ├── 01.basics/             # 主题分类目录
+│   │   │   ├── 01.box-model/      # 具体主题目录
+│   │   │   │   ├── 01.intro.mdx   # MDX 文档 (其中使用 <Playground id="box-model-intro" />)
+│   │   │   │   └── _demos/        # **该文档关联的 Playgrounds/Exercises 示例代码根目录**
+│   │   │   │       ├── box-model-intro/ # **示例文件夹 (其名称即为 <Playground /> 的 `id` prop)**
+│   │   │   │       │   ├── index.html       # 默认会读取的 HTML 文件 (初始代码)
+│   │   │   │       │   ├── style.css        # 默认会读取的 CSS 文件 (初始代码)
+│   │   │   │       │   └── script.js        # 默认会读取的 JS 文件 (初始代码)
+│   │   │   │       ├── another-exercise/    # 另一个练习文件夹 (其名称为 <Playground /> 的 `id` prop)
+│   │   │   │       │   ├── index.html       # 初始代码
+│   │   │   │       │   ├── style.css
+│   │   │   │       │   ├── solution.html    # 约定为解决方案 HTML 文件
+│   │   │   │       │   └── solution.css     # 约定为解决方案 CSS 文件
+│   │   │   ├── 02.display/
+│   │   │   │   ├── 01.flexbox.mdx
+│   │   │   │   └── _demos/
+│   │   │   │       └── flex-alignment-intro/
+│   │   │   │           ├── index.html
+│   │   │   │           └── style.css
+│   │   │   └── index.mdx          # 如果目录本身就是文档入口
+│   │   └── ...
+│   ├── router.ts                  # @tanstack/react-router 路由定义
+│   ├── site.config.ts             # 全局网站配置
+│   ├── main.tsx                   # 应用入口文件
+│   └── vite-env.d.ts              # Vite 环境变量声明
+├── index.html                     # SPA 入口 HTML
+├── package.json                   # 项目依赖和脚本
+├── tsconfig.json                  # TypeScript 配置
+├── .eslintrc.cjs                  # ESLint 配置
+├── .prettierrc                    # Prettier 配置
+└── README.md                      # 项目说明
+```
+
+**关键约定：**
+
+- **`_demos/` 目录：** 统一存放 MDX 文档相关的 Playground/Exercise 代码，位于使用它的 MDX 文档的**同级目录**下。
+- **示例文件夹命名 (`playgroundId`)：** 每个示例/练习的文件夹名称**必须唯一**且**直接用作 `<Playground />` 组件的 `id` prop**。
+- **默认文件名约定：** 构建系统将根据 `id` 查找 `_demos/<id>/` 文件夹，并自动读取以下文件作为**初始代码**（如果存在）：`index.html`, `style.css`, `script.js`。
+- **答案文件名约定（针对练习）：** 对于练习，除了上述初始代码文件，构建系统还将自动查找并读取以下文件作为**解决方案代码**（如果存在）：`solution.html`, `solution.css`, `solution.js`。
+
 
 ## **P1 阶段：基础架构搭建与核心文档展示 (MVP)**
 
 **目标：** 构建项目的骨架，实现静态 MDX 文档的加载、渲染和基本导航，完成初步的 GitHub Pages 部署。
 
-### 1\. **项目初始化与基础配置**
+### 1. **项目初始化与基础配置**
 
 ```
 * [ ] **初始化 Vite 项目：**
@@ -216,7 +297,7 @@ tags:
     * 验证浏览器访问 `localhost:5173/learn-css/` （或相应端口及路径）能显示空白页面或基本内容。
 ```
 
-### 2\. **路由配置 (`@tanstack/react-router`)**
+### 2. **路由配置 (`@tanstack/react-router`)**
 
 ```
 * [ ] **安装路由库：**
@@ -235,7 +316,7 @@ tags:
     * 验证页面刷新后，当前 Hash 路由状态能正确保持。
 ```
 
-### 3\. **MDX 加载与基础渲染**
+### 3. **MDX 加载与基础渲染**
 
 ```
 * [ ] **安装 MDX 插件：**
@@ -253,7 +334,7 @@ tags:
     * 在 `TopicsPage` 组件中，尝试导入并渲染一个 MDX 文件，验证内容显示。
 ```
 
-### 4\. **侧边栏导航自动生成与渲染**
+### 4. **侧边栏导航自动生成与渲染**
 
 ```
 * [ ] **设计侧边栏数据结构：**
@@ -274,7 +355,7 @@ tags:
     * 修改 `Sidebar` 组件，根据 `sidebarDepth` 控制侧边栏的展示层级。
 ```
 
-### 5\. **首页 (`/#/`) 基础搭建**
+### 5. **首页 (`/#/`) 基础搭建**
 
 ```
 * [ ] **创建首页组件：**
@@ -289,7 +370,7 @@ tags:
     * 为“网站结构说明”和“CSS 学习路线图”添加占位符文本或区块。
 ```
 
-### 6\. **GitHub Pages 自动化部署**
+### 6. **GitHub Pages 自动化部署**
 
 ```
 * [ ] **创建 GitHub Actions Workflow：**
@@ -305,13 +386,13 @@ tags:
     * 验证所有路由和资源加载正常。
 ```
 
------
+---
 
 ## **P2 阶段：交互式 Playground 与基础搜索 (核心功能)**
 
 **目标：** 实现内嵌 Playground、独立的示例详情页以及网站的全局搜索功能。
 
-### 7\. **CodeMirror 编辑器集成**
+### 7. **CodeMirror 编辑器集成**
 
 ```
 * [ ] **安装 CodeMirror 库：**
@@ -325,11 +406,11 @@ tags:
     * 在测试页面渲染 `CodeEditor`，验证代码编辑和高亮功能。
 ```
 
-### 8\. **自定义 Playground 模块核心开发**
+### 8. **自定义 Playground 模块核心开发**
 
 ```
 * [ ] **设计 Playground 组件 API：**
-    * 定义 `Playground` 组件的 Props 接口，例如 `files: Record<string, string>`, `initialActiveFile?: string`, `showConsole?: boolean`, `onCodeChange?: (files: Record<string, string>) => void`。
+    * 定义 `Playground` 组件的 Props 接口，例如 `id: string`, `mode: 'demo' | 'exercise' | 'test'`, `showConsole?: boolean`, `onCodeChange?: (files: Record<string, string>) => void`。
 * [ ] **实现 `iframe` 沙箱：**
     * 在 `Playground` 组件中渲染一个 `iframe` 元素。
     * 实现将 `files` 内容动态组合成单个 HTML 字符串（包含内联 `<style>` 和 `<script>` 标签）并设置到 `iframe.srcdoc`。
@@ -355,25 +436,32 @@ tags:
     * 创建包含 HTML/CSS/JS 的复杂示例，验证所有功能。
 ```
 
-### 9\. **MDX 中的 Playground 集成与 Frontmatter 解析**
+### 9. **MDX 解析与 Playground 代码自动加载**
 
 ```
-* [ ] **细化 MDX 解析器配置：**
-    * 在 `vite.config.ts` 中，确保 MDX 插件能正确处理自定义 JSX 组件（例如 `<Playground />`）。
-    * 确认 Frontmatter 的解析器 (如 `remark-frontmatter` 配合 `gray-matter`) 能正确提取 `playgroundId`, `playgroundMode`, `initialCode`, `solutionCode`。
+* [ ] **MDX 解析器配置：**
+    * 确保 MDX 插件能正确解析 `<Playground />` 组件的 `id` 和 `mode` prop。
+* [ ] **构建时扫描 `Playground` 组件并加载代码：**
+    * **【关键】** 编写 Vite 插件或自定义 Node.js 脚本：
+        * 遍历所有 `.mdx` 文件。
+        * **扫描 MDX 内容，识别所有 `<Playground />` 组件实例，并提取它们的 `id` 和 `mode` prop。** (这可能需要解析 MDX 的 AST)
+        * 对于每个提取到的 `id`：
+            * 根据当前 MDX 文件路径和 `id`，构建出对应的示例文件夹路径（例如 `src/topics/01.basics/01.box-model/_demos/box-model-intro/`）。
+            * **自动读取该文件夹内约定的初始代码文件**（`index.html`, `style.css`, `script.js`）的内容，组合成 `initialCode: Record<string, string>` 对象。
+            * **自动读取约定的解决方案代码文件**（`solution.html`, `solution.css`, `solution.js`）的内容，组合成 `solutionCode: Record<string, string>` 对象。
+        * 将收集到的所有 Playground 实例数据（包含 `id`, `mode`, `initialCode`, `solutionCode`）统一存储到 `src/data/allPlaygrounds.json`。
 * [ ] **在 `MdxRenderer` 中渲染 Playground：**
-    * 修改 `MdxRenderer` 组件，识别 MDX 内容中的特定标记（如 `<Playground />` 组件）。
-    * 将从 Frontmatter 中解析到的 `initialCode`, `playgroundMode` 等 Props 传递给 `Playground` 组件。
-    * 确保 MDX 中的其他内容和 Playground 组件能和谐共存。
+    * 修改 `MdxRenderer` 组件，根据 `Playground` 组件的 `id` prop 从 `allPlaygrounds.json` 中查找对应的代码内容。
+    * 将代码内容以及 `mode` prop 传递给 `Playground` 组件。
 ```
 
-### 10\. **示例详情页 (`/#/playground/:id`) 开发**
+### 10. **示例详情页 (`/#/playground/:id`) 开发**
 
 ```
 * [ ] **数据收集：**
     * 修改构建时脚本（或 Vite 插件），遍历所有 MDX 文件。
     * 提取所有包含 `playgroundId` 的 Frontmatter 数据（`id`, `title`, `initialCode`, `solutionCode`, `category` 等）。
-    * 生成一个汇总所有 Playground 示例的 JSON 文件 (例如 `src/data/allPlaygrounds.json`)。
+    * `src/data/allPlaygrounds.json` 已包含所有 Playground 实例的代码内容和 `mode` 信息。
 * [ ] **创建示例详情页组件：**
     * 创建 `src/pages/PlaygroundDetailPage.tsx`。
     * 使用 `@tanstack/react-router` 获取 URL 中的 `:id` 参数。
@@ -388,7 +476,7 @@ tags:
     * 在内嵌 Playground 组件中，实现点击按钮后跳转到 `/#/playground/:id` 的逻辑。
 ```
 
-### 11\. **全局搜索功能实现**
+### 11. **全局搜索功能实现**
 
 ```
 * [ ] **搜索库选型与安装：**
@@ -410,13 +498,12 @@ tags:
     * 在目标文档页面，使用 JavaScript 高亮显示匹配的关键词。
 ```
 
------
 
 ## **P3 阶段：高级功能与体验优化 (完善与优化)**
 
 **目标：** 完善索引页、引入练习模式、提供下载功能，并进行整体优化。
 
-### 12\. **索引页 (`/#/reference`) 数据与 UI**
+### 12. **索引页 (`/#/reference`) 数据与 UI**
 
 ```
 * [ ] **数据收集与处理：**
@@ -431,7 +518,7 @@ tags:
     * 在索引页内添加搜索框，实现对索引列表中关键词的过滤。
 ```
 
-### 13\. **Playground 下载为 ZIP 功能**
+### 13. **Playground 下载为 ZIP 功能**
 
 ```
 * [ ] **安装库：**
@@ -443,7 +530,7 @@ tags:
     * 使用 `file-saver` 触发浏览器下载，文件名如 `playground-example.zip`。
 ```
 
-### 14\. **“小练习”模式实现**
+### 14. **“小练习”模式实现**
 
 ```
 * [ ] **修改 Playground 组件：**
@@ -456,7 +543,7 @@ tags:
     * 在代码中添加注释或简单接口定义，表明未来可在此处集成更复杂的浏览器能力验证逻辑。
 ```
 
-### 15\. **响应式布局优化**
+### 15. **响应式布局优化**
 
 ```
 * [ ] **整体布局调整：**
@@ -470,7 +557,7 @@ tags:
     * 确保编辑器和预览区域在小屏幕下能合理自适应，例如堆叠显示或缩小比例。
 ```
 
-### 16\. **GitHub 编辑链接功能**
+### 16. **GitHub 编辑链接功能**
 
 ```
 * [ ] **修改学习页布局：**
@@ -480,7 +567,7 @@ tags:
     * URL 格式应为 `https://github.com/your-repo/edit/main/src/topics/path/to/your-doc.mdx`。
 ```
 
-### 17\. **CSS 学习路线图 (Roadmap)**
+### 17. **CSS 学习路线图 (Roadmap)**
 
 ```
 * [ ] **设计 Roadmap 数据结构：**
@@ -491,7 +578,7 @@ tags:
     * 为每个 Roadmap 节点添加点击事件，使其能够跳转到对应的学习页 (`/#/topics/path-to-doc`)。
 ```
 
-### 18\. **代码分割 (Code Splitting)**
+### 18. **代码分割 (Code Splitting)**
 
 ```
 * [ ] **识别分割点：**
@@ -503,27 +590,27 @@ tags:
     * 验证打包产物中是否存在分割后的 JS chunk。
 ```
 
------
+---
 
 ## **P4 阶段：未来迭代与高级优化 (长期规划)**
 
 **目标：** 这些是当前版本不强制要求完成，但已在架构中预留接口或在设计时考虑其可扩展性的功能。
 
-* [ ] **国际化 (i18n) 完整支持：**
-  * 细化语言文件结构（参考 Docusaurus）。
-  * 实现语言切换 UI。
-  * 为所有 UI 文本和 MDX 内容提供多语言版本。
-* [ ] **WebAssembly/Web Worker 集成：**
-  * 调研在浏览器端运行 SCSS/PostCSS 编译或更复杂测试的可行方案。
-  * 初步实现概念验证 (POC)。
-* [ ] **用户个性化：**
-  * 实现浏览器本地存储（LocalStorage/IndexedDB）来保存学习进度。
-  * 允许用户收藏文档或 Playground 示例。
-  * 允许用户本地保存自定义的 Playground 代码。
-* [ ] **评论系统集成：**
-  * 调研并集成轻量级评论系统 (如 Giscus, Utterances)。
-* [ ] **更细致的搜索优化：**
-  * 增加拼写纠错功能。
-  * 支持同义词搜索。
-* [ ] **可视化测试：**
-  * 结合 Playground 验证 CSS 渲染效果是否符合预期，可能需要更专业的测试框架或工具。
+- [ ] **国际化 (i18n) 完整支持：**
+  - 细化语言文件结构（参考 Docusaurus）。
+  - 实现语言切换 UI。
+  - 为所有 UI 文本和 MDX 内容提供多语言版本。
+- [ ] **WebAssembly/Web Worker 集成：**
+  - 调研在浏览器端运行 SCSS/PostCSS 编译或更复杂测试的可行方案。
+  - 初步实现概念验证 (POC)。
+- [ ] **用户个性化：**
+  - 实现浏览器本地存储（LocalStorage/IndexedDB）来保存学习进度。
+  - 允许用户收藏文档或 Playground 示例。
+  - 允许用户本地保存自定义的 Playground 代码。
+- [ ] **评论系统集成：**
+  - 调研并集成轻量级评论系统 (如 Giscus, Utterances)。
+- [ ] **更细致的搜索优化：**
+  - 增加拼写纠错功能。
+  - 支持同义词搜索。
+- [ ] **可视化测试：**
+  - 结合 Playground 验证 CSS 渲染效果是否符合预期，可能需要更专业的测试框架或工具。
