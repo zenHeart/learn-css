@@ -19,26 +19,6 @@ interface MdxRendererProps {
 }
 
 const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgrounds = [] }) => {
-  // 简单的 Playground 组件渲染
-  const renderPlayground = (id: string, mode: string = 'demo') => {
-    const playground = playgrounds.find(p => p.id === id)
-    
-    if (!playground) {
-      return <div className="playground-error">Playground "{id}" 未找到</div>
-    }
-    
-    return (
-      <Playground
-        id={playground.id}
-        mode={playground.mode}
-        showConsole={true}
-        onCodeChange={(files) => {
-          console.log('Playground 代码已更改:', files)
-        }}
-      />
-    )
-  }
-  
   // 处理内容中的 Playground 标记
   const processedContent = content.replace(
     /{\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/}/g,
@@ -70,17 +50,15 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
         
         {/* 渲染 Playground 组件 */}
         {playgrounds.map((playground) => (
-          <div key={playground.id} className="playground-section">
-            <h3>交互式演示: {playground.id}</h3>
-            <Playground
-              id={playground.id}
-              mode={playground.mode}
-              showConsole={true}
-              onCodeChange={(files) => {
-                console.log('Playground 代码已更改:', files)
-              }}
-            />
-          </div>
+          <Playground
+            key={playground.id}
+            id={playground.id}
+            mode={playground.mode}
+            showConsole={true}
+            onCodeChange={(files) => {
+              console.log('Playground 代码已更改:', files)
+            }}
+          />
         ))}
       </div>
     </div>

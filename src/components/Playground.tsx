@@ -252,28 +252,28 @@ document.addEventListener('DOMContentLoaded', function() {
               className="preview-iframe"
             />
           </div>
+          
+          {showConsole && (
+            <div className="console-panel">
+              <div className="console-header">
+                <span>控制台</span>
+                <button onClick={clearConsole} className="clear-btn">清空</button>
+              </div>
+              <div className="console-content">
+                {consoleMessages.length === 0 ? (
+                  <div className="console-empty">控制台输出将显示在这里...</div>
+                ) : (
+                  consoleMessages.map((message, index) => (
+                    <div key={index} className="console-message">
+                      {message}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
-      {showConsole && (
-        <div className="console-panel">
-          <div className="console-header">
-            <span>控制台</span>
-            <button onClick={clearConsole} className="clear-btn">清空</button>
-          </div>
-          <div className="console-content">
-            {consoleMessages.length === 0 ? (
-              <div className="console-empty">控制台输出将显示在这里...</div>
-            ) : (
-              consoleMessages.map((message, index) => (
-                <div key={index} className="console-message">
-                  {message}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
