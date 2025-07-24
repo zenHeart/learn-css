@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 盒模型示例</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="box-model-demo">
+        <h1>CSS 盒模型演示</h1>
+        
+        <div class="box-container">
+            <div class="box content-box">
+                <div class="content">内容区域</div>
+            </div>
+            
+            <div class="box border-box">
+                <div class="content">内容区域</div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <p>左侧：标准盒模型 (content-box)</p>
+            <p>右侧：IE 盒模型 (border-box)</p>
+        </div>
+    </div>
+    
+    <script src="./script.js"></script>
+</body>
+</html> 
