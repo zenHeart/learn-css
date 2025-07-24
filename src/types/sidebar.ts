@@ -15,7 +15,4 @@ export interface SidebarItem {
 export interface SidebarData {
   items: SidebarItem[]
   depth: number
-}
-
-// 导出默认类型
-export type { SidebarItem, SidebarData } 
+} 
