@@ -25,10 +25,22 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
 }
 
 h1 {
@@ -328,117 +340,214 @@ button:focus-visible {
 
 .home-page {
   text-align: center;
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 3rem 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: auto;
+  background: rgba(255,255,255,0.98);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px 0 rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(10px);
 }
 
 .hero {
   margin-bottom: 3rem;
+  max-width: 800px;
 }
 
 .hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #333;
+  font-size: 3.2rem;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .hero p {
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1.25rem;
+  color: #4a5568;
   margin-bottom: 2rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .quick-nav {
   margin-bottom: 3rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.quick-nav h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 .nav-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .nav-button {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: #007bff;
-  color: white;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
   text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px 0 rgba(102,126,234,0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
 }
 
 .nav-button:hover {
-  background-color: #0056b3;
-  color: white;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  color: #fff;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px 0 rgba(102,126,234,0.25);
+}
+
+.nav-button:hover::before {
+  left: 100%;
 }
 
 .features {
   text-align: left;
   margin-bottom: 3rem;
+  width: 100%;
+  max-width: 800px;
+  background: #f8fafc;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
 }
 
 .features h2 {
-  margin-bottom: 1rem;
-  color: #333;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .features ul {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
 }
 
 .features li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #2d3748;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.features li:hover {
+  transform: translateY(-2px);
 }
 
 .github-section {
   margin-bottom: 3rem;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(102,126,234,0.15);
+  width: 100%;
+  max-width: 800px;
+  color: white;
 }
 
 .github-section h2 {
   margin-bottom: 1rem;
-  color: #333;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .github-section p {
-  margin-bottom: 1rem;
-  color: #666;
+  margin-bottom: 1.5rem;
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1rem;
 }
 
 .github-link {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: #24292e;
+  padding: 1rem 2rem;
+  background: rgba(255,255,255,0.15);
   color: white;
   text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+  border: 2px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
 }
 
 .github-link:hover {
-  background-color: #1b1f23;
+  background: rgba(255,255,255,0.25);
   color: white;
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.4);
 }
 
 .roadmap-placeholder {
-  margin-bottom: 2rem;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 16px 0 rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .roadmap-placeholder h2 {
   margin-bottom: 1rem;
-  color: #333;
+  color: #1a1a1a;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .roadmap-placeholder p {
+  color: #4a5568;
+  font-size: 1rem;
   margin-bottom: 1.5rem;
-  color: #666;
 }
 
 .roadmap-preview {
@@ -446,23 +555,23 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  margin-top: 1.5rem;
   flex-wrap: wrap;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
 }
 
 .roadmap-node {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(102,126,234,0.2);
 }
 
 .roadmap-arrow {
+  color: #667eea;
   font-size: 1.5rem;
-  color: #666;
   font-weight: bold;
 }
 
@@ -1043,28 +1152,125 @@ button:focus-visible {
   border: 1px solid #ddd;
 }
 
-/* 响应式设计 */
+/* 响应式设计优化 */
+@media (max-width: 1024px) {
+  .home-page {
+    max-width: 900px;
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .hero h1 {
+    font-size: 2.8rem;
+  }
+  
+  .features ul {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .reference-page {
+  #root {
+    padding: 1rem 0.5rem;
+  }
+  
+  .home-page {
+    max-width: 100%;
+    padding: 2rem 1rem;
+    border-radius: 16px;
+    margin: 1rem;
+  }
+  
+  .hero h1 {
+    font-size: 2.4rem;
+  }
+  
+  .hero p {
+    font-size: 1.1rem;
+  }
+  
+  .nav-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .nav-button {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+  
+  .features {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .features ul {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .features li {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .github-section {
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .roadmap-placeholder {
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .roadmap-preview {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .roadmap-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 0.5rem;
+  }
+  
+  .home-page {
+    margin: 0.5rem;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .quick-nav h2,
+  .features h2,
+  .github-section h2,
+  .roadmap-placeholder h2 {
+    font-size: 1.2rem;
+  }
+  
+  .features {
     padding: 1rem;
   }
   
-  .reference-controls {
-    flex-direction: column;
-    align-items: stretch;
+  .github-section {
+    padding: 1.5rem 1rem;
   }
   
-  .search-box {
-    min-width: auto;
-  }
-  
-  .doc-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .doc-meta {
-    justify-content: flex-start;
+  .roadmap-placeholder {
+    padding: 1rem;
   }
 }
 
