@@ -1,5 +1,11 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect, useState, useRef } from 'react'
 import Playground from './Playground'
+
+interface TocItem {
+  id: string
+  text: string
+  level: number
+}
 
 interface MdxRendererProps {
   content: string
@@ -18,8 +24,41 @@ interface MdxRendererProps {
   }>
 }
 
+// 从文本生成ID
+const generateId = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/[^\u4e00-\u9fa5a-z0-9\s-]/g, '') // 保留中文、英文、数字
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+// 提取标题并生成TOC
+const extractTocFromMarkdown = (markdown: string): TocItem[] => {
+  const tocItems: TocItem[] = []
+  const lines = markdown.split('\n')
+  
+  lines.forEach(line => {
+    const match = line.match(/^(#{1,6})\s+(.+)$/)
+    if (match) {
+      const level = match[1].length
+      const text = match[2].trim()
+      const id = generateId(text)
+      
+      tocItems.push({
+        id,
+        text,
+        level
+      })
+    }
+  })
+  
+  return tocItems
+}
+
 // 简单的 Markdown 到 HTML 转换器
-const markdownToHtml = (markdown: string): string => {
+const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   let html = markdown
 
   // 首先标记需要保护的元素（避免被段落包裹）
@@ -56,13 +95,31 @@ const markdownToHtml = (markdown: string): string => {
     return placeholder
   })
 
-  // 处理标题
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>')
-  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>')
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>')
-  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>')
-  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>')
-  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>')
+  // 处理标题 - 添加ID属性
+  html = html.replace(/^# (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h1 id="${id}">${title}</h1>`
+  })
+  html = html.replace(/^## (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h2 id="${id}">${title}</h2>`
+  })
+  html = html.replace(/^### (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h3 id="${id}">${title}</h3>`
+  })
+  html = html.replace(/^#### (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h4 id="${id}">${title}</h4>`
+  })
+  html = html.replace(/^##### (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h5 id="${id}">${title}</h5>`
+  })
+  html = html.replace(/^###### (.*$)/gim, (match, title) => {
+    const id = generateId(title)
+    return `<h6 id="${id}">${title}</h6>`
+  })
 
   // 处理粗体和斜体
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -135,13 +192,95 @@ const markdownToHtml = (markdown: string): string => {
   return html
 }
 
+// TOC 组件
+const TOC: React.FC<{ items: TocItem[]; activeId: string; isMobile: boolean }> = ({ 
+  items, 
+  activeId, 
+  isMobile 
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (items.length === 0) return null
+
+  const handleItemClick = (id: string) => {
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest'
+      })
+      if (isMobile) {
+        setIsOpen(false)
+      }
+    }
+  }
+
+  const toggleToc = () => {
+    setIsOpen(!isOpen)
+  }
+
+  return (
+    <div className={`toc-container ${isMobile ? 'toc-mobile' : ''}`}>
+      {isMobile && (
+        <button 
+          className={`toc-toggle ${isOpen ? 'active' : ''}`}
+          onClick={toggleToc}
+        >
+          📑 目录 {isOpen ? '▲' : '▼'}
+        </button>
+      )}
+      
+      <div className={`toc-content ${isMobile ? (isOpen ? 'open' : 'closed') : ''}`}>
+        <div className="toc-header">
+          <span>目录</span>
+        </div>
+        <ul className="toc-list">
+          {items.map((item) => (
+            <li 
+              key={item.id}
+              className={`toc-item toc-level-${item.level} ${activeId === item.id ? 'active' : ''}`}
+            >
+              <button
+                className="toc-link"
+                onClick={() => handleItemClick(item.id)}
+                title={item.text}
+              >
+                {item.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgrounds = [] }) => {
-  const contentRef = React.useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [activeHeading, setActiveHeading] = useState<string>('')
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // 检测移动端
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // 提取TOC
+  const tocItems = useMemo(() => {
+    return extractTocFromMarkdown(content)
+  }, [content])
   
   // 解析内容并构建包含 React 组件的元素数组
   const contentElements = useMemo(() => {
     // 转换 Markdown 到 HTML（playground 标记已被保护和恢复）
-    let htmlContent = markdownToHtml(content)
+    let htmlContent = markdownToHtml(content, tocItems)
     
     // 分割内容，找到 playground 标记的位置
     const playgroundRegex = /\{\s*\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/\s*\}/g
@@ -182,66 +321,103 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
     }
     
     return parts
-  }, [content])
+  }, [content, tocItems])
+
+  // 监听滚动，更新当前激活的标题
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current || tocItems.length === 0) return
+
+      const headings = tocItems.map(item => document.getElementById(item.id)).filter(Boolean)
+      
+      let current = ''
+      const scrollTop = window.scrollY + 100 // 偏移量
+
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const heading = headings[i]
+        if (heading && heading.offsetTop <= scrollTop) {
+          current = heading.id
+          break
+        }
+      }
+
+      setActiveHeading(current)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // 初始调用
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [tocItems])
 
   return (
-    <div className="mdx-content">
-      {frontmatter && (
-        <div className="mdx-frontmatter">
-          {frontmatter.title && <h1>{frontmatter.title}</h1>}
-          {frontmatter.description && <p className="description">{frontmatter.description}</p>}
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="tags">
-              {frontmatter.tags.map((tag, index) => (
-                <span key={index} className="tag">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-      
-      <div className="mdx-body" ref={contentRef}>
-        {contentElements.map((element, index) => {
-          if (typeof element === 'string') {
-            // 渲染 HTML 内容
-            return (
-              <div 
-                key={`content-${index}`}
-                dangerouslySetInnerHTML={{ __html: element }} 
-              />
-            )
-          } else if (element.type === 'playground') {
-                         // 渲染 Playground 组件
-             const playground = playgrounds.find(p => p.id === element.id)
-             if (playground) {
-               return (
-                 <Playground
-                   key={`playground-${element.id}`}
-                   id={playground.id}
-                   mode={playground.mode}
-                   initialCode={playground.initialCode}
-                   solutionCode={playground.solutionCode}
-                   showConsole={true}
-                   onCodeChange={(files) => {
-                     console.log('Playground 代码已更改:', files)
-                   }}
-                 />
-               )
-            } else {
-              // 如果找不到对应的 playground 数据，显示占位符
+    <div className="mdx-content-wrapper">
+      <div className="mdx-content">
+        {frontmatter && (
+          <div className="mdx-frontmatter">
+            {frontmatter.title && <h1>{frontmatter.title}</h1>}
+            {frontmatter.description && <p className="description">{frontmatter.description}</p>}
+            {frontmatter.tags && frontmatter.tags.length > 0 && (
+              <div className="tags">
+                {frontmatter.tags.map((tag, index) => (
+                  <span key={index} className="tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="mdx-body" ref={contentRef}>
+          {contentElements.map((element, index) => {
+            if (typeof element === 'string') {
+              // 渲染 HTML 内容
               return (
-                <div key={`placeholder-${element.id}`} className="playground-error">
-                  <p>⚠️ 未找到 Playground: {element.id}</p>
-                  <p>请检查 _demos 目录中是否存在对应的文件。</p>
-                </div>
+                <div 
+                  key={`content-${index}`}
+                  dangerouslySetInnerHTML={{ __html: element }} 
+                />
               )
+            } else if (element.type === 'playground') {
+                           // 渲染 Playground 组件
+               const playground = playgrounds.find(p => p.id === element.id)
+               if (playground) {
+                 return (
+                   <Playground
+                     key={`playground-${element.id}`}
+                     id={playground.id}
+                     mode={playground.mode}
+                     initialCode={playground.initialCode}
+                     solutionCode={playground.solutionCode}
+                     showConsole={true}
+                     onCodeChange={(files) => {
+                       console.log('Playground 代码已更改:', files)
+                     }}
+                   />
+                 )
+              } else {
+                // 如果找不到对应的 playground 数据，显示占位符
+                return (
+                  <div key={`placeholder-${element.id}`} className="playground-error">
+                    <p>⚠️ 未找到 Playground: {element.id}</p>
+                    <p>请检查 _demos 目录中是否存在对应的文件。</p>
+                  </div>
+                )
+              }
             }
-          }
-          return null
-        })}
+            return null
+          })}
+        </div>
       </div>
+      
+      {tocItems.length > 0 && (
+        <TOC 
+          items={tocItems} 
+          activeId={activeHeading}
+          isMobile={isMobile}
+        />
+      )}
     </div>
   )
 }
