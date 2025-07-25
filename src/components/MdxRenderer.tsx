@@ -712,7 +712,6 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
                      mode={playground.mode}
                      initialCode={playground.initialCode}
                      solutionCode={playground.solutionCode}
-                     showConsole={true}
                      onCodeChange={(files) => {
                        console.log('Playground 代码已更改:', files)
                      }}

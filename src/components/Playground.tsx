@@ -5,6 +5,7 @@ interface PlaygroundProps {
   id: string
   mode?: 'demo' | 'exercise' | 'test'
   showConsole?: boolean
+  showControl?: boolean
   initialCode?: Record<string, string>
   solutionCode?: Record<string, string>
   onCodeChange?: (files: Record<string, string>) => void
@@ -19,7 +20,8 @@ interface FileData {
 const Playground: React.FC<PlaygroundProps> = ({
   id,
   mode = 'demo',
-  showConsole = true,
+  showConsole = false,
+  showControl = false,
   initialCode,
   solutionCode,
   onCodeChange
@@ -153,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const [editorWidth, setEditorWidth] = useState(50) // 编辑器宽度百分比
   const [isDragging, setIsDragging] = useState(false)
   const [isVerticalLayout, setIsVerticalLayout] = useState(false)
+  const [mobileActiveTab, setMobileActiveTab] = useState<'preview' | 'editor'>('preview') // 移动端活动 tab
 
   // 当 initialCode 变化时，重新初始化文件
   useEffect(() => {
@@ -317,77 +320,162 @@ document.addEventListener('DOMContentLoaded', function() {
   return (
     <div className={`playground ${isVerticalLayout ? 'vertical' : 'horizontal'}`}>
       <div className="playground-header">
-        <div className="file-tabs">
-          {files.map((file, index) => (
+        {isVerticalLayout ? (
+          // 移动端：预览/编辑切换 tabs
+          <div className="mobile-tabs">
             <button
-              key={file.name}
-              className={`file-tab ${index === activeFileIndex ? 'active' : ''}`}
-              onClick={() => setActiveFileIndex(index)}
+              className={`mobile-tab ${mobileActiveTab === 'preview' ? 'active' : ''}`}
+              onClick={() => setMobileActiveTab('preview')}
             >
-              {file.name}
+              预览
             </button>
-          ))}
-        </div>
-        <div className="playground-actions">
-          <button onClick={resetCode} className="action-btn">重置</button>
-          <button onClick={clearConsole} className="action-btn">清空控制台</button>
-        </div>
-      </div>
-      
-      <div className="playground-content">
-        <div 
-          className="editor-panel"
-          style={!isVerticalLayout ? { width: `${editorWidth}%` } : {}}
-        >
-          <CodeEditor
-            value={files[activeFileIndex].content}
-            language={files[activeFileIndex].language}
-            onChange={(content) => handleFileChange(activeFileIndex, content)}
-          />
-        </div>
-        
-        {!isVerticalLayout && (
-          <div 
-            className={`playground-divider ${isDragging ? 'dragging' : ''}`}
-            onMouseDown={handleMouseDown}
-          >
-            <div className="divider-handle"></div>
+            <button
+              className={`mobile-tab ${mobileActiveTab === 'editor' ? 'active' : ''}`}
+              onClick={() => setMobileActiveTab('editor')}
+            >
+              编辑
+            </button>
+          </div>
+        ) : (
+          // 桌面端：文件 tabs
+          <div className="file-tabs">
+            {files.map((file, index) => (
+              <button
+                key={file.name}
+                className={`file-tab ${index === activeFileIndex ? 'active' : ''}`}
+                onClick={() => setActiveFileIndex(index)}
+              >
+                {file.name}
+              </button>
+            ))}
           </div>
         )}
         
-        <div 
-          className="preview-panel"
-          style={!isVerticalLayout ? { width: `${100 - editorWidth}%` } : {}}
-        >
-          <div className="preview-content">
-            <iframe
-              srcDoc={previewHtml}
-              title="Preview"
-              sandbox="allow-scripts allow-same-origin"
-              className="preview-iframe"
-            />
+        {/* 控制按钮只在配置开启时显示 */}
+        {showControl && (
+          <div className="playground-actions">
+            <button onClick={resetCode} className="action-btn">重置</button>
+            {showConsole && <button onClick={clearConsole} className="action-btn">清空控制台</button>}
           </div>
-          
-          {showConsole && (
-            <div className="console-panel">
-              <div className="console-header">
-                <span>控制台</span>
-                <button onClick={clearConsole} className="clear-btn">清空</button>
-              </div>
-              <div className="console-content">
-                {consoleMessages.length === 0 ? (
-                  <div className="console-empty">控制台输出将显示在这里...</div>
-                ) : (
-                  consoleMessages.map((message, index) => (
-                    <div key={index} className="console-message">
-                      {message}
+        )}
+      </div>
+      
+      <div className="playground-content">
+        {isVerticalLayout ? (
+          // 移动端布局：根据 tab 显示不同内容
+          <div className="mobile-content">
+            {mobileActiveTab === 'preview' ? (
+              // 预览模式
+              <div className="mobile-preview-panel">
+                <div className="preview-content">
+                  <iframe
+                    srcDoc={previewHtml}
+                    title="Preview"
+                    sandbox="allow-scripts allow-same-origin"
+                    className="preview-iframe"
+                  />
+                </div>
+                
+                {showConsole && (
+                  <div className="console-panel">
+                    <div className="console-header">
+                      <span>控制台</span>
+                      <button onClick={clearConsole} className="clear-btn">清空</button>
                     </div>
-                  ))
+                    <div className="console-content">
+                      {consoleMessages.length === 0 ? (
+                        <div className="console-empty">控制台输出将显示在这里...</div>
+                      ) : (
+                        consoleMessages.map((message, index) => (
+                          <div key={index} className="console-message">
+                            {message}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
+            ) : (
+              // 编辑模式
+              <div className="mobile-editor-panel">
+                <div className="mobile-file-tabs">
+                  {files.map((file, index) => (
+                    <button
+                      key={file.name}
+                      className={`mobile-file-tab ${index === activeFileIndex ? 'active' : ''}`}
+                      onClick={() => setActiveFileIndex(index)}
+                    >
+                      {file.name}
+                    </button>
+                  ))}
+                </div>
+                <div className="mobile-editor-content">
+                  <CodeEditor
+                    value={files[activeFileIndex].content}
+                    language={files[activeFileIndex].language}
+                    onChange={(content) => handleFileChange(activeFileIndex, content)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // 桌面端布局：保持原有布局
+          <>
+            <div 
+              className="editor-panel"
+              style={{ width: `${editorWidth}%` }}
+            >
+              <CodeEditor
+                value={files[activeFileIndex].content}
+                language={files[activeFileIndex].language}
+                onChange={(content) => handleFileChange(activeFileIndex, content)}
+              />
             </div>
-          )}
-        </div>
+            
+            <div 
+              className={`playground-divider ${isDragging ? 'dragging' : ''}`}
+              onMouseDown={handleMouseDown}
+            >
+              <div className="divider-handle"></div>
+            </div>
+            
+            <div 
+              className="preview-panel"
+              style={{ width: `${100 - editorWidth}%` }}
+            >
+              <div className="preview-content">
+                <iframe
+                  srcDoc={previewHtml}
+                  title="Preview"
+                  sandbox="allow-scripts allow-same-origin"
+                  className="preview-iframe"
+                />
+              </div>
+              
+              {showConsole && (
+                <div className="console-panel">
+                  <div className="console-header">
+                    <span>控制台</span>
+                    <button onClick={clearConsole} className="clear-btn">清空</button>
+                  </div>
+                  <div className="console-content">
+                    {consoleMessages.length === 0 ? (
+                      <div className="console-empty">控制台输出将显示在这里...</div>
+                    ) : (
+                      consoleMessages.map((message, index) => (
+                        <div key={index} className="console-message">
+                          {message}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
