@@ -1114,16 +1114,7 @@ button:focus-visible {
   margin: 0;
 }
 
-/* 参考索引页面样式 */
-.reference-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  min-height: 100vh;
-  background: rgba(255,255,255,0.98);
-  box-shadow: 0 8px 40px 0 rgba(0,0,0,0.08);
-  backdrop-filter: blur(10px);
-}
+
 
 /* Playground 测试页面样式 */
 .playground-test-page {
@@ -1373,75 +1364,7 @@ button:focus-visible {
   background: #4f46e5;
 }
 
-.reference-header {
-  margin-bottom: 2rem;
-  text-align: center;
-}
 
-.reference-header h1 {
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.reference-header p {
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.reference-controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  flex: 1;
-  min-width: 300px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: #fff;
-  color: #333;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
-}
-
-.category-filter {
-  min-width: 200px;
-}
-
-.category-select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  background: #fff;
-  color: #333;
-  cursor: pointer;
-}
-
-.category-select:focus {
-  outline: none;
-  border-color: #646cff;
-}
-
-.reference-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
 
 .no-results {
   text-align: center;
