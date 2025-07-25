@@ -158,6 +158,9 @@ const Sidebar: React.FC<SidebarProps> = ({ depth = 3, onDocChange }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
+        <Link to="/" className="home-button">
+          ← 返回首页
+        </Link>
         <h3>学习目录</h3>
       </div>
       

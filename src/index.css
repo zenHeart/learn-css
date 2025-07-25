@@ -23,24 +23,23 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
   min-width: 320px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  background: #ffffff;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 #root {
-  flex: 1;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
 }
 
 h1 {
@@ -82,8 +81,13 @@ button:focus-visible {
 
 /* MDX 内容样式 */
 .mdx-content {
-  max-width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
   line-height: 1.6;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mdx-frontmatter {
@@ -238,11 +242,11 @@ button:focus-visible {
 .sidebar {
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  min-width: 240px;
-  max-width: 280px;
+  width: 260px;
   height: 100vh;
-  overflow-y: auto;
-  padding-bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -252,6 +256,25 @@ button:focus-visible {
   position: sticky;
   top: 0;
   z-index: 10;
+  flex-shrink: 0;
+}
+
+.home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  margin-bottom: 0.5rem;
+}
+
+.home-button:hover {
+  color: #374151;
+  background: #f3f4f6;
 }
 
 .sidebar-header h3 {
@@ -265,6 +288,7 @@ button:focus-visible {
 .sidebar-content {
   flex: 1;
   padding: 0.5rem 0;
+  overflow-y: auto;
 }
 
 .sidebar-item {
@@ -391,15 +415,13 @@ button:focus-visible {
 
 .content {
   flex: 1;
-  width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
   background-color: #fff;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   height: 100vh;
+  min-width: 0;
 }
 
 .playground-placeholder {
@@ -425,7 +447,6 @@ button:focus-visible {
   width: 100%;
   margin: auto;
   background: rgba(255,255,255,0.98);
-  border-radius: 24px;
   box-shadow: 0 8px 40px 0 rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
