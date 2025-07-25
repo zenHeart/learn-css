@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const [activeFileIndex, setActiveFileIndex] = useState(0)
   const [previewHtml, setPreviewHtml] = useState('')
   const [consoleMessages, setConsoleMessages] = useState<string[]>([])
+  const [editorWidth, setEditorWidth] = useState(50) // 编辑器宽度百分比
+  const [isDragging, setIsDragging] = useState(false)
+  const [isVerticalLayout, setIsVerticalLayout] = useState(false)
 
   // 当 initialCode 变化时，重新初始化文件
   useEffect(() => {
@@ -255,6 +258,51 @@ document.addEventListener('DOMContentLoaded', function() {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
+  // 监听窗口大小变化，决定是否使用垂直布局
+  useEffect(() => {
+    const handleResize = () => {
+      const shouldUseVertical = window.innerWidth < 768
+      setIsVerticalLayout(shouldUseVertical)
+    }
+
+    handleResize() // 初始检查
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // 处理拖动分隔条
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (isVerticalLayout) return
+    e.preventDefault()
+    setIsDragging(true)
+  }, [isVerticalLayout])
+
+  useEffect(() => {
+    if (!isDragging || isVerticalLayout) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const container = document.querySelector('.playground-content') as HTMLElement
+      if (!container) return
+
+      const rect = container.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const percentage = Math.min(Math.max((x / rect.width) * 100, 20), 80)
+      setEditorWidth(percentage)
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, isVerticalLayout])
+
   // 清空控制台
   const clearConsole = () => {
     setConsoleMessages([])
@@ -267,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   return (
-    <div className="playground">
+    <div className={`playground ${isVerticalLayout ? 'vertical' : 'horizontal'}`}>
       <div className="playground-header">
         <div className="file-tabs">
           {files.map((file, index) => (
@@ -287,7 +335,10 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       
       <div className="playground-content">
-        <div className="editor-panel">
+        <div 
+          className="editor-panel"
+          style={!isVerticalLayout ? { width: `${editorWidth}%` } : {}}
+        >
           <CodeEditor
             value={files[activeFileIndex].content}
             language={files[activeFileIndex].language}
@@ -295,7 +346,19 @@ document.addEventListener('DOMContentLoaded', function() {
           />
         </div>
         
-        <div className="preview-panel">
+        {!isVerticalLayout && (
+          <div 
+            className={`playground-divider ${isDragging ? 'dragging' : ''}`}
+            onMouseDown={handleMouseDown}
+          >
+            <div className="divider-handle"></div>
+          </div>
+        )}
+        
+        <div 
+          className="preview-panel"
+          style={!isVerticalLayout ? { width: `${100 - editorWidth}%` } : {}}
+        >
           <div className="preview-content">
             <iframe
               srcDoc={previewHtml}
