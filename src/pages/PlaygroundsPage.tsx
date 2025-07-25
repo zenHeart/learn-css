@@ -13,7 +13,7 @@ interface PlaygroundItem {
   solutionCode?: Record<string, string>
 }
 
-const PlaygroundDetailPage: React.FC = () => {
+const PlaygroundsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [playgroundsWithMeta, setPlaygroundsWithMeta] = useState<PlaygroundItem[]>([])
@@ -177,4 +177,4 @@ const PlaygroundDetailPage: React.FC = () => {
   )
 }
 
-export default PlaygroundDetailPage 
+export default PlaygroundsPage 

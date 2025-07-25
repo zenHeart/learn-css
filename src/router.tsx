@@ -1,7 +1,7 @@
 import { createHashRouter } from 'react-router'
 import HomePage from './pages/HomePage'
 import TopicsPage from './pages/TopicsPage'
-import PlaygroundDetailPage from './pages/PlaygroundDetailPage'
+import PlaygroundsPage from './pages/PlaygroundsPage'
 
 // 定义路由结构
 const router = createHashRouter([
@@ -15,7 +15,7 @@ const router = createHashRouter([
   },
   {
     path: '/playground/:id',
-    element: <PlaygroundDetailPage />,
+    element: <PlaygroundsPage />,
   },
 ])
 
