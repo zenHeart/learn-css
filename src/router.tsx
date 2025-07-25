@@ -1,7 +1,6 @@
 import { createHashRouter } from 'react-router'
 import HomePage from './pages/HomePage'
 import TopicsPage from './pages/TopicsPage'
-import ReferencePage from './pages/ReferencePage'
 import PlaygroundDetailPage from './pages/PlaygroundDetailPage'
 import PlaygroundTestPage from './pages/PlaygroundTestPage'
 
@@ -14,10 +13,6 @@ const router = createHashRouter([
   {
     path: '/topics/:docId',
     element: <TopicsPage />,
-  },
-  {
-    path: '/reference',
-    element: <ReferencePage />,
   },
   {
     path: '/playground',

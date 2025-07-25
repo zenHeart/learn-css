@@ -6,6 +6,7 @@ import { sidebarData } from 'virtual:doc-data'
 interface SidebarProps {
   depth?: number
   onDocChange?: (docId: string) => void
+  onSearchClick?: () => void
 }
 
 interface SidebarItemProps {
@@ -154,13 +155,22 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({
   )
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ depth = 3, onDocChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ depth = 3, onDocChange, onSearchClick }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <Link to="/" className="home-button">
-          ← 返回首页
-        </Link>
+        <div className="sidebar-header-top">
+          <Link to="/" className="home-button">
+            ← 返回首页
+          </Link>
+          <button 
+            className="search-button" 
+            onClick={onSearchClick}
+            title="搜索文档 (⌘+K)"
+          >
+            🔍
+          </button>
+        </div>
       </div>
       
       <div className="sidebar-content">

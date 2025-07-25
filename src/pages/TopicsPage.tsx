@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router'
 import MdxRenderer from '../components/MdxRenderer'
 import Sidebar from '../components/Sidebar'
+import SearchModal from '../components/SearchModal'
 
 // 导入虚拟模块数据
 import { sidebarData, allDocsData, allPlaygroundsData } from 'virtual:doc-data'
@@ -33,6 +34,7 @@ const TopicsPage: React.FC = () => {
   const [docs, setDocs] = useState<DocItem[]>(allDocsData || [])
   const [playgrounds, setPlaygrounds] = useState<Record<string, PlaygroundItem>>(allPlaygroundsData || {})
   const [error, setError] = useState<string | null>(null)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
   // 监听虚拟模块数据变化
   useEffect(() => {
@@ -45,6 +47,23 @@ const TopicsPage: React.FC = () => {
       setError('加载文档数据失败')
     }
   }, [allDocsData, allPlaygroundsData])
+
+  // 搜索弹窗处理
+  const openSearchModal = () => setIsSearchModalOpen(true)
+  const closeSearchModal = () => setIsSearchModalOpen(false)
+
+  // 监听 Command+K 快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        openSearchModal()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // 根据文档ID查找文档
   const findDocById = (docId: string) => {
@@ -124,54 +143,87 @@ const TopicsPage: React.FC = () => {
   // 错误状态显示
   if (error) {
     return (
-      <div className="topics-page">
-        <Sidebar depth={3} onDocChange={handleDocChange} />
-        <div className="content">
-          <div className="error-message">
-            <h2>出错了！</h2>
-            <p>{error}</p>
-            <p>可用文档:</p>
-            <ul>
-              {docs.map(doc => (
-                <li key={doc.id}>
-                  <button 
-                    onClick={() => handleDocChange(doc.id)}
-                    style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}
-                  >
-                    {doc.title}
-                  </button>
-                </li>
-              ))}
-            </ul>
+      <>
+        <div className="topics-page">
+          <Sidebar 
+            depth={3} 
+            onDocChange={handleDocChange}
+            onSearchClick={openSearchModal}
+          />
+          <div className="content">
+            <div className="error-message">
+              <h2>出错了！</h2>
+              <p>{error}</p>
+              <p>可用文档:</p>
+              <ul>
+                {docs.map(doc => (
+                  <li key={doc.id}>
+                    <button 
+                      onClick={() => handleDocChange(doc.id)}
+                      style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}
+                    >
+                      {doc.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+
+        <SearchModal 
+          isOpen={isSearchModalOpen}
+          onClose={closeSearchModal}
+        />
+      </>
     )
   }
 
   if (!currentDoc) {
     return (
-      <div className="topics-page">
-        <Sidebar depth={3} onDocChange={handleDocChange} />
-        <div className="content">
-          <div className="loading">加载中...</div>
+      <>
+        <div className="topics-page">
+          <Sidebar 
+            depth={3} 
+            onDocChange={handleDocChange}
+            onSearchClick={openSearchModal}
+          />
+          <div className="content">
+            <div className="loading">加载中...</div>
+          </div>
         </div>
-      </div>
+
+        <SearchModal 
+          isOpen={isSearchModalOpen}
+          onClose={closeSearchModal}
+        />
+      </>
     )
   }
 
   return (
-    <div className="topics-page">
-      <Sidebar depth={3} onDocChange={handleDocChange} />
-      
-      <div className="content">
-        <MdxRenderer 
-          content={currentDoc.content} // 使用真实的 MDX 内容
-          frontmatter={currentDoc.frontmatter} // 使用真实的 frontmatter
-          playgrounds={getCurrentPlaygrounds()}
+    <>
+      <div className="topics-page">
+        <Sidebar 
+          depth={3} 
+          onDocChange={handleDocChange}
+          onSearchClick={openSearchModal}
         />
+        
+        <div className="content">
+          <MdxRenderer 
+            content={currentDoc.content} // 使用真实的 MDX 内容
+            frontmatter={currentDoc.frontmatter} // 使用真实的 frontmatter
+            playgrounds={getCurrentPlaygrounds()}
+          />
+        </div>
       </div>
-    </div>
+
+      <SearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={closeSearchModal}
+      />
+    </>
   )
 }
 
