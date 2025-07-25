@@ -230,16 +230,18 @@ button:focus-visible {
 /* 页面布局样式 */
 .topics-page {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
 }
 
 .sidebar {
-  width: 280px;
-  background-color: #f8f9fa;
-  border-right: 1px solid #e9ecef;
-  display: flex;
-  flex-direction: column;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  min-width: 220px;
+  max-width: 320px;
+  height: 100vh;
   overflow-y: auto;
+  padding-bottom: 2em;
 }
 
 .sidebar-header {
@@ -264,22 +266,29 @@ button:focus-visible {
 }
 
 .sidebar-item-header {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
-  border-radius: 4px;
-  margin: 0 0.5rem;
 }
 
-.sidebar-item-header:hover {
-  background-color: #e9ecef;
+.sidebar-item-header.directory {
+  font-weight: bold;
+  background: #f5f7fa;
+  color: #333;
+  margin-top: 0.5em;
 }
 
+.sidebar-item-header.active-parent {
+  background: #e0e7ff;
+  font-weight: bold;
+  border-left: 4px solid #2563eb;
+}
 .sidebar-item-header.active {
-  background-color: #007bff;
-  color: white;
+  background: #2563eb;
+  color: #fff;
+  border-left: 4px solid #2563eb;
 }
 
 .expand-button {
@@ -298,22 +307,33 @@ button:focus-visible {
 }
 
 .sidebar-title {
-  font-weight: 500;
-  color: #495057;
+  user-select: none;
 }
 
 .sidebar-link {
-  color: #495057;
+  color: inherit;
   text-decoration: none;
-  font-weight: 400;
+  display: block;
+  width: 100%;
+  transition: color 0.2s, background 0.2s;
+  border-radius: 6px;
+  padding: 0.1em 0.2em;
 }
 
 .sidebar-link:hover {
-  color: #007bff;
+  color: #2563eb;
+  background: #e0e7ff;
 }
 
 .sidebar-children {
-  margin-left: 1rem;
+  margin-left: 0;
+  border-left: 2px solid #e5e7eb;
+  margin-top: 0.2em;
+  padding-left: 0.2em;
+}
+
+.sidebar-item + .sidebar-item {
+  margin-top: 0.1em;
 }
 
 .level-0 > .sidebar-item-header {
@@ -341,6 +361,7 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  height: 100vh;
 }
 
 .playground-placeholder {
