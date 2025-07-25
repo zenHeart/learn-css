@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router'
 import Playground from '../components/Playground'
-import { allPlaygroundsData } from 'virtual:doc-data'
+import { allPlaygroundsData, allDocsData } from 'virtual:doc-data'
 
 interface PlaygroundItem {
   id: string
@@ -15,19 +15,39 @@ interface PlaygroundItem {
 const PlaygroundDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const [selectedPlayground, setSelectedPlayground] = useState(id || '')
+  const [playgroundsWithMeta, setPlaygroundsWithMeta] = useState<PlaygroundItem[]>([])
 
-  // 从虚拟模块获取 Playground 数据
+  // 从虚拟模块获取数据
   const allPlaygrounds = allPlaygroundsData || {}
-  
-  // 转换为带标题和分类的格式
-  const playgroundsWithMeta: PlaygroundItem[] = Object.entries(allPlaygrounds).map(([playgroundId, playground]) => ({
-    id: playgroundId,
-    title: `Playground: ${playgroundId}`,
-    category: '示例',
-    mode: playground.mode,
-    initialCode: playground.initialCode,
-    solutionCode: playground.solutionCode
-  }))
+  const allDocs = allDocsData || []
+
+  // 构建带完整信息的 Playground 列表
+  useEffect(() => {
+    const playgrounds: PlaygroundItem[] = []
+    
+    // 遍历所有文档，收集 Playground 信息
+    allDocs.forEach(doc => {
+      doc.playgrounds.forEach(playground => {
+        playgrounds.push({
+          id: playground.id,
+          title: `${doc.title} - ${playground.id}`,
+          category: doc.category,
+          mode: playground.mode,
+          initialCode: playground.initialCode,
+          solutionCode: playground.solutionCode
+        })
+      })
+    })
+
+    setPlaygroundsWithMeta(playgrounds)
+    
+    // 如果没有指定 ID，默认选择第一个
+    if (!id && playgrounds.length > 0) {
+      setSelectedPlayground(playgrounds[0].id)
+    } else if (id) {
+      setSelectedPlayground(id)
+    }
+  }, [allPlaygrounds, allDocs, id])
 
   // 获取当前选中的 Playground
   const currentPlayground = playgroundsWithMeta.find(p => p.id === selectedPlayground)
@@ -46,6 +66,7 @@ const PlaygroundDetailPage: React.FC = () => {
       <div className="playground-nav">
         <div className="nav-header">
           <h3>示例导航</h3>
+          <p>选择要练习的示例</p>
         </div>
         
         <div className="nav-content">
@@ -76,6 +97,10 @@ const PlaygroundDetailPage: React.FC = () => {
               <p className="playground-description">
                 这是一个独立的 Playground 环境，专注于代码实践和调试。
               </p>
+              <div className="playground-meta">
+                <span className="mode-badge">{currentPlayground.mode}</span>
+                <span className="category-badge">{currentPlayground.category}</span>
+              </div>
             </div>
             
             <Playground
@@ -91,6 +116,23 @@ const PlaygroundDetailPage: React.FC = () => {
           <div className="playground-not-found">
             <h2>示例未找到</h2>
             <p>抱歉，找不到 ID 为 "{id}" 的示例。</p>
+            {playgroundsWithMeta.length > 0 && (
+              <div className="suggestions">
+                <p>可用的示例：</p>
+                <ul>
+                  {playgroundsWithMeta.slice(0, 5).map(playground => (
+                    <li key={playground.id}>
+                      <button
+                        onClick={() => setSelectedPlayground(playground.id)}
+                        className="suggestion-link"
+                      >
+                        {playground.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>

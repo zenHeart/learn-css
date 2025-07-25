@@ -20,6 +20,10 @@ const router = createHashRouter([
     element: <ReferencePage />,
   },
   {
+    path: '/playground',
+    element: <PlaygroundDetailPage />,
+  },
+  {
     path: '/playground/:id',
     element: <PlaygroundDetailPage />,
   },
