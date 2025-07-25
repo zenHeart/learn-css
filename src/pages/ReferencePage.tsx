@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { allDocsData } from 'virtual:doc-data'
 
 interface DocItem {
@@ -10,6 +10,7 @@ interface DocItem {
   tags: string[]
   description: string
   frontmatter: Record<string, any>
+  content: string
   playgrounds: PlaygroundItem[]
 }
 
@@ -21,14 +22,26 @@ interface PlaygroundItem {
 }
 
 const ReferencePage: React.FC = () => {
+  const navigate = useNavigate()
   const [docs, setDocs] = useState<DocItem[]>(allDocsData || [])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   // 监听虚拟模块数据变化
   useEffect(() => {
-    setDocs(allDocsData || [])
+    try {
+      setDocs(allDocsData || [])
+    } catch (error) {
+      console.error('加载文档数据失败:', error)
+      setDocs([])
+    }
   }, [allDocsData])
+
+  // 处理文档跳转
+  const handleDocClick = (docId: string) => {
+    console.log('跳转到文档:', docId)
+    navigate(`/topics/${docId}`)
+  }
 
   // 按分类组织文档
   const docsByCategory = docs.reduce((acc, doc) => {
@@ -100,9 +113,16 @@ const ReferencePage: React.FC = () => {
       </div>
 
       <div className="reference-content">
-        {Object.keys(filteredDocsByCategory).length === 0 ? (
+        {docs.length === 0 ? (
+          <div className="no-results">
+            <p>正在加载文档数据...</p>
+          </div>
+        ) : Object.keys(filteredDocsByCategory).length === 0 ? (
           <div className="no-results">
             <p>没有找到匹配的文档</p>
+            <p className="search-hint">
+              {searchTerm ? `尝试修改搜索关键词："${searchTerm}"` : '尝试选择其他分类或清空搜索条件'}
+            </p>
           </div>
         ) : (
           Object.entries(filteredDocsByCategory).map(([category, categoryDocs]) => (
@@ -110,10 +130,23 @@ const ReferencePage: React.FC = () => {
               <h2 className="category-title">{category}</h2>
               <div className="category-docs">
                 {categoryDocs.map((doc) => (
-                  <div key={doc.id} className="doc-item">
+                  <div 
+                    key={doc.id} 
+                    className="doc-item"
+                    onClick={() => handleDocClick(doc.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="doc-header">
                       <h3 className="doc-title">
-                        <Link to={`/topics#${doc.id}`} className="doc-link">
+                        <Link 
+                          to={`/topics/${doc.id}`} 
+                          className="doc-link"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleDocClick(doc.id)
+                          }}
+                        >
                           {doc.title}
                         </Link>
                       </h3>
