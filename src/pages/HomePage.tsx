@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
       <div className="quick-nav">
         <h2>快速导航</h2>
         <div className="nav-buttons">
-          <Link to="/topics" className="nav-button">开始学习</Link>
+          <Link to="/topics/01.basics-01.concept-01.intro" className="nav-button">开始学习</Link>
           <Link to="/reference" className="nav-button">参考索引</Link>
           <Link to="/playground" className="nav-button">代码实践</Link>
         </div>

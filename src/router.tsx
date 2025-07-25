@@ -12,7 +12,7 @@ const router = createHashRouter([
     element: <HomePage />,
   },
   {
-    path: '/topics',
+    path: '/topics/:docId',
     element: <TopicsPage />,
   },
   {

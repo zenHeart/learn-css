@@ -142,7 +142,7 @@ class DocScanner {
     return relativePath
       .replace(/\.mdx$/, '')
       .replace(/[\/\\]/g, '-')
-      .replace(/^0*/, '')
+      .toLowerCase()
   }
 
   // 生成标题
@@ -249,7 +249,7 @@ class DocScanner {
           const title = isFile ? doc.title : this.generateTitle(part)
           sidebarMap.set(itemPath, {
             title,
-            path: isFile ? `/${doc.id}` : '',
+            path: isFile ? doc.id : '',
             children: [],
             frontmatter: isFile ? doc.frontmatter : undefined
           })

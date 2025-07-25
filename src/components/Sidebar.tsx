@@ -18,7 +18,7 @@ interface SidebarItemProps {
 const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDepth, onDocChange }) => {
   const [isExpanded, setIsExpanded] = useState(level === 0)
   const location = useLocation()
-  const isActive = location.pathname === item.path
+  const isActive = location.pathname === `/topics/${item.path}`
   const hasChildren = item.children && item.children.length > 0
   const canExpand = level < maxDepth && hasChildren
 
@@ -30,7 +30,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
 
   const handleDocClick = () => {
     if (onDocChange && item.path) {
-      onDocChange(item.path.replace('/', ''))
+      onDocChange(item.path)
     }
   }
 
@@ -50,12 +50,13 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
         {hasChildren ? (
           <span className="sidebar-title">{item.title}</span>
         ) : (
-          <button 
+          <Link 
+            to={`/topics/${item.path}`}
             className="sidebar-link"
             onClick={handleDocClick}
           >
             {item.title}
-          </button>
+          </Link>
         )}
       </div>
       

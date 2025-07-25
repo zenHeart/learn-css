@@ -1337,3 +1337,58 @@ button:focus-visible {
 .suggestion-link:hover {
   color: #535bf2;
 }
+
+/* 错误消息样式 */
+.error-message {
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
+  margin: 1rem 0;
+}
+
+.error-message h2 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.error-message p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.error-message ul {
+  list-style: none;
+  padding: 0;
+}
+
+.error-message li {
+  margin-bottom: 0.5rem;
+}
+
+.error-message button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: inherit;
+}
+
+.error-message button:hover {
+  color: #0056b3;
+}
+
+/* 加载状态样式 */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.loading::before {
+  content: "⏳ ";
+  margin-right: 0.5rem;
+}
