@@ -30,7 +30,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate()
   const [docs, setDocs] = useState<DocItem[]>(allDocsData || [])
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   // 监听虚拟模块数据变化
   useEffect(() => {
@@ -49,35 +48,18 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose() // 关闭弹窗
   }
 
-  // 按分类组织文档
-  const docsByCategory = docs.reduce((acc, doc) => {
-    const category = doc.category || '未分类'
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(doc)
-    return acc
-  }, {} as Record<string, DocItem[]>)
-
-  // 获取所有分类
-  const categories = Object.keys(docsByCategory).sort()
-
   // 过滤文档
   const filteredDocs = docs.filter(doc => {
     // 确保 tags 是数组
     const tags = Array.isArray(doc.tags) ? doc.tags : []
     
-    const matchesSearch = searchTerm === '' || 
+    return searchTerm === '' || 
       doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory
-    
-    return matchesSearch && matchesCategory
   })
 
-  // 按分类过滤的文档
+  // 按分类组织过滤后的文档
   const filteredDocsByCategory = filteredDocs.reduce((acc, doc) => {
     const category = doc.category || '未分类'
     if (!acc[category]) {
@@ -110,7 +92,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // 清空搜索条件
   const clearSearch = () => {
     setSearchTerm('')
-    setSelectedCategory('all')
   }
 
   // 弹窗打开时重置搜索
@@ -136,29 +117,25 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         {/* 搜索控制区 */}
         <div className="search-modal-controls">
           <div className="search-box">
-            <input
-              type="text"
-              placeholder="搜索文档、标签或描述... (ESC 关闭)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-              autoFocus
-            />
-          </div>
-
-          <div className="category-filter">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="category-select"
-            >
-              <option value="all">所有分类</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                placeholder="搜索文档、标签或描述..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+                autoFocus
+              />
+              {searchTerm && (
+                <button 
+                  className="clear-input-btn"
+                  onClick={clearSearch}
+                  title="清空搜索"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -171,12 +148,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           ) : Object.keys(filteredDocsByCategory).length === 0 ? (
             <div className="no-results">
               <p>没有找到匹配的文档</p>
-              <p className="search-hint">
-                {searchTerm ? `尝试修改搜索关键词："${searchTerm}"` : '尝试选择其他分类或清空搜索条件'}
-              </p>
-              <button onClick={clearSearch} className="clear-search-btn">
-                清空搜索条件
-              </button>
+              {searchTerm ? (
+                <p className="search-hint">
+                  尝试修改搜索关键词："<span className="search-term">{searchTerm}</span>"
+                </p>
+              ) : (
+                <p className="search-hint">
+                  输入关键词开始搜索文档标题、描述或标签
+                </p>
+              )}
             </div>
           ) : (
             Object.entries(filteredDocsByCategory).map(([category, categoryDocs]) => (
@@ -228,13 +208,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         <div className="search-modal-footer">
           <div className="search-shortcuts">
             <span className="shortcut">
-              <kbd>↑</kbd> <kbd>↓</kbd> 导航
-            </span>
-            <span className="shortcut">
-              <kbd>Enter</kbd> 选择
+              <kbd>⌘</kbd> <kbd>K</kbd> 打开搜索
             </span>
             <span className="shortcut">
               <kbd>ESC</kbd> 关闭
+            </span>
+            <span className="search-stats">
+              {searchTerm ? `找到 ${filteredDocs.length} 个结果` : `共有 ${docs.length} 个文档`}
             </span>
           </div>
         </div>

@@ -2093,6 +2093,125 @@ button:focus-visible {
     }
   }
 
+  /* 搜索模态框样式优化 */
+  .search-modal-controls {
+    padding: 0 0 20px 0;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f6f8fa;
+    border: 2px solid #d1d9e0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+    justify-content: space-between;
+  }
+
+  .search-input-wrapper:focus-within {
+    border-color: #0969da;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    color: #24292f;
+    placeholder-color: #656d76;
+  }
+
+  .search-input::placeholder {
+    color: #656d76;
+  }
+
+  .clear-input-btn {
+    background: none;
+    border: none;
+    color: #656d76;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .clear-input-btn:hover {
+    color: #24292f;
+    background: #f3f4f6;
+  }
+
+  .search-hint {
+    color: #656d76;
+    font-size: 14px;
+    margin: 8px 0 0 0;
+  }
+
+  .search-term {
+    color: #0969da;
+    font-weight: 500;
+  }
+
+  .search-stats {
+    color: #656d76;
+    font-size: 12px;
+    margin-left: auto;
+  }
+
+  /* 暗色模式 */
+  @media (prefers-color-scheme: dark) {
+    .search-input-wrapper {
+      background: #21262d;
+      border-color: #30363d;
+    }
+
+    .search-input-wrapper:focus-within {
+      border-color: #58a6ff;
+      background: #0d1117;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+
+    .search-input {
+      color: #f0f6fc;
+    }
+
+    .search-input::placeholder {
+      color: #8b949e;
+    }
+
+    .clear-input-btn {
+      color: #8b949e;
+    }
+
+    .clear-input-btn:hover {
+      color: #f0f6fc;
+      background: #30363d;
+    }
+
+    .search-hint {
+      color: #8b949e;
+    }
+
+    .search-term {
+      color: #58a6ff;
+    }
+
+    .search-stats {
+      color: #8b949e;
+    }
+  }
+
   /* 代码块滚动条样式 */
   .mdx-content pre.code-block {
     scrollbar-width: thin;
@@ -2539,7 +2658,8 @@ button:focus-visible {
 }
 
 .search-modal-controls .search-input {
-  width: 100%;
+  width: 80%;
+  margin-right: 1rem; 
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
