@@ -50,10 +50,15 @@
    - 完善 MDX 插件配置
    - 实现真实 MDX 内容渲染
 
-3. **下载功能** (0%) - 中优先级
+3. **文档内容迁移** (0%) - 高优先级
+   - 将 `docs/` 目录内容迁移到 `src/topics/`
+   - 按照约定规范重构文件组织
+   - 迁移示例代码到对应 `_demos/` 目录
+
+4. **下载功能** (0%) - 中优先级
    - Playground 代码下载为 ZIP
 
-4. **部署验证** (80%) - 中优先级
+5. **部署验证** (80%) - 中优先级
    - GitHub Pages 实际部署测试
 
 ### 🚀 下一步计划
@@ -61,7 +66,8 @@
 **P2阶段剩余工作**：
 1. 实现全局搜索功能
 2. 完善真实 MDX 解析
-3. 测试 GitHub Pages 部署
+3. 完成文档内容迁移
+4. 测试 GitHub Pages 部署
 
 **P3阶段工作**：
 1. 下载 ZIP 功能
@@ -226,6 +232,35 @@ src/
 - [ ] 调整 Playground 在小屏幕下的布局
 - [ ] 确保所有页面在不同设备上的良好表现
 
+#### 7. 文档内容迁移 (0% 完成) - 新增任务
+**目标**：将 `docs/` 目录的内容迁移到 `src/topics/` 目录，满足约定的文档结构
+
+**具体任务**：
+- [ ] 分析现有 `docs/` 目录结构，设计迁移方案
+- [ ] 按照约定规范重构文件组织方式：
+  - 基础概念：`src/topics/01.basics/01.concept/01.intro.mdx`
+  - 基础语法：`src/topics/01.basics/02.basic/01.intro.mdx`
+  - 选择器：`src/topics/01.basics/03.selector/01.intro.mdx`
+  - 盒模型：`src/topics/01.basics/04.box-model/01.intro.mdx`
+  - 层叠：`src/topics/01.basics/05.cascade/01.intro.mdx`
+  - 布局基础：`src/topics/02.layout/01.basics/01.intro.mdx`
+  - 正常流：`src/topics/02.layout/02.normal-flow/01.intro.mdx`
+  - 居中布局：`src/topics/02.layout/03.center/01.intro.mdx`
+  - 多列布局：`src/topics/02.layout/04.column/01.intro.mdx`
+  - 弹性布局：`src/topics/02.layout/05.flex/01.intro.mdx`
+  - 网格布局：`src/topics/02.layout/06.grid/01.intro.mdx`
+  - 工具：`src/topics/03.tools/01.stylus/01.intro.mdx`
+- [ ] 迁移 `docs/examples/` 目录下的示例代码到对应的 `_demos/` 目录
+- [ ] 保持文档内容不变，只调整文件组织结构和命名
+- [ ] 更新文档中的内部链接和引用路径
+- [ ] 验证迁移后的文档结构和示例代码正常工作
+
+**技术要点**：
+- 遵循 `01.xx.mdx` 文件命名规范
+- 保持 `_demos/` 目录与 MDX 文件同级
+- 确保示例代码的 `id` 与文件夹名称一致
+- 更新文档中的相对路径引用
+
 ### 🔵 低优先级任务
 
 #### 7. GitHub 编辑链接 (0% 完成)
@@ -260,6 +295,7 @@ src/
 - [x] 示例详情页实现
 - [x] 参考索引页真实数据
 - [ ] 全局搜索功能（剩余 20%）
+- [ ] 文档内容迁移（新增任务）
 
 ### P3 阶段：体验优化与高级功能 (未开始)
 - [ ] Playground 代码下载
