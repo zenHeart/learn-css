@@ -64,10 +64,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // 过滤文档
   const filteredDocs = docs.filter(doc => {
+    // 确保 tags 是数组
+    const tags = Array.isArray(doc.tags) ? doc.tags : []
+    
     const matchesSearch = searchTerm === '' || 
       doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory
     
@@ -204,7 +207,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         <p className="search-doc-description">{doc.description}</p>
                       )}
                       
-                      {doc.tags.length > 0 && (
+                      {Array.isArray(doc.tags) && doc.tags.length > 0 && (
                         <div className="search-doc-tags">
                           {doc.tags.map((tag, index) => (
                             <span key={index} className="search-tag">

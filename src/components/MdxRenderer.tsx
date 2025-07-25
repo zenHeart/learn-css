@@ -679,7 +679,7 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
           <div className="mdx-frontmatter">
             {frontmatter.title && <h1>{frontmatter.title}</h1>}
             {frontmatter.description && <p className="description">{frontmatter.description}</p>}
-            {frontmatter.tags && frontmatter.tags.length > 0 && (
+            {Array.isArray(frontmatter.tags) && frontmatter.tags.length > 0 && (
               <div className="tags">
                 {frontmatter.tags.map((tag, index) => (
                   <span key={index} className="tag">

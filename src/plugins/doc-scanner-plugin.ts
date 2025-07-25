@@ -121,7 +121,7 @@ class DocScanner {
         title: frontmatter.title || this.generateTitle(relativePath),
         path: relativePath,
         category: frontmatter.category || this.extractCategory(relativePath),
-        tags: frontmatter.tags || [],
+        tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
         description: frontmatter.description || '',
         frontmatter,
         content: mdxContent, // 添加完整的 MDX 内容
@@ -151,7 +151,12 @@ class DocScanner {
         
         // 处理数组类型的值
         if (value.startsWith('[') && value.endsWith(']')) {
-          frontmatter[key] = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''))
+          const arrayContent = value.slice(1, -1).trim()
+          if (arrayContent) {
+            frontmatter[key] = arrayContent.split(',').map(v => v.trim().replace(/['"]/g, '')).filter(v => v !== '')
+          } else {
+            frontmatter[key] = []
+          }
         } else {
           frontmatter[key] = value.replace(/['"]/g, '')
         }
