@@ -5,6 +5,8 @@ interface PlaygroundProps {
   id: string
   mode?: 'demo' | 'exercise' | 'test'
   showConsole?: boolean
+  initialCode?: Record<string, string>
+  solutionCode?: Record<string, string>
   onCodeChange?: (files: Record<string, string>) => void
 }
 
@@ -18,12 +20,16 @@ const Playground: React.FC<PlaygroundProps> = ({
   id,
   mode = 'demo',
   showConsole = true,
+  initialCode,
+  solutionCode,
   onCodeChange
 }) => {
-  const [files, setFiles] = useState<FileData[]>([
-    {
-      name: 'index.html',
-      content: `<!DOCTYPE html>
+  // 生成初始文件列表
+  const generateInitialFiles = useCallback((): FileData[] => {
+    const defaultFiles = [
+      {
+        name: 'index.html',
+        content: `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -40,11 +46,11 @@ const Playground: React.FC<PlaygroundProps> = ({
     <script src="./script.js"></script>
 </body>
 </html>`,
-      language: 'html'
-    },
-    {
-      name: 'style.css',
-      content: `body {
+        language: 'html' as const
+      },
+      {
+        name: 'style.css',
+        content: `body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     padding: 20px;
@@ -84,11 +90,11 @@ button {
 button:hover {
     background-color: #0056b3;
 }`,
-      language: 'css'
-    },
-    {
-      name: 'script.js',
-      content: `// JavaScript 代码
+        language: 'css' as const
+      },
+      {
+        name: 'script.js',
+        content: `// JavaScript 代码
 document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('btn');
     
@@ -98,13 +104,59 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Playground 已加载');
 });`,
-      language: 'javascript'
-    }
-  ])
+        language: 'javascript' as const
+      }
+    ]
 
+    // 如果有提供初始代码，则使用提供的代码
+    if (initialCode && Object.keys(initialCode).length > 0) {
+      const files: FileData[] = []
+      
+      // 处理 HTML 文件
+      if (initialCode['index.html']) {
+        files.push({
+          name: 'index.html',
+          content: initialCode['index.html'],
+          language: 'html'
+        })
+      }
+      
+      // 处理 CSS 文件
+      if (initialCode['style.css']) {
+        files.push({
+          name: 'style.css',
+          content: initialCode['style.css'],
+          language: 'css'
+        })
+      }
+      
+      // 处理 JS 文件
+      if (initialCode['script.js']) {
+        files.push({
+          name: 'script.js',
+          content: initialCode['script.js'],
+          language: 'javascript'
+        })
+      }
+      
+      // 如果没有任何文件，返回默认文件
+      return files.length > 0 ? files : defaultFiles
+    }
+    
+    return defaultFiles
+  }, [initialCode])
+
+  const [files, setFiles] = useState<FileData[]>(generateInitialFiles)
   const [activeFileIndex, setActiveFileIndex] = useState(0)
   const [previewHtml, setPreviewHtml] = useState('')
   const [consoleMessages, setConsoleMessages] = useState<string[]>([])
+
+  // 当 initialCode 变化时，重新初始化文件
+  useEffect(() => {
+    const newFiles = generateInitialFiles()
+    setFiles(newFiles)
+    setActiveFileIndex(0)
+  }, [generateInitialFiles])
 
   // 生成预览 HTML
   const generatePreviewHtml = useCallback((files: FileData[]) => {

@@ -189,14 +189,25 @@ class DocScanner {
 
     const rawContent = fs.readFileSync(mdxPath, 'utf-8')
     const mdxContent = this.extractMdxContent(rawContent)
-    const playgroundMatches = mdxContent.matchAll(/{\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/}/g)
+    const playgroundMatches = mdxContent.matchAll(/\{\s*\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/\s*\}/g)
     
     for (const match of playgroundMatches) {
       const [, playgroundId, mode] = match
-      const playgroundDir = path.join(demosPath, playgroundId)
       
+      // 优先查找单文件（.html）
+      const singleFilePath = path.join(demosPath, `${playgroundId}.html`)
+      if (fs.existsSync(singleFilePath)) {
+        const playground = await this.loadPlaygroundFromSingleFile(singleFilePath, playgroundId, mode as any)
+        if (playground) {
+          playgrounds.push(playground)
+        }
+        continue
+      }
+      
+      // 如果没有单文件，查找文件夹
+      const playgroundDir = path.join(demosPath, playgroundId)
       if (fs.existsSync(playgroundDir)) {
-        const playground = await this.loadPlayground(playgroundDir, playgroundId, mode as any)
+        const playground = await this.loadPlaygroundFromDirectory(playgroundDir, playgroundId, mode as any)
         if (playground) {
           playgrounds.push(playground)
         }
@@ -206,8 +217,8 @@ class DocScanner {
     return playgrounds
   }
 
-  // 加载 Playground 代码
-  private async loadPlayground(playgroundDir: string, playgroundId: string, mode: string): Promise<PlaygroundItem | null> {
+  // 从文件夹加载 Playground 代码
+  private async loadPlaygroundFromDirectory(playgroundDir: string, playgroundId: string, mode: string): Promise<PlaygroundItem | null> {
     try {
       const initialCode: Record<string, string> = {}
       const solutionCode: Record<string, string> = {}
@@ -242,6 +253,87 @@ class DocScanner {
       }
     } catch (error) {
       console.warn(`无法加载 Playground ${playgroundId}:`, error)
+      return null
+    }
+  }
+
+  // 从单个 HTML 文件加载 Playground 代码
+  private async loadPlaygroundFromSingleFile(filePath: string, playgroundId: string, mode: string): Promise<PlaygroundItem | null> {
+    try {
+      const htmlContent = fs.readFileSync(filePath, 'utf-8')
+      const initialCode: Record<string, string> = {}
+      
+      // 提取 CSS 样式
+      const styleMatches = htmlContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi)
+      if (styleMatches) {
+        const cssContent = styleMatches
+          .map(match => match.replace(/<\/?style[^>]*>/gi, ''))
+          .join('\n\n')
+          .trim()
+        if (cssContent) {
+          initialCode['style.css'] = cssContent
+        }
+      }
+      
+      // 提取 JavaScript
+      const scriptMatches = htmlContent.match(/<script[^>]*>([\s\S]*?)<\/script>/gi)
+      if (scriptMatches) {
+        const jsContent = scriptMatches
+          .map(match => match.replace(/<\/?script[^>]*>/gi, ''))
+          .filter(content => content.trim()) // 过滤空脚本
+          .join('\n\n')
+          .trim()
+        if (jsContent) {
+          initialCode['script.js'] = jsContent
+        }
+      }
+      
+      // 清理 HTML 内容（移除 style 和 script 标签）
+      let cleanHtml = htmlContent
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/^\s*\n/gm, '') // 移除空行
+        .trim()
+        
+      // 如果 HTML 是完整文档，提取 body 内容
+      const bodyMatch = cleanHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+      if (bodyMatch) {
+        cleanHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${playgroundId}</title>
+</head>
+<body>
+${bodyMatch[1].trim()}
+</body>
+</html>`
+      } else if (!cleanHtml.includes('<!DOCTYPE html>')) {
+        // 如果不是完整文档，包装成完整的 HTML
+        cleanHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${playgroundId}</title>
+</head>
+<body>
+${cleanHtml}
+</body>
+</html>`
+      }
+      
+      initialCode['index.html'] = cleanHtml
+      
+      return {
+        id: playgroundId,
+        mode: mode as any,
+        initialCode,
+        solutionCode: undefined
+      }
+    } catch (error) {
+      console.warn(`无法加载单文件 Playground ${playgroundId}:`, error)
       return null
     }
   }
