@@ -110,21 +110,21 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({
         className={`sidebar-item-header${isActive ? ' active' : ''}${childActive ? ' active-parent' : ''}${!isLeaf ? ' directory' : ''}`}
         style={{ paddingLeft: `${level * 1.5}em` }}
       >
-        {hasChildren && (
-          <button
-            className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-            onClick={handleToggle}
-            aria-label={isExpanded ? '收起' : '展开'}
-            type="button"
-          >
-            {isExpanded ? '▼' : '▶'}
-          </button>
-        )}
-        
-        {/* 为没有展开按钮的项目添加占位空间 */}
-        {!hasChildren && level > 0 && (
-          <span className="expand-button-placeholder" style={{ width: '20px', marginRight: '0.5rem' }}></span>
-        )}
+        {/* 统一的按钮区域，确保所有项目对齐 */}
+        <div className="expand-button-area">
+          {hasChildren ? (
+            <button
+              className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+              onClick={handleToggle}
+              aria-label={isExpanded ? '收起' : '展开'}
+              type="button"
+            >
+              {isExpanded ? '▼' : '▶'}
+            </button>
+          ) : (
+            <span className="expand-button-placeholder"></span>
+          )}
+        </div>
         
         {isLeaf ? (
           <Link
@@ -161,7 +161,6 @@ const Sidebar: React.FC<SidebarProps> = ({ depth = 3, onDocChange }) => {
         <Link to="/" className="home-button">
           ← 返回首页
         </Link>
-        <h3>学习目录</h3>
       </div>
       
       <div className="sidebar-content">
