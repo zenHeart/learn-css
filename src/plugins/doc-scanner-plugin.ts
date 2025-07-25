@@ -297,6 +297,75 @@ export function docScannerPlugin(): Plugin {
   const VIRTUAL_MODULE_ID = 'virtual:doc-data'
   const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 
+  // 生成虚拟模块内容的函数
+  async function generateVirtualModuleContent() {
+    try {
+      // 扫描所有文档
+      const docs = await scanner.scanAllDocs()
+      console.log(`扫描到 ${docs.length} 个文档`)
+      
+      // 生成侧边栏数据
+      const sidebar = await scanner.generateSidebar()
+      console.log(`生成侧边栏数据，包含 ${sidebar.length} 个根项目`)
+      
+      // 生成所有 Playground 数据
+      const allPlaygrounds = await scanner.generateAllPlaygrounds()
+      console.log(`生成 Playground 数据，包含 ${Object.keys(allPlaygrounds).length} 个示例`)
+      
+      // 生成路由数据
+      const routes = docs.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        path: doc.path,
+        category: doc.category,
+        playgrounds: doc.playgrounds.map(p => p.id)
+      }))
+      
+      const generatedData = {
+        sidebar: { items: sidebar },
+        allDocs: docs,
+        allPlaygrounds: allPlaygrounds,
+        routes
+      }
+      
+      console.log('文档扫描完成！')
+      
+      // 添加时间戳确保内容变化
+      const timestamp = Date.now()
+      
+      return `
+        // 生成时间: ${timestamp}
+        export const sidebarData = ${JSON.stringify(generatedData.sidebar, null, 2)};
+        export const allDocsData = ${JSON.stringify(generatedData.allDocs, null, 2)};
+        export const allPlaygroundsData = ${JSON.stringify(generatedData.allPlaygrounds, null, 2)};
+        export const routesData = ${JSON.stringify(generatedData.routes, null, 2)};
+        
+        export default {
+          sidebar: sidebarData,
+          allDocs: allDocsData,
+          allPlaygrounds: allPlaygroundsData,
+          routes: routesData
+        };
+      `
+    } catch (error) {
+      console.error('扫描文档时出错:', error)
+      // 返回基本配置以避免前端错误
+      return `
+        export const sidebarData = { items: [] };
+        export const allDocsData = [];
+        export const allPlaygroundsData = {};
+        export const routesData = [];
+        
+        export default {
+          sidebar: sidebarData,
+          allDocs: allDocsData,
+          allPlaygrounds: allPlaygroundsData,
+          routes: routesData
+        };
+      `
+    }
+  }
+
   return {
     name: 'doc-scanner',
 
@@ -320,25 +389,29 @@ export function docScannerPlugin(): Plugin {
             `[doc-scanner] 文档文件变化: ${path.relative(topicsPath, file)}`,
           )
           
-          // 通知客户端模块需要更新
-          const module = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID)
-          if (module) {
-            module.importers.forEach((importer: any) => {
+          // 获取虚拟模块
+          const virtualModule = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID)
+          if (virtualModule) {
+            // 使虚拟模块失效
+            server.moduleGraph.invalidateModule(virtualModule)
+            
+            // 使所有依赖虚拟模块的模块失效
+            const importers = Array.from(virtualModule.importers || [])
+            importers.forEach((importer: any) => {
               server.moduleGraph.invalidateModule(importer)
+            })
+            
+            // 通知客户端更新
+            if (importers.length > 0) {
               server.ws.send({
                 type: 'update',
-                updates: [
-                  {
-                    type: 'js-update',
-                    path: importer.url,
-                    acceptedPath: importer.url,
-                  },
-                ],
+                updates: importers.map((importer: any) => ({
+                  type: 'js-update',
+                  path: importer.url,
+                  acceptedPath: importer.url,
+                }))
               })
-            })
-
-            // 直接使模块失效以确保下次请求时重新生成
-            server.moduleGraph.invalidateModule(module)
+            }
           }
         }
       }
@@ -357,67 +430,7 @@ export function docScannerPlugin(): Plugin {
 
     async load(id) {
       if (id === RESOLVED_VIRTUAL_MODULE_ID) {
-        try {
-          // 扫描所有文档
-          const docs = await scanner.scanAllDocs()
-          console.log(`扫描到 ${docs.length} 个文档`)
-          
-          // 生成侧边栏数据
-          const sidebar = await scanner.generateSidebar()
-          console.log(`生成侧边栏数据，包含 ${sidebar.length} 个根项目`)
-          
-          // 生成所有 Playground 数据
-          const allPlaygrounds = await scanner.generateAllPlaygrounds()
-          console.log(`生成 Playground 数据，包含 ${Object.keys(allPlaygrounds).length} 个示例`)
-          
-          // 生成路由数据
-          const routes = docs.map(doc => ({
-            id: doc.id,
-            title: doc.title,
-            path: doc.path,
-            category: doc.category,
-            playgrounds: doc.playgrounds.map(p => p.id)
-          }))
-          
-          const generatedData = {
-            sidebar: { items: sidebar },
-            allDocs: docs,
-            allPlaygrounds: allPlaygrounds,
-            routes
-          }
-          
-          console.log('文档扫描完成！')
-          
-          return `
-            export const sidebarData = ${JSON.stringify(generatedData.sidebar, null, 2)};
-            export const allDocsData = ${JSON.stringify(generatedData.allDocs, null, 2)};
-            export const allPlaygroundsData = ${JSON.stringify(generatedData.allPlaygrounds, null, 2)};
-            export const routesData = ${JSON.stringify(generatedData.routes, null, 2)};
-            
-            export default {
-              sidebar: sidebarData,
-              allDocs: allDocsData,
-              allPlaygrounds: allPlaygroundsData,
-              routes: routesData
-            };
-          `
-        } catch (error) {
-          console.error('扫描文档时出错:', error)
-          // 返回基本配置以避免前端错误
-          return `
-            export const sidebarData = { items: [] };
-            export const allDocsData = [];
-            export const allPlaygroundsData = {};
-            export const routesData = [];
-            
-            export default {
-              sidebar: sidebarData,
-              allDocs: allDocsData,
-              allPlaygrounds: allPlaygroundsData,
-              routes: routesData
-            };
-          `
-        }
+        return await generateVirtualModuleContent()
       }
       return null
     }

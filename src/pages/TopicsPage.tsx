@@ -25,8 +25,14 @@ interface PlaygroundItem {
 
 const TopicsPage: React.FC = () => {
   const [currentDoc, setCurrentDoc] = useState<DocItem | null>(null)
-  const [docs] = useState<DocItem[]>(allDocsData || [])
-  const [playgrounds] = useState<Record<string, PlaygroundItem>>(allPlaygroundsData || {})
+  const [docs, setDocs] = useState<DocItem[]>(allDocsData || [])
+  const [playgrounds, setPlaygrounds] = useState<Record<string, PlaygroundItem>>(allPlaygroundsData || {})
+
+  // 监听虚拟模块数据变化
+  useEffect(() => {
+    setDocs(allDocsData || [])
+    setPlaygrounds(allPlaygroundsData || {})
+  }, [allDocsData, allPlaygroundsData])
 
   // 默认显示第一个文档
   useEffect(() => {
