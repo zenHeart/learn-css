@@ -516,46 +516,81 @@ ${indentedContent}
   // 生成侧边栏数据
   async generateSidebar(): Promise<SidebarItem[]> {
     const docs = await this.scanAllDocs()
-    const sidebarMap = new Map<string, SidebarItem>()
-
-    // 按路径组织文档
+    const root: SidebarItem[] = []
+    
+    // 创建路径到节点的映射
+    const pathToNode = new Map<string, SidebarItem>()
+    
+    // 按路径排序，确保父目录在子项目之前处理
+    docs.sort((a, b) => a.path.localeCompare(b.path))
+    
     docs.forEach(doc => {
       const pathParts = doc.path.split(path.sep)
       let currentPath = ''
+      let currentLevel = root
       
       pathParts.forEach((part, index) => {
         const isFile = index === pathParts.length - 1 && part.endsWith('.mdx')
-        const itemPath = currentPath ? path.join(currentPath, part) : part
+        currentPath = currentPath ? path.join(currentPath, part) : part
         
-        if (!sidebarMap.has(itemPath)) {
-          const title = isFile ? doc.title : this.generateTitle(part)
-          sidebarMap.set(itemPath, {
-            title,
+        // 查找当前层级中是否已有此项目
+        let existingItem = currentLevel.find(item => {
+          // 对于文件，比较完整路径；对于目录，比较标题
+          if (isFile) {
+            return item.path === doc.id
+          } else {
+            return item.title === this.generateTitle(part) && !item.path
+          }
+        })
+        
+        if (!existingItem) {
+          // 创建新项目
+          const newItem: SidebarItem = {
+            title: isFile ? doc.title : this.generateTitle(part),
             path: isFile ? doc.id : '',
             children: [],
             frontmatter: isFile ? doc.frontmatter : undefined
-          })
-        }
-        
-        if (index < pathParts.length - 1) {
-          const parentPath = currentPath
-          const parent = sidebarMap.get(parentPath)
-          const current = sidebarMap.get(itemPath)
-          
-          if (parent && current && !parent.children?.find(child => child.path === current.path)) {
-            if (!parent.children) parent.children = []
-            parent.children.push(current)
           }
+          
+          currentLevel.push(newItem)
+          pathToNode.set(currentPath, newItem)
+          existingItem = newItem
         }
         
-        currentPath = itemPath
+        // 移动到下一层级
+        if (!isFile) {
+          if (!existingItem.children) {
+            existingItem.children = []
+          }
+          currentLevel = existingItem.children
+        }
       })
     })
-
-    // 返回根级别的项目
-    return Array.from(sidebarMap.values()).filter(item => 
-      !item.path.includes(path.sep)
-    )
+    
+    // 递归排序和清理空目录
+    const sortAndClean = (items: SidebarItem[]): SidebarItem[] => {
+      return items
+        .filter(item => {
+          // 如果是文件，保留
+          if (item.path) return true
+          // 如果是目录且有子项目，保留
+          if (item.children && item.children.length > 0) {
+            item.children = sortAndClean(item.children)
+            return item.children.length > 0
+          }
+          // 空目录，移除
+          return false
+        })
+        .sort((a, b) => {
+          // 目录在前，文件在后
+          if (!a.path && b.path) return -1
+          if (a.path && !b.path) return 1
+          // 同类型按标题排序
+          return a.title.localeCompare(b.title)
+        })
+    }
+    
+    return sortAndClean(root)
   }
 
   // 生成所有 Playground 数据

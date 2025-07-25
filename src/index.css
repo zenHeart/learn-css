@@ -283,6 +283,8 @@ button:focus-visible {
   position: relative;
   display: flex;
   align-items: center;
+  gap: 0.25rem;
+  min-height: 36px;
 }
 
 .sidebar-item-header:hover {
@@ -329,26 +331,31 @@ button:focus-visible {
   margin-right: 0.5rem;
   font-size: 0.75rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: inherit;
+  color: #64748b;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 20px;
   height: 20px;
+  min-width: 20px;
+  flex-shrink: 0;
 }
 
 .expand-button:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
   transform: scale(1.1);
 }
 
 .expand-button.expanded {
   transform: rotate(90deg);
+  color: #3b82f6;
 }
 
 .expand-button.expanded:hover {
   transform: rotate(90deg) scale(1.1);
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .sidebar-title {
