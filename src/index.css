@@ -1560,7 +1560,7 @@ button:focus-visible {
 
   .mdx-content {
     max-width: 100%;
-    margin: 0.5
+    margin: 0.5rem;
     box-sizing: border-box;
     overflow-x: auto;
     word-wrap: break-word;
@@ -1734,10 +1734,50 @@ button:focus-visible {
   }
 
   .mdx-content table {
-    max-width: 100%;
-    overflow-x: auto;
-    display: block;
-    white-space: nowrap;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    margin: 1rem 0;
+    border: 1px solid #e1e4e8;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mdx-content table th,
+  .mdx-content table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e1e4e8;
+    vertical-align: top;
+  }
+
+  .mdx-content table th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+    border-bottom: 2px solid #e1e4e8;
+    color: #24292e;
+  }
+
+  .mdx-content table tr:nth-child(even) {
+    background-color: #f6f8fa;
+  }
+
+  .mdx-content table tr:hover {
+    background-color: #f0f0f0;
+  }
+
+  @media (max-width: 768px) {
+    .mdx-content table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+    
+    .mdx-content table th,
+    .mdx-content table td {
+      padding: 6px 8px;
+    }
   }
 
   .playground {

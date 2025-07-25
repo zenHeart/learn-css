@@ -57,11 +57,120 @@ const extractTocFromMarkdown = (markdown: string): TocItem[] => {
   return tocItems
 }
 
+// 处理 Markdown 表格
+const processMarkdownTables = (html: string): string => {
+  const lines = html.split('\n')
+  const processedLines: string[] = []
+  let i = 0
+  
+  while (i < lines.length) {
+    const line = lines[i].trim()
+    
+    // 检查是否是表格行（包含 | 分隔符）
+    if (line.includes('|') && line.length > 0) {
+      // 寻找完整的表格
+      const tableLines: string[] = []
+      let j = i
+      
+      // 收集连续的表格行
+      while (j < lines.length && lines[j].trim().includes('|')) {
+        const tableLine = lines[j].trim()
+        if (tableLine) {
+          tableLines.push(tableLine)
+        }
+        j++
+      }
+      
+      if (tableLines.length >= 2) {
+        // 转换表格
+        const tableHtml = convertTableToHtml(tableLines)
+        processedLines.push(tableHtml)
+        i = j // 跳过已处理的表格行
+      } else {
+        // 不是有效表格，保持原样
+        processedLines.push(lines[i])
+        i++
+      }
+    } else {
+      processedLines.push(lines[i])
+      i++
+    }
+  }
+  
+  return processedLines.join('\n')
+}
+
+// 将表格行转换为 HTML
+const convertTableToHtml = (tableLines: string[]): string => {
+  if (tableLines.length < 2) return tableLines.join('\n')
+  
+  // 第一行是标题行
+  const headerLine = tableLines[0]
+  const headerCells = headerLine.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+  
+  // 第二行通常是分隔符行（检查是否包含 - 字符）
+  const separatorLine = tableLines[1]
+  const isSeparatorLine = separatorLine.includes('-')
+  
+  let dataStartIndex = 1
+  let hasHeader = false
+  
+  if (isSeparatorLine) {
+    hasHeader = true
+    dataStartIndex = 2
+  }
+  
+  // 构建表格 HTML
+  let tableHtml = '<table>\n'
+  
+  // 添加表头
+  if (hasHeader) {
+    tableHtml += '  <thead>\n'
+    tableHtml += '    <tr>\n'
+    headerCells.forEach(cell => {
+      tableHtml += `      <th>${cell}</th>\n`
+    })
+    tableHtml += '    </tr>\n'
+    tableHtml += '  </thead>\n'
+    tableHtml += '  <tbody>\n'
+  } else {
+    tableHtml += '  <tbody>\n'
+    // 如果没有分隔符行，第一行也作为数据行处理
+    tableHtml += '    <tr>\n'
+    headerCells.forEach(cell => {
+      tableHtml += `      <td>${cell}</td>\n`
+    })
+    tableHtml += '    </tr>\n'
+  }
+  
+  // 添加数据行
+  for (let i = dataStartIndex; i < tableLines.length; i++) {
+    const dataLine = tableLines[i]
+    const dataCells = dataLine.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+    
+    if (dataCells.length > 0) {
+      tableHtml += '    <tr>\n'
+      dataCells.forEach(cell => {
+        tableHtml += `      <td>${cell}</td>\n`
+      })
+      tableHtml += '    </tr>\n'
+    }
+  }
+  
+  tableHtml += '  </tbody>\n'
+  tableHtml += '</table>'
+  
+  return tableHtml
+}
+
 // 简单的 Markdown 到 HTML 转换器
 const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   let html = markdown
 
-  // 首先标记需要保护的元素（避免被段落包裹）
+  // 首先处理表格（在保护其他元素之前）
+  html = processMarkdownTables(html)
+
+  // 然后标记需要保护的元素（避免被段落包裹）
   const protectedElements: { placeholder: string; content: string }[] = []
   let placeholderIndex = 0
 
@@ -78,6 +187,16 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   // 保护 iframe
   html = html.replace(/<iframe[\s\S]*?<\/iframe>/g, (match) => {
     const placeholder = `__PROTECTED_ELEMENT_${placeholderIndex++}__`
+    protectedElements.push({
+      placeholder,
+      content: match
+    })
+    return placeholder
+  })
+
+  // 保护表格（已经转换为HTML的表格）
+  html = html.replace(/<table[\s\S]*?<\/table>/g, (match) => {
+    const placeholder = `__PROTECTED_TABLE_${placeholderIndex++}__`
     protectedElements.push({
       placeholder,
       content: match
@@ -153,7 +272,7 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
     }
 
     // 检查是否是块级元素或 playground 标记
-    if (line.match(/^<(h[1-6]|ul|li|pre|div|__PROTECTED_ELEMENT_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
+    if (line.match(/^<(h[1-6]|ul|li|pre|div|table|__PROTECTED_ELEMENT_|__PROTECTED_TABLE_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
       // 如果当前在段落中，先关闭段落
       if (inParagraph) {
         processedLines.push('</p>')
