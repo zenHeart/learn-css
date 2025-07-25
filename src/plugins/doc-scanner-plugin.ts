@@ -10,6 +10,7 @@ export interface DocItem {
   tags: string[]
   description: string
   frontmatter: Record<string, any>
+  content: string // 添加完整的 MDX 内容
   playgrounds: PlaygroundItem[]
 }
 
@@ -84,8 +85,9 @@ class DocScanner {
   // 处理单个 MDX 文件
   private async processMdxFile(filePath: string, relativePath: string): Promise<DocItem | null> {
     try {
-      const content = fs.readFileSync(filePath, 'utf-8')
-      const frontmatter = this.extractFrontmatter(content)
+      const rawContent = fs.readFileSync(filePath, 'utf-8')
+      const frontmatter = this.extractFrontmatter(rawContent)
+      const mdxContent = this.extractMdxContent(rawContent)
       
       // 生成文档 ID
       const docId = this.generateDocId(relativePath)
@@ -101,6 +103,7 @@ class DocScanner {
         tags: frontmatter.tags || [],
         description: frontmatter.description || '',
         frontmatter,
+        content: mdxContent, // 添加完整的 MDX 内容
         playgrounds
       }
     } catch (error) {
@@ -135,6 +138,17 @@ class DocScanner {
     })
 
     return frontmatter
+  }
+
+  // 提取 MDX 内容（去除 frontmatter）
+  private extractMdxContent(content: string): string {
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n/)
+    if (frontmatterMatch) {
+      // 返回去除 frontmatter 后的内容
+      return content.substring(frontmatterMatch[0].length).trim()
+    }
+    // 如果没有 frontmatter，返回整个内容
+    return content.trim()
   }
 
   // 生成文档 ID
@@ -173,8 +187,9 @@ class DocScanner {
       return playgrounds
     }
 
-    const content = fs.readFileSync(mdxPath, 'utf-8')
-    const playgroundMatches = content.matchAll(/{\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/}/g)
+    const rawContent = fs.readFileSync(mdxPath, 'utf-8')
+    const mdxContent = this.extractMdxContent(rawContent)
+    const playgroundMatches = mdxContent.matchAll(/{\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/}/g)
     
     for (const match of playgroundMatches) {
       const [, playgroundId, mode] = match

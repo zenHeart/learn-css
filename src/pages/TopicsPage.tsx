@@ -14,6 +14,7 @@ interface DocItem {
   tags: string[]
   description: string
   frontmatter: Record<string, any>
+  content: string // 添加真实的 MDX 内容
   playgrounds: PlaygroundItem[]
 }
 
@@ -159,61 +160,14 @@ const TopicsPage: React.FC = () => {
     )
   }
 
-  // 生成 MDX 内容（后续将通过真实 MDX 解析）
-  const playgroundSection = currentDoc.playgrounds.length > 0
-    ? currentDoc.playgrounds.map(playground => 
-        `<div class="playground-placeholder" data-playground-id="${playground.id}" data-playground-mode="${playground.mode}"></div>`
-      ).join('')
-    : `<div class="playground-placeholder empty">暂无交互示例</div>`;
-
-  const mdxContent = `
-<h1>${currentDoc.title}</h1>
-
-<p>${currentDoc.description}</p>
-
-<h2>文档信息</h2>
-
-<ul>
-  <li><strong>分类：</strong>${currentDoc.category}</li>
-  <li><strong>标签：</strong>${currentDoc.tags.join(', ')}</li>
-  <li><strong>路径：</strong>${currentDoc.path}</li>
-  <li><strong>ID：</strong>${currentDoc.id}</li>
-</ul>
-
-<h2>内容预览</h2>
-
-<p>这是文档 "${currentDoc.title}" 的内容预览。实际内容将从 MDX 文件中加载。</p>
-
-<h2>交互式演示</h2>
-
-<p>下面包含 ${currentDoc.playgrounds.length} 个交互式演示：</p>
-${playgroundSection}
-
-<h2>小贴士</h2>
-
-<ul>
-  <li>这是一个自动生成的文档预览</li>
-  <li>实际内容将从 MDX 文件中解析</li>
-  <li>Playground 示例已自动加载</li>
-</ul>
-  `
-
-  const frontmatter = {
-    title: currentDoc.title,
-    category: currentDoc.category,
-    tags: currentDoc.tags,
-    description: currentDoc.description,
-    keywords: currentDoc.tags.join(', ')
-  }
-
   return (
     <div className="topics-page">
       <Sidebar depth={3} onDocChange={handleDocChange} />
       
       <div className="content">
         <MdxRenderer 
-          content={mdxContent} 
-          frontmatter={frontmatter}
+          content={currentDoc.content} // 使用真实的 MDX 内容
+          frontmatter={currentDoc.frontmatter} // 使用真实的 frontmatter
           playgrounds={getCurrentPlaygrounds()}
         />
       </div>
