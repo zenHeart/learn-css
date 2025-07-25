@@ -1,6 +1,6 @@
 export const siteConfig = {
   title: "CSS 学习笔记",
-  description: "一个专注于 CSS 知识学习与实践的纯静态笔记网站。",
+  description: "一个专注于 CSS 知识学习与实践的网站。",
   keywords: "CSS, 学习, 教程, 笔记, 前端, 开发",
   github: "https://github.com/zenHeart/learn-css",
   sidebarDepth: 3,

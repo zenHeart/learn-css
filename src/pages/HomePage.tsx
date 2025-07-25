@@ -62,18 +62,6 @@ const HomePage: React.FC = () => {
             📖 在 GitHub 上查看源码
           </a>
         </div>
-        
-        <div className="roadmap-placeholder">
-          <h2>CSS 学习路线图</h2>
-          <p>这里将显示交互式的 CSS 学习路线图，帮助您规划学习路径。</p>
-          <div className="roadmap-preview">
-            <div className="roadmap-node">基础概念</div>
-            <div className="roadmap-arrow">→</div>
-            <div className="roadmap-node">布局技术</div>
-            <div className="roadmap-arrow">→</div>
-            <div className="roadmap-node">高级技巧</div>
-          </div>
-        </div>
       </div>
 
       <SearchModal 

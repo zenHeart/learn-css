@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>test use pdf layout and use zoom to fix content</h1>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium blanditiis illo, aliquam maxime dolorem est temporibus. Distinctio, sequi quos illum aspernatur, repudiandae dignissimos eius nisi, debitis hic ab a eum!</p>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium blanditiis illo, aliquam maxime dolorem est temporibus. Distinctio, sequi quos illum aspernatur, repudiandae dignissimos eius nisi, debitis hic ab a eum!</p>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium blanditiis illo, aliquam maxime dolorem est temporibus. Distinctio, sequi quos illum aspernatur, repudiandae dignissimos eius nisi, debitis hic ab a eum!</p>
+  <div id="ppi"></div>
+</body>
+<script>
+function findFirstPositive (f,b=1,d=(e,g,c)=>g<e?-1:0<f(c=e+g>>>1)?c==e||0>=f(c-1)?c:d(e,c-1):d(c+1,g)) {
+  for (;0>=f(b);b<<=1);return d(b>>>1,b)|0
+}
+
+var dpi = findFirstPositive(x => matchMedia(`(max-resolution: ${x}dpi)`).matches)
+document.body.style.zoom = window.innerHeight/dpi*2.54*window.devicePixelRatio/29.7
+// debugger
+
+</script>
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+  }
+  body {
+    margin:0 auto;
+    width: 21cm;
+    height: 29.7cm;
+    outline: 1px solid black;
+    zoom: calc( 100vh / 29.7cm )
+  }
+  #ppi {
+    height: 1cm;
+    width: 1cm;
+    background-color: red;
+  }
+</style>
+</html>
