@@ -1,12 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { playgroundLoader } from './src/plugins/playground-loader'
+import { docScannerPlugin } from './src/plugins/doc-scanner-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    playgroundLoader(),
+    docScannerPlugin(),
   ],
   base: '/learn-css/',
 })

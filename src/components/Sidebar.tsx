@@ -1,19 +1,21 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import type { SidebarItem } from '../types/sidebar'
-import sidebarData from '../data/sidebar.json'
+import { sidebarData } from 'virtual:doc-data'
 
 interface SidebarProps {
   depth?: number
+  onDocChange?: (docId: string) => void
 }
 
 interface SidebarItemProps {
   item: SidebarItem
   level: number
   maxDepth: number
+  onDocChange?: (docId: string) => void
 }
 
-const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDepth }) => {
+const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDepth, onDocChange }) => {
   const [isExpanded, setIsExpanded] = useState(level === 0)
   const location = useLocation()
   const isActive = location.pathname === item.path
@@ -23,6 +25,12 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
   const handleToggle = () => {
     if (canExpand) {
       setIsExpanded(!isExpanded)
+    }
+  }
+
+  const handleDocClick = () => {
+    if (onDocChange && item.path) {
+      onDocChange(item.path.replace('/', ''))
     }
   }
 
@@ -42,9 +50,12 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
         {hasChildren ? (
           <span className="sidebar-title">{item.title}</span>
         ) : (
-          <Link to={item.path} className="sidebar-link">
+          <button 
+            className="sidebar-link"
+            onClick={handleDocClick}
+          >
             {item.title}
-          </Link>
+          </button>
         )}
       </div>
       
@@ -56,6 +67,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
               item={child}
               level={level + 1}
               maxDepth={maxDepth}
+              onDocChange={onDocChange}
             />
           ))}
         </div>
@@ -64,7 +76,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
   )
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ depth = 3 }) => {
+const Sidebar: React.FC<SidebarProps> = ({ depth = 3, onDocChange }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -72,12 +84,13 @@ const Sidebar: React.FC<SidebarProps> = ({ depth = 3 }) => {
       </div>
       
       <div className="sidebar-content">
-        {sidebarData.items.map((item, index) => (
+        {(sidebarData?.items || []).map((item, index) => (
           <SidebarItemComponent
             key={index}
             item={item}
             level={0}
             maxDepth={depth}
+            onDocChange={onDocChange}
           />
         ))}
       </div>
