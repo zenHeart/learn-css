@@ -234,31 +234,39 @@ button:focus-visible {
   min-height: 0;
 }
 
+/* 侧边栏整体样式 */
 .sidebar {
-  background: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
   border-right: 1px solid #e5e7eb;
   min-width: 220px;
   max-width: 320px;
   height: 100vh;
   overflow-y: auto;
   padding-bottom: 2em;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-header {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  background-color: #fff;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #f1f3f4;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .sidebar-header h3 {
   margin: 0;
-  color: #333;
   font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-content {
   flex: 1;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
 }
 
 .sidebar-item {
@@ -266,29 +274,51 @@ button:focus-visible {
 }
 
 .sidebar-item-header {
-  padding: 0.5em 1em;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
-  font-size: 1rem;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  margin: 0.125rem 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.95rem;
   cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-item-header:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
 }
 
 .sidebar-item-header.directory {
-  font-weight: bold;
-  background: #f5f7fa;
-  color: #333;
-  margin-top: 0.5em;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+  margin-top: 0.5rem;
+  border-left: 3px solid #cbd5e1;
+}
+
+.sidebar-item-header.directory:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-left-color: #667eea;
 }
 
 .sidebar-item-header.active-parent {
-  background: #e0e7ff;
-  font-weight: bold;
-  border-left: 4px solid #2563eb;
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  font-weight: 600;
+  border-left: 3px solid #8b5cf6;
+  color: #6d28d9;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.12);
 }
+
 .sidebar-item-header.active {
-  background: #2563eb;
-  color: #fff;
-  border-left: 4px solid #2563eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border-left: 3px solid #4f46e5;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+  transform: translateX(3px);
 }
 
 .expand-button {
@@ -298,16 +328,33 @@ button:focus-visible {
   padding: 0.25rem;
   margin-right: 0.5rem;
   font-size: 0.75rem;
-  transition: transform 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: inherit;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.expand-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
 }
 
 .expand-button.expanded {
   transform: rotate(90deg);
 }
 
+.expand-button.expanded:hover {
+  transform: rotate(90deg) scale(1.1);
+}
+
 .sidebar-title {
   user-select: none;
+  flex: 1;
+  padding: 0.125rem 0;
 }
 
 .sidebar-link {
@@ -315,40 +362,58 @@ button:focus-visible {
   text-decoration: none;
   display: block;
   width: 100%;
-  transition: color 0.2s, background 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 6px;
-  padding: 0.1em 0.2em;
+  padding: 0.125rem 0.25rem;
+  flex: 1;
 }
 
 .sidebar-link:hover {
-  color: #2563eb;
-  background: #e0e7ff;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
+  transform: translateX(2px);
 }
 
 .sidebar-children {
-  margin-left: 0;
-  border-left: 2px solid #e5e7eb;
-  margin-top: 0.2em;
-  padding-left: 0.2em;
+  margin-left: 0.75rem;
+  border-left: 2px solid #f1f3f4;
+  margin-top: 0.25rem;
+  padding-left: 0.5rem;
+  position: relative;
+}
+
+.sidebar-children::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #e2e8f0 0%, transparent 100%);
+  opacity: 0.6;
 }
 
 .sidebar-item + .sidebar-item {
-  margin-top: 0.1em;
+  margin-top: 0.125rem;
 }
 
+/* 层级样式优化 */
 .level-0 > .sidebar-item-header {
   font-weight: 600;
-  color: #212529;
+  color: #1e293b;
+  font-size: 1rem;
 }
 
 .level-1 > .sidebar-item-header {
   font-weight: 500;
-  color: #495057;
+  color: #475569;
+  font-size: 0.925rem;
 }
 
 .level-2 > .sidebar-item-header {
   font-weight: 400;
-  color: #6c757d;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .content {

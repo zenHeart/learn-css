@@ -13,9 +13,16 @@ interface SidebarItemProps {
   level: number
   maxDepth: number
   onDocChange?: (docId: string) => void
+  parentCollapsed?: boolean
 }
 
-const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDepth, onDocChange }) => {
+const SidebarItemComponent: React.FC<SidebarItemProps> = ({ 
+  item, 
+  level, 
+  maxDepth, 
+  onDocChange, 
+  parentCollapsed = false 
+}) => {
   const location = useLocation()
   const isLeaf = !!item.path && (!item.children || item.children.length === 0)
   const isActive = isLeaf && location.pathname === `/topics/${item.path}`
@@ -29,14 +36,30 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
     )
   }
   const childActive = hasActiveChild(item.children)
-  // 初始展开：有激活子节点或是顶级目录
-  const [isExpanded, setIsExpanded] = useState(level === 0 || childActive)
-  // 用户手动操作后不再自动响应路由
+  
+  // 展开状态：考虑父级折叠状态
+  const shouldAutoExpand = !parentCollapsed && (level === 0 || childActive)
+  const [isExpanded, setIsExpanded] = useState(shouldAutoExpand)
   const [userToggled, setUserToggled] = useState(false)
 
+  // 路由变化时的自动展开逻辑
   useEffect(() => {
-    if (!userToggled && childActive) setIsExpanded(true)
-  }, [childActive, userToggled])
+    if (!userToggled && !parentCollapsed) {
+      if (childActive) {
+        setIsExpanded(true)
+      } else if (level === 0) {
+        setIsExpanded(true)
+      }
+    }
+  }, [childActive, userToggled, parentCollapsed, level])
+
+  // 父级折叠时，重置用户操作状态
+  useEffect(() => {
+    if (parentCollapsed) {
+      setUserToggled(false)
+      setIsExpanded(false)
+    }
+  }, [parentCollapsed])
 
   const handleToggle = () => {
     setIsExpanded(expanded => !expanded)
@@ -53,6 +76,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
             level={level + 1}
             maxDepth={maxDepth}
             onDocChange={onDocChange}
+            parentCollapsed={!isExpanded}
           />
         ))
         .filter(Boolean)
