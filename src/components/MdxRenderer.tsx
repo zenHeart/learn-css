@@ -220,18 +220,54 @@ const TOC: React.FC<{ items: TocItem[]; activeId: string; isMobile: boolean }> =
     setIsOpen(!isOpen)
   }
 
-  return (
-    <div className={`toc-container ${isMobile ? 'toc-mobile' : ''}`}>
-      {isMobile && (
+  if (isMobile) {
+    return (
+      <div className="toc-mobile">
+        {/* 悬浮的TOC图标按钮 */}
         <button 
-          className={`toc-toggle ${isOpen ? 'active' : ''}`}
+          className={`toc-mobile-toggle ${isOpen ? 'active' : ''}`}
           onClick={toggleToc}
+          title="目录"
         >
-          📑 目录 {isOpen ? '▲' : '▼'}
+          <span className="toc-icon">📋</span>
         </button>
-      )}
-      
-      <div className={`toc-content ${isMobile ? (isOpen ? 'open' : 'closed') : ''}`}>
+        
+        {/* 展开的目录内容 */}
+        {isOpen && (
+          <>
+            <div className="toc-mobile-overlay" onClick={toggleToc} />
+            <div className="toc-mobile-content">
+              <div className="toc-mobile-header">
+                <span>目录</span>
+                <button className="toc-close-btn" onClick={toggleToc}>×</button>
+              </div>
+              <ul className="toc-list">
+                {items.map((item) => (
+                  <li 
+                    key={item.id}
+                    className={`toc-item toc-level-${item.level} ${activeId === item.id ? 'active' : ''}`}
+                  >
+                    <button
+                      className="toc-link"
+                      onClick={() => handleItemClick(item.id)}
+                      title={item.text}
+                    >
+                      {item.text}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  // 桌面端TOC
+  return (
+    <div className="toc-container">
+      <div className="toc-content">
         <div className="toc-header">
           <span>目录</span>
         </div>
