@@ -7,22 +7,12 @@ keywords: CSS Grid, 网格布局, grid-template-columns, grid-template-rows, fr 
 ---
 
 # grid 布局
-用 grid 实现二维平面的的布局
 
-## 概览
-利用 grid 实现 [圣杯布局](./_demos/layout-grid/grid-layout-holy-grail.html)
+grid 用来实现二维布局
 
-## 交互式演示
-
-下面是一些 Grid 布局的交互式演示：
 
 
 ## 核心概念
-
-{/* @playground id="grid-concept" mode="demo" */}
-
-{/* @playground id="grid-display" mode="demo" */}
-
 
 * **网格(grid)** 元素上 `display` 属性申明为 `grid` 或 `inline-grid` 会创建网格布局
 * **网格列(grid column)** 元素定义为 `grid` 布局后,`grid-template-columns` 属性会创建网格列
@@ -35,6 +25,7 @@ keywords: CSS Grid, 网格布局, grid-template-columns, grid-template-rows, fr 
 * **网格区域(grid area)** 有多个网格单元组成的空间,**注意空间只能为矩形**
 * **隐式网格(implicit grid)** 利用 `grid-template-columns` 和 `grid-template-ros` 申明的网格区域为显示网格,对于超出此区域的部分,浏览器会创建隐式网格,可以利用 `grid-auto-rows` 和 `grid-auto-columns` 进行设置。
     
+{/* @playground id="grid-concept" mode="demo" */}
 
 网格布局的学习重点为:
 1. 如何设置网格容器
