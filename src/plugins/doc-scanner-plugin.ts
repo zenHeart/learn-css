@@ -153,15 +153,35 @@ class DocScanner {
 
   // 生成文档 ID
   private generateDocId(relativePath: string): string {
-    return relativePath
+    let id = relativePath
       .replace(/\.mdx$/, '')
       .replace(/[\/\\]/g, '-')
       .toLowerCase()
+    
+    // 如果是 index.mdx 文件，使用其父目录作为 ID
+    if (id.endsWith('-index')) {
+      id = id.replace(/-index$/, '')
+    }
+    
+    return id
   }
 
   // 生成标题
   private generateTitle(relativePath: string): string {
     const fileName = path.basename(relativePath, '.mdx')
+    
+    // 如果是 index，使用父目录名称
+    if (fileName === 'index') {
+      const parentDir = path.dirname(relativePath)
+      if (parentDir && parentDir !== '.') {
+        const dirName = path.basename(parentDir)
+        return dirName
+          .replace(/^\d+\./, '')
+          .replace(/[-_]/g, ' ')
+          .replace(/\b\w/g, l => l.toUpperCase())
+      }
+    }
+    
     return fileName
       .replace(/^\d+\./, '')
       .replace(/[-_]/g, ' ')
@@ -513,6 +533,19 @@ ${indentedContent}
     }
   }
 
+  // 检查目录是否只包含 index.mdx
+  private checkDirectoryHasOnlyIndex(dirPath: string): boolean {
+    try {
+      const items = fs.readdirSync(dirPath, { withFileTypes: true })
+      const mdxFiles = items.filter(item => item.isFile() && item.name.endsWith('.mdx'))
+      
+      // 只有一个 MDX 文件且是 index.mdx
+      return mdxFiles.length === 1 && mdxFiles[0].name === 'index.mdx'
+    } catch {
+      return false
+    }
+  }
+
   // 生成侧边栏数据
   async generateSidebar(): Promise<SidebarItem[]> {
     const docs = await this.scanAllDocs()
@@ -529,6 +562,59 @@ ${indentedContent}
       let currentPath = ''
       let currentLevel = root
       
+      // 检查是否是 index.mdx 文件
+      const isIndexFile = pathParts[pathParts.length - 1] === 'index.mdx'
+      
+      // 如果是 index.mdx 文件，检查其父目录是否只包含这一个 MDX 文件
+      if (isIndexFile && pathParts.length > 1) {
+        const parentDirPath = path.join(this.topicsDir, ...pathParts.slice(0, -1))
+        const hasOnlyIndex = this.checkDirectoryHasOnlyIndex(parentDirPath)
+        
+        if (hasOnlyIndex) {
+          // 只创建到父目录级别，将其作为文档项
+          const parentPathParts = pathParts.slice(0, -1)
+          
+          parentPathParts.forEach((part, index) => {
+            const isLastPart = index === parentPathParts.length - 1
+            currentPath = currentPath ? path.join(currentPath, part) : part
+            
+            // 查找当前层级中是否已有此项目
+            let existingItem = currentLevel.find(item => {
+              if (isLastPart) {
+                return item.path === doc.id
+              } else {
+                return item.title === this.generateTitle(part) && !item.path
+              }
+            })
+            
+            if (!existingItem) {
+              // 创建新项目
+              const newItem: SidebarItem = {
+                title: isLastPart ? doc.title : this.generateTitle(part),
+                path: isLastPart ? doc.id : '',
+                children: isLastPart ? undefined : [],
+                frontmatter: isLastPart ? doc.frontmatter : undefined
+              }
+              
+              currentLevel.push(newItem)
+              pathToNode.set(currentPath, newItem)
+              existingItem = newItem
+            }
+            
+            // 移动到下一层级
+            if (!isLastPart) {
+              if (!existingItem.children) {
+                existingItem.children = []
+              }
+              currentLevel = existingItem.children
+            }
+          })
+          
+          return // 跳过正常的文件处理逻辑
+        }
+      }
+      
+      // 正常的文件处理逻辑
       pathParts.forEach((part, index) => {
         const isFile = index === pathParts.length - 1 && part.endsWith('.mdx')
         currentPath = currentPath ? path.join(currentPath, part) : part
