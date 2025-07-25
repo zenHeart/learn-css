@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
           <div className="nav-buttons">
             <Link to="/topics/01.basics-01.concept-01.intro" className="nav-button">开始学习</Link>
             <button onClick={openSearchModal} className="nav-button">搜索文档 (⌘+K)</button>
-            <Link to="/playground" className="nav-button">代码实践</Link>
+            <Link to="/playground/grid-concept" className="nav-button">代码实践</Link>
           </div>
         </div>
         
