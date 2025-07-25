@@ -35,6 +35,7 @@ const TopicsPage: React.FC = () => {
   const [playgrounds, setPlaygrounds] = useState<Record<string, PlaygroundItem>>(allPlaygroundsData || {})
   const [error, setError] = useState<string | null>(null)
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   // 监听虚拟模块数据变化
   useEffect(() => {
@@ -51,6 +52,9 @@ const TopicsPage: React.FC = () => {
   // 搜索弹窗处理
   const openSearchModal = () => setIsSearchModalOpen(true)
   const closeSearchModal = () => setIsSearchModalOpen(false)
+  
+  const toggleMobileSidebar = () => setIsMobileSidebarOpen(prev => !prev)
+  const closeMobileSidebar = () => setIsMobileSidebarOpen(false)
 
   // 监听 Command+K 快捷键
   useEffect(() => {
@@ -183,11 +187,36 @@ const TopicsPage: React.FC = () => {
     return (
       <>
         <div className="topics-page">
-          <Sidebar 
-            depth={3} 
-            onDocChange={handleDocChange}
-            onSearchClick={openSearchModal}
-          />
+                  {/* 移动端汉堡菜单按钮 */}
+        <button 
+          className={`mobile-menu-toggle ${isMobileSidebarOpen ? 'active' : ''}`}
+          onClick={toggleMobileSidebar}
+          aria-label="切换导航菜单"
+        >
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
+            <span className="hamburger-line"></span>
+          </button>
+
+          {/* 移动端遮罩层 */}
+          {isMobileSidebarOpen && (
+            <div 
+              className="mobile-overlay"
+              onClick={closeMobileSidebar}
+            />
+          )}
+
+          <div className={`sidebar-container ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
+            <Sidebar 
+              depth={3} 
+              onDocChange={(docId) => {
+                handleDocChange(docId)
+                closeMobileSidebar()
+              }}
+              onSearchClick={openSearchModal}
+            />
+          </div>
+          
           <div className="content">
             <div className="loading">加载中...</div>
           </div>
@@ -204,11 +233,35 @@ const TopicsPage: React.FC = () => {
   return (
     <>
       <div className="topics-page">
-        <Sidebar 
-          depth={3} 
-          onDocChange={handleDocChange}
-          onSearchClick={openSearchModal}
-        />
+        {/* 移动端汉堡菜单按钮 */}
+        <button 
+          className={`mobile-menu-toggle ${isMobileSidebarOpen ? 'active' : ''}`}
+          onClick={toggleMobileSidebar}
+          aria-label="切换导航菜单"
+        >
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+        </button>
+
+        {/* 移动端遮罩层 */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="mobile-overlay"
+            onClick={closeMobileSidebar}
+          />
+        )}
+
+        <div className={`sidebar-container ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
+          <Sidebar 
+            depth={3} 
+            onDocChange={(docId) => {
+              handleDocChange(docId)
+              closeMobileSidebar()
+            }}
+            onSearchClick={openSearchModal}
+          />
+        </div>
         
         <div className="content">
           <MdxRenderer 

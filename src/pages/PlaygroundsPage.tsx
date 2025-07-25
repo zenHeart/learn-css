@@ -19,6 +19,7 @@ const PlaygroundsPage: React.FC = () => {
   const navigate = useNavigate()
   const [playgroundsWithMeta, setPlaygroundsWithMeta] = useState<PlaygroundItem[]>([])
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   
   // 从虚拟模块获取数据
   const allDocs = allDocsData || []
@@ -78,6 +79,9 @@ const PlaygroundsPage: React.FC = () => {
   // 搜索弹窗处理
   const openSearchModal = () => setIsSearchModalOpen(true)
   const closeSearchModal = () => setIsSearchModalOpen(false)
+  
+  const toggleMobileSidebar = () => setIsMobileSidebarOpen(prev => !prev)
+  const closeMobileSidebar = () => setIsMobileSidebarOpen(false)
 
   // 监听 Command+K 快捷键
   useEffect(() => {
@@ -95,6 +99,7 @@ const PlaygroundsPage: React.FC = () => {
   // 处理 playground 切换
   const handlePlaygroundSelect = (playgroundId: string) => {
     navigate(`/playground/${playgroundId}`)
+    closeMobileSidebar()
   }
 
   if (playgroundsWithMeta.length === 0) {
@@ -118,22 +123,42 @@ const PlaygroundsPage: React.FC = () => {
   return (
     <>
       <div className="topics-page">
+        {/* 移动端汉堡菜单按钮 */}
+        <button 
+          className={`mobile-menu-toggle ${isMobileSidebarOpen ? 'active' : ''}`}
+          onClick={toggleMobileSidebar}
+          aria-label="切换导航菜单"
+        >
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+        </button>
+
+        {/* 移动端遮罩层 */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="mobile-overlay"
+            onClick={closeMobileSidebar}
+          />
+        )}
+
         {/* 左侧导航 - 与 Sidebar 保持一致的布局 */}
-        <div className="sidebar">
-          <div className="sidebar-header">
-            <div className="sidebar-header-top">
-              <Link to="/" className="home-button">
-                ← 返回首页
-              </Link>
-              <button 
-                className="search-button" 
-                onClick={openSearchModal}
-                title="搜索文档 (⌘+K)"
-              >
-                🔍
-              </button>
+        <div className={`sidebar-container ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
+          <div className="sidebar">
+            <div className="sidebar-header">
+              <div className="sidebar-header-top">
+                <Link to="/" className="home-button">
+                  ← 返回首页
+                </Link>
+                <button 
+                  className="search-button" 
+                  onClick={openSearchModal}
+                  title="搜索文档 (⌘+K)"
+                >
+                  🔍
+                </button>
+              </div>
             </div>
-          </div>
           
           <div className="sidebar-content">
             {Object.entries(playgroundsByCategory).map(([category, playgrounds]) => (
@@ -156,6 +181,7 @@ const PlaygroundsPage: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
         </div>
         
         {/* 右侧内容区 - 与 TopicsPage 保持一致的布局 */}
