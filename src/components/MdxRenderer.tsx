@@ -229,7 +229,9 @@ const TOC: React.FC<{ items: TocItem[]; activeId: string; isMobile: boolean }> =
           onClick={toggleToc}
           title="目录"
         >
-          <span className="toc-icon">📋</span>
+          <span className="toc-hamburger-line"></span>
+          <span className="toc-hamburger-line"></span>
+          <span className="toc-hamburger-line"></span>
         </button>
         
         {/* 展开的目录内容 */}

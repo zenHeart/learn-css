@@ -1005,6 +1005,7 @@ button:focus-visible {
 /* 移动端TOC悬浮按钮 */
 .toc-mobile-toggle {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 48px;
@@ -1015,7 +1016,7 @@ button:focus-visible {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  font-size: 20px;
+  padding: 0;
 }
 
 .toc-mobile-toggle:hover {
@@ -1030,13 +1031,35 @@ button:focus-visible {
   box-shadow: 0 4px 12px rgba(3, 102, 214, 0.3);
 }
 
-.toc-mobile-toggle.active .toc-icon {
-  filter: invert(1);
+/* TOC三线图标 */
+.toc-hamburger-line {
+  width: 16px;
+  height: 2px;
+  background-color: #24292e;
+  transition: all 0.3s ease;
+  margin: 1.5px 0;
+  display: block;
 }
 
-.toc-icon {
-  display: block;
-  line-height: 1;
+.toc-mobile-toggle:hover .toc-hamburger-line {
+  background-color: #0366d6;
+}
+
+.toc-mobile-toggle.active .toc-hamburger-line {
+  background-color: #ffffff;
+}
+
+/* TOC激活状态动画 */
+.toc-mobile-toggle.active .toc-hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.toc-mobile-toggle.active .toc-hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.toc-mobile-toggle.active .toc-hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
 /* 移动端TOC遮罩层 */
@@ -1736,7 +1759,12 @@ button:focus-visible {
   .toc-mobile-toggle {
     width: 44px;
     height: 44px;
-    font-size: 18px;
+  }
+
+  .toc-hamburger-line {
+    width: 14px;
+    height: 2px;
+    margin: 1px 0;
   }
 
   .toc-mobile-content {
