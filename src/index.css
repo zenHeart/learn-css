@@ -1021,7 +1021,7 @@ button:focus-visible {
   display: none;
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  right: 1rem;
   z-index: 1001;
   background: #ffffff;
   border: 1px solid #e1e4e8;
@@ -1090,6 +1090,15 @@ button:focus-visible {
 
 /* 响应式适配 */
 @media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   .mobile-menu-toggle {
     display: flex;
   }
@@ -1100,6 +1109,9 @@ button:focus-visible {
 
   .topics-page {
     position: relative;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .sidebar-container {
@@ -1126,61 +1138,172 @@ button:focus-visible {
 
   .content {
     width: 100%;
-    padding-top: 3rem; /* 为汉堡菜单按钮留出空间 */
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    padding-top: 4rem; /* 为汉堡菜单按钮留出更多空间 */
+    box-sizing: border-box;
     flex: 1;
+    min-width: 0; /* 防止内容溢出 */
   }
 
-  .topics-page {
-    flex-direction: column;
+  .mdx-content {
+    max-width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow-x: auto;
+    word-wrap: break-word;
+  }
+
+  .mdx-content pre,
+  .mdx-content code {
+    max-width: 100%;
+    overflow-x: auto;
+    font-size: 0.875rem;
+  }
+
+  .mdx-content img,
+  .mdx-content video {
+    max-width: 100%;
+    height: auto;
   }
 
   .playground {
     height: auto;
-    min-height: 500px;
+    min-height: 400px;
+    max-width: 100%;
+    overflow: hidden;
   }
   
   .playground.vertical .editor-panel {
-    height: 250px;
-    min-height: 200px;
+    height: 200px;
+    min-height: 150px;
   }
   
   .playground.vertical .preview-panel {
     height: auto;
     flex: 1;
-    min-height: 250px;
+    min-height: 200px;
   }
   
   .playground-header {
     flex-direction: column;
     gap: 0.5rem;
     align-items: stretch;
+    padding: 0.5rem;
   }
   
   .file-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
   }
   
   .file-tab {
     min-width: 60px;
     flex-shrink: 0;
   }
+
+  .playground-content {
+    max-width: 100%;
+    overflow: hidden;
+    flex-direction: column;
+  }
+
+  .editor-panel,
+  .preview-panel {
+    min-width: 0;
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  .preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    max-width: 100%;
+  }
+
+  .preview-content {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* CodeMirror 移动端适配 */
+  .cm-editor {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .cm-scroller {
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 480px) {
+  .mobile-menu-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .content {
+    padding: 0.5rem;
+    padding-top: 3.5rem;
+  }
+
+  .mdx-content {
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: auto;
+    word-wrap: break-word;
+    box-sizing: border-box;
+  }
+
+  .mdx-content pre,
+  .mdx-content code {
+    max-width: 100%;
+    overflow-x: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .mdx-content img,
+  .mdx-content video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .mdx-content table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+
   .playground {
     border-radius: 4px;
     height: auto;
-    min-height: 400px;
+    min-height: 350px;
+    margin: 0;
+    max-width: 100%;
   }
   
   .playground-header {
-    padding: 0.5rem;
+    padding: 0.375rem;
+    flex-direction: column;
+  }
+  
+  .file-tabs {
+    margin-bottom: 0.5rem;
   }
   
   .file-tab {
-    padding: 0.375rem 0.75rem;
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
+    min-width: 50px;
   }
   
   .action-btn {
@@ -1189,17 +1312,31 @@ button:focus-visible {
   }
   
   .playground.vertical .editor-panel {
-    height: 200px;
+    height: 150px;
+    min-height: 120px;
+  }
+
+  .playground.vertical .preview-panel {
     min-height: 150px;
   }
   
   .console-panel {
-    max-height: 120px;
+    max-height: 100px;
   }
   
   .console-content {
     font-size: 0.75rem;
-    max-height: 80px;
+    max-height: 60px;
+    padding: 0.375rem;
+  }
+
+  .console-header {
+    padding: 0.375rem;
+    font-size: 0.75rem;
+  }
+
+  .sidebar-container {
+    width: 260px;
   }
 }
 
