@@ -731,3 +731,124 @@ button:focus-visible {
   position: absolute;
   left: 0;
 }
+
+/* Playground 详情页样式 */
+.playground-detail-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.playground-nav {
+  width: 280px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.nav-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #fff;
+}
+
+.nav-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.nav-content {
+  flex: 1;
+  padding: 1rem;
+}
+
+.nav-category {
+  margin-bottom: 1.5rem;
+}
+
+.category-title {
+  margin: 0 0 0.75rem 0;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.category-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #586069;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.nav-item.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.playground-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+.playground-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.playground-header {
+  margin-bottom: 2rem;
+}
+
+.playground-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.playground-description {
+  color: #666;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.playground-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.playground-not-found h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.playground-not-found p {
+  color: #666;
+  margin: 0;
+}
