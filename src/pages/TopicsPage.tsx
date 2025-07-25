@@ -160,6 +160,12 @@ const TopicsPage: React.FC = () => {
   }
 
   // 生成 MDX 内容（后续将通过真实 MDX 解析）
+  const playgroundSection = currentDoc.playgrounds.length > 0
+    ? currentDoc.playgrounds.map(playground => 
+        `<div class="playground-placeholder" data-playground-id="${playground.id}" data-playground-mode="${playground.mode}"></div>`
+      ).join('')
+    : `<div class="playground-placeholder empty">暂无交互示例</div>`;
+
   const mdxContent = `
 <h1>${currentDoc.title}</h1>
 
@@ -181,10 +187,7 @@ const TopicsPage: React.FC = () => {
 <h2>交互式演示</h2>
 
 <p>下面包含 ${currentDoc.playgrounds.length} 个交互式演示：</p>
-
-${currentDoc.playgrounds.map(playground => 
-  `<div class="playground-placeholder" data-playground-id="${playground.id}" data-playground-mode="${playground.mode}"></div>`
-).join('')}
+${playgroundSection}
 
 <h2>小贴士</h2>
 

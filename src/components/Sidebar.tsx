@@ -18,18 +18,17 @@ interface SidebarItemProps {
 const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDepth, onDocChange }) => {
   const [isExpanded, setIsExpanded] = useState(level === 0)
   const location = useLocation()
-  const isActive = location.pathname === `/topics/${item.path}`
-  const hasChildren = item.children && item.children.length > 0
-  const canExpand = level < maxDepth && hasChildren
+  const isLeaf = !!item.path && (!item.children || item.children.length === 0)
+  const isActive = isLeaf && location.pathname === `/topics/${item.path}`
 
   const handleToggle = () => {
-    if (canExpand) {
+    if (!isLeaf && item.children && item.children.length > 0) {
       setIsExpanded(!isExpanded)
     }
   }
 
   const handleDocClick = () => {
-    if (onDocChange && item.path) {
+    if (onDocChange && isLeaf && item.path) {
       onDocChange(item.path)
     }
   }
@@ -37,7 +36,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
   return (
     <div className={`sidebar-item level-${level}`}>
       <div className={`sidebar-item-header ${isActive ? 'active' : ''}`}>
-        {canExpand && (
+        {!isLeaf && item.children && item.children.length > 0 && (
           <button
             className={`expand-button ${isExpanded ? 'expanded' : ''}`}
             onClick={handleToggle}
@@ -46,23 +45,23 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({ item, level, maxDept
             ▶
           </button>
         )}
-        
-        {hasChildren ? (
-          <span className="sidebar-title">{item.title}</span>
-        ) : (
-          <Link 
+        {isLeaf ? (
+          <Link
             to={`/topics/${item.path}`}
             className="sidebar-link"
             onClick={handleDocClick}
           >
             {item.title}
           </Link>
+        ) : (
+          <span className="sidebar-title" onClick={handleToggle} style={{ cursor: 'pointer' }}>
+            {item.title}{item.path === '' ? ' (目录)' : ''}
+          </span>
         )}
       </div>
-      
-      {canExpand && isExpanded && (
+      {item.children && isExpanded && (
         <div className="sidebar-children">
-          {item.children!.map((child, index) => (
+          {item.children.map((child, index) => (
             <SidebarItemComponent
               key={index}
               item={child}
