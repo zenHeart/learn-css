@@ -1033,10 +1033,6 @@ button:focus-visible {
   padding: 2rem;
 }
 
-.playground-header {
-  margin-bottom: 2rem;
-}
-
 .playground-header h2 {
   margin: 0 0 0.5rem 0;
   color: #333;

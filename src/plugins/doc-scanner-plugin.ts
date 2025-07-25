@@ -257,6 +257,161 @@ class DocScanner {
     }
   }
 
+  // 规范化代码格式（移除多余缩进和空行）
+  private normalizeCode(code: string): string {
+    if (!code || !code.trim()) return ''
+    
+    const lines = code.split('\n')
+    
+    // 移除开头和结尾的空行
+    while (lines.length > 0 && !lines[0].trim()) {
+      lines.shift()
+    }
+    while (lines.length > 0 && !lines[lines.length - 1].trim()) {
+      lines.pop()
+    }
+    
+    if (lines.length === 0) return ''
+    
+    // 找到最小缩进级别（忽略空行）
+    let minIndent = Infinity
+    for (const line of lines) {
+      if (line.trim()) {
+        const match = line.match(/^(\s*)/)
+        if (match) {
+          minIndent = Math.min(minIndent, match[1].length)
+        }
+      }
+    }
+    
+    // 如果所有行都有相同的最小缩进，移除这个缩进
+    if (minIndent > 0 && minIndent !== Infinity) {
+      return lines
+        .map(line => line.startsWith(' '.repeat(minIndent)) ? line.slice(minIndent) : line)
+        .join('\n')
+        .trim()
+    }
+    
+    return lines.join('\n').trim()
+  }
+
+  // 格式化 CSS 代码
+  private formatCssCode(cssCode: string): string {
+    if (!cssCode || !cssCode.trim()) return ''
+    
+    // 先进行基础规范化
+    let formatted = this.normalizeCode(cssCode)
+    
+    // CSS 特定的格式化
+    const lines = formatted.split('\n')
+    const formattedLines: string[] = []
+    let indentLevel = 0
+    const indentSize = 2 // CSS 使用 2 空格缩进
+    
+    for (let line of lines) {
+      line = line.trim()
+      if (!line) continue
+      
+      // 处理闭合大括号
+      if (line === '}') {
+        indentLevel = Math.max(0, indentLevel - 1)
+        formattedLines.push(' '.repeat(indentLevel * indentSize) + line)
+        continue
+      }
+      
+      // 添加当前行（带缩进）
+      formattedLines.push(' '.repeat(indentLevel * indentSize) + line)
+      
+      // 处理开放大括号
+      if (line.endsWith('{')) {
+        indentLevel++
+      }
+    }
+    
+    return formattedLines.join('\n')
+  }
+
+  // 格式化 JavaScript 代码
+  private formatJsCode(jsCode: string): string {
+    if (!jsCode || !jsCode.trim()) return ''
+    
+    // 先进行基础规范化
+    let formatted = this.normalizeCode(jsCode)
+    
+    // JavaScript 特定的格式化
+    const lines = formatted.split('\n')
+    const formattedLines: string[] = []
+    let indentLevel = 0
+    const indentSize = 2 // JavaScript 使用 2 空格缩进
+    
+    for (let line of lines) {
+      line = line.trim()
+      if (!line) continue
+      
+      // 处理闭合大括号和小括号
+      if (line.startsWith('}') || line.startsWith(')')) {
+        indentLevel = Math.max(0, indentLevel - 1)
+      }
+      
+      // 添加当前行（带缩进）
+      formattedLines.push(' '.repeat(indentLevel * indentSize) + line)
+      
+      // 处理开放大括号和小括号
+      if (line.endsWith('{') || line.endsWith('(')) {
+        indentLevel++
+      }
+      
+      // 处理函数声明和控制结构
+      if (line.includes('function') && line.endsWith('{')) {
+        // 已经在上面处理了
+      } else if (['if', 'for', 'while', 'try', 'catch'].some(keyword => line.startsWith(keyword))) {
+        if (line.endsWith('{')) {
+          // 已经在上面处理了
+        }
+      }
+    }
+    
+    return formattedLines.join('\n')
+  }
+
+  // 格式化完整的 HTML 文档
+  private formatHtmlDocument(htmlContent: string, playgroundId: string): string {
+    // 简单的 HTML 格式化，确保基本的缩进结构
+    const lines = htmlContent.split('\n')
+    const formattedLines: string[] = []
+    let indentLevel = 0
+    const indentSize = 4
+    
+    for (let line of lines) {
+      line = line.trim()
+      if (!line) continue
+      
+      // 检查是否是闭合标签
+      if (line.startsWith('</')) {
+        indentLevel = Math.max(0, indentLevel - 1)
+      }
+      
+      // 添加当前行（带缩进）
+      if (line) {
+        formattedLines.push(' '.repeat(indentLevel * indentSize) + line)
+      }
+      
+      // 检查是否是开始标签（但不是自闭合标签）
+      if (line.startsWith('<') && !line.startsWith('</') && !line.endsWith('/>') && !line.includes('<!DOCTYPE')) {
+        const tagMatch = line.match(/<(\w+)/)
+        if (tagMatch) {
+          const tagName = tagMatch[1].toLowerCase()
+          // 对于需要增加缩进的标签
+          if (['html', 'head', 'body', 'div', 'section', 'article', 'nav', 'header', 'footer', 'main', 'aside'].includes(tagName)) {
+            indentLevel++
+          }
+        }
+      }
+    }
+    
+    return formattedLines.join('\n')
+  }
+
   // 从单个 HTML 文件加载 Playground 代码
   private async loadPlaygroundFromSingleFile(filePath: string, playgroundId: string, mode: string): Promise<PlaygroundItem | null> {
     try {
@@ -267,9 +422,13 @@ class DocScanner {
       const styleMatches = htmlContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi)
       if (styleMatches) {
         const cssContent = styleMatches
-          .map(match => match.replace(/<\/?style[^>]*>/gi, ''))
+          .map(match => {
+            const content = match.replace(/<\/?style[^>]*>/gi, '')
+            return this.formatCssCode(content)
+          })
+          .filter(content => content.trim())
           .join('\n\n')
-          .trim()
+        
         if (cssContent) {
           initialCode['style.css'] = cssContent
         }
@@ -279,10 +438,13 @@ class DocScanner {
       const scriptMatches = htmlContent.match(/<script[^>]*>([\s\S]*?)<\/script>/gi)
       if (scriptMatches) {
         const jsContent = scriptMatches
-          .map(match => match.replace(/<\/?script[^>]*>/gi, ''))
+          .map(match => {
+            const content = match.replace(/<\/?script[^>]*>/gi, '')
+            return this.formatJsCode(content)
+          })
           .filter(content => content.trim()) // 过滤空脚本
           .join('\n\n')
-          .trim()
+        
         if (jsContent) {
           initialCode['script.js'] = jsContent
         }
@@ -292,12 +454,16 @@ class DocScanner {
       let cleanHtml = htmlContent
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/^\s*\n/gm, '') // 移除空行
-        .trim()
-        
-      // 如果 HTML 是完整文档，提取 body 内容
+      
+      // 如果 HTML 是完整文档，提取 body 内容并重新构建
       const bodyMatch = cleanHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
       if (bodyMatch) {
+        const bodyContent = this.normalizeCode(bodyMatch[1])
+        const indentedBodyContent = bodyContent
+          .split('\n')
+          .map(line => line.trim() ? '    ' + line : line)
+          .join('\n')
+        
         cleanHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -306,11 +472,17 @@ class DocScanner {
     <title>${playgroundId}</title>
 </head>
 <body>
-${bodyMatch[1].trim()}
+${indentedBodyContent}
 </body>
 </html>`
       } else if (!cleanHtml.includes('<!DOCTYPE html>')) {
         // 如果不是完整文档，包装成完整的 HTML
+        const normalizedContent = this.normalizeCode(cleanHtml)
+        const indentedContent = normalizedContent
+          .split('\n')
+          .map(line => line.trim() ? '    ' + line : line)
+          .join('\n')
+        
         cleanHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -319,9 +491,12 @@ ${bodyMatch[1].trim()}
     <title>${playgroundId}</title>
 </head>
 <body>
-${cleanHtml}
+${indentedContent}
 </body>
 </html>`
+      } else {
+        // 如果已经是完整的 HTML 文档，只需要规范化格式
+        cleanHtml = this.formatHtmlDocument(cleanHtml, playgroundId)
       }
       
       initialCode['index.html'] = cleanHtml

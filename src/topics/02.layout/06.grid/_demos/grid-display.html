@@ -1,47 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>验证 display gird 和 inline-grid 区别</title>
-        <style>
-            .container {
-                display: grid;
-                border: 1px solid #000;
-                margin: 10px;
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>验证 display gird 和 inline-grid 区别</title>
+    <style>
+      .container {
+        display: grid;
+        border: 1px solid #000;
+        margin: 10px;
+      }
 
-            .container > .cell {
-                opacity: 0.7;
-                background: #fdd;
-                border: 1px solid orange;
-            }
-        </style>
-    </head>
-    <body>
-        <label for="display">dispaly: </label>
-        <select name="display">
-            <option value="inline-grid">inline-grid</option>
-            <option selected value="grid">grid</option>
-        </select>
-        <div class="container">
-            <div class="cell">1</div>
-            <div style="line-height: 2rem;" class="cell">2</div>
-            <div style="line-height: 5rem;" class="cell">3</div>
-        </div>
-    </body>
-    <script>
-        let config = {
-            select: document.querySelector('select[name="display"]'),
-            container: document.querySelector('.container'),
-            init() {
-                this.container.style.display = this.select.value;
-                this.select.onchange = e => {
-                    this.container.style.display = e.target.value;
-                };
-            }
+      .container > .cell {
+        opacity: 0.7;
+        background: #fdd;
+        border: 1px solid orange;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="display">dispaly: </label>
+    <select name="display">
+      <option value="inline-grid">inline-grid</option>
+      <option selected value="grid">grid</option>
+    </select>
+    <div class="container">
+      <div class="cell">1</div>
+      <div style="line-height: 2rem" class="cell">2</div>
+      <div style="line-height: 5rem" class="cell">3</div>
+    </div>
+  </body>
+  <script>
+    let config = {
+      select: document.querySelector('select[name="display"]'),
+      container: document.querySelector(".container"),
+      init() {
+        this.container.style.display = this.select.value;
+        this.select.onchange = (e) => {
+          this.container.style.display = e.target.value;
         };
-        config.init();
-    </script>
+      },
+    };
+    config.init();
+  </script>
+  <script>
+    console.log("grid-display.html");
+  </script>
 </html>
