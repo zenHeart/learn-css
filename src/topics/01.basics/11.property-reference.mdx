@@ -1,0 +1,552 @@
+---
+title: "CSS 属性分类参考"
+category: "基础知识"
+tags:
+  - CSS属性
+  - 属性分类
+  - 参考手册
+description: "详细的CSS属性分类参考，按功能分组的完整属性列表"
+keywords: "CSS属性, 属性分类, CSS参考, 定位属性, 布局属性"
+---
+
+# CSS 属性分类参考
+
+## 定位属性
+
+### 视窗平面定位属性
+
+这些属性决定了元素在视窗中的位置：
+
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `position` | 定位方式 | `static`, `relative`, `absolute`, `fixed`, `sticky` |
+| `top` | 距离顶部距离 | `10px`, `50%`, `auto` |
+| `right` | 距离右侧距离 | `10px`, `50%`, `auto` |
+| `bottom` | 距离底部距离 | `10px`, `50%`, `auto` |
+| `left` | 距离左侧距离 | `10px`, `50%`, `auto` |
+
+
+```css
+.positioned {
+  position: absolute;
+  top: 50px;
+  left: 100px;
+}
+```
+
+### 垂直定位属性
+
+决定了元素在 z 轴的层叠次序：
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `z-index` | 层叠顺序 | `0`, `1`, `999`, `-1` |
+
+```css
+.modal {
+  position: fixed;
+  z-index: 1000;
+}
+```
+
+### 裁剪属性
+
+决定了定位后的元素若溢出包含块，溢出区域的处理问题：
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `clip` | 裁剪区域（已废弃） | `rect(0, 100px, 100px, 0)` |
+| `clip-path` | 裁剪路径 | `circle(50%)`, `polygon(...)` |
+
+## 布局属性
+
+### 元素显示特性属性
+
+这些属性决定了元素以何种模型进行显示：
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `display` | 显示类型 | `block`, `inline`, `flex`, `grid`, `none` |
+| `visibility` | 可见性 | `visible`, `hidden`, `collapse` |
+| `overflow` | 溢出处理 | `visible`, `hidden`, `scroll`, `auto` |
+| `overflow-x` | 水平溢出 | `visible`, `hidden`, `scroll`, `auto` |
+| `overflow-y` | 垂直溢出 | `visible`, `hidden`, `scroll`, `auto` |
+
+```css
+.container {
+  display: flex;
+  overflow: hidden;
+}
+
+.hidden-element {
+  visibility: hidden;
+}
+```
+
+### 元素排布特性属性
+
+决定了元素以何种方式进行对齐：
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `float` | 浮动方向 | `left`, `right`, `none` |
+| `clear` | 清除浮动 | `left`, `right`, `both`, `none` |
+
+```css
+.sidebar {
+  float: left;
+  width: 200px;
+}
+
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+```
+
+## 尺寸属性
+
+### 宽度属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `width` | 宽度 | `100px`, `50%`, `auto` |
+| `min-width` | 最小宽度 | `100px`, `10em` |
+| `max-width` | 最大宽度 | `500px`, `100%` |
+
+### 高度属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `height` | 高度 | `100px`, `50%`, `auto` |
+| `min-height` | 最小高度 | `100px`, `10em` |
+| `max-height` | 最大高度 | `500px`, `100vh` |
+
+```css
+.container {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+}
+```
+
+> 注意：尺寸属性只针对块元素，和以块元素显示的行内元素。
+
+## 外边距属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `margin` | 外边距（简写） | `10px`, `10px 20px`, `auto` |
+| `margin-top` | 上外边距 | `10px`, `1em`, `auto` |
+| `margin-right` | 右外边距 | `10px`, `1em`, `auto` |
+| `margin-bottom` | 下外边距 | `10px`, `1em`, `auto` |
+| `margin-left` | 左外边距 | `10px`, `1em`, `auto` |
+
+```css
+.centered {
+  margin: 0 auto; /* 水平居中 */
+}
+
+.spaced {
+  margin: 20px 10px; /* 上下20px，左右10px */
+}
+```
+
+## 内边距属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `padding` | 内边距（简写） | `10px`, `10px 20px` |
+| `padding-top` | 上内边距 | `10px`, `1em` |
+| `padding-right` | 右内边距 | `10px`, `1em` |
+| `padding-bottom` | 下内边距 | `10px`, `1em` |
+| `padding-left` | 左内边距 | `10px`, `1em` |
+
+```css
+.card {
+  padding: 20px; /* 四边都是20px */
+}
+
+.button {
+  padding: 10px 20px; /* 上下10px，左右20px */
+}
+```
+
+## 边框属性
+
+### 边框样式
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `border` | 边框（简写） | `1px solid #000` |
+| `border-width` | 边框宽度 | `1px`, `thin`, `medium`, `thick` |
+| `border-style` | 边框样式 | `solid`, `dashed`, `dotted`, `double` |
+| `border-color` | 边框颜色 | `#000`, `red`, `transparent` |
+
+### 单边边框
+
+| 属性 | 描述 |
+|------|------|
+| `border-top` | 上边框 |
+| `border-right` | 右边框 |
+| `border-bottom` | 下边框 |
+| `border-left` | 左边框 |
+
+### 边框圆角
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `border-radius` | 圆角（简写） | `5px`, `50%`, `10px 20px` |
+| `border-top-left-radius` | 左上圆角 | `5px` |
+| `border-top-right-radius` | 右上圆角 | `5px` |
+| `border-bottom-right-radius` | 右下圆角 | `5px` |
+| `border-bottom-left-radius` | 左下圆角 | `5px` |
+
+```css
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.circle {
+  border-radius: 50%;
+}
+```
+
+## 背景属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `background` | 背景（简写） | `#fff url(bg.jpg) no-repeat center` |
+| `background-color` | 背景颜色 | `#fff`, `red`, `transparent` |
+| `background-image` | 背景图片 | `url(bg.jpg)`, `linear-gradient(...)` |
+| `background-repeat` | 重复方式 | `no-repeat`, `repeat`, `repeat-x` |
+| `background-position` | 背景位置 | `center`, `top left`, `50% 50%` |
+| `background-size` | 背景尺寸 | `cover`, `contain`, `100px 200px` |
+| `background-attachment` | 背景附着 | `scroll`, `fixed`, `local` |
+
+```css
+.hero {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  background-size: cover;
+  background-position: center;
+}
+```
+
+## 文字属性
+
+### 字体属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `font` | 字体（简写） | `16px Arial, sans-serif` |
+| `font-family` | 字体族 | `Arial, sans-serif` |
+| `font-size` | 字体大小 | `16px`, `1.2em`, `large` |
+| `font-weight` | 字体粗细 | `normal`, `bold`, `400`, `700` |
+| `font-style` | 字体样式 | `normal`, `italic`, `oblique` |
+| `font-variant` | 字体变形 | `normal`, `small-caps` |
+
+### 文本属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `color` | 文字颜色 | `#000`, `red`, `rgb(255,0,0)` |
+| `text-align` | 文本对齐 | `left`, `center`, `right`, `justify` |
+| `text-decoration` | 文本装饰 | `none`, `underline`, `line-through` |
+| `text-transform` | 文本转换 | `none`, `uppercase`, `lowercase` |
+| `text-indent` | 首行缩进 | `2em`, `20px` |
+| `line-height` | 行高 | `1.5`, `24px`, `normal` |
+| `letter-spacing` | 字母间距 | `normal`, `1px`, `0.1em` |
+| `word-spacing` | 单词间距 | `normal`, `5px` |
+| `white-space` | 空白处理 | `normal`, `nowrap`, `pre` |
+
+```css
+.title {
+  font: bold 24px "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.content {
+  font-size: 16px;
+  line-height: 1.6;
+  text-indent: 2em;
+}
+```
+
+## 列表属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `list-style` | 列表样式（简写） | `disc inside` |
+| `list-style-type` | 列表类型 | `disc`, `circle`, `decimal`, `none` |
+| `list-style-position` | 列表位置 | `inside`, `outside` |
+| `list-style-image` | 列表图片 | `url(bullet.png)`, `none` |
+
+```css
+.custom-list {
+  list-style: none;
+}
+
+.numbered-list {
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+```
+
+## 表格属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `border-collapse` | 边框合并 | `separate`, `collapse` |
+| `border-spacing` | 边框间距 | `2px`, `5px 10px` |
+| `table-layout` | 表格布局 | `auto`, `fixed` |
+| `caption-side` | 标题位置 | `top`, `bottom` |
+| `empty-cells` | 空单元格 | `show`, `hide` |
+
+```css
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+```
+
+## Flexbox 属性
+
+### 容器属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `display` | 显示类型 | `flex`, `inline-flex` |
+| `flex-direction` | 主轴方向 | `row`, `column`, `row-reverse` |
+| `flex-wrap` | 换行设置 | `nowrap`, `wrap`, `wrap-reverse` |
+| `flex-flow` | 方向和换行（简写） | `row wrap` |
+| `justify-content` | 主轴对齐 | `flex-start`, `center`, `space-between` |
+| `align-items` | 交叉轴对齐 | `flex-start`, `center`, `stretch` |
+| `align-content` | 多行对齐 | `flex-start`, `center`, `space-around` |
+| `gap` | 间距 | `10px`, `10px 20px` |
+
+### 项目属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `flex` | 弹性（简写） | `1`, `0 1 auto`, `none` |
+| `flex-grow` | 放大比例 | `0`, `1`, `2` |
+| `flex-shrink` | 缩小比例 | `1`, `0` |
+| `flex-basis` | 基础大小 | `auto`, `100px`, `50%` |
+| `align-self` | 单独对齐 | `auto`, `center`, `flex-end` |
+| `order` | 排序 | `0`, `1`, `-1` |
+
+```css
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.flex-item {
+  flex: 1;
+}
+
+.flex-item--featured {
+  flex: 2;
+  order: -1;
+}
+```
+
+## Grid 属性
+
+### 容器属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `display` | 显示类型 | `grid`, `inline-grid` |
+| `grid-template-columns` | 列定义 | `1fr 2fr`, `repeat(3, 1fr)` |
+| `grid-template-rows` | 行定义 | `100px auto`, `repeat(2, 1fr)` |
+| `grid-template-areas` | 区域定义 | `"header header" "sidebar main"` |
+| `grid-gap` | 间距（简写） | `10px`, `10px 20px` |
+| `justify-items` | 项目水平对齐 | `start`, `center`, `stretch` |
+| `align-items` | 项目垂直对齐 | `start`, `center`, `stretch` |
+| `justify-content` | 容器水平对齐 | `start`, `center`, `space-around` |
+| `align-content` | 容器垂直对齐 | `start`, `center`, `space-around` |
+
+### 项目属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `grid-column` | 列位置（简写） | `1 / 3`, `span 2` |
+| `grid-row` | 行位置（简写） | `1 / 3`, `span 2` |
+| `grid-area` | 区域位置 | `header`, `1 / 1 / 2 / 3` |
+| `justify-self` | 单独水平对齐 | `start`, `center`, `stretch` |
+| `align-self` | 单独垂直对齐 | `start`, `center`, `stretch` |
+
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 20px;
+}
+
+.grid-item--span-2 {
+  grid-column: span 2;
+}
+```
+
+## 变换属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `transform` | 2D/3D变换 | `translate(10px, 20px)`, `rotate(45deg)` |
+| `transform-origin` | 变换原点 | `center`, `top left`, `50% 50%` |
+| `transform-style` | 3D样式 | `flat`, `preserve-3d` |
+| `perspective` | 透视距离 | `1000px`, `none` |
+| `perspective-origin` | 透视原点 | `center`, `top left` |
+| `backface-visibility` | 背面可见性 | `visible`, `hidden` |
+
+```css
+.rotated {
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+.scaled {
+  transform: scale(1.2) translateX(10px);
+}
+```
+
+## 过渡和动画属性
+
+### 过渡属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `transition` | 过渡（简写） | `all 0.3s ease` |
+| `transition-property` | 过渡属性 | `all`, `opacity`, `transform` |
+| `transition-duration` | 过渡时间 | `0.3s`, `300ms` |
+| `transition-timing-function` | 过渡函数 | `ease`, `linear`, `cubic-bezier(...)` |
+| `transition-delay` | 过渡延迟 | `0s`, `0.1s` |
+
+### 动画属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `animation` | 动画（简写） | `slideIn 1s ease-in-out` |
+| `animation-name` | 动画名称 | `slideIn`, `fadeOut` |
+| `animation-duration` | 动画时间 | `1s`, `500ms` |
+| `animation-timing-function` | 动画函数 | `ease`, `linear` |
+| `animation-delay` | 动画延迟 | `0s`, `0.5s` |
+| `animation-iteration-count` | 播放次数 | `1`, `infinite`, `3` |
+| `animation-direction` | 播放方向 | `normal`, `reverse`, `alternate` |
+| `animation-fill-mode` | 填充模式 | `none`, `forwards`, `backwards` |
+| `animation-play-state` | 播放状态 | `running`, `paused` |
+
+```css
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-in.active {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.slide-animation {
+  animation: slideIn 0.5s ease-out forwards;
+}
+```
+
+## 其他常用属性
+
+### 光标属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `cursor` | 光标样式 | `pointer`, `text`, `not-allowed`, `url(...)` |
+
+### 轮廓属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `outline` | 轮廓（简写） | `1px solid red` |
+| `outline-color` | 轮廓颜色 | `red`, `#000` |
+| `outline-style` | 轮廓样式 | `solid`, `dashed` |
+| `outline-width` | 轮廓宽度 | `1px`, `thin` |
+| `outline-offset` | 轮廓偏移 | `2px`, `-1px` |
+
+### 内容属性
+
+| 属性 | 描述 | 取值示例 |
+|------|------|----------|
+| `content` | 生成内容 | `"文本"`, `attr(title)`, `counter(...)` |
+| `quotes` | 引号样式 | `auto`, `"「" "」"` |
+
+```css
+.button {
+  cursor: pointer;
+  outline: none;
+}
+
+.button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  /* 其他样式... */
+}
+```
+
+## 属性继承性
+
+### 可继承属性
+
+这些属性会自动从父元素继承到子元素：
+
+- 所有字体相关属性（`font-family`, `font-size`, `font-weight` 等）
+- 所有文本相关属性（`color`, `text-align`, `line-height` 等）
+- `list-style` 系列属性
+- `cursor`
+- `visibility`
+
+### 不可继承属性
+
+这些属性不会自动继承：
+
+- 所有盒模型属性（`width`, `height`, `margin`, `padding`, `border` 等）
+- 所有定位属性（`position`, `top`, `left` 等）
+- 所有背景属性（`background` 系列）
+- 所有布局属性（`display`, `float` 等）
+
+### 强制继承
+
+可以使用 `inherit` 关键字强制继承：
+
+```css
+.child {
+  border: inherit; /* 继承父元素的边框 */
+  margin: inherit; /* 继承父元素的外边距 */
+}
+```
+
+## 参考资料
+
+- [CSS 属性参考 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Properties_Reference)
+- [CSS 规范 - W3C](https://www.w3.org/Style/CSS/)
+- [Can I Use - CSS 兼容性查询](https://caniuse.com/) 

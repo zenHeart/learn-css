@@ -1,0 +1,292 @@
+---
+title: "CSS 自定义属性"
+category: "基础知识"
+tags:
+  - CSS变量
+  - 自定义属性
+  - CSS3
+description: "详解CSS自定义属性(CSS变量)的使用方法、作用域和应用场景"
+keywords: "CSS变量, CSS自定义属性, var(), :root, CSS3"
+---
+
+# CSS 自定义属性
+
+## 什么是自定义属性
+
+CSS 自定义属性（也称为 CSS 变量）是前缀 `--` 开头的属性。可以利用自定义属性实现 CSS 中设置变量的效果，提高代码的可维护性和复用性。
+
+## 如何使用自定义属性
+
+### 1. 定义自定义属性
+
+```css
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --font-size-large: 24px;
+  --border-radius: 4px;
+}
+```
+
+> **注意要点**：
+> 1. **自定义属性必须使用 `--` 开头**
+> 2. **自定义属性名称大小写敏感**
+> 3. **建议在 `:root` 中定义全局变量**
+
+### 2. 使用 `var()` 函数引用自定义属性
+
+```css
+.button {
+  color: var(--primary-color);
+  font-size: var(--font-size-large);
+  border-radius: var(--border-radius);
+}
+
+.warning {
+  color: var(--warn-color, red); /* 第二个参数是默认值 */
+}
+```
+
+{/* @playground id="basic-use" mode="demo" */}
+
+## 作用域和继承
+
+### 全局作用域
+
+在 `:root` 中定义的自定义属性具有全局作用域：
+
+```css
+:root {
+  --global-color: #333;
+}
+
+/* 任何元素都可以使用 */
+body {
+  color: var(--global-color);
+}
+```
+
+{/* @playground id="customer-scope" mode="demo" */}
+
+### 局部作用域
+
+自定义属性遵循 CSS 的层叠和继承规则：
+
+```css
+.component {
+  --local-color: blue;
+}
+
+.component .item {
+  color: var(--local-color); /* 继承父元素的变量 */
+}
+```
+
+### 嵌套和覆盖
+
+```css
+:root {
+  --color: red;
+}
+
+.parent {
+  --color: blue; /* 覆盖全局变量 */
+}
+
+.child {
+  color: var(--color); /* 使用最近的 --color 值 */
+}
+```
+
+{/* @playground id="nest" mode="demo" */}
+
+## 高级用法
+
+### 1. 默认值设置
+
+```css
+.element {
+  /* 如果 --undefined-var 不存在，使用 #999 作为默认值 */
+  color: var(--undefined-var, #999);
+  
+  /* 多层默认值 */
+  margin: var(--margin, var(--default-margin, 10px));
+}
+```
+
+{/* @playground id="var-default" mode="demo" */}
+
+### 2. 与 calc() 函数结合使用
+
+```css
+:root {
+  --base-size: 16px;
+  --multiplier: 1.5;
+}
+
+.large-text {
+  font-size: calc(var(--base-size) * var(--multiplier));
+}
+```
+
+{/* @playground id="var-calc" mode="demo" */}
+
+### 3. 部分值替换
+
+自定义属性可以包含部分属性值：
+
+```css
+:root {
+  --shadow-color: 0, 0, 0;
+  --shadow-alpha: 0.3;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(var(--shadow-color), var(--shadow-alpha));
+}
+```
+
+{/* @playground id="var-part-replace" mode="demo" */}
+
+### 4. 依赖其他自定义属性
+
+```css
+:root {
+  --primary-hue: 210;
+  --primary-saturation: 100%;
+  --primary-lightness: 50%;
+  
+  /* 基于其他变量定义新变量 */
+  --primary-color: hsl(
+    var(--primary-hue), 
+    var(--primary-saturation), 
+    var(--primary-lightness)
+  );
+  
+  --primary-light: hsl(
+    var(--primary-hue), 
+    var(--primary-saturation), 
+    calc(var(--primary-lightness) + 20%)
+  );
+}
+```
+
+{/* @playground id="rely-other-depency" mode="demo" */}
+
+## JavaScript 操作自定义属性
+
+### 读取自定义属性
+
+```javascript
+// 获取根元素的自定义属性
+const rootStyles = getComputedStyle(document.documentElement);
+const primaryColor = rootStyles.getPropertyValue('--primary-color');
+
+// 获取特定元素的自定义属性
+const element = document.querySelector('.component');
+const elementStyles = getComputedStyle(element);
+const localColor = elementStyles.getPropertyValue('--local-color');
+```
+
+### 设置自定义属性
+
+```javascript
+// 设置根元素的自定义属性
+document.documentElement.style.setProperty('--primary-color', '#ff6b6b');
+
+// 设置特定元素的自定义属性
+const element = document.querySelector('.component');
+element.style.setProperty('--local-color', 'green');
+```
+
+{/* @playground id="js-control-property" mode="demo" */}
+
+## 实际应用场景
+
+### 1. 主题切换
+
+```css
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #dddddd;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --border-color: #444444;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+```
+
+### 2. 响应式设计
+
+```css
+:root {
+  --container-width: 1200px;
+  --gutter: 20px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --container-width: 100%;
+    --gutter: 10px;
+  }
+}
+
+.container {
+  max-width: var(--container-width);
+  padding: 0 var(--gutter);
+}
+```
+
+### 3. 组件样式系统
+
+```css
+.button {
+  --button-bg: #007bff;
+  --button-color: white;
+  --button-padding: 8px 16px;
+  
+  background: var(--button-bg);
+  color: var(--button-color);
+  padding: var(--button-padding);
+}
+
+.button--large {
+  --button-padding: 12px 24px;
+}
+
+.button--danger {
+  --button-bg: #dc3545;
+}
+```
+
+## 浏览器兼容性
+
+CSS 自定义属性在现代浏览器中有良好的支持：
+
+- Chrome 49+
+- Firefox 31+
+- Safari 9.1+
+- Edge 16+
+
+对于不支持的浏览器，可以使用 PostCSS 插件进行编译转换。
+
+## 最佳实践
+
+1. **合理命名**：使用语义化的变量名，如 `--primary-color` 而不是 `--blue`
+2. **分层管理**：全局变量放在 `:root`，组件变量放在组件内部
+3. **提供默认值**：使用 `var()` 函数的第二个参数提供合理的默认值
+4. **文档化**：为重要的自定义属性添加注释说明
+5. **性能考虑**：避免在大量元素上频繁修改自定义属性
+
+## 参考资料
+
+- [CSS 自定义属性 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Using_CSS_custom_properties)
+- [CSS Variables - W3C](https://www.w3.org/TR/css-variables-1/) 

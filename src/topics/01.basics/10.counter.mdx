@@ -1,0 +1,290 @@
+---
+title: "CSS 计数器"
+category: "基础知识"
+tags:
+  - 计数器
+  - counter
+  - 自动编号
+description: "详解CSS计数器的使用方法，实现文章段落自动编号等功能"
+keywords: "CSS计数器, counter, counter-reset, counter-increment, 自动编号"
+---
+
+# CSS 计数器
+
+计数器是 CSS 内部维护的变量，可以利用计数器实现文章段落添加序号等功能。
+
+## 快速预览
+
+下面是一个文章标题自动编号的示例：
+
+{/* @playground id="couter-aritcle" mode="demo" */}
+
+## 基本用法
+
+实现计数器需要三个步骤：
+
+1. 采用 `counter-reset` 属性声明 `counter` 变量
+   > 注意变量名的合法性，不能为 CSS 关键字
+
+2. 采用 `counter-increment` 属性设置变量递增规则
+
+3. 在标题前的伪元素使用 `counter(变量名)` 获取变量当前值
+
+```css
+/* 1. 重置计数器 */
+h1 {
+  counter-reset: chapter;
+}
+
+/* 2. 递增计数器 */
+h2 {
+  counter-increment: chapter;
+}
+
+/* 3. 显示计数器 */
+h2::before {
+  content: "第 " counter(chapter) " 章：";
+}
+```
+
+## 核心属性和值
+
+### counter-reset
+
+`counter-reset` 属性重置或创建计数变量，值的格式为：
+
+> `[ <custom-ident> <integer>? ]+ | none`
+
+- **custom-ident** 为合法的计数变量名
+- **integer** 为整数，表示计数起始值，默认为 0
+
+```css
+h1 {
+  /* chapter 和 section 两个计数变量，section 初始值重置为 1 */
+  counter-reset: chapter section 1;
+}
+
+/* 等价于 */
+h1 {
+  counter-reset: chapter 0 section 1;
+}
+```
+
+### counter-increment
+
+`counter-increment` 属性设置计数器的递增规则，值的格式为：
+
+> `[ <custom-ident> <integer>? ]+ | none`
+
+- **custom-ident** 为计数变量名
+- **integer** 为递增的步长，默认为 1
+
+```css
+h2 {
+  /* chapter 递增 1，section 递增 2 */
+  counter-increment: chapter section 2;
+}
+
+/* 等价于 */
+h2 {
+  counter-increment: chapter 1 section 2;
+}
+```
+
+### counter() 函数
+
+`counter()` 函数用于获取计数器的当前值，格式为：
+
+> `counter(<custom-ident>, <counter-style>?)`
+
+- **custom-ident** 为计数变量名
+- **counter-style** 为可选的计数样式，默认为 `decimal`
+
+```css
+h2::before {
+  /* 使用默认的十进制数字 */
+  content: counter(chapter);
+}
+
+h3::before {
+  /* 使用大写罗马数字 */
+  content: counter(section, upper-roman);
+}
+```
+
+## 计数样式
+
+CSS 支持多种计数样式：
+
+| 样式值 | 描述 | 示例 |
+|--------|------|------|
+| `decimal` | 十进制数字（默认） | 1, 2, 3, ... |
+| `decimal-leading-zero` | 带前导零的十进制 | 01, 02, 03, ... |
+| `lower-roman` | 小写罗马数字 | i, ii, iii, ... |
+| `upper-roman` | 大写罗马数字 | I, II, III, ... |
+| `lower-alpha` | 小写字母 | a, b, c, ... |
+| `upper-alpha` | 大写字母 | A, B, C, ... |
+| `lower-greek` | 小写希腊字母 | α, β, γ, ... |
+
+{/* @playground id="counter-increment" mode="demo" */}
+
+## 嵌套计数器
+
+对于多级标题，可以使用嵌套计数器：
+
+```css
+body {
+  counter-reset: chapter;
+}
+
+h1 {
+  counter-reset: section;
+  counter-increment: chapter;
+}
+
+h1::before {
+  content: "第 " counter(chapter) " 章 ";
+}
+
+h2 {
+  counter-increment: section;
+}
+
+h2::before {
+  content: counter(chapter) "." counter(section) " ";
+}
+```
+
+{/* @playground id="chapter" mode="demo" */}
+
+## counters() 函数
+
+对于更复杂的嵌套场景，可以使用 `counters()` 函数：
+
+> `counters(<custom-ident>, <string>, <counter-style>?)`
+
+- **custom-ident** 为计数变量名
+- **string** 为嵌套层级间的分隔符
+- **counter-style** 为可选的计数样式
+
+```css
+ol {
+  counter-reset: item;
+}
+
+li {
+  counter-increment: item;
+}
+
+li::before {
+  content: counters(item, ".") " ";
+}
+```
+
+这样可以实现 `1.1.1` 这样的多级编号。
+
+## 实际应用案例
+
+### 1. 文章目录自动编号
+
+```css
+.article {
+  counter-reset: h2-counter h3-counter;
+}
+
+.article h2 {
+  counter-increment: h2-counter;
+  counter-reset: h3-counter;
+}
+
+.article h2::before {
+  content: counter(h2-counter) ". ";
+}
+
+.article h3 {
+  counter-increment: h3-counter;
+}
+
+.article h3::before {
+  content: counter(h2-counter) "." counter(h3-counter) " ";
+}
+```
+
+### 2. 有序列表自定义样式
+
+```css
+.custom-list {
+  counter-reset: list-item;
+  list-style: none;
+}
+
+.custom-list li {
+  counter-increment: list-item;
+  position: relative;
+  padding-left: 2em;
+}
+
+.custom-list li::before {
+  content: "(" counter(list-item) ")";
+  position: absolute;
+  left: 0;
+  color: #666;
+}
+```
+
+{/* @playground id="couter-list" mode="demo" */}
+
+### 3. 步骤指南编号
+
+```css
+.steps {
+  counter-reset: step;
+}
+
+.step {
+  counter-increment: step;
+  position: relative;
+  padding-left: 3em;
+  margin-bottom: 1em;
+}
+
+.step::before {
+  content: "步骤 " counter(step);
+  position: absolute;
+  left: 0;
+  background: #007bff;
+  color: white;
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  font-size: 0.8em;
+}
+```
+
+## 浏览器兼容性
+
+CSS 计数器在所有现代浏览器中都有良好的支持：
+
+- Chrome: 2+
+- Firefox: 1+
+- Safari: 3+
+- IE: 8+
+
+## 注意事项
+
+1. **变量名规则**：计数器名称不能使用 CSS 关键字
+2. **作用域**：计数器具有层叠作用域，子元素会继承父元素的计数器
+3. **重置时机**：`counter-reset` 会重置计数器到指定值
+4. **递增时机**：`counter-increment` 在元素创建时执行
+5. **性能考虑**：大量使用计数器可能影响页面渲染性能
+
+## 最佳实践
+
+1. **语义化命名**：使用有意义的计数器名称，如 `chapter`、`section`
+2. **合理重置**：在适当的层级重置计数器，避免计数混乱
+3. **样式一致性**：保持同类型元素的计数样式一致
+4. **辅助功能**：确保计数器内容对屏幕阅读器友好
+
+## 参考资料
+
+- [CSS 计数器 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_Counter_Styles/Using_CSS_counters)
+- [CSS Lists and Counters - W3C](https://www.w3.org/TR/css-lists-3/) 

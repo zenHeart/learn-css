@@ -1,0 +1,171 @@
+---
+title: "CSS 塌陷现象详解"
+category: "基础知识"
+tags:
+  - 塌陷
+  - 浮动
+  - 定位
+  - BFC
+description: "深入讲解浮动塌陷和定位塌陷的产生原因及解决方法"
+keywords: "CSS塌陷, 浮动塌陷, 定位塌陷, 清除浮动, 包含块"
+---
+
+# CSS 塌陷现象详解
+
+> 前言：讲解浮动塌陷和定位塌陷的产生及解决方法
+
+## 塌陷举例
+
+在讲解塌陷之前让我们先看两个例子：
+
+### 1. 浮动导致的塌陷
+
+```html
+<div class="container">
+  <div class="left">左栏</div>
+  <div class="right">右栏</div>
+</div>
+```
+
+```css
+.container {
+  border: 2px solid red;
+}
+
+.left {
+  float: left;
+  width: 200px;
+  height: 100px;
+  background: blue;
+}
+
+.right {
+  float: right;
+  width: 200px;
+  height: 100px;
+  background: green;
+}
+```
+
+从上面的例子可以看出父元素的高度出现了坍塌，没有包含左右栏两个子元素。
+
+### 2. 绝对定位导致的塌陷
+
+```html
+<div class="container">
+  <div class="item">绝对定位元素</div>
+</div>
+```
+
+```css
+.container {
+  border: 2px solid red;
+}
+
+.item {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  background: blue;
+}
+```
+
+这里采用 `absolute` 属性进行定位也出现了塌陷的问题，并且出现了其他的异常现象！
+
+## 塌陷原因分析
+
+塌陷可以理解为包含块高度异常。包含块的概念如下：
+
+每个元素都有自己的盒模型，当多个盒模型存在嵌套关系时，就会产生包含块。它是指内部元素的父元素内容区。CSS 规范中指出，包含块是决定元素的布局和定位的外部边界。
+
+之所以发生异常就是在包含块的高度没有赋值的情况下，子元素的尺寸没有触发父元素的尺寸变化。
+
+阅读 CSS 规范发现如下内容（[块元素高度确定](https://www.w3.org/TR/CSS22/visudet.html#root-height)）：
+
+1. **绝对定位元素在计算包含块高度时会被忽略**
+2. **如果元素有任何浮动后代元素，子元素下底边缘低于父元素内容的底部，高度将会自动扩张包含这个底部。但是只有当该父元素本身也包含浮动的时候才会成立**
+
+对于父元素内部的浮动和绝对定位或者其他的非该父元素的浮动都不起作用。
+
+### 验证父元素浮动特性
+
+```css
+.container {
+  float: left; /* 给父元素添加浮动 */
+  border: 2px solid red;
+}
+```
+
+可以看到父元素的塌陷被清除，但是这么操作又产生了新的问题：父元素的宽度不再是视图宽度。
+
+## 塌陷解决方案
+
+### 1. 利用伪类清除浮动
+
+```css
+.container::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+```
+
+**原理**：利用 `clear:both` 在浮动框下生成了一个空的子元素块，扩张了父元素的下边界。
+
+### 2. 在浮动元素下添加清除浮动框
+
+```html
+<div class="container">
+  <div class="left">左栏</div>
+  <div class="right">右栏</div>
+  <div class="clear"></div>
+</div>
+```
+
+```css
+.clear {
+  clear: both;
+}
+```
+
+### 3. 触发父元素的 BFC
+
+可以通过以下方式触发父元素的 BFC 来清除浮动：
+
+- `overflow: hidden;`
+- `display: flow-root;`
+- `position: absolute;` 或 `position: fixed;`
+- `display: inline-block;`
+
+```css
+.container {
+  overflow: hidden; /* 触发 BFC */
+}
+```
+
+### 4. 使用 Flexbox 或 Grid
+
+现代布局方案可以避免浮动带来的问题：
+
+```css
+.container {
+  display: flex;
+}
+
+.left, .right {
+  /* 不需要浮动 */
+}
+```
+
+## 最佳实践
+
+1. **优先使用现代布局方案**（Flexbox、Grid）避免浮动
+2. **必须使用浮动时**，推荐使用伪类清除浮动的方法
+3. **避免过度使用绝对定位**，特别是在容器高度需要自适应的场景
+4. **理解 BFC 概念**，合理运用 BFC 特性解决布局问题
+
+## 相关概念
+
+- [块格式化上下文 (BFC)](./07.bfc.mdx)
+- [浮动布局详解](../02.layout/01.basics/01.intro.mdx)
+- [定位详解](../02.layout/02.normal-flow/01.intro.mdx) 

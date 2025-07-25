@@ -1,0 +1,510 @@
+---
+title: "伪类和伪元素"
+category: "基础知识"
+tags:
+  - 伪类
+  - 伪元素
+  - 选择器
+description: "详解CSS伪类和伪元素的概念、使用方法和实际应用场景"
+keywords: "伪类, 伪元素, CSS选择器, ::before, ::after, :hover, :focus"
+---
+
+# 伪类和伪元素
+
+伪元素可以补充 DIV 的实现,
+使用时注意如下特点。
+
+1. 伪元素必须设置 **content** 属性为非 `none` 才会显示
+详见 [content](https://www.w3.org/TR/CSS2/generate.html#content)
+2. 伪元素默认为 `inline` 元素
+3. 查看 [one div](https://a.singlediv.com/) 实现了利用一个 DIV
+结合伪元素生成多种图形功能
+4. 伪元素和实体元素之间产生空隙必须设置
+为 `aboslute`
+
+## 概述
+
+伪类和伪元素是CSS中两个重要的概念，它们允许我们选择文档中不存在于DOM树中的元素，或者为已存在的元素添加额外的样式状态。
+
+## 伪类 (Pseudo-classes)
+
+伪类用于选择处于特定状态的元素，语法使用单冒号 `:`。
+
+### 常用伪类
+
+#### 链接状态伪类
+
+```css
+/* 未访问的链接 */
+a:link {
+  color: blue;
+}
+
+/* 已访问的链接 */
+a:visited {
+  color: purple;
+}
+
+/* 鼠标悬停 */
+a:hover {
+  color: red;
+  text-decoration: underline;
+}
+
+/* 获得焦点 */
+a:focus {
+  outline: 2px solid orange;
+}
+
+/* 激活状态（点击时） */
+a:active {
+  color: darkred;
+}
+```
+
+#### 结构伪类
+
+```css
+/* 第一个子元素 */
+li:first-child {
+  font-weight: bold;
+}
+
+/* 最后一个子元素 */
+li:last-child {
+  margin-bottom: 0;
+}
+
+/* 第n个子元素 */
+li:nth-child(2n) {
+  background: #f0f0f0;
+}
+
+/* 奇数行 */
+tr:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+/* 偶数行 */
+tr:nth-child(even) {
+  background: #ffffff;
+}
+
+/* 唯一的子元素 */
+p:only-child {
+  text-align: center;
+}
+```
+
+#### 表单伪类
+
+```css
+/* 获得焦点的输入框 */
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* 有效的输入 */
+input:valid {
+  border-color: green;
+}
+
+/* 无效的输入 */
+input:invalid {
+  border-color: red;
+}
+
+/* 必填字段 */
+input:required {
+  border-left: 3px solid orange;
+}
+
+/* 禁用的元素 */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 选中的复选框或单选按钮 */
+input:checked + label {
+  font-weight: bold;
+}
+```
+
+#### 其他常用伪类
+
+```css
+/* 空元素 */
+p:empty {
+  display: none;
+}
+
+/* 不匹配选择器的元素 */
+input:not([type="submit"]) {
+  border: 1px solid #ccc;
+}
+
+/* 目标元素（锚点跳转） */
+section:target {
+  background: yellow;
+}
+
+/* 根元素 */
+:root {
+  --primary-color: #007bff;
+}
+```
+
+## 伪元素 (Pseudo-elements)
+
+伪元素用于创建和样式化不存在于DOM中的元素，语法使用双冒号 `::`（CSS2中使用单冒号，但建议使用双冒号）。
+
+### ::before 和 ::after
+
+这是最常用的伪元素，可以在元素内容的前面或后面插入内容。
+
+#### 基本用法
+
+```css
+.quote::before {
+  content: """;
+  font-size: 2em;
+  color: #999;
+}
+
+.quote::after {
+  content: """;
+  font-size: 2em;
+  color: #999;
+}
+```
+
+**重要特点**：
+1. **必须设置 `content` 属性**为非 `none` 才会显示
+2. **默认为 `inline` 元素**
+3. **可以设置任何CSS样式**
+
+#### 实际应用示例
+
+##### 1. 添加图标
+
+```css
+.icon-user::before {
+  content: "👤";
+  margin-right: 5px;
+}
+
+.icon-email::before {
+  content: "✉️";
+  margin-right: 5px;
+}
+```
+
+##### 2. 创建几何形状
+
+```css
+.triangle::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: #333;
+}
+```
+
+##### 3. 清除浮动
+
+```css
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+```
+
+##### 4. 创建覆盖层
+
+```css
+.overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.overlay:hover::before {
+  opacity: 1;
+}
+```
+
+### 其他伪元素
+
+#### ::first-letter
+
+选择元素的第一个字母：
+
+```css
+p::first-letter {
+  font-size: 3em;
+  float: left;
+  line-height: 1;
+  margin-right: 5px;
+  color: #333;
+}
+```
+
+#### ::first-line
+
+选择元素的第一行：
+
+```css
+p::first-line {
+  font-weight: bold;
+  color: #666;
+}
+```
+
+#### ::selection
+
+选择用户选中的文本：
+
+```css
+::selection {
+  background: #007bff;
+  color: white;
+}
+
+/* Firefox 兼容 */
+::-moz-selection {
+  background: #007bff;
+  color: white;
+}
+```
+
+#### ::placeholder
+
+样式化输入框的占位符文本：
+
+```css
+input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* 兼容性写法 */
+input::-webkit-input-placeholder { color: #999; }
+input::-moz-placeholder { color: #999; }
+input:-ms-input-placeholder { color: #999; }
+```
+
+## 高级应用
+
+### 使用 attr() 函数
+
+```css
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+```
+
+```html
+<span class="tooltip" data-tooltip="这是一个提示信息">悬停查看提示</span>
+```
+
+### 计数器应用
+
+```css
+.numbered-list {
+  counter-reset: item;
+}
+
+.numbered-list li {
+  counter-increment: item;
+  position: relative;
+}
+
+.numbered-list li::before {
+  content: counter(item);
+  position: absolute;
+  left: -30px;
+  top: 0;
+  background: #007bff;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+```
+
+### 复杂装饰效果
+
+```css
+.fancy-button {
+  position: relative;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.fancy-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.fancy-button:hover::before {
+  left: 100%;
+}
+```
+
+### One Div 技术
+
+利用一个 DIV 结合伪元素可以创建复杂的图形，这种技术被称为 "One Div"：
+
+```css
+.star {
+  position: relative;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 35px solid #ffcc00;
+  transform: rotate(35deg);
+}
+
+.star::before {
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: -25px;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 35px solid #ffcc00;
+  transform: rotate(-70deg);
+}
+
+.star::after {
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: -25px;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 35px solid #ffcc00;
+  transform: rotate(70deg);
+}
+```
+
+## 注意事项和最佳实践
+
+### 1. 定位问题
+
+伪元素默认是 `inline` 元素，如果需要定位或设置宽高，需要设置为 `absolute` 或 `block`：
+
+```css
+.element::before {
+  content: "";
+  position: absolute; /* 或者 display: block */
+  width: 100px;
+  height: 100px;
+}
+```
+
+### 2. 层级问题
+
+伪元素的 `z-index` 默认为 `auto`，可能会被父元素的其他子元素覆盖：
+
+```css
+.element::before {
+  content: "";
+  position: absolute;
+  z-index: 1; /* 确保在正确的层级 */
+}
+```
+
+### 3. 响应式考虑
+
+```css
+.element::after {
+  content: "";
+  width: 50px;
+  height: 50px;
+}
+
+@media (max-width: 768px) {
+  .element::after {
+    width: 30px;
+    height: 30px;
+  }
+}
+```
+
+### 4. 兼容性
+
+- 现代浏览器完全支持双冒号语法
+- IE8+ 支持单冒号语法
+- 建议使用双冒号以区分伪类和伪元素
+
+### 5. 性能考虑
+
+- 避免在大量元素上使用复杂的伪元素
+- 优先使用 CSS 而不是 JavaScript 来实现装饰效果
+- 合理使用 `will-change` 属性优化动画性能
+
+## 实用工具和资源
+
+- [One Div Project](https://a.singlediv.com/) - 使用单个 DIV 和伪元素创建的精美图形
+- [CSS-Tricks 伪元素指南](https://css-tricks.com/pseudo-element-roundup/)
+- [MDN 伪类参考](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-classes)
+- [MDN 伪元素参考](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-elements)
+
+## 参考资料
+
+- [CSS 伪类 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-classes)
+- [CSS 伪元素 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-elements)
+- [CSS 生成内容规范 - W3C](https://www.w3.org/TR/CSS2/generate.html#content) 

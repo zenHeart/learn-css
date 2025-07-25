@@ -1,0 +1,492 @@
+---
+title: "响应式布局与媒体查询"
+category: "布局技术"
+tags:
+  - 响应式
+  - 媒体查询
+  - 移动端
+  - 断点
+description: "详解响应式布局的策略、媒体查询的使用及注意事项"
+keywords: "响应式布局, 媒体查询, @media, 移动端适配, 断点设计"
+---
+
+# 响应式布局与媒体查询
+
+**详解响应式布局的策略及媒体查询的使用方法**
+
+---
+
+## 概述
+
+响应式布局是一种网页设计方法，使网页能够在不同设备和屏幕尺寸上提供最佳的浏览体验。媒体查询是 CSS3 新增的特性，是实现响应式布局的核心技术。
+
+通过对呈现网页设备的检查，媒体查询可以显示特定的样式类。基于该技术可以实现响应式布局。
+
+## 媒体查询基本语法
+
+媒体查询的基本格式如下：
+
+```css
+@media [逻辑操作符] [媒体类型] and (媒体特征) {
+  /* CSS 规则 */
+}
+```
+
+当检测到符合对应媒体特征的设备时，才采用对应的 CSS 规则。
+
+{/* @playground id="font-change" mode="demo" */}
+
+### 引用方式
+
+可以采用如下方式引入媒体查询：
+
+#### 1. 在 CSS 文件中使用 @media
+
+```css
+/* 默认样式 */
+.container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* 平板设备 */
+@media screen and (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 0 20px;
+  }
+}
+
+/* 手机设备 */
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+}
+```
+
+#### 2. 在 HTML 中使用 link 标签
+
+```html
+<!-- 默认样式 -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- 平板样式 -->
+<link rel="stylesheet" href="tablet.css" 
+      media="screen and (max-width: 768px)">
+
+<!-- 手机样式 -->
+<link rel="stylesheet" href="mobile.css" 
+      media="screen and (max-width: 480px)">
+```
+
+#### 3. 在 CSS 中使用 @import
+
+```css
+@import url("tablet.css") screen and (max-width: 768px);
+@import url("mobile.css") screen and (max-width: 480px);
+```
+
+## 媒体类型
+
+常用的媒体类型包括：
+
+| 类型 | 描述 |
+|------|------|
+| `all` | 所有设备（默认值） |
+| `screen` | 彩色屏幕设备 |
+| `print` | 打印设备 |
+| `speech` | 语音合成器 |
+
+```css
+/* 屏幕显示样式 */
+@media screen {
+  body { font-size: 16px; }
+}
+
+/* 打印样式 */
+@media print {
+  body { font-size: 12pt; }
+  .no-print { display: none; }
+}
+```
+
+## 媒体特征
+
+### 常用的媒体特征
+
+| 特征 | 描述 | 示例 |
+|------|------|------|
+| `width` | 视口宽度 | `(width: 320px)` |
+| `min-width` | 最小视口宽度 | `(min-width: 768px)` |
+| `max-width` | 最大视口宽度 | `(max-width: 1024px)` |
+| `height` | 视口高度 | `(height: 600px)` |
+| `min-height` | 最小视口高度 | `(min-height: 400px)` |
+| `max-height` | 最大视口高度 | `(max-height: 800px)` |
+| `orientation` | 设备方向 | `(orientation: landscape)` |
+| `aspect-ratio` | 宽高比 | `(aspect-ratio: 16/9)` |
+| `resolution` | 设备分辨率 | `(min-resolution: 2dppx)` |
+
+### 宽度相关查询
+
+```css
+/* 手机 */
+@media (max-width: 480px) {
+  .container { width: 100%; }
+}
+
+/* 平板 */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container { width: 90%; }
+}
+
+/* 桌面 */
+@media (min-width: 769px) {
+  .container { width: 1200px; }
+}
+```
+
+### 设备方向查询
+
+```css
+/* 横屏 */
+@media (orientation: landscape) {
+  .sidebar { width: 300px; }
+}
+
+/* 竖屏 */
+@media (orientation: portrait) {
+  .sidebar { width: 100%; }
+}
+```
+
+### 高分辨率屏幕查询
+
+```css
+/* 普通屏幕 */
+.logo {
+  background-image: url('logo.png');
+}
+
+/* 高分辨率屏幕 */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 2dppx) {
+  .logo {
+    background-image: url('logo@2x.png');
+    background-size: 100px 50px;
+  }
+}
+```
+
+## 逻辑操作符
+
+### and 操作符
+
+组合多个媒体特征：
+
+```css
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  /* 平板横屏样式 */
+}
+```
+
+### or 操作符（逗号分隔）
+
+满足任一条件即应用样式：
+
+```css
+@media (max-width: 480px), (orientation: portrait) {
+  /* 手机或竖屏样式 */
+}
+```
+
+### not 操作符
+
+排除特定条件：
+
+```css
+@media not screen and (max-width: 480px) {
+  /* 非手机屏幕样式 */
+}
+```
+
+### only 操作符
+
+仅在支持媒体查询的浏览器中应用：
+
+```css
+@media only screen and (max-width: 480px) {
+  /* 仅在支持的浏览器中应用 */
+}
+```
+
+## 响应式设计策略
+
+### 1. 移动优先 (Mobile First)
+
+从最小屏幕开始设计，逐步增强：
+
+```css
+/* 默认（移动端）样式 */
+.container {
+  width: 100%;
+  padding: 0 15px;
+}
+
+/* 平板 */
+@media (min-width: 768px) {
+  .container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+}
+
+/* 桌面 */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1170px;
+  }
+}
+```
+
+### 2. 桌面优先 (Desktop First)
+
+从大屏幕开始设计，逐步适配小屏：
+
+```css
+/* 默认（桌面）样式 */
+.container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* 平板 */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 0 20px;
+  }
+}
+
+/* 手机 */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 15px;
+  }
+}
+```
+
+### 3. 常用断点设置
+
+```css
+/* 超小屏幕（手机，小于 576px） */
+@media (max-width: 575.98px) { }
+
+/* 小屏幕（手机，576px 及以上） */
+@media (min-width: 576px) { }
+
+/* 中等屏幕（平板，768px 及以上） */
+@media (min-width: 768px) { }
+
+/* 大屏幕（桌面，992px 及以上） */
+@media (min-width: 992px) { }
+
+/* 超大屏幕（大桌面，1200px 及以上） */
+@media (min-width: 1200px) { }
+```
+
+## 响应式布局典型案例
+
+### 1. 响应式网格系统
+
+```css
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.col {
+  flex: 1;
+  padding: 0 15px;
+}
+
+/* 平板：2列布局 */
+@media (max-width: 768px) {
+  .col {
+    flex: 0 0 50%;
+  }
+}
+
+/* 手机：1列布局 */
+@media (max-width: 480px) {
+  .col {
+    flex: 0 0 100%;
+  }
+}
+```
+
+{/* @playground id="test-media" mode="demo" */}
+
+### 2. 响应式导航菜单
+
+```css
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    background: #fff;
+    transition: left 0.3s ease;
+  }
+  
+  .nav-menu.active {
+    left: 0;
+  }
+  
+  .nav-toggle {
+    display: block;
+  }
+}
+```
+
+### 3. 响应式图片
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 根据屏幕尺寸显示不同图片 */
+.hero-image {
+  background-image: url('hero-desktop.jpg');
+}
+
+@media (max-width: 768px) {
+  .hero-image {
+    background-image: url('hero-tablet.jpg');
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-image {
+    background-image: url('hero-mobile.jpg');
+  }
+}
+```
+
+## 响应式单位
+
+### 视口单位
+
+| 单位 | 描述 |
+|------|------|
+| `vw` | 视口宽度的 1% |
+| `vh` | 视口高度的 1% |
+| `vmin` | 视口较小尺寸的 1% |
+| `vmax` | 视口较大尺寸的 1% |
+
+```css
+.hero {
+  width: 100vw;
+  height: 100vh;
+}
+
+.responsive-text {
+  font-size: 4vw; /* 响应式字体 */
+}
+```
+
+### 相对单位
+
+```css
+.container {
+  width: 90%; /* 相对于父元素 */
+  max-width: 1200px; /* 最大宽度限制 */
+  margin: 0 auto;
+}
+
+.text {
+  font-size: 1.2rem; /* 相对于根元素字体大小 */
+  line-height: 1.6em; /* 相对于当前元素字体大小 */
+}
+```
+
+## 最佳实践
+
+### 1. 性能优化
+
+```css
+/* 避免过多的媒体查询嵌套 */
+/* ❌ 不推荐 */
+@media (max-width: 768px) {
+  @media (orientation: portrait) {
+    /* 样式 */
+  }
+}
+
+/* ✅ 推荐 */
+@media (max-width: 768px) and (orientation: portrait) {
+  /* 样式 */
+}
+```
+
+### 2. 渐进增强
+
+```css
+/* 基础样式 */
+.button {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+}
+
+/* 增强样式 */
+@media (min-width: 768px) {
+  .button {
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
+```
+
+### 3. 测试要点
+
+- 在不同设备和浏览器中测试
+- 检查关键断点的显示效果
+- 验证触摸友好性（按钮大小、间距）
+- 确保内容可读性和可访问性
+
+## 注意事项
+
+1. **避免使用固定单位**：优先使用相对单位和百分比
+2. **合理设置断点**：基于内容而非特定设备尺寸
+3. **考虑性能影响**：减少不必要的样式重计算
+4. **测试真实设备**：模拟器不能完全替代真实设备测试
+5. **关注用户体验**：确保在所有设备上都有良好的用户体验
+
+## 参考资料
+
+- [媒体查询 - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Media_Queries)
+- [响应式网站设计](https://alistapart.com/article/responsive-web-design/)
+- [响应式网页示例](https://mediaqueri.es/) 

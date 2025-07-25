@@ -1,0 +1,700 @@
+---
+title: "暗黑模式实现"
+category: "基础知识"
+tags:
+  - 暗黑模式
+  - 主题切换
+  - CSS变量
+  - 媒体查询
+description: "详解CSS暗黑模式的实现方法，包括CSS变量、媒体查询和JavaScript控制"
+keywords: "暗黑模式, CSS变量, prefers-color-scheme, 主题切换, 暗黑主题"
+---
+
+# 暗黑模式实现
+
+## 概述
+
+暗黑模式是一种显示模式，使用深色背景和浅色文本，能够减少眼睛疲劳，节省电池电量，并在低光环境下提供更好的用户体验。
+
+## 实现方案
+
+### 1. 采用 CSS 全局变量
+
+使用CSS自定义属性（CSS变量）是实现暗黑模式最灵活和可维护的方法。
+
+#### 基础变量定义
+
+```css
+:root {
+  /* 亮色模式变量 */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #e1e1e1;
+  --card-bg: #ffffff;
+  --button-bg: #007bff;
+  --button-text: #ffffff;
+  --link-color: #007bff;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* 暗色模式变量 */
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --border-color: #444444;
+  --card-bg: #2d2d2d;
+  --button-bg: #66b3ff;
+  --button-text: #000000;
+  --link-color: #66b3ff;
+  --shadow: rgba(255, 255, 255, 0.1);
+}
+```
+
+#### 应用变量到组件
+
+```css
+/* 使用变量的样式 */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--button-bg);
+}
+
+a {
+  color: var(--link-color);
+}
+
+.input {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+```
+
+### 2. 使用 prefers-color-scheme 媒体查询
+
+利用系统级别的颜色方案偏好自动切换主题。
+
+```css
+/* 默认亮色模式 */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #e1e1e1;
+}
+
+/* 系统暗色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --border-color: #444444;
+  }
+}
+
+/* 应用样式 */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+```
+
+### 3. 混合方案：支持手动切换和系统偏好
+
+```css
+/* 默认跟随系统 */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+  }
+}
+
+/* 手动设置覆盖系统偏好 */
+[data-theme="light"] {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+}
+
+/* 应用样式 */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+```
+
+## 完整的暗黑模式设计系统
+
+### 颜色设计原则
+
+1. **对比度充足**：确保文本和背景有足够的对比度
+2. **眼睛友好**：使用偏灰的黑色而非纯黑色
+3. **品牌一致性**：保持品牌色彩在暗色模式下的识别度
+4. **层次清晰**：通过不同深度的背景色创建视觉层次
+
+### 完整的变量系统
+
+```css
+:root {
+  /* 基础颜色 */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  /* 灰度系统 */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  /* 品牌颜色 */
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --yellow-400: #facc15;
+  --yellow-500: #eab308;
+}
+
+/* 亮色模式语义化变量 */
+:root {
+  /* 背景色 */
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--gray-50);
+  --bg-tertiary: var(--gray-100);
+  
+  /* 文本色 */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-400);
+  --text-inverse: var(--color-white);
+  
+  /* 边框色 */
+  --border-primary: var(--gray-200);
+  --border-secondary: var(--gray-300);
+  
+  /* 品牌色 */
+  --color-primary: var(--blue-500);
+  --color-primary-hover: var(--blue-600);
+  --color-success: var(--green-500);
+  --color-warning: var(--yellow-500);
+  --color-danger: var(--red-500);
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 暗色模式语义化变量 */
+[data-theme="dark"] {
+  /* 背景色 */
+  --bg-primary: var(--gray-900);
+  --bg-secondary: var(--gray-800);
+  --bg-tertiary: var(--gray-700);
+  
+  /* 文本色 */
+  --text-primary: var(--color-white);
+  --text-secondary: var(--gray-300);
+  --text-tertiary: var(--gray-400);
+  --text-inverse: var(--gray-900);
+  
+  /* 边框色 */
+  --border-primary: var(--gray-700);
+  --border-secondary: var(--gray-600);
+  
+  /* 品牌色 */
+  --color-primary: var(--blue-400);
+  --color-primary-hover: var(--blue-500);
+  --color-success: var(--green-400);
+  --color-warning: var(--yellow-400);
+  --color-danger: var(--red-400);
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* 系统偏好检测 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* 背景色 */
+    --bg-primary: var(--gray-900);
+    --bg-secondary: var(--gray-800);
+    --bg-tertiary: var(--gray-700);
+    
+    /* 文本色 */
+    --text-primary: var(--color-white);
+    --text-secondary: var(--gray-300);
+    --text-tertiary: var(--gray-400);
+    --text-inverse: var(--gray-900);
+    
+    /* 边框色 */
+    --border-primary: var(--gray-700);
+    --border-secondary: var(--gray-600);
+    
+    /* 品牌色 */
+    --color-primary: var(--blue-400);
+    --color-primary-hover: var(--blue-500);
+    --color-success: var(--green-400);
+    --color-warning: var(--yellow-400);
+    --color-danger: var(--red-400);
+    
+    /* 阴影 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  }
+}
+```
+
+### 组件样式示例
+
+```css
+/* 页面基础样式 */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 卡片组件 */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* 按钮组件 */
+.button {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.button--secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-secondary);
+}
+
+.button--secondary:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* 输入框组件 */
+.input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* 导航组件 */
+.nav {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 1rem 0;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.nav-link--active {
+  color: var(--color-primary);
+  background-color: var(--bg-tertiary);
+}
+```
+
+## JavaScript 主题切换
+
+### 基础主题切换功能
+
+```javascript
+class ThemeManager {
+  constructor() {
+    this.themes = ['light', 'dark', 'auto'];
+    this.currentTheme = this.getStoredTheme() || 'auto';
+    this.init();
+  }
+  
+  init() {
+    this.applyTheme(this.currentTheme);
+    this.setupEventListeners();
+  }
+  
+  // 获取存储的主题
+  getStoredTheme() {
+    return localStorage.getItem('theme');
+  }
+  
+  // 存储主题设置
+  setStoredTheme(theme) {
+    localStorage.setItem('theme', theme);
+  }
+  
+  // 获取系统偏好
+  getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  
+  // 应用主题
+  applyTheme(theme) {
+    this.currentTheme = theme;
+    
+    if (theme === 'auto') {
+      const systemTheme = this.getSystemTheme();
+      document.documentElement.setAttribute('data-theme', systemTheme);
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    
+    this.setStoredTheme(theme);
+    this.updateToggleButton();
+  }
+  
+  // 切换主题
+  toggleTheme() {
+    const currentIndex = this.themes.indexOf(this.currentTheme);
+    const nextIndex = (currentIndex + 1) % this.themes.length;
+    const nextTheme = this.themes[nextIndex];
+    
+    this.applyTheme(nextTheme);
+  }
+  
+  // 设置特定主题
+  setTheme(theme) {
+    if (this.themes.includes(theme)) {
+      this.applyTheme(theme);
+    }
+  }
+  
+  // 更新切换按钮
+  updateToggleButton() {
+    const button = document.querySelector('[data-theme-toggle]');
+    if (button) {
+      button.textContent = this.getThemeLabel(this.currentTheme);
+      button.setAttribute('aria-label', `切换到${this.getNextThemeLabel()}`);
+    }
+  }
+  
+  // 获取主题标签
+  getThemeLabel(theme) {
+    const labels = {
+      light: '☀️',
+      dark: '🌙',
+      auto: '🔄'
+    };
+    return labels[theme] || '🔄';
+  }
+  
+  // 获取下一个主题标签
+  getNextThemeLabel() {
+    const currentIndex = this.themes.indexOf(this.currentTheme);
+    const nextIndex = (currentIndex + 1) % this.themes.length;
+    const nextTheme = this.themes[nextIndex];
+    
+    const labels = {
+      light: '亮色模式',
+      dark: '暗色模式',
+      auto: '跟随系统'
+    };
+    return labels[nextTheme] || '跟随系统';
+  }
+  
+  // 设置事件监听器
+  setupEventListeners() {
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (this.currentTheme === 'auto') {
+        this.applyTheme('auto');
+      }
+    });
+    
+    // 监听切换按钮点击
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-theme-toggle]')) {
+        this.toggleTheme();
+      }
+    });
+    
+    // 监听键盘快捷键 (Ctrl/Cmd + Shift + L)
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
+        this.toggleTheme();
+      }
+    });
+  }
+}
+
+// 初始化主题管理器
+const themeManager = new ThemeManager();
+
+// 暴露全局方法
+window.setTheme = (theme) => themeManager.setTheme(theme);
+window.toggleTheme = () => themeManager.toggleTheme();
+```
+
+### HTML 切换按钮
+
+```html
+<!-- 主题切换按钮 -->
+<button 
+  data-theme-toggle 
+  class="theme-toggle"
+  aria-label="切换主题"
+  title="切换主题 (Ctrl+Shift+L)">
+  🔄
+</button>
+
+<!-- 主题选择器 -->
+<div class="theme-selector">
+  <label for="theme-select">选择主题：</label>
+  <select id="theme-select" onchange="setTheme(this.value)">
+    <option value="auto">跟随系统</option>
+    <option value="light">亮色模式</option>
+    <option value="dark">暗色模式</option>
+  </select>
+</div>
+```
+
+### 主题切换按钮样式
+
+```css
+.theme-toggle {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--bg-secondary);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-selector select {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: var(--text-primary);
+}
+```
+
+## 浏览器开发者工具测试
+
+### Chrome 开发者工具
+
+在 Chrome 中测试暗黑模式：
+
+1. 打开开发者工具 (F12)
+2. 打开命令面板 (Ctrl+Shift+P / Cmd+Shift+P)
+3. 输入 "Rendering"
+4. 选择 "Show Rendering"
+5. 在 "Emulate CSS media feature prefers-color-scheme" 下拉菜单中选择：
+   - `prefers-color-scheme: dark`
+   - `prefers-color-scheme: light`
+   - `No emulation`
+
+### Firefox 开发者工具
+
+在 Firefox 中测试：
+
+1. 打开开发者工具 (F12)
+2. 在设置中启用 "检查器" > "切换 prefers-color-scheme 仿真"
+3. 在检查器工具栏中会出现模拟按钮
+
+## 最佳实践
+
+### 1. 渐进增强
+
+```css
+/* 基础样式（亮色模式） */
+body {
+  background: white;
+  color: black;
+}
+
+/* 暗色模式增强 */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #1a1a1a;
+    color: white;
+  }
+}
+```
+
+### 2. 图片适配
+
+```css
+/* 图片在暗色模式下的处理 */
+.logo {
+  filter: none;
+}
+
+[data-theme="dark"] .logo {
+  filter: brightness(0.8) contrast(1.2);
+}
+
+/* 或者使用不同的图片 */
+.logo-light {
+  display: block;
+}
+
+.logo-dark {
+  display: none;
+}
+
+[data-theme="dark"] .logo-light {
+  display: none;
+}
+
+[data-theme="dark"] .logo-dark {
+  display: block;
+}
+```
+
+### 3. 动画和过渡
+
+```css
+/* 确保主题切换时的平滑过渡 */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* 禁用动画的用户偏好 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+```
+
+### 4. 可访问性考虑
+
+```css
+/* 确保充足的对比度 */
+:root {
+  --text-on-primary: white; /* 4.5:1 对比度 */
+  --text-on-secondary: #333; /* 7:1 对比度 */
+}
+
+/* 焦点指示器 */
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  :root {
+    --border-primary: currentColor;
+    --shadow-md: none;
+  }
+}
+```
+
+{/* @playground id="index" mode="demo" */}
+
+## 参考资料
+
+- [prefers-color-scheme - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+- [Chrome 开发者工具暗色模式调试](https://developer.chrome.com/docs/devtools/rendering/emulate-css/)
+- [Web.dev 暗色模式指南](https://web.dev/prefers-color-scheme/)
+- [Material Design 暗色主题](https://material.io/design/color/dark-theme.html) 

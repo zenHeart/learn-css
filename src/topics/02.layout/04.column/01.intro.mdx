@@ -1,54 +1,324 @@
-# column
-使用 column 实现多栏布局。
+---
+title: "多列布局 (Multi-column)"
+category: "布局技术"
+tags:
+  - 多列布局
+  - column
+  - 分栏
+description: "详解CSS多列布局的使用方法和属性配置"
+keywords: "多列布局, column, CSS分栏, 报刊布局"
+---
 
+# 多列布局 (Multi-column)
+
+使用 column 相关属性实现多栏布局，如报刊杂志的图文排版效果。
 
 ## 概述
-在报刊和杂志上可以看到两栏或三栏的图文布局。
-使用 column 相关属性可以达到同样的效果。
 
+在报刊和杂志上可以看到两栏或三栏的图文布局。使用 column 相关属性可以达到同样的效果，让长文本内容在多个列中均匀分布，提高阅读体验。
 
+{/* @playground id="basic-use" mode="demo" */}
 
-
-
-## 属性列表
-
-
-
+## 核心属性
 
 ### column-count
-控制列的数量 
 
-1. 会产生新的 BFC ,不出现 margin 塌陷。
+控制列的数量，指定元素内容应该被分割成的列数。
 
+```css
+.three-columns {
+  column-count: 3;
+}
+```
 
-问题:
-* [ ] 只有首列有 margin
-* [ ] 列跟换的规则
-* [ ] 空隙计算的规则
+**特点：**
+- 会产生新的 BFC，不出现 margin 塌陷
+- 列的宽度会自动计算以填满容器
+
+{/* @playground id="columns" mode="demo" */}
 
 ### column-width
-限制列的最小宽度,浏览器会根据容器宽度,平均分配各列
 
+限制列的最小宽度，浏览器会根据容器宽度，平均分配各列。
 
-### columns
-结合 `column-count` 和 `column-width` 简化列的设置
+```css
+.min-width-columns {
+  column-width: 200px;
+}
+```
 
-> **注意容器的宽度表示的是最小可允许宽度,实际宽度会大于此值**
+**注意：** 容器的宽度表示的是最小可允许宽度，实际宽度会大于此值。
 
+{/* @playground id="column-width" mode="demo" */}
+
+### columns (简写属性)
+
+结合 `column-count` 和 `column-width` 简化列的设置。
+
+```css
+/* column-width column-count */
+.auto-columns {
+  columns: 200px 3; /* 最小宽度200px，最多3列 */
+}
+
+.responsive-columns {
+  columns: 250px; /* 只设置最小宽度，列数自适应 */
+}
+```
 
 ### column-gap
-设置列的间隙,默认为 `1em`
+
+设置列之间的间隙，默认为 `normal`（通常为 1em）。
+
+```css
+.narrow-gap {
+  column-gap: 20px;
+}
+
+.wide-gap {
+  column-gap: 3em;
+}
+
+.no-gap {
+  column-gap: 0;
+}
+```
 
 通过容器宽度可以精确设定各列的宽度。
 
-### column-style
-设置每列的边栏样式
+{/* @playground id="column-gap" mode="demo" */}
 
+### column-rule
 
-## 总结
+设置列之间的分割线样式，类似 border 的语法。
 
+```css
+.with-rule {
+  column-rule: 2px solid #ccc;
+}
 
+/* 分别设置 */
+.custom-rule {
+  column-rule-width: 3px;
+  column-rule-style: dashed;
+  column-rule-color: #007bff;
+}
+```
+
+### column-fill
+
+控制内容在列中的分布方式。
+
+```css
+.balanced {
+  column-fill: balance; /* 默认值，各列高度尽量平衡 */
+}
+
+.auto-fill {
+  column-fill: auto; /* 按顺序填充列 */
+}
+```
+
+## 控制分栏行为
+
+### break-inside
+
+控制元素内部是否可以分栏。
+
+```css
+.no-break {
+  break-inside: avoid; /* 避免在元素内部分栏 */
+}
+
+.allow-break {
+  break-inside: auto; /* 允许分栏（默认） */
+}
+```
+
+{/* @playground id="multicol-break-inside" mode="demo" */}
+
+### break-before 和 break-after
+
+控制元素前后的分栏行为。
+
+```css
+.break-before {
+  break-before: column; /* 强制在元素前分栏 */
+}
+
+.break-after {
+  break-after: avoid; /* 避免在元素后分栏 */
+}
+```
+
+### column-span
+
+控制元素是否跨越所有列。
+
+```css
+.span-all {
+  column-span: all; /* 跨越所有列 */
+}
+
+.span-none {
+  column-span: none; /* 不跨越（默认） */
+}
+```
+
+## 实际应用示例
+
+### 文章布局
+
+```css
+.article {
+  column-count: 2;
+  column-gap: 30px;
+  column-rule: 1px solid #eee;
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.article h2 {
+  column-span: all;
+  text-align: center;
+  margin: 2em 0 1em;
+  padding-bottom: 0.5em;
+  border-bottom: 2px solid #333;
+}
+
+.article p {
+  margin-bottom: 1em;
+  break-inside: avoid;
+}
+```
+
+### 响应式多列布局
+
+```css
+.responsive-columns {
+  columns: 300px; /* 基础列宽 */
+  column-gap: 2rem;
+  column-rule: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+  .responsive-columns {
+    columns: auto 1; /* 小屏幕单列 */
+    column-rule: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-columns {
+    columns: 250px; /* 大屏幕更多列 */
+  }
+}
+```
+
+### 图片画廊
+
+```css
+.gallery {
+  column-count: 4;
+  column-gap: 15px;
+}
+
+.gallery img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 15px;
+  break-inside: avoid;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 992px) {
+  .gallery {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .gallery {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    column-count: 1;
+  }
+}
+```
+
+## 兼容性和注意事项
+
+### 浏览器支持
+
+- **现代浏览器**：全面支持
+- **IE 10+**：支持，但可能有细微差异
+- **移动浏览器**：良好支持
+
+### 常见问题和解决方案
+
+#### 1. 内容被意外分割
+
+```css
+/* 问题：段落被分割到不同列 */
+p {
+  break-inside: avoid; /* 解决：避免段落内分栏 */
+}
+
+/* 问题：图片和标题分离 */
+.image-caption {
+  break-inside: avoid; /* 解决：将图片和说明作为整体 */
+}
+```
+
+#### 2. 列高度不平衡
+
+```css
+.balanced-columns {
+  column-fill: balance; /* 确保列高度平衡 */
+  orphans: 3; /* 最少3行才能单独成列 */
+  widows: 3;  /* 列末最少保留3行 */
+}
+```
+
+#### 3. 在移动设备上的优化
+
+```css
+.mobile-friendly {
+  columns: 300px;
+}
+
+@media (max-width: 600px) {
+  .mobile-friendly {
+    columns: auto 1; /* 移动端强制单列 */
+    column-gap: 0;
+    column-rule: none;
+  }
+}
+```
+
+## 与其他布局方法的比较
+
+| 特性 | Multi-column | Flexbox | Grid |
+|------|-------------|---------|------|
+| **用途** | 文本流式布局 | 一维布局 | 二维布局 |
+| **内容流动** | 垂直流动，自动换列 | 手动控制 | 精确定位 |
+| **响应式** | 基于容器宽度自适应 | 需要媒体查询 | 需要媒体查询 |
+| **适用场景** | 长文本、文章、画廊 | 导航、按钮组 | 复杂布局 |
+
+## 最佳实践
+
+1. **内容适配**：确保内容适合多列显示，避免过短的内容
+2. **响应式设计**：在小屏幕上使用单列布局
+3. **分栏控制**：合理使用 break-* 属性避免内容被不当分割
+4. **可读性**：注意列宽和行间距，保证阅读舒适度
+5. **测试兼容性**：在不同浏览器中测试效果一致性
 
 ## 参考资料
-* [column module](https://www.w3.org/TR/css-multicol-1/#columns)
-* [mdn css column](https://wiki.developer.mozilla.org/en-US/docs/Web/CSS/CSS_Columns)
+
+- [CSS Multi-column Layout - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Columns)
+- [CSS Multi-column Layout Module - W3C](https://www.w3.org/TR/css-multicol-1/)
