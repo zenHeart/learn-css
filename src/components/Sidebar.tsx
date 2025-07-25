@@ -117,7 +117,7 @@ const SidebarItemComponent: React.FC<SidebarItemProps> = ({
             aria-label={isExpanded ? '收起' : '展开'}
             type="button"
           >
-            ▶
+            {isExpanded ? '▼' : '▶'}
           </button>
         )}
         
