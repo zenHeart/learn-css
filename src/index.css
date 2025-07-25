@@ -1211,6 +1211,21 @@ button:focus-visible {
   user-select: none; /* 防止拖动时选中文本 */
 }
 
+/* 拖拽时的全局样式 */
+body.dragging-divider {
+  user-select: none !important;
+  cursor: col-resize !important;
+}
+
+body.dragging-divider * {
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+body.dragging-divider .playground-divider {
+  pointer-events: auto !important;
+}
+
 .playground.horizontal .playground-content {
   flex-direction: row;
 }
@@ -1327,8 +1342,13 @@ button:focus-visible {
   background-color: #e1e4e8;
   cursor: col-resize;
   position: relative;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  z-index: 10;
 }
 
 .playground-divider:hover {
@@ -1337,6 +1357,28 @@ button:focus-visible {
 
 .playground-divider.dragging {
   background-color: #0366d6;
+  /* 拖拽时禁用过渡效果，避免卡顿 */
+  transition: none;
+}
+
+.playground-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background-color: currentColor;
+  opacity: 0.3;
+}
+
+.playground-divider:hover::before {
+  opacity: 0.8;
+}
+
+.playground-divider.dragging::before {
+  opacity: 1;
 }
 
 .divider-handle {
@@ -1344,11 +1386,11 @@ button:focus-visible {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 40px;
-  margin-left: -4px;
+  width: 16px;
+  height: 50px;
   background-color: transparent;
-  border-radius: 2px;
+  border-radius: 3px;
+  pointer-events: none;
 }
 
 .playground-divider:hover .divider-handle {
@@ -2240,7 +2282,6 @@ button:focus-visible {
     background: transparent;
     font-size: 16px;
     color: #24292f;
-    placeholder-color: #656d76;
   }
 
   .search-input::placeholder {

@@ -277,32 +277,76 @@ document.addEventListener('DOMContentLoaded', function() {
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (isVerticalLayout) return
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(true)
+    
+    // 添加全局样式，防止拖拽时选中文本和鼠标样式变化
+    document.body.classList.add('dragging-divider')
   }, [isVerticalLayout])
 
   useEffect(() => {
     if (!isDragging || isVerticalLayout) return
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const container = document.querySelector('.playground-content') as HTMLElement
-      if (!container) return
+    let animationFrameId: number | null = null
+    let lastUpdateTime = 0
+    const throttleDelay = 16 // 约60fps
 
-      const rect = container.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const percentage = Math.min(Math.max((x / rect.width) * 100, 20), 80)
-      setEditorWidth(percentage)
+    const handleMouseMove = (e: MouseEvent) => {
+      const currentTime = Date.now()
+      
+      // 节流处理，减少更新频率
+      if (currentTime - lastUpdateTime < throttleDelay) {
+        return
+      }
+      
+      // 使用 requestAnimationFrame 来优化性能，减少卡顿
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+      
+      animationFrameId = requestAnimationFrame(() => {
+        const container = document.querySelector('.playground-content') as HTMLElement
+        if (!container) return
+
+        const rect = container.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        
+        // 计算百分比，设置合理的边界值
+        const percentage = Math.min(Math.max((x / rect.width) * 100, 15), 85)
+        setEditorWidth(percentage)
+        lastUpdateTime = currentTime
+      })
     }
 
     const handleMouseUp = () => {
       setIsDragging(false)
+      
+      // 清理全局样式
+      document.body.classList.remove('dragging-divider')
+      
+      // 清理动画帧
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    // 监听全局鼠标事件，确保拖拽时鼠标移出组件区域也能正常工作
+    document.addEventListener('mousemove', handleMouseMove, { passive: false })
+    document.addEventListener('mouseup', handleMouseUp, { once: true })
+    
+    // 处理鼠标离开窗口的情况
+    document.addEventListener('mouseleave', handleMouseUp, { once: true })
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mouseleave', handleMouseUp)
+      
+      // 清理样式和动画帧
+      document.body.classList.remove('dragging-divider')
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
     }
   }, [isDragging, isVerticalLayout])
 
