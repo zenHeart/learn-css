@@ -26,6 +26,7 @@ export interface SidebarItem {
   path: string
   children?: SidebarItem[]
   frontmatter?: Record<string, any>
+  sortWeight?: number // 添加排序权重字段
 }
 
 class DocScanner {
@@ -35,6 +36,12 @@ class DocScanner {
   constructor() {
     this.topicsDir = path.resolve('src/topics')
     this.demosDir = '_demos'
+  }
+
+  // 提取数字前缀的辅助函数
+  private extractSortWeight(name: string): number {
+    const match = name.match(/^(\d+)\./)
+    return match ? parseInt(match[1], 10) : 9999
   }
 
   // 扫描所有文档
@@ -56,13 +63,27 @@ class DocScanner {
     
     // 按名称排序（支持 01.xx.mdx 格式）
     items.sort((a, b) => {
-      if (a.isDirectory() && b.isDirectory()) {
-        return a.name.localeCompare(b.name)
+      // 提取数字前缀的函数
+      const extractNumber = (name: string): number => {
+        const match = name.match(/^(\d+)\./)
+        return match ? parseInt(match[1], 10) : 9999
       }
-      if (a.isFile() && b.isFile()) {
-        return a.name.localeCompare(b.name)
+      
+      // 获取数字前缀
+      const numA = extractNumber(a.name)
+      const numB = extractNumber(b.name)
+      
+      // 先按数字前缀排序
+      if (numA !== numB) {
+        return numA - numB
       }
-      return a.isDirectory() ? -1 : 1
+      
+      // 如果数字前缀相同，按文件类型排序（目录优先）
+      if (a.isDirectory() && b.isFile()) return -1
+      if (a.isFile() && b.isDirectory()) return 1
+      
+      // 同类型按名称排序
+      return a.name.localeCompare(b.name)
     })
 
     for (const item of items) {
@@ -593,7 +614,8 @@ ${indentedContent}
                 title: isLastPart ? doc.title : this.generateTitle(part),
                 path: isLastPart ? doc.id : '',
                 children: isLastPart ? undefined : [],
-                frontmatter: isLastPart ? doc.frontmatter : undefined
+                frontmatter: isLastPart ? doc.frontmatter : undefined,
+                sortWeight: this.extractSortWeight(part)
               }
               
               currentLevel.push(newItem)
@@ -635,7 +657,8 @@ ${indentedContent}
             title: isFile ? doc.title : this.generateTitle(part),
             path: isFile ? doc.id : '',
             children: [],
-            frontmatter: isFile ? doc.frontmatter : undefined
+            frontmatter: isFile ? doc.frontmatter : undefined,
+            sortWeight: this.extractSortWeight(part)
           }
           
           currentLevel.push(newItem)
@@ -668,9 +691,18 @@ ${indentedContent}
           return false
         })
         .sort((a, b) => {
-          // 目录在前，文件在后
+          // 首先按照数字前缀排序
+          const weightA = a.sortWeight ?? 9999
+          const weightB = b.sortWeight ?? 9999
+          
+          if (weightA !== weightB) {
+            return weightA - weightB
+          }
+          
+          // 如果数字前缀相同，目录在前，文件在后
           if (!a.path && b.path) return -1
           if (a.path && !b.path) return 1
+          
           // 同类型按标题排序
           return a.title.localeCompare(b.title)
         })

@@ -9,6 +9,7 @@ export interface SidebarItem {
     tags?: string[]
     description?: string
   }
+  sortWeight?: number // 用于数字前缀排序的权重
 }
 
 // 侧边栏根数据结构
