@@ -1,5 +1,26 @@
 import React, { useMemo, useEffect, useState, useRef } from 'react'
 import Playground from './Playground'
+import Prism from 'prismjs'
+
+// 导入基础组件和常用语言（按依赖顺序）
+import 'prismjs/components/prism-markup'
+import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-clike'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-yaml'
+import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-java'
+import 'prismjs/components/prism-sql'
+
+// 导入GitHub主题样式
+import 'prismjs/themes/prism.css'
 
 interface TocItem {
   id: string
@@ -114,10 +135,23 @@ const convertTableToHtml = (tableLines: string[]): string => {
   
   let dataStartIndex = 1
   let hasHeader = false
+  let columnAlignments: string[] = []
   
   if (isSeparatorLine) {
     hasHeader = true
     dataStartIndex = 2
+    
+    // 解析列对齐信息
+    const separatorCells = separatorLine.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+    columnAlignments = separatorCells.map(cell => {
+      if (cell.startsWith(':') && cell.endsWith(':')) {
+        return 'center'
+      } else if (cell.endsWith(':')) {
+        return 'right'
+      } else {
+        return 'left'
+      }
+    })
   }
   
   // 构建表格 HTML
@@ -127,8 +161,10 @@ const convertTableToHtml = (tableLines: string[]): string => {
   if (hasHeader) {
     tableHtml += '  <thead>\n'
     tableHtml += '    <tr>\n'
-    headerCells.forEach(cell => {
-      tableHtml += `      <th>${cell}</th>\n`
+    headerCells.forEach((cell, index) => {
+      const alignment = columnAlignments[index] || 'left'
+      const alignClass = alignment !== 'left' ? ` class="align-${alignment}"` : ''
+      tableHtml += `      <th${alignClass}>${cell}</th>\n`
     })
     tableHtml += '    </tr>\n'
     tableHtml += '  </thead>\n'
@@ -150,8 +186,10 @@ const convertTableToHtml = (tableLines: string[]): string => {
     
     if (dataCells.length > 0) {
       tableHtml += '    <tr>\n'
-      dataCells.forEach(cell => {
-        tableHtml += `      <td>${cell}</td>\n`
+      dataCells.forEach((cell, index) => {
+        const alignment = columnAlignments[index] || 'left'
+        const alignClass = alignment !== 'left' ? ` class="align-${alignment}"` : ''
+        tableHtml += `      <td${alignClass}>${cell}</td>\n`
       })
       tableHtml += '    </tr>\n'
     }
@@ -161,6 +199,65 @@ const convertTableToHtml = (tableLines: string[]): string => {
   tableHtml += '</table>'
   
   return tableHtml
+}
+
+// 语言别名映射
+const languageAliases: Record<string, string> = {
+  'js': 'javascript',
+  'ts': 'typescript',
+  'jsx': 'jsx',
+  'tsx': 'tsx',
+  'html': 'markup',
+  'htm': 'markup',
+  'xml': 'markup',
+  'svg': 'markup',
+  'markup': 'markup',
+  'css': 'css',
+  'json': 'json',
+  'yml': 'yaml',
+  'yaml': 'yaml',
+  'md': 'markup',
+  'markdown': 'markup',
+  'bash': 'bash',
+  'sh': 'bash',
+  'zsh': 'bash',
+  'shell': 'bash',
+  'console': 'bash',
+  'terminal': 'bash',
+  'py': 'python',
+  'python': 'python',
+  'java': 'java',
+  'c': 'c',
+  'cpp': 'cpp',
+  'c++': 'cpp',
+  'cxx': 'cpp',
+  'sql': 'sql',
+  'mysql': 'sql',
+  'postgresql': 'sql',
+  'sqlite': 'sql',
+  'text': '',
+  'txt': '',
+  'plain': ''
+}
+
+// 规范化语言名称
+const normalizeLang = (lang: string): string => {
+  if (!lang) return ''
+  const lower = lang.toLowerCase().trim()
+  return languageAliases[lower] || lower
+}
+
+// HTML转义函数
+const escapeHtml = (text: string): string => {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }
+  
+  return text.replace(/[&<>"']/g, (char) => htmlEscapes[char] || char)
 }
 
 // 简单的 Markdown 到 HTML 转换器
@@ -174,12 +271,33 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   const protectedElements: { placeholder: string; content: string }[] = []
   let placeholderIndex = 0
 
-  // 保护代码块
+  // 保护代码块并应用语法高亮
   html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
     const placeholder = `__PROTECTED_ELEMENT_${placeholderIndex++}__`
+    
+    // 处理语言别名
+    const normalizedLang = normalizeLang(lang)
+    const trimmedCode = code.trim()
+    
+    let highlightedCode = trimmedCode
+    
+    // 如果指定了语言且Prism支持该语言，则进行语法高亮
+    if (normalizedLang && normalizedLang !== '' && Prism.languages[normalizedLang]) {
+      try {
+        highlightedCode = Prism.highlight(trimmedCode, Prism.languages[normalizedLang], normalizedLang)
+      } catch (e) {
+        console.warn(`语法高亮失败 (${normalizedLang}):`, e)
+        highlightedCode = escapeHtml(trimmedCode)
+      }
+    } else {
+      // 如果不支持语法高亮，则转义HTML字符
+      highlightedCode = escapeHtml(trimmedCode)
+    }
+    
+    const langClass = (normalizedLang && normalizedLang !== '') ? `language-${normalizedLang}` : 'language-text'
     protectedElements.push({
       placeholder,
-      content: `<pre><code class="language-${lang}">${code.trim()}</code></pre>`
+      content: `<pre class="code-block"><code class="${langClass}">${highlightedCode}</code></pre>`
     })
     return placeholder
   })
@@ -240,19 +358,34 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
     return `<h6 id="${id}">${title}</h6>`
   })
 
-  // 处理粗体和斜体
+  // 处理粗体、斜体和删除线
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
+  html = html.replace(/~~(.*?)~~/g, '<del>$1</del>')
 
-  // 处理行内代码
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
+  // 处理行内代码（需要转义HTML字符）
+  html = html.replace(/`([^`]+)`/g, (match, code) => {
+    return `<code>${escapeHtml(code)}</code>`
+  })
 
   // 处理链接
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 
-  // 处理无序列表
+  // 处理任务列表和无序列表
+  html = html.replace(/^\s*[-*+]\s+\[\s*x\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" checked disabled> $1</li>')
+  html = html.replace(/^\s*[-*+]\s+\[\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" disabled> $1</li>')
   html = html.replace(/^\s*[-*+]\s+(.*)$/gim, '<li>$1</li>')
-  html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>')
+  html = html.replace(/(<li.*?<\/li>(?:\s*<li.*?<\/li>)*)/gs, '<ul>$1</ul>')
+
+  // 处理引用块
+  html = html.replace(/^>\s*(.*)$/gim, '<blockquote-line>$1</blockquote-line>')
+  html = html.replace(/(<blockquote-line>.*?<\/blockquote-line>(?:\s*<blockquote-line>.*?<\/blockquote-line>)*)/gs, (match) => {
+    const content = match.replace(/<\/?blockquote-line>/g, '').trim()
+    return `<blockquote>${content}</blockquote>`
+  })
+
+  // 处理水平分割线
+  html = html.replace(/^(\s*[-*_]){3,}\s*$/gim, '<hr>')
 
   // 处理段落 - 改进的段落处理
   const lines = html.split('\n')
@@ -272,7 +405,7 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
     }
 
     // 检查是否是块级元素或 playground 标记
-    if (line.match(/^<(h[1-6]|ul|li|pre|div|table|__PROTECTED_ELEMENT_|__PROTECTED_TABLE_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
+    if (line.match(/^<(h[1-6]|ul|li|pre|div|table|blockquote|hr|__PROTECTED_ELEMENT_|__PROTECTED_TABLE_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
       // 如果当前在段落中，先关闭段落
       if (inParagraph) {
         processedLines.push('</p>')
@@ -506,6 +639,38 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
     
     return () => window.removeEventListener('scroll', handleScroll)
   }, [tocItems])
+
+  // 应用语法高亮
+  useEffect(() => {
+    if (contentRef.current) {
+      // 为没有通过Prism处理的代码块应用高亮
+      const codeBlocks = contentRef.current.querySelectorAll('pre code:not(.token)')
+      codeBlocks.forEach((block) => {
+        const codeElement = block as HTMLElement
+        const pre = codeElement.parentElement
+        
+        if (pre && !pre.classList.contains('code-block')) {
+          const lang = Array.from(codeElement.classList)
+            .find(cls => cls.startsWith('language-'))
+            ?.replace('language-', '')
+          
+          if (lang && lang !== 'text' && Prism.languages[lang]) {
+            try {
+              const highlighted = Prism.highlight(codeElement.textContent || '', Prism.languages[lang], lang)
+              codeElement.innerHTML = highlighted
+              pre.classList.add('code-block')
+            } catch (e) {
+              console.warn(`语法高亮失败 (${lang}):`, e)
+            }
+          } else {
+            // 对于纯文本，只需要添加code-block类和转义HTML
+            codeElement.innerHTML = escapeHtml(codeElement.textContent || '')
+            pre.classList.add('code-block')
+          }
+        }
+      })
+    }
+  }, [contentElements])
 
   return (
     <div className="mdx-content-wrapper">
