@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, Link } from 'react-router'
 import Playground from '../components/Playground'
+import SearchModal from '../components/SearchModal'
 import { allPlaygroundsData, allDocsData } from 'virtual:doc-data'
 
 interface PlaygroundItem {
@@ -17,6 +18,7 @@ const PlaygroundsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [playgroundsWithMeta, setPlaygroundsWithMeta] = useState<PlaygroundItem[]>([])
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   
   // 从虚拟模块获取数据
   const allDocs = allDocsData || []
@@ -73,6 +75,23 @@ const PlaygroundsPage: React.FC = () => {
     return acc
   }, {} as Record<string, PlaygroundItem[]>)
 
+  // 搜索弹窗处理
+  const openSearchModal = () => setIsSearchModalOpen(true)
+  const closeSearchModal = () => setIsSearchModalOpen(false)
+
+  // 监听 Command+K 快捷键
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        openSearchModal()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // 处理 playground 切换
   const handlePlaygroundSelect = (playgroundId: string) => {
     navigate(`/playground/${playgroundId}`)
@@ -80,100 +99,126 @@ const PlaygroundsPage: React.FC = () => {
 
   if (playgroundsWithMeta.length === 0) {
     return (
-      <div className="playground-detail-page">
-        <div className="playground-loading">
-          <h2>加载中...</h2>
-          <p>正在加载示例数据</p>
+      <>
+        <div className="topics-page">
+          <div className="playground-loading">
+            <h2>加载中...</h2>
+            <p>正在加载示例数据</p>
+          </div>
         </div>
-      </div>
+
+        <SearchModal 
+          isOpen={isSearchModalOpen}
+          onClose={closeSearchModal}
+        />
+      </>
     )
   }
 
   return (
-    <div className="playground-detail-page">
-      <div className="playground-main">
-        {currentPlayground ? (
-          <div className="playground-container">
-            <div className="playground-header">
-              <div className="playground-breadcrumb">
-                <span className="category-badge">{currentPlayground.category}</span>
-                <span className="breadcrumb-separator">›</span>
-                <span className="doc-title">{currentPlayground.docTitle}</span>
-                <span className="breadcrumb-separator">›</span>
-                <span className="playground-title">{currentPlayground.title}</span>
-              </div>
-              
-              <div className="playground-meta">
-                <span className={`mode-badge mode-${currentPlayground.mode}`}>
-                  {currentPlayground.mode === 'demo' ? '示例' : 
-                   currentPlayground.mode === 'exercise' ? '练习' : '测试'}
-                </span>
-              </div>
+    <>
+      <div className="topics-page">
+        {/* 左侧导航 - 与 Sidebar 保持一致的布局 */}
+        <div className="sidebar">
+          <div className="sidebar-header">
+            <div className="sidebar-header-top">
+              <Link to="/" className="home-button">
+                ← 返回首页
+              </Link>
+              <button 
+                className="search-button" 
+                onClick={openSearchModal}
+                title="搜索文档 (⌘+K)"
+              >
+                🔍
+              </button>
             </div>
-            
-            <Playground
-              id={currentPlayground.id}
-              mode={currentPlayground.mode}
-              initialCode={currentPlayground.initialCode}
-              solutionCode={currentPlayground.solutionCode}
-              showConsole={true}
-              onCodeChange={(files) => {
-                console.log(`Playground ${currentPlayground.id} 代码已更改:`, files)
-              }}
-            />
           </div>
-        ) : (
-          <div className="playground-not-found">
-            <h2>示例未找到</h2>
-            <p>抱歉，找不到 ID 为 "{id}" 的示例。</p>
-            <div className="suggestions">
-              <p>可用的示例：</p>
-              <ul>
-                {playgroundsWithMeta.slice(0, 5).map(playground => (
-                  <li key={playground.id}>
+          
+          <div className="sidebar-content">
+            {Object.entries(playgroundsByCategory).map(([category, playgrounds]) => (
+              <div key={category} className="playground-category">
+                <h4 className="playground-category-title">{category}</h4>
+                <div className="playground-category-items">
+                  {playgrounds.map((playground) => (
                     <button
+                      key={playground.id}
+                      className={`playground-nav-item ${id === playground.id ? 'active' : ''}`}
                       onClick={() => handlePlaygroundSelect(playground.id)}
-                      className="suggestion-link"
                     >
-                      {playground.title} ({playground.category})
+                      <div className="playground-nav-content">
+                        <span className="playground-nav-title">{playground.title}</span>
+                        <span className="playground-nav-doc">{playground.docTitle}</span>
+                      </div>
                     </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-      
-      <div className="playground-nav">
-        <div className="nav-header">
-          <h3>所有示例</h3>
-          <p>按分类排序的代码示例</p>
         </div>
         
-        <div className="nav-content">
-          {Object.entries(playgroundsByCategory).map(([category, playgrounds]) => (
-            <div key={category} className="nav-category">
-              <h4 className="category-title">{category}</h4>
-              <div className="category-items">
-                {playgrounds.map((playground) => (
-                  <button
-                    key={playground.id}
-                    className={`nav-item ${id === playground.id ? 'active' : ''}`}
-                    onClick={() => handlePlaygroundSelect(playground.id)}
-                  >
-                    <div className="nav-item-content">
-                      <span className="nav-item-title">{playground.title}</span>
-                      <span className="nav-item-doc">{playground.docTitle}</span>
-                    </div>
-                  </button>
-                ))}
+        {/* 右侧内容区 - 与 TopicsPage 保持一致的布局 */}
+        <div className="content">
+          {currentPlayground ? (
+            <div className="playground-content">
+              <div className="playground-header">
+                <div className="playground-breadcrumb">
+                  <span className="category-badge">{currentPlayground.category}</span>
+                  <span className="breadcrumb-separator">›</span>
+                  <span className="doc-title">{currentPlayground.docTitle}</span>
+                  <span className="breadcrumb-separator">›</span>
+                  <span className="playground-title">{currentPlayground.title}</span>
+                </div>
+                
+                <div className="playground-meta">
+                  <span className={`mode-badge mode-${currentPlayground.mode}`}>
+                    {currentPlayground.mode === 'demo' ? '示例' : 
+                     currentPlayground.mode === 'exercise' ? '练习' : '测试'}
+                  </span>
+                </div>
+              </div>
+              
+              <Playground
+                id={currentPlayground.id}
+                mode={currentPlayground.mode}
+                initialCode={currentPlayground.initialCode}
+                solutionCode={currentPlayground.solutionCode}
+                showConsole={true}
+                onCodeChange={(files) => {
+                  console.log(`Playground ${currentPlayground.id} 代码已更改:`, files)
+                }}
+              />
+            </div>
+          ) : (
+            <div className="playground-not-found">
+              <h2>示例未找到</h2>
+              <p>抱歉，找不到 ID 为 "{id}" 的示例。</p>
+              <div className="suggestions">
+                <p>可用的示例：</p>
+                <ul>
+                  {playgroundsWithMeta.slice(0, 5).map(playground => (
+                    <li key={playground.id}>
+                      <button
+                        onClick={() => handlePlaygroundSelect(playground.id)}
+                        className="suggestion-link"
+                      >
+                        {playground.title} ({playground.category})
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
-    </div>
+
+      <SearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={closeSearchModal}
+      />
+    </>
   )
 }
 

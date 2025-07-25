@@ -952,20 +952,7 @@ button:focus-visible {
 
 
 
-/* Playground 详情页样式 */
-.playground-detail-page {
-  display: flex;
-  height: 100vh;
-  background: #ffffff;
-}
-
-.playground-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
+/* Playground 页面样式 */
 .playground-loading {
   display: flex;
   flex-direction: column;
@@ -975,7 +962,7 @@ button:focus-visible {
   color: #6b7280;
 }
 
-.playground-container {
+.playground-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1091,48 +1078,14 @@ button:focus-visible {
   color: #1d4ed8;
 }
 
-/* 右侧导航样式 */
-.playground-nav {
-  width: 320px;
-  background: #ffffff;
-  border-left: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.nav-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
-}
-
-.nav-header h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.nav-header p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.nav-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 0;
-}
-
-.nav-category {
+/* Playground 侧边栏导航样式 */
+.playground-category {
   margin-bottom: 1.5rem;
 }
 
-.category-title {
+.playground-category-title {
   margin: 0 0 0.75rem 0;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
@@ -1140,47 +1093,47 @@ button:focus-visible {
   letter-spacing: 0.05em;
 }
 
-.category-items {
+.playground-category-items {
   display: flex;
   flex-direction: column;
 }
 
-.nav-item {
+.playground-nav-item {
   background: none;
   border: none;
   text-align: left;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
   cursor: pointer;
   transition: all 0.15s ease;
   border-left: 3px solid transparent;
 }
 
-.nav-item:hover {
+.playground-nav-item:hover {
   background: #f3f4f6;
 }
 
-.nav-item.active {
+.playground-nav-item.active {
   background: #eff6ff;
   border-left-color: #2563eb;
 }
 
-.nav-item-content {
+.playground-nav-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.nav-item-title {
+.playground-nav-title {
   font-weight: 500;
   color: #111827;
   font-size: 0.875rem;
 }
 
-.nav-item.active .nav-item-title {
+.playground-nav-item.active .playground-nav-title {
   color: #1d4ed8;
 }
 
-.nav-item-doc {
+.playground-nav-doc {
   font-size: 0.75rem;
   color: #6b7280;
   line-height: 1.2;
