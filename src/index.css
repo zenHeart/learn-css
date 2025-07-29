@@ -1724,9 +1724,10 @@ body.dragging-divider .playground-divider {
     font-size: 0.875rem;
     color: #586069;
     transition: all 0.2s;
-    border-bottom: 2px solid transparent;
+    border-radius: 0;
     text-align: center;
     border-right: 1px solid #e1e4e8;
+    border-bottom: 1px solid #e1e4e8;
   }
   
   .mobile-tab:last-child {
@@ -1738,9 +1739,9 @@ body.dragging-divider .playground-divider {
   }
   
   .mobile-tab.active {
-    color: #0366d6;
+    background-color: #0366d6;
+    color: white;
     border-bottom-color: #0366d6;
-    background-color: #f1f8ff;
   }
   
   /* 移动端内容区域 */
