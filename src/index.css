@@ -1708,40 +1708,13 @@ body.dragging-divider .playground-divider {
     border-right: none;
   }
   
-  /* 移动端tab切换样式 */
+  /* 移动端tab切换样式 - 已废弃，改为按钮切换 */
   .mobile-tabs {
-    display: flex;
-    gap: 0;
-    flex: 1;
+    display: none;
   }
   
   .mobile-tab {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 0.75rem 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: #586069;
-    transition: all 0.2s;
-    border-radius: 0;
-    text-align: center;
-    border-right: 1px solid #e1e4e8;
-    border-bottom: 1px solid #e1e4e8;
-  }
-  
-  .mobile-tab:last-child {
-    border-right: none;
-  }
-  
-  .mobile-tab:hover {
-    background-color: #e1e4e8;
-  }
-  
-  .mobile-tab.active {
-    background-color: #0366d6;
-    color: white;
-    border-bottom-color: #0366d6;
+    display: none;
   }
   
   /* 移动端内容区域 */
@@ -1829,6 +1802,25 @@ body.dragging-divider .playground-divider {
     background-color: #f6f8fa;
     border-bottom: 1px solid #e1e4e8;
     min-height: 44px;
+    justify-content: space-between; /* 确保左右布局 */
+  }
+
+  /* 移动端文件tabs */
+  .mobile-file-tabs-header {
+    flex: 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-right: 0.5rem; /* 与右侧按钮保持间距 */
+  }
+
+  .playground-actions {
+    flex-shrink: 0;
+    gap: 0.25rem;
+  }
+
+  /* 移动端预览模式下的头部样式 */
+  .playground.vertical .playground-header.preview-mode {
+    justify-content: flex-end;
   }
   
   .file-tabs {
@@ -1864,6 +1856,16 @@ body.dragging-divider .playground-divider {
     font-size: 0.75rem;
     white-space: nowrap;
     min-width: auto;
+  }
+
+  .mobile-toggle {
+    background-color: #0366d6;
+    color: white;
+    font-weight: 500;
+  }
+
+  .mobile-toggle:hover {
+    background-color: #0256cc;
   }
 
   .playground-content {

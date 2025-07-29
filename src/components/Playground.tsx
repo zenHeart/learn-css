@@ -363,25 +363,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   return (
     <div className={`playground ${isVerticalLayout ? 'vertical' : 'horizontal'}`}>
-      <div className="playground-header">
-        {isVerticalLayout ? (
-          // 移动端：预览/编辑切换 tabs
-          <div className="mobile-tabs">
-            <button
-              className={`mobile-tab ${mobileActiveTab === 'preview' ? 'active' : ''}`}
-              onClick={() => setMobileActiveTab('preview')}
-            >
-              预览
-            </button>
-            <button
-              className={`mobile-tab ${mobileActiveTab === 'editor' ? 'active' : ''}`}
-              onClick={() => setMobileActiveTab('editor')}
-            >
-              编辑
-            </button>
-          </div>
-        ) : (
-          // 桌面端：文件 tabs
+      <div className={`playground-header ${isVerticalLayout && mobileActiveTab === 'preview' ? 'preview-mode' : ''}`}>
+        {/* 桌面端文件tabs */}
+        {!isVerticalLayout && (
           <div className="file-tabs">
             {files.map((file, index) => (
               <button
@@ -395,11 +379,41 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         )}
         
-        {/* 控制按钮只在配置开启时显示 */}
-        {showControl && (
+        {/* 移动端文件tabs - 只在编辑模式显示 */}
+        {isVerticalLayout && mobileActiveTab === 'editor' && (
+          <div className="file-tabs mobile-file-tabs-header">
+            {files.map((file, index) => (
+              <button
+                key={file.name}
+                className={`file-tab ${index === activeFileIndex ? 'active' : ''}`}
+                onClick={() => setActiveFileIndex(index)}
+              >
+                {file.name}
+              </button>
+            ))}
+          </div>
+        )}
+        
+        {/* 控制按钮区域 */}
+        {(isVerticalLayout || showControl) && (
           <div className="playground-actions">
-            <button onClick={resetCode} className="action-btn">重置</button>
-            {showConsole && <button onClick={clearConsole} className="action-btn">清空控制台</button>}
+            {/* 移动端预览/编辑切换按钮 */}
+            {isVerticalLayout && (
+              <button 
+                onClick={() => setMobileActiveTab(mobileActiveTab === 'preview' ? 'editor' : 'preview')} 
+                className="action-btn mobile-toggle"
+              >
+                {mobileActiveTab === 'preview' ? '编辑' : '预览'}
+              </button>
+            )}
+            
+            {/* 原有控制按钮只在配置开启时显示 */}
+            {showControl && (
+              <>
+                <button onClick={resetCode} className="action-btn">重置</button>
+                {showConsole && <button onClick={clearConsole} className="action-btn">清空控制台</button>}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -443,17 +457,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ) : (
               // 编辑模式
               <div className="mobile-editor-panel">
-                <div className="mobile-file-tabs">
-                  {files.map((file, index) => (
-                    <button
-                      key={file.name}
-                      className={`mobile-file-tab ${index === activeFileIndex ? 'active' : ''}`}
-                      onClick={() => setActiveFileIndex(index)}
-                    >
-                      {file.name}
-                    </button>
-                  ))}
-                </div>
                 <div className="mobile-editor-content">
                   <CodeEditor
                     value={files[activeFileIndex].content}
