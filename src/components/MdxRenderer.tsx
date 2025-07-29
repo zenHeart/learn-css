@@ -371,11 +371,23 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   // 处理链接
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 
-  // 处理任务列表和无序列表
+  // 处理任务列表、无序列表和有序列表
   html = html.replace(/^\s*[-*+]\s+\[\s*x\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" checked disabled> $1</li>')
   html = html.replace(/^\s*[-*+]\s+\[\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" disabled> $1</li>')
-  html = html.replace(/^\s*[-*+]\s+(.*)$/gim, '<li>$1</li>')
-  html = html.replace(/(<li.*?<\/li>(?:\s*<li.*?<\/li>)*)/gs, '<ul>$1</ul>')
+  html = html.replace(/^\s*[-*+]\s+(.*)$/gim, '<li class="unordered">$1</li>')
+  html = html.replace(/^\s*\d+\.\s+(.*)$/gim, '<li class="ordered">$1</li>')
+  
+  // 将连续的无序列表项包装在 <ul> 中
+  html = html.replace(/(<li class="unordered">.*?<\/li>(?:\s*<li class="unordered">.*?<\/li>)*)/gs, (match) => {
+    const cleanedMatch = match.replace(/ class="unordered"/g, '')
+    return `<ul>${cleanedMatch}</ul>`
+  })
+  
+  // 将连续的有序列表项包装在 <ol> 中
+  html = html.replace(/(<li class="ordered">.*?<\/li>(?:\s*<li class="ordered">.*?<\/li>)*)/gs, (match) => {
+    const cleanedMatch = match.replace(/ class="ordered"/g, '')
+    return `<ol>${cleanedMatch}</ol>`
+  })
 
   // 处理引用块
   html = html.replace(/^>\s*(.*)$/gim, '<blockquote-line>$1</blockquote-line>')
@@ -405,7 +417,7 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
     }
 
     // 检查是否是块级元素或 playground 标记
-    if (line.match(/^<(h[1-6]|ul|li|pre|div|table|blockquote|hr|__PROTECTED_ELEMENT_|__PROTECTED_TABLE_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
+    if (line.match(/^<(h[1-6]|ul|ol|li|pre|div|table|blockquote|hr|__PROTECTED_ELEMENT_|__PROTECTED_TABLE_)/) || line.match(/^\{\s*\/\*\s*@playground/)) {
       // 如果当前在段落中，先关闭段落
       if (inParagraph) {
         processedLines.push('</p>')
@@ -440,6 +452,8 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   html = html.replace(/(<\/[h1-6]>)<\/p>/g, '$1')
   html = html.replace(/<p>(<ul)/g, '$1')
   html = html.replace(/(<\/ul>)<\/p>/g, '$1')
+  html = html.replace(/<p>(<ol)/g, '$1')
+  html = html.replace(/(<\/ol>)<\/p>/g, '$1')
 
   return html
 }
