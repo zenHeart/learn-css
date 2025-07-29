@@ -8,28 +8,32 @@ keywords: CSS Grid, 网格布局, grid-template-columns, grid-template-rows, fr 
 
 # grid 布局
 
-grid 用来实现二维布局
+grid 用来实现二维布局网格布局的学习重点为:
 
-## 核心概念
 
-* **网格(grid)** 元素上 `display` 属性申明为 `grid` 或 `inline-grid` 会创建网格布局
-* **网格列(grid column)** 元素定义为 `grid` 布局后,`grid-template-columns` 属性会创建网格列
-* **网格行(grid row)** `grid-template-rows` 属性会创建网格行
-* **网格间距(grid gap)** 利用 `grid-gap` 属性申明网格行和列的间距
-* **网格线(grid line)** 网格的列和行之间的分割线为网格线,对于有间距的网格系统,可以把网格线的宽度假想成网格间距,网格线用于浏览器布局,实际不可见
-* **网格轨道(grid track)** 任意两条平行的网格线之间的空间为网格轨道,行和列实际上为单排网格轨道
-* **网格元组 (grid cell)** 网格最小的空间单元
-* **网格区域(grid area)** 有多个网格单元组成的空间,**注意空间只能为矩形**
-* **隐式网格(implicit grid)** 利用 `grid-template-columns` 和 `grid-template-ros` 申明的网格区域为显示网格,对于超出此区域的部分,浏览器会创建隐式网格,可以利用 `grid-auto-rows` 和 `grid-auto-columns` 进行设置。
-    
-{/* @playground id="grid-concept" mode="demo" */}
+* 如何设置网格容器      
+* 如何在网格容器定位网格项目   
 
-网格布局的学习重点为:
-1. 如何设置网格容器
-2. 如何在网格容器定位网格项目
+
+
+## 设置网格容器
+
+通过将 `display` 属性设置为 `grid` 或 `inline-grid` 创建网格布局。
+网格中的元素每个会单独占用一列，形成一列多行的网格节奏。
+
+默认创建 1*n 的网格容器,每行高度由内容区决定,每个网格单元会自动换行，即使宽度不足一行。
+查看示例
+
+{/* @playground id="display" mode="demo" */}
+
+display grid 和 inline-grid 的核心区别
+
+* `grid` 子项默认占满一行，而 `inline-grid` 子项只占用内容宽度
+* `grid` 生成的容器是块级元素独占一行，而 `inline-grid` 生成的容器是内联元素随着行内其他元素铺排
 
 
 ## 网格容器设定
+
 设置父元素 `display` 属性为 
 * `grid` 生成网格块容器
 * `inline-grid` 生成内联网格容器
@@ -41,14 +45,30 @@ grid 用来实现二维布局
 可以为容器设置行列属性来定义网格系统
 
 
-### 行列设定
-利用 
-* **grid-template-rows** 定义网格列轨道
-* **grid-template-columns** 定义网格行轨道
+## 网格行列轨道
 
-参看示例 [设置行列轨道](./grid-columns-rows.html) 通过指定行列各行列的大小,子元素按顺序依次排入各对应网格划分的空间。
+为了实现多行多列的布局，网格提供了 
+
+* **grid-template-rows** 定义网格行的宽度和行数
+* **grid-template-columns** 定义网格列的宽度和列数
+
+实现一个 2 行 2 列布局
+
+{/* @playground id="grid-columns-rows" mode="demo" */}
+
+
+### fr 单位
+
+fr 是用于分配网格容器剩余空间宽度的单位，效果类似 flex 
+
+{/* @playground id="grid-columns-rows-fr" mode="demo" */}
+
+
+可以看到设置 fr 后，子元素会均匀分配剩余空间。行的高度任然为内容高度。
+
 
 ### 轨道值
+
 除了常规的设定像素,百分比手段来定义网格行列轨道的宽度。
 grid 提供丰富的手段来定义轨道宽度。典型值如下
 
@@ -104,3 +124,19 @@ fr 是用于分配网格容器剩余空间宽度的单位。值为非负整数�
 
 ## 参考资料
 * [grid example](https://gridbyexample.com/examples/)
+
+
+## 核心概念
+
+
+* **网格(grid)** 元素上 `display` 属性申明为 `grid` 或 `inline-grid` 会创建网格布局
+* **网格列(grid column)** 元素定义为 `grid` 布局后,`grid-template-columns` 属性会创建网格列
+* **网格行(grid row)** `grid-template-rows` 属性会创建网格行
+* **网格间距(grid gap)** 利用 `grid-gap` 属性申明网格行和列的间距
+* **网格线(grid line)** 网格的列和行之间的分割线为网格线,对于有间距的网格系统,可以把网格线的宽度假想成网格间距,网格线用于浏览器布局,实际不可见
+* **网格轨道(grid track)** 任意两条平行的网格线之间的空间为网格轨道,行和列实际上为单排网格轨道
+* **网格元组 (grid cell)** 网格最小的空间单元
+* **网格区域(grid area)** 有多个网格单元组成的空间,**注意空间只能为矩形**
+* **隐式网格(implicit grid)** 利用 `grid-template-columns` 和 `grid-template-ros` 申明的网格区域为显示网格,对于超出此区域的部分,浏览器会创建隐式网格,可以利用 `grid-auto-rows` 和 `grid-auto-columns` 进行设置。
+    
+{/* @playground id="grid-concept" mode="demo" */}
