@@ -1,0 +1,32 @@
+<style>
+  .floor {
+    /* 设置为网格容器，为后续铺瓷砖做好准备 */
+    display: grid;
+    /* 灰色的毛坯地面 */
+    background-color: gray;
+    height: 300px;
+    width: 300px;
+    box-shadow: 0 2px 8px rgba(120, 100, 60, 0.08);
+    border: 1px solid #d2b48c;
+    margin: 10px;
+
+    /* 确定每块瓷砖大小和网格线 */
+    grid-template-columns: 100px 100px 100px;
+    grid-template-rows: 100px 100px 100px;
+  }
+  .cell {
+    border: 1px solid #fff;
+  }
+</style>
+
+<div class="floor">
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+</div>
