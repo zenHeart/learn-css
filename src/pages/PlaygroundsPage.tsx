@@ -211,6 +211,7 @@ const PlaygroundsPage: React.FC = () => {
                 initialCode={currentPlayground.initialCode}
                 solutionCode={currentPlayground.solutionCode}
                 showConsole={true}
+                fullHeight={true}
                 onCodeChange={(files) => {
                   console.log(`Playground ${currentPlayground.id} 代码已更改:`, files)
                 }}

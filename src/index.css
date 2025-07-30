@@ -3402,3 +3402,22 @@ body.dragging-divider .playground-divider {
   content: "⏳ ";
   margin-right: 0.5rem;
 }
+
+/* Playground 全高度样式 */
+.playground-full-height {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.playground-full-height .playground-content {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .playground-full-height {
+    height: calc(100vh - 140px);
+  }
+}

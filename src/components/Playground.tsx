@@ -9,6 +9,7 @@ interface PlaygroundProps {
   initialCode?: Record<string, string>
   solutionCode?: Record<string, string>
   onCodeChange?: (files: Record<string, string>) => void
+  fullHeight?: boolean
 }
 
 interface FileData {
@@ -24,7 +25,8 @@ const Playground: React.FC<PlaygroundProps> = ({
   showControl = false,
   initialCode,
   solutionCode,
-  onCodeChange
+  onCodeChange,
+  fullHeight = false
 }) => {
   // 生成初始文件列表
   const generateInitialFiles = useCallback((): FileData[] => {
@@ -540,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   return (
-    <div className={`playground ${isVerticalLayout ? 'vertical' : 'horizontal'}`}>
+    <div className={`playground ${isVerticalLayout ? 'vertical' : 'horizontal'}${fullHeight ? ' playground-full-height' : ''}`}>
       <div className={`playground-header ${isVerticalLayout && mobileActiveTab === 'preview' ? 'preview-mode' : ''}`}>
         {/* 桌面端文件tabs */}
         {!isVerticalLayout && (
