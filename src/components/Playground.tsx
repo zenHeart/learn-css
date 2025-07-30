@@ -229,11 +229,114 @@ document.addEventListener('DOMContentLoaded', function() {
       html = html.replace(styleRegex, `<style>${cssFile.content}</style>`)
     }
 
-    // 处理 JavaScript 文件：替换 script 标签的 src 属性
+    // 处理 JavaScript 文件：改进的模块处理
+    const processedJsFiles = new Set<string>()
+    const allModuleFiles: { name: string; content: string }[] = []
+    const entryModules: string[] = []
+
+    // 第一步：识别所有可能的模块文件（包含 import 或 export）
+    jsFiles.forEach(jsFile => {
+      const hasExport = jsFile.content.includes('export ')
+      const hasImport = jsFile.content.includes('import ')
+      
+      if (hasExport || hasImport) {
+        allModuleFiles.push({ name: jsFile.name, content: jsFile.content })
+        processedJsFiles.add(jsFile.name)
+      }
+    })
+
+    // 第二步：处理 HTML 中的脚本引用
     for (const jsFile of jsFiles) {
-      // 替换 <script src="./filename.js"></script>
-      const scriptRegex = new RegExp(`<script[^>]*src=["']\\.\/${jsFile.name}["'][^>]*></script>`, 'gi')
-      html = html.replace(scriptRegex, `<script>${jsFile.content}</script>`)
+      const scriptRegex = new RegExp(`<script([^>]*?)src=["']\\.\/${jsFile.name}["']([^>]*?)></script>`, 'gi')
+      
+      html = html.replace(scriptRegex, (_match, beforeSrc, afterSrc) => {
+        const allAttributes = (beforeSrc + afterSrc).trim()
+        const isModule = allAttributes.includes('type="module"')
+        
+        if (isModule) {
+          // 如果是模块但还没被识别为模块文件，添加到模块列表
+          if (!processedJsFiles.has(jsFile.name)) {
+            allModuleFiles.push({ name: jsFile.name, content: jsFile.content })
+            processedJsFiles.add(jsFile.name)
+          }
+          entryModules.push(jsFile.name)
+          return `<!-- MODULE_PLACEHOLDER_${jsFile.name} -->`
+        } else {
+          // 普通脚本直接内联
+          const scriptTag = allAttributes ? `<script ${allAttributes}>${jsFile.content}</script>` : `<script>${jsFile.content}</script>`
+          processedJsFiles.add(jsFile.name)
+          return scriptTag
+        }
+      })
+    }
+
+    // 第三步：生成模块脚本
+    if (allModuleFiles.length > 0) {
+      let moduleScript = '(function() {\n'
+      moduleScript += '  const modules = {};\n\n'
+      
+      // 处理每个模块
+      allModuleFiles.forEach(moduleFile => {
+        const moduleKey = moduleFile.name.replace('.js', '')
+        let moduleContent = moduleFile.content
+        
+        // 替换 import 语句
+        moduleContent = moduleContent.replace(/import\s+\{([^}]+)\}\s+from\s+['"]\.\/([^'"]+)(?:\.js)?['"]/g, 
+          (_, imports, moduleName) => {
+            return `const { ${imports} } = modules['${moduleName}'] || {};`
+          })
+        
+        // 替换 export 语句
+        moduleContent = moduleContent.replace(/export\s+function\s+(\w+)/g, 'function $1')
+        moduleContent = moduleContent.replace(/export\s+const\s+(\w+)/g, 'const $1')
+        moduleContent = moduleContent.replace(/export\s+let\s+(\w+)/g, 'let $1')
+        moduleContent = moduleContent.replace(/export\s+var\s+(\w+)/g, 'var $1')
+        
+        // 收集导出的标识符
+        const exportNames: string[] = []
+        const exportMatches = moduleFile.content.match(/export\s+(function\s+(\w+)|const\s+(\w+)|let\s+(\w+)|var\s+(\w+))/g) || []
+        exportMatches.forEach(match => {
+          const funcMatch = match.match(/function\s+(\w+)/)
+          const constMatch = match.match(/const\s+(\w+)/)
+          const letMatch = match.match(/let\s+(\w+)/)
+          const varMatch = match.match(/var\s+(\w+)/)
+          const name = funcMatch?.[1] || constMatch?.[1] || letMatch?.[1] || varMatch?.[1]
+          if (name) exportNames.push(name)
+        })
+        
+        // 处理 export { ... } 语法
+        const namedExportMatch = moduleFile.content.match(/export\s+\{([^}]+)\}/)
+        if (namedExportMatch) {
+          const namedExports = namedExportMatch[1].split(',').map(name => name.trim())
+          exportNames.push(...namedExports)
+        }
+        
+        moduleContent = moduleContent.replace(/export\s+\{[^}]+\}/g, '')
+        
+        moduleScript += `  // Module: ${moduleFile.name}\n`
+        moduleScript += `  modules['${moduleKey}'] = (function() {\n`
+        moduleScript += `    ${moduleContent.split('\n').map(line => '    ' + line).join('\n')}\n`
+        if (exportNames.length > 0) {
+          moduleScript += `    return { ${exportNames.join(', ')} };\n`
+        } else {
+          moduleScript += `    return {};\n`
+        }
+        moduleScript += `  })();\n\n`
+      })
+      
+      moduleScript += '})();\n'
+      
+      // 替换第一个模块占位符
+      let replaced = false
+      entryModules.forEach(entryModule => {
+        if (!replaced) {
+          html = html.replace(`<!-- MODULE_PLACEHOLDER_${entryModule} -->`, 
+            `<script type="module">${moduleScript}</script>`)
+          replaced = true
+        } else {
+          html = html.replace(`<!-- MODULE_PLACEHOLDER_${entryModule} -->`, '')
+        }
+      })
     }
 
     // 如果还有未替换的 CSS 文件，添加到 head 中
@@ -251,9 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 如果还有未替换的 JS 文件，添加到 body 末尾
     const remainingJs = jsFiles.filter(jsFile => {
-      const fileName = jsFile.name
-      return !html.includes(`<script>${jsFile.content}</script>`) && 
-             !html.match(new RegExp(`<script[^>]*src=["']\\.\/${fileName}["']`, 'i'))
+      return !processedJsFiles.has(jsFile.name) && 
+             !allModuleFiles.some((mf: { name: string; content: string }) => mf.name === jsFile.name)
     })
     
     if (remainingJs.length > 0) {
