@@ -1,0 +1,17 @@
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    gap: 10px;
+    border: 1px solid #ccc;
+  }
+  .cell {
+    background-color: #f0f0f0;
+    /* 设置元素从第 2 条网格线开始排列 */
+    grid-column-start: 2; 
+  }
+</style>
+<div class="container">
+  <div class="cell">1</div>
+</div>

@@ -8,15 +8,30 @@ keywords: CSS Grid, 网格布局, grid-template-columns, grid-template-rows, fr 
 
 # grid 布局
 
-grid 用来实现二维布局网格布局的学习重点为:
+grid 用来实现二维布局。它允许开发者通过定义行和列来创建复杂的布局结构。通过本章学习达到以下目标
+
+* 理解 grid 布局的核心概念和常用属性
+* 掌握如何使用 grid 创建常用的布局模式
+
+## 概念模型
+
+{/* @playground id="plot" mode="demo" */}
+
+想象你要耕作一块田地，你需要规划好每种作物的种植位置。
+CSS Grid 就像是这块田地的规划图，通过定义行和列来安排每种作物的位置。
 
 
-1. 如何设置网格容器      
-2. 如何在网格容器定位网格项目   
+* **网格线(grid line)** 网格的列和行之间的分割线为网格线,对于有间距的网格系统,可以把网格线的宽度假想成网格间距,网格线用于浏览器布局,实际不可见
+* **网格轨道(grid track)** 任意两条平行的网格线之间的空间为网格轨道,行和列实际上为单排网格轨道
+* **网格元组 (grid cell)** 网格最小的空间单元
+* **网格区域(grid area)** 有多个网格单元组成的空间,**注意空间只能为矩形**
+* **网格间距(grid gap)** 利用 `grid-gap` 属性申明网格行和列的间距
 
-## 基本使用
 
-### grid inline-grid
+
+## grid 容器设置
+
+### display grid
 
 通过将 `display` 属性设置为 `grid` 或 `inline-grid` 创建网格布局。
 网格中的元素每个会单独占用一列，形成一列多行的网格节奏。
@@ -55,17 +70,17 @@ display grid 和 inline-grid 的核心区别
 {/* @playground id="grid-columns-rows" mode="demo" */}
 
 
-#### fr 单位
+#### fr
 
 fr 是用于分配网格容器剩余空间宽度的单位，效果类似 flex 
 
-{/* @playground id="grid-columns-rows-fr" mode="demo" */}
+{/* @playground id="fr" mode="demo" */}
 
 
-可以看到设置 fr 后，子元素会均匀分配剩余空间。行的高度任然为内容高度。
+注意 fr 的和不足 1 的时候，与存在剩余未分配空间
 
+{/* @playground id="fr-percent" mode="demo" */}
 
-{/* @playground id="grid-columns-rows-units" mode="demo" */}
 
 #### minmax/auto
 
@@ -81,6 +96,8 @@ grid 提供丰富的手段来定义轨道宽度。典型值如下
   1. `minmax(100px,1fr)` 表示最小为 100px,最大根据容器剩余空间进行划分
 
 {/* @playground id="grid-value-minmax-auto" mode="demo" */}
+
+
 
 #### repeat
 
@@ -98,7 +115,35 @@ grid 提供丰富的手段来定义轨道宽度。典型值如下
 {/* @playground id="grid-columns-rows-repeat-track" mode="demo" */}
 
 
+##### auto-fill
 
+有时你不知道具体需要多少列或行，可以使用 `auto-fill` 或 `auto-fit` 来自动填充网格。
+
+使用 auto-fill 每列宽度 100px, 创建多列
+
+{/* @playground id="grid-columns-rows-auto-fill" mode="demo" */}
+
+
+auto-fill 可以配合 `minmax` 函数使用
+
+
+{/* @playground id="grid-columns-rows-auto-fill-func" mode="demo" */}
+
+
+
+##### auto-fit
+
+auto-fit 和 auto-fill 类似，但会自动适应容器宽度，填充剩余空间。
+
+{/* @playground id="grid-columns-rows-auto-fit" mode="demo" */}
+
+
+### grid-auto-flow
+
+默认网格元素按照从左往右、从上往下的顺序排列。可以通过 `grid-auto-flow` 设置为 `column` 来改变排列方向。
+按照列来铺排
+
+{/* @playground id="grid-auto-flow" mode="demo" */}
 
 
 ### grid-template
@@ -124,6 +169,43 @@ grid-template 只能定义有限行，对于超出的部分会创建隐式网格
 {/* @playground id="implicit-grid" mode="demo" */}
 
 
+## grid 元素设置
+
+### grid-column-start/end
+
+可以通过 `grid-column-start` 和 `grid-column-end` 属性来定义网格项目在网格中的位置。
+
+设置元素从第 2 条网格线开始排列。
+
+
+
+{/* @playground id="grid-column-start" mode="demo" */}
+
+
+网格线从 1 开始编号，负数表示从右往左的网格线。
+
+
+{/* @playground id="grid-column-start-negative" mode="demo" */}
+
+
+#### span
+
+类似表格 span ，用于定义 grid 项目占据几条轨道
+
+{/* @playground id="span" mode="demo" */}
+
+
+
+
+#### auto
+
+auto 表示默认铺排对应的位置，比如上例 span 等效为如下语法
+
+
+{/* @playground id="auto" mode="demo" */}
+
+
+
 ### grid-column/grid-row
 
 可以通过 `grid-column` 和 `grid-row` 属性来定义网格项目在网格中的位置。
@@ -136,17 +218,6 @@ grid-template 只能定义有限行，对于超出的部分会创建隐式网格
 
 未指定时，grid 项目会自动占据一个网格单元格。通过制定行类的网格区域，使元素跨越多个网格
 效果类似表格中的 `colspan` 和 `rowspan` 属性。
-
-
-#### auto / span
-
-对于元素放置无法指定具体的开头时，比如每个元素占据两列时，可以通过 auto, 代表自然放置的起始位置，
-span 代表行或者列的合并策略。
-
-
-
-{/* @playground id="grid-span" mode="demo" */}
-
 
 
 
@@ -171,15 +242,9 @@ span 代表行或者列的合并策略。
 * **网格(grid)** 元素上 `display` 属性申明为 `grid` 或 `inline-grid` 会创建网格布局
 * **网格行(grid row)** `grid-template-rows` 属性会创建网格行
 * **网格列(grid column)** 元素定义为 `grid` 布局后,`grid-template-columns` 属性会创建网格列
-* **网格间距(grid gap)** 利用 `grid-gap` 属性申明网格行和列的间距
-* **网格线(grid line)** 网格的列和行之间的分割线为网格线,对于有间距的网格系统,可以把网格线的宽度假想成网格间距,网格线用于浏览器布局,实际不可见
-* **网格轨道(grid track)** 任意两条平行的网格线之间的空间为网格轨道,行和列实际上为单排网格轨道
-* **网格元组 (grid cell)** 网格最小的空间单元
-* **网格区域(grid area)** 有多个网格单元组成的空间,**注意空间只能为矩形**
 * **显示网格(explicit grid)** 网格容器上 `grid-template` 属性定义的网格行和列
 * **隐式网格(implicit grid)** 网格容器上超出 `grid-template` 定义的行和列
 
-{/* @playground id="grid-concept" mode="demo" */}
 
 
 ## grid-template-areas
@@ -192,6 +257,33 @@ span 代表行或者列的合并策略。
 
 
 
+## 知识点
+
+
+* **CSS Grid 容器**
+   * `display: grid、 inline-grid` 将元素设为网格容器，为其直接子元素创建网格格式上下文。
+   * `grid-template-columns`/`grid-template-rows` 定义网格轨道，轨道尺寸
+      * `fr` 单位：分配剩余空间
+      * `px`/`em`/`%` 等：固定长度
+      * `auto`：根据内容自动计算
+      * `min-content、max-content`：定义最小和最大值
+      * `minmax(min, max)`：定义最小和最大值
+      * `fit-content()`：根据内容适配宽度
+      * `auto-fill、auto-fit` 自动填充或适配网格
+      * `repeat(num, pattern)` 简化重复定义
+* **显式网格定义**：属性  定义网格的列/行轨道（可包含具体长度、`fr`、`minmax()`、`auto` 等）【概念性】，制定网格的结构。
+* **隐式网格与自动轨道**：未显式定义的行/列轨道会自动创建，可用 `grid-auto-columns`/`grid-auto-rows` 调整其大小【概念性】。
+* **网格单元格与网格线**：网格由交叉的行线与列线构成最小的“单元格”（**格子**）【事实性】，可使用行/列编号对齐或跨越。
+* **网格间距（Gap）**：属性 `gap`（或 `column-gap`、`row-gap`）设定列间距与行间距【程序性】，简化设置网格间隙。
+* **自动布局方向**：`grid-auto-flow` 控制自动放置项目时沿行还是列填充（默认沿行）【概念性】；可设为 `dense` 来填补空缺。
+* **项目放置（定位）**：网格子项通过 `grid-column-start`/`grid-column-end` 和 `grid-row-start`/`grid-row-end` 指定起始和结束线【程序性】；简写 `grid-column`/`grid-row` 也可使用。
+* **跨越（Span）**：可在 `*-end` 或简写中使用 `span n`，使网格项跨越多个轨道【程序性】。例如 `grid-column: auto / span 2`。
+* **对齐属性**：容器层面 `justify-items`/`align-items` 设定项目在单元格内的默认对齐方式【概念性】；而 `justify-content`/`align-content` 控制整个网格的对齐与分布【概念性】。子项层面可用 `justify-self`/`align-self` 覆盖。
+* **显式 vs 隐式网格**：显式网格是开发者定义的轨道集合（通过 `grid-template-...`），隐式网格是浏览器自动添加的轨道【概念性】；使用负编号（如 `grid-column: 1 / -1`）仅作用于显式网格。
+* **常见应用**：网格适用于二维布局，比如同时控制多行多列；理解 `fr` 单位、自动放置和对齐逻辑是高效使用网格的关键【元认知】。在设计布局前先规划网格结构，有助于更快地完成复杂布局。
+
+
+{/* @playground id="grid-concept" mode="demo" */}
 
 
 ## 参考资料

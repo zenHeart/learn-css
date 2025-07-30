@@ -1205,7 +1205,8 @@ button:focus-visible {
 .playground {
   display: flex;
   flex-direction: column;
-  height: 600px;
+  min-height: auto; 
+  max-height: 600px;
   border: 1px solid #e1e4e8;
   border-radius: 6px;
   overflow: hidden;
@@ -1699,7 +1700,8 @@ body.dragging-divider .playground-divider {
   }
 
   .playground {
-    height: 400px;
+    min-height: auto; 
+    max-height: 400px;
     width: 100%;
     max-width: 100%;
     overflow: hidden;
@@ -2460,8 +2462,8 @@ body.dragging-divider .playground-divider {
   }
 
   .playground {
-    height: auto;
-    min-height: 350px;
+    min-height: auto; 
+    max-height: 350px;
     margin: 0;
     width: 100%;
     max-width: 100%;
@@ -3269,7 +3271,8 @@ body.dragging-divider .playground-divider {
   }
 
   .playground {
-    height: 350px;
+    min-height: auto; 
+    max-height: 350px;
   }
 
   .file-tab {

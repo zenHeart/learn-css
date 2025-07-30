@@ -1,0 +1,34 @@
+<style>
+  :root {
+    --grid-type: auto-fill;
+  }
+
+  .container {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-type), minmax(100px, 1fr));
+    gap: 10px;
+    border: 1px solid #ccc;
+  }
+
+  .cell {
+    background-color: #f0f0f0;
+    padding: 20px;
+    text-align: center;
+  }
+</style>
+
+<select id="grid-type-select">
+  <option value="auto-fill">Auto Fill</option>
+  <option value="auto-fit">Auto Fit</option>
+</select>
+
+<div class="container">
+  <div class="cell">1</div>
+  <div class="cell">2</div>
+</div>
+
+<script>
+document.getElementById('grid-type-select').addEventListener('change', function(e) {
+  document.documentElement.style.setProperty('--grid-type', e.target.value);
+});
+</script>

@@ -1,0 +1,69 @@
+<style>
+  body {
+    background: #f4f4f4;
+    font-family: sans-serif;
+    padding: 2rem;
+    text-align: center;
+  }
+  /* .field 是一块 3x3 的田地 */
+  .field {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+    width: 90%;
+    max-width: 500px;
+    margin: 2rem auto;
+    transition: all 0.7s ease-in-out;
+  }
+  /* .cell 就是田地里的作物 */
+  .cell {
+    background: #8bc34a;
+    border: 2px solid #689f38;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+  }
+  /* --- 初始布局规划 --- */
+  .corn {
+    grid-area: 1 / 1 / 2 / 3;
+  } /* 第1行，占2格 */
+  .tomato {
+    grid-area: 1 / 3 / 3 / 4;
+  } /* 第3列，占2格 */
+  .potato {
+    grid-area: 2 / 1 / 3 / 3;
+  }
+  .eggplant {
+    grid-area: 3 / 1 / 4 / 4;
+  } /* 第3行，占3格 */
+  /* --- 重新规划布局 --- */
+  /* 当 .field 拥有 .rearranged 类时，应用此规划 */
+  .field.rearranged .corn {
+    grid-area: 1 / 1 / 4 / 2;
+  }
+  .field.rearranged .tomato {
+    grid-area: 1 / 2 / 2 / 4;
+  }
+  .field.rearranged .potato {
+    grid-area: 2 / 2 / 4 / 3;
+  }
+  .field.rearranged .eggplant {
+    grid-area: 2 / 3 / 4 / 4;
+  }
+</style>
+<h2>🧑‍🌾 Grid 就像一块田，可以随意规划</h2>
+<button>重新规划田地</button>
+<div class="field" id="field">
+  <div class="cell corn">🌽</div>
+  <div class="cell tomato">🍅</div>
+  <div class="cell potato">🥔</div>
+  <div class="cell eggplant">🍆</div>
+</div>
+<script>
+  document.querySelector("button").addEventListener("click", () => {
+    document.getElementById("field").classList.toggle("rearranged");
+  });
+</script>

@@ -1,0 +1,22 @@
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    gap: 10px;
+    border: 1px solid #ccc;
+  }
+  .cell {
+    background-color: #f0f0f0;
+    /* 
+  grid column 为 grid-column-start 和 grid-column-end 的简写形式
+  如下语句等效为
+  grid-column-start: auto;
+  grid-column-end: span 2;
+*/
+    grid-column: auto / span 2;
+  }
+</style>
+<div class="container">
+  <div class="cell">1</div>
+</div>

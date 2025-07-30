@@ -1,0 +1,17 @@
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    gap: 10px;
+    border: 1px solid #ccc;
+  }
+  .cell {
+    background-color: #f0f0f0;
+    /* 这里的 span 2 表示占据两列 */
+    grid-column-start: span 2; 
+  }
+</style>
+<div class="container">
+  <div class="cell">1</div>
+</div>

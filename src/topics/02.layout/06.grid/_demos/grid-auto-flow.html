@@ -1,0 +1,37 @@
+<style>
+  :root {
+    --flow-type: column;
+  }
+  .container {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: var(--flow-type);
+    gap: 10px;
+    border: 1px solid #ccc;
+  }
+  .cell {
+    background-color: #f0f0f0;
+  }
+</style>
+<select id="flow-type">
+  <option value="column">column</option>
+  <option value="row">row</option>
+</select>
+<div class="container">
+  <div class="cell">1</div>
+  <div class="cell">2</div>
+  <div class="cell">3</div>
+  <div class="cell">4</div>
+  <div class="cell">5</div>
+  <div class="cell">6</div>
+</div>
+
+<script>
+  document
+    .getElementById("flow-type")
+    .addEventListener("change", function (e) {
+      document.documentElement.style.setProperty("--flow-type", e.target.value);
+    });
+</script>
+
