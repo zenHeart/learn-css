@@ -269,24 +269,23 @@ class DocScanner {
       const initialCode: Record<string, string> = {}
       const solutionCode: Record<string, string> = {}
 
-      // 读取初始代码文件
-      const initialFiles = ['index.html', 'style.css', 'script.js']
-      for (const fileName of initialFiles) {
-        const filePath = path.join(playgroundDir, fileName)
-        if (fs.existsSync(filePath)) {
+      // 读取文件夹中的所有文件
+      const files = fs.readdirSync(playgroundDir, { withFileTypes: true })
+      
+      for (const file of files) {
+        if (file.isFile()) {
+          const filePath = path.join(playgroundDir, file.name)
           const content = fs.readFileSync(filePath, 'utf-8')
-          initialCode[fileName] = content
-        }
-      }
-
-      // 如果是练习模式，读取解决方案代码
-      if (mode === 'exercise') {
-        const solutionFiles = ['solution.html', 'solution.css', 'solution.js']
-        for (const fileName of solutionFiles) {
-          const filePath = path.join(playgroundDir, fileName)
-          if (fs.existsSync(filePath)) {
-            const content = fs.readFileSync(filePath, 'utf-8')
-            solutionCode[fileName] = content
+          
+          // 不是解决方案文件
+          if (!file.name.startsWith('solution.')) {
+            initialCode[file.name] = content
+          }
+          
+          // 如果是练习模式，读取解决方案文件
+          if (mode === 'exercise' && file.name.startsWith('solution.')) {
+            const originalName = file.name.replace('solution.', '')
+            solutionCode[originalName] = content
           }
         }
       }
@@ -464,88 +463,9 @@ class DocScanner {
       const htmlContent = fs.readFileSync(filePath, 'utf-8')
       const initialCode: Record<string, string> = {}
       
-      // 提取 CSS 样式
-      const styleMatches = htmlContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi)
-      if (styleMatches) {
-        const cssContent = styleMatches
-          .map(match => {
-            const content = match.replace(/<\/?style[^>]*>/gi, '')
-            return this.formatCssCode(content)
-          })
-          .filter(content => content.trim())
-          .join('\n\n')
-        
-        if (cssContent) {
-          initialCode['style.css'] = cssContent
-        }
-      }
-      
-      // 提取 JavaScript
-      const scriptMatches = htmlContent.match(/<script[^>]*>([\s\S]*?)<\/script>/gi)
-      if (scriptMatches) {
-        const jsContent = scriptMatches
-          .map(match => {
-            const content = match.replace(/<\/?script[^>]*>/gi, '')
-            return this.formatJsCode(content)
-          })
-          .filter(content => content.trim()) // 过滤空脚本
-          .join('\n\n')
-        
-        if (jsContent) {
-          initialCode['script.js'] = jsContent
-        }
-      }
-      
-      // 清理 HTML 内容（移除 style 和 script 标签）
-      let cleanHtml = htmlContent
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      
-      // 如果 HTML 是完整文档，提取 body 内容并重新构建
-      const bodyMatch = cleanHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-      if (bodyMatch) {
-        const bodyContent = this.normalizeCode(bodyMatch[1])
-        const indentedBodyContent = bodyContent
-          .split('\n')
-          .map(line => line.trim() ? '    ' + line : line)
-          .join('\n')
-        
-        cleanHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${playgroundId}</title>
-</head>
-<body>
-${indentedBodyContent}
-</body>
-</html>`
-      } else if (!cleanHtml.includes('<!DOCTYPE html>')) {
-        // 如果不是完整文档，包装成完整的 HTML
-        const normalizedContent = this.normalizeCode(cleanHtml)
-        const indentedContent = normalizedContent
-          .split('\n')
-          .map(line => line.trim() ? '    ' + line : line)
-          .join('\n')
-        
-        cleanHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${playgroundId}</title>
-</head>
-<body>
-${indentedContent}
-</body>
-</html>`
-      } else {
-        // 如果已经是完整的 HTML 文档，只需要规范化格式
-        cleanHtml = this.formatHtmlDocument(cleanHtml, playgroundId)
-      }
-      
-      initialCode['index.html'] = cleanHtml
+      // 直接使用原始文件内容，不拆分
+      const fileName = path.basename(filePath)
+      initialCode[fileName] = htmlContent
       
       return {
         id: playgroundId,

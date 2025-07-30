@@ -110,39 +110,34 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     ]
 
-    // 如果有提供初始代码，则使用提供的代码
+    // 如果有提供初始代码，直接使用
     if (initialCode && Object.keys(initialCode).length > 0) {
       const files: FileData[] = []
       
-      // 处理 HTML 文件
-      if (initialCode['index.html']) {
+      // 确定文件语言类型
+      const getLanguage = (fileName: string): 'html' | 'css' | 'javascript' => {
+        if (fileName.endsWith('.html')) return 'html'
+        if (fileName.endsWith('.css')) return 'css'
+        if (fileName.endsWith('.js')) return 'javascript'
+        return 'html' // 默认
+      }
+      
+      // 按文件名排序，确保 index.html 在前面
+      const sortedFiles = Object.entries(initialCode).sort(([a], [b]) => {
+        if (a.includes('index.html')) return -1
+        if (b.includes('index.html')) return 1
+        return a.localeCompare(b)
+      })
+      
+      for (const [fileName, content] of sortedFiles) {
         files.push({
-          name: 'index.html',
-          content: initialCode['index.html'],
-          language: 'html'
+          name: fileName,
+          content: content,
+          language: getLanguage(fileName)
         })
       }
       
-      // 处理 CSS 文件
-      if (initialCode['style.css']) {
-        files.push({
-          name: 'style.css',
-          content: initialCode['style.css'],
-          language: 'css'
-        })
-      }
-      
-      // 处理 JS 文件
-      if (initialCode['script.js']) {
-        files.push({
-          name: 'script.js',
-          content: initialCode['script.js'],
-          language: 'javascript'
-        })
-      }
-      
-      // 如果没有任何文件，返回默认文件
-      return files.length > 0 ? files : defaultFiles
+      return files
     }
     
     return defaultFiles
@@ -166,27 +161,108 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 生成预览 HTML
   const generatePreviewHtml = useCallback((files: FileData[]) => {
-    const htmlFile = files.find(f => f.name.endsWith('.html'))
-    const cssFile = files.find(f => f.name.endsWith('.css'))
-    const jsFile = files.find(f => f.name.endsWith('.js'))
-
+    // 查找主 HTML 文件
+    let htmlFile = files.find(f => f.name === 'index.html')
+    if (!htmlFile) {
+      htmlFile = files.find(f => f.name.endsWith('.html'))
+    }
+    
     if (!htmlFile) return ''
 
     let html = htmlFile.content
 
-    // 注入 CSS
-    if (cssFile) {
-      const styleTag = `<style>${cssFile.content}</style>`
+    // 如果只有一个 HTML 文件，直接使用（单文件模式）
+    if (files.length === 1 && htmlFile.name.endsWith('.html')) {
+      // 注入控制台重写代码
+      const consoleOverride = `
+        <script>
+          (function() {
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            console.log = function(...args) {
+              originalLog.apply(console, args);
+              window.parent.postMessage({
+                type: 'console',
+                level: 'log',
+                message: args.join(' ')
+              }, '*');
+            };
+            
+            console.error = function(...args) {
+              originalError.apply(console, args);
+              window.parent.postMessage({
+                type: 'console',
+                level: 'error',
+                message: args.join(' ')
+              }, '*');
+            };
+            
+            console.warn = function(...args) {
+              originalWarn.apply(console, args);
+              window.parent.postMessage({
+                type: 'console',
+                level: 'warn',
+                message: args.join(' ')
+              }, '*');
+            };
+          })();
+        </script>
+      `
+      html = html.replace('</body>', `${consoleOverride}\n</body>`)
+      return html
+    }
+
+    // 多文件模式：替换外部引用为内联内容
+    const cssFiles = files.filter(f => f.name.endsWith('.css'))
+    const jsFiles = files.filter(f => f.name.endsWith('.js'))
+
+    // 处理 CSS 文件：替换 link 标签和 style 标签的 src 属性
+    for (const cssFile of cssFiles) {
+      // 替换 <link rel="stylesheet" href="./filename.css"> 
+      const linkRegex = new RegExp(`<link[^>]*href=["']\\.\/${cssFile.name}["'][^>]*>`, 'gi')
+      html = html.replace(linkRegex, `<style>${cssFile.content}</style>`)
+      
+      // 替换 <style src="./filename.css"></style> (虽然这不是标准用法，但可能存在)
+      const styleRegex = new RegExp(`<style[^>]*src=["']\\.\/${cssFile.name}["'][^>]*></style>`, 'gi')
+      html = html.replace(styleRegex, `<style>${cssFile.content}</style>`)
+    }
+
+    // 处理 JavaScript 文件：替换 script 标签的 src 属性
+    for (const jsFile of jsFiles) {
+      // 替换 <script src="./filename.js"></script>
+      const scriptRegex = new RegExp(`<script[^>]*src=["']\\.\/${jsFile.name}["'][^>]*></script>`, 'gi')
+      html = html.replace(scriptRegex, `<script>${jsFile.content}</script>`)
+    }
+
+    // 如果还有未替换的 CSS 文件，添加到 head 中
+    const remainingCss = cssFiles.filter(cssFile => {
+      const fileName = cssFile.name
+      return !html.includes(`<style>${cssFile.content}</style>`) && 
+             !html.match(new RegExp(`<link[^>]*href=["']\\.\/${fileName}["']`, 'i'))
+    })
+    
+    if (remainingCss.length > 0) {
+      const allRemainingCss = remainingCss.map(f => f.content).join('\n\n')
+      const styleTag = `<style>${allRemainingCss}</style>`
       html = html.replace('</head>', `${styleTag}\n</head>`)
     }
 
-    // 注入 JavaScript
-    if (jsFile) {
-      const scriptTag = `<script>${jsFile.content}</script>`
+    // 如果还有未替换的 JS 文件，添加到 body 末尾
+    const remainingJs = jsFiles.filter(jsFile => {
+      const fileName = jsFile.name
+      return !html.includes(`<script>${jsFile.content}</script>`) && 
+             !html.match(new RegExp(`<script[^>]*src=["']\\.\/${fileName}["']`, 'i'))
+    })
+    
+    if (remainingJs.length > 0) {
+      const allRemainingJs = remainingJs.map(f => f.content).join('\n\n')
+      const scriptTag = `<script>${allRemainingJs}</script>`
       html = html.replace('</body>', `${scriptTag}\n</body>`)
     }
 
-    // 注入控制台重写
+    // 注入控制台重写代码
     const consoleOverride = `
       <script>
         (function() {
