@@ -908,10 +908,59 @@ button:focus-visible {
 }
 
 .mdx-content img {
-  max-width: 100%;
+  max-width: 350px;
   height: auto;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 1.5rem auto;
+}
+
+/* 针对文档中的技术图表，可能需要更大的显示空间 */
+.mdx-content img[alt*="图"] {
+  max-width: min(100%, 900px);
+}
+
+/* 针对小图标或装饰性图片 */
+.mdx-content img[alt*="icon"],
+.mdx-content img[alt*="logo"] {
+  max-width: min(100%, 200px);
+  display: inline-block;
+  margin: 0.5rem;
+}
+
+/* 图片加载状态优化 */
+.mdx-content img {
+  transition: opacity 0.3s ease;
+  background-color: #f8f9fa;
+}
+
+.mdx-content img:not([src]) {
+  opacity: 0.5;
+}
+
+/* 图片点击放大效果（可选） */
+.mdx-content img:hover {
+  cursor: pointer;
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* 防止图片在加载时产生布局跳动 */
+.mdx-content img[loading="lazy"] {
+  min-height: 100px;
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 25%, transparent 50%, #f0f0f0 50%, #f0f0f0 75%, transparent 75%, transparent);
+  background-size: 20px 20px;
+  animation: loading-placeholder 1.5s infinite linear;
+}
+
+@keyframes loading-placeholder {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
 }
 
 .toc-container {
@@ -1697,6 +1746,25 @@ body.dragging-divider .playground-divider {
   .mdx-content video {
     max-width: 100%;
     height: auto;
+    margin: 1rem auto;
+    /* 移动端限制图片最大宽度，确保不会太大 */
+    max-width: min(100%, 90vw);
+    /* 移动端减少阴影效果，减少视觉负担 */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 移动端技术图表样式 */
+  .mdx-content img[alt*="图"] {
+    max-width: min(100%, 95vw);
+    /* 确保图片在小屏幕上也能看清细节 */
+    border: 1px solid #e1e4e8;
+  }
+
+  /* 移动端小图标样式 */
+  .mdx-content img[alt*="icon"],
+  .mdx-content img[alt*="logo"] {
+    max-width: min(100%, 120px);
+    margin: 0.25rem;
   }
 
   .playground {
@@ -1947,6 +2015,16 @@ body.dragging-divider .playground-divider {
   .mdx-content video {
     max-width: 100%;
     height: auto;
+    margin: 1rem auto;
+    /* 在更小的屏幕上进一步限制宽度 */
+    max-width: min(100%, 85vw);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  /* 小屏幕技术图表样式 */
+  .mdx-content img[alt*="图"] {
+    max-width: min(100%, 90vw);
+    border: 1px solid #e1e4e8;
   }
 
   /* GitHub Flavored Markdown 表格样式 */

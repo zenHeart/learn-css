@@ -636,6 +636,52 @@ class DocScanner {
     return sortAndClean(root)
   }
 
+  // 复制图片文件到 public 目录
+  async copyImageFiles(): Promise<void> {
+    const publicDir = path.resolve('public')
+    const publicTopicsDir = path.join(publicDir, 'topics')
+
+    // 确保 public/topics 目录存在
+    if (!fs.existsSync(publicTopicsDir)) {
+      fs.mkdirSync(publicTopicsDir, { recursive: true })
+    }
+
+    // 遍历所有 topics 目录
+    await this.copyDirectoryImages(this.topicsDir, publicTopicsDir)
+  }
+
+  // 递归复制目录中的图片文件
+  private async copyDirectoryImages(sourceDir: string, targetDir: string): Promise<void> {
+    if (!fs.existsSync(sourceDir)) return
+
+    const items = fs.readdirSync(sourceDir, { withFileTypes: true })
+
+    for (const item of items) {
+      const sourcePath = path.join(sourceDir, item.name)
+      const targetPath = path.join(targetDir, item.name)
+
+      if (item.isDirectory()) {
+        // 递归处理子目录
+        if (!fs.existsSync(targetPath)) {
+          fs.mkdirSync(targetPath, { recursive: true })
+        }
+        await this.copyDirectoryImages(sourcePath, targetPath)
+      } else if (item.isFile()) {
+        // 检查是否是图片文件
+        const ext = path.extname(item.name).toLowerCase()
+        if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'].includes(ext)) {
+          // 复制图片文件
+          try {
+            fs.copyFileSync(sourcePath, targetPath)
+            console.log(`复制图片: ${sourcePath} -> ${targetPath}`)
+          } catch (error) {
+            console.warn(`复制图片失败: ${sourcePath}`, error)
+          }
+        }
+      }
+    }
+  }
+
   // 生成所有 Playground 数据
   async generateAllPlaygrounds(): Promise<Record<string, PlaygroundItem>> {
     const docs = await this.scanAllDocs()
@@ -660,6 +706,9 @@ export function docScannerPlugin(): Plugin {
   // 生成虚拟模块内容的函数
   async function generateVirtualModuleContent() {
     try {
+      // 复制图片文件到 public 目录
+      await scanner.copyImageFiles()
+      
       // 扫描所有文档
       const docs = await scanner.scanAllDocs()
       console.log(`扫描到 ${docs.length} 个文档`)

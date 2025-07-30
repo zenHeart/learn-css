@@ -266,6 +266,7 @@ const TopicsPage: React.FC = () => {
         <div className="content">
           <MdxRenderer 
             content={currentDoc.content} // 使用真实的 MDX 内容
+            currentRoute={currentDoc.path} // 传入当前文档路径
             frontmatter={currentDoc.frontmatter} // 使用真实的 frontmatter
             playgrounds={getCurrentPlaygrounds()}
           />

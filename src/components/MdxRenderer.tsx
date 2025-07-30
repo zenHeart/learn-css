@@ -30,6 +30,7 @@ interface TocItem {
 
 interface MdxRendererProps {
   content: string
+  currentRoute?: string
   frontmatter?: {
     title?: string
     category?: string
@@ -423,8 +424,45 @@ const buildNestedList = (items: ListItem[]): string => {
   return result.trim()
 }
 
+// 处理图片路径的函数
+const processImagePath = (imagePath: string, currentRoute?: string): string => {
+  // 如果是绝对路径或网络路径，直接返回
+  if (imagePath.startsWith('http') || imagePath.startsWith('//') || imagePath.startsWith('/')) {
+    return imagePath
+  }
+  
+  // 处理相对路径
+  if (imagePath.startsWith('./')) {
+    // 去掉 './' 前缀
+    const cleanPath = imagePath.substring(2)
+    
+    // 如果有当前路由信息，构建完整路径
+    if (currentRoute) {
+      // 从路由中提取目录路径，需要构建相对于 public 目录的路径
+      // currentRoute 格式类似 "02.layout/06.grid/index.mdx"
+      const routeParts = currentRoute.split('/').filter(Boolean)
+      if (routeParts.length > 0) {
+        // 移除最后的文件名（如 index.mdx），只保留目录路径
+        const dirParts = routeParts.slice(0, -1) // 去掉文件名
+        if (dirParts.length > 0) {
+          // 构建相对于网站根目录的路径
+          // 在 Vite 中，src 目录下的文件需要通过导入或者放在 public 目录
+          // 这里我们使用一个特殊的路径来处理 src 目录下的图片
+          return `/learn-css/topics/${dirParts.join('/')}/${cleanPath}`
+        }
+      }
+    }
+    
+    // 默认情况下，尝试从 static 目录查找
+    return `/learn-css/${cleanPath}`
+  }
+  
+  // 其他相对路径，尝试从 static 目录查找
+  return `/learn-css/${imagePath}`
+}
+
 // 简单的 Markdown 到 HTML 转换器
-const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
+const markdownToHtml = (markdown: string, tocItems: TocItem[], currentRoute?: string): string => {
   let html = markdown
 
   // 首先处理表格（在保护其他元素之前）
@@ -533,6 +571,12 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
 
   // 处理链接
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+
+  // 处理图片
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+    const processedSrc = processImagePath(src, currentRoute)
+    return `<img src="${processedSrc}" alt="${alt}" loading="lazy" />`
+  })
 
   // 处理列表（使用新的处理函数）
   html = processLists(html)
@@ -708,7 +752,7 @@ const TOC: React.FC<{ items: TocItem[]; activeId: string; isMobile: boolean }> =
   )
 }
 
-const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgrounds = [] }) => {
+const MdxRenderer: React.FC<MdxRendererProps> = ({ content, currentRoute, frontmatter, playgrounds = [] }) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const [activeHeading, setActiveHeading] = useState<string>('')
   const [isMobile, setIsMobile] = useState(false)
@@ -732,7 +776,7 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content, frontmatter, playgro
   // 解析内容并构建包含 React 组件的元素数组
   const contentElements = useMemo(() => {
     // 转换 Markdown 到 HTML（playground 标记已被保护和恢复）
-    let htmlContent = markdownToHtml(content, tocItems)
+    let htmlContent = markdownToHtml(content, tocItems, currentRoute)
     
     // 分割内容，找到 playground 标记的位置
     const playgroundRegex = /\{\s*\/\*\s*@playground\s+id="([^"]+)"\s+mode="([^"]+)"\s*\*\/\s*\}/g
