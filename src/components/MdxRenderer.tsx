@@ -260,6 +260,169 @@ const escapeHtml = (text: string): string => {
   return text.replace(/[&<>"']/g, (char) => htmlEscapes[char] || char)
 }
 
+// 列表项接口
+interface ListItem {
+  indent: number
+  type: 'ul' | 'ol' | 'task'
+  content: string
+  isChecked?: boolean
+}
+
+// 栈项接口
+interface StackItem {
+  type: 'ul' | 'ol' | 'task'
+  indent: number
+  html: string[]
+}
+
+// 处理列表的函数
+const processLists = (html: string): string => {
+  const lines = html.split('\n')
+  const processedLines: string[] = []
+  let i = 0
+  
+  while (i < lines.length) {
+    const line = lines[i]
+    
+    // 检查是否是列表项
+    const unorderedMatch = line.match(/^(\s*)([-*+])\s+(.*)$/)
+    const orderedMatch = line.match(/^(\s*)(\d+\.)\s+(.*)$/)
+    const taskMatch = line.match(/^(\s*)([-*+])\s+\[(\s*[x\s]*)\]\s+(.*)$/)
+    
+    if (unorderedMatch || orderedMatch || taskMatch) {
+      // 处理列表块
+      const listHtml = processListBlock(lines, i)
+      processedLines.push(listHtml.html)
+      i = listHtml.nextIndex
+    } else {
+      processedLines.push(line)
+      i++
+    }
+  }
+  
+  return processedLines.join('\n')
+}
+
+// 处理列表块
+const processListBlock = (lines: string[], startIndex: number): { html: string; nextIndex: number } => {
+  const items: ListItem[] = []
+  let i = startIndex
+  
+  // 收集连续的列表项
+  while (i < lines.length) {
+    const line = lines[i]
+    
+    // 任务列表项
+    const taskMatch = line.match(/^(\s*)([-*+])\s+\[(\s*[x\s]*)\]\s+(.*)$/)
+    if (taskMatch) {
+      const indent = taskMatch[1].length
+      const isChecked = taskMatch[3].toLowerCase().includes('x')
+      items.push({
+        indent,
+        type: 'task',
+        content: taskMatch[4],
+        isChecked
+      })
+      i++
+      continue
+    }
+    
+    // 无序列表项
+    const unorderedMatch = line.match(/^(\s*)([-*+])\s+(.*)$/)
+    if (unorderedMatch) {
+      const indent = unorderedMatch[1].length
+      items.push({
+        indent,
+        type: 'ul',
+        content: unorderedMatch[3]
+      })
+      i++
+      continue
+    }
+    
+    // 有序列表项
+    const orderedMatch = line.match(/^(\s*)(\d+\.)\s+(.*)$/)
+    if (orderedMatch) {
+      const indent = orderedMatch[1].length
+      items.push({
+        indent,
+        type: 'ol',
+        content: orderedMatch[3]
+      })
+      i++
+      continue
+    }
+    
+    // 如果不是列表项，跳出循环
+    break
+  }
+  
+  // 构建嵌套列表 HTML
+  const html = buildNestedList(items)
+  
+  return { html, nextIndex: i }
+}
+
+// 构建嵌套列表 HTML
+const buildNestedList = (items: ListItem[]): string => {
+  if (items.length === 0) return ''
+  
+  const stack: StackItem[] = []
+  let result = ''
+  
+  for (const item of items) {
+    // 关闭更深层级的列表
+    while (stack.length > 0 && stack[stack.length - 1].indent >= item.indent) {
+      const closed = stack.pop()!
+      const tag = closed.type === 'ol' ? 'ol' : 'ul'
+      const listContent = closed.html.join('\n')
+      
+      if (stack.length > 0) {
+        // 添加到父级列表
+        stack[stack.length - 1].html.push(`<${tag}>\n${listContent}\n</${tag}>`)
+      } else {
+        // 顶级列表
+        result += `<${tag}>\n${listContent}\n</${tag}>\n`
+      }
+    }
+    
+    // 如果需要开始新的列表层级
+    if (stack.length === 0 || stack[stack.length - 1].indent < item.indent) {
+      stack.push({
+        type: item.type,
+        indent: item.indent,
+        html: []
+      })
+    }
+    
+    // 添加列表项
+    let listItemHtml = ''
+    if (item.type === 'task') {
+      const checked = item.isChecked ? ' checked' : ''
+      listItemHtml = `<li class="task-list-item"><input type="checkbox"${checked} disabled> ${item.content}</li>`
+    } else {
+      listItemHtml = `<li>${item.content}</li>`
+    }
+    
+    stack[stack.length - 1].html.push(listItemHtml)
+  }
+  
+  // 关闭所有剩余的列表
+  while (stack.length > 0) {
+    const closed = stack.pop()!
+    const tag = closed.type === 'ol' ? 'ol' : 'ul'
+    const listContent = closed.html.join('\n')
+    
+    if (stack.length > 0) {
+      stack[stack.length - 1].html.push(`<${tag}>\n${listContent}\n</${tag}>`)
+    } else {
+      result += `<${tag}>\n${listContent}\n</${tag}>\n`
+    }
+  }
+  
+  return result.trim()
+}
+
 // 简单的 Markdown 到 HTML 转换器
 const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   let html = markdown
@@ -371,23 +534,8 @@ const markdownToHtml = (markdown: string, tocItems: TocItem[]): string => {
   // 处理链接
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 
-  // 处理任务列表、无序列表和有序列表
-  html = html.replace(/^\s*[-*+]\s+\[\s*x\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" checked disabled> $1</li>')
-  html = html.replace(/^\s*[-*+]\s+\[\s*\]\s+(.*)$/gim, '<li class="task-list-item"><input type="checkbox" disabled> $1</li>')
-  html = html.replace(/^\s*[-*+]\s+(.*)$/gim, '<li class="unordered">$1</li>')
-  html = html.replace(/^\s*\d+\.\s+(.*)$/gim, '<li class="ordered">$1</li>')
-  
-  // 将连续的无序列表项包装在 <ul> 中
-  html = html.replace(/(<li class="unordered">.*?<\/li>(?:\s*<li class="unordered">.*?<\/li>)*)/gs, (match) => {
-    const cleanedMatch = match.replace(/ class="unordered"/g, '')
-    return `<ul>${cleanedMatch}</ul>`
-  })
-  
-  // 将连续的有序列表项包装在 <ol> 中
-  html = html.replace(/(<li class="ordered">.*?<\/li>(?:\s*<li class="ordered">.*?<\/li>)*)/gs, (match) => {
-    const cleanedMatch = match.replace(/ class="ordered"/g, '')
-    return `<ol>${cleanedMatch}</ol>`
-  })
+  // 处理列表（使用新的处理函数）
+  html = processLists(html)
 
   // 处理引用块
   html = html.replace(/^>\s*(.*)$/gim, '<blockquote-line>$1</blockquote-line>')
