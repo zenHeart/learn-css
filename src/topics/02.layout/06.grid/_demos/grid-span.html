@@ -1,0 +1,18 @@
+<style>
+  .container {
+    display: grid;
+    grid-template: 100px 1fr / repeat(2, 100px 1fr)
+  }
+
+  .cell {
+    background: #ffc07e;
+    border: 2px solid #c08b7d;
+    grid-column: auto / span 2; /* 让单元格跨越两列 */
+  }
+
+</style>
+
+<div class="container">
+  <div class="cell">1</div>
+  <div class="cell">2</div>
+</div>
