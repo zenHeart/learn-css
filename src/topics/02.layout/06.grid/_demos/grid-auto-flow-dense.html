@@ -1,11 +1,11 @@
 <style>
   :root {
-    --flow-type: dense;
+    --flow-type: column;
   }
   .container {
     display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(3, auto);
     grid-auto-flow: var(--flow-type);
     gap: 10px;
     border: 1px solid #ccc;
@@ -13,28 +13,19 @@
   .cell {
     background-color: #f0f0f0;
   }
-  /* 不同 cell 设置位置，制造空隙 */
-  .cell2 { grid-column: 3; }
-  .cell4 { grid-row: 3; }
 </style>
 <select id="flow-type">
-  <option value="dense">dense</option>
   <option value="column">column</option>
   <option value="row">row</option>
 </select>
 <div class="container">
   <div class="cell">1</div>
-  <div class="cell cell2">2</div>
+  <div class="cell">2</div>
   <div class="cell">3</div>
-  <div class="cell cell4">4</div>
+  <div class="cell">4</div>
   <div class="cell">5</div>
   <div class="cell">6</div>
 </div>
-<!-- 
-  说明：
-  - 选择 row/column 时，空格不会被填补。
-  - 选择 dense 时，后面的格子会尽量填补空隙。
--->
 
 <script>
   document
@@ -43,3 +34,4 @@
       document.documentElement.style.setProperty("--flow-type", e.target.value);
     });
 </script>
+

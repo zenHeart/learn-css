@@ -1,0 +1,37 @@
+<style>
+  .container {
+    display: grid;
+    /* 父网格：两列（侧边 + 主内容） */
+    grid-template-columns: 100px 1fr; 
+    gap: 8px;
+    border: 1px solid #ccc;
+    padding: 8px;
+  }
+
+  .parent {
+    /* 横跨父网格所有列 */
+    grid-column: 1 / -1;             
+    display: grid;
+    /* 使用 subgrid 继承父网格列定义 */
+    grid-template-columns: subgrid;                         
+    background: #f5f5f5;
+    padding: 8px;
+  }
+
+  .a {
+    background: #ffd580;
+    text-align: center;
+  }
+
+  .b {
+    background: #fffbe7;
+    text-align: center;
+  }
+</style>
+
+<div class="container">
+  <div class="parent">
+    <div class="a">A</div> 
+    <div class="b">B</div> 
+  </div>
+</div>

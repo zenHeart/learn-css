@@ -1,0 +1,21 @@
+<style>
+  .container {
+    display: grid;
+    /* 显式列：1-2-3 */
+    grid-template-columns: 
+      [first-left first-right] 100px
+      [last-left last-right] 100px;
+    gap: 10px;
+    border: 2px dashed #ccc;
+  }
+
+  .cell {
+    background: #eee;
+    grid-column-start: last-left; /* 设置元素从最后一条左侧网格线开始排列 */
+
+  }
+</style>
+
+<div class="container">
+  <div class="cell">1</div>
+</div>

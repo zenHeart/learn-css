@@ -1,9 +1,18 @@
 <style>
   .container {
     display: grid;
+
+    /* grid-template 具名行列说明：
+  - [row1-start] 和 [row1-end] 等为具名网格线，可用于 grid-row/grid-column 精确定位。
+  - "header header" 和 "sidebar main" 为具名区域，可用 grid-area 直接引用。
+  - / 分隔符前为行定义，后为列定义，列同样可具名。
+  - 例如：.sidebar { grid-row: row2-start / row2-end; grid-column: col1-start / col1-end; } 
+  */
+
     grid-template:
-      "header header" 60px
-      "sidebar main" 1fr / 120px 1fr;
+      [row1-start] "header header" 60px [row1-end row2-start]
+      [row2-start] "sidebar main" 1fr [row2-end]
+      / [col1-start] 120px [col1-end col2-start] 1fr [col2-end];
     gap: 10px;
     height: 200px;
     border: 2px dashed #ccc;

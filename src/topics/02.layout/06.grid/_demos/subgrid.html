@@ -1,0 +1,51 @@
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    grid-template-rows: 40px 1fr;
+    gap: 8px;
+    border: 2px dashed #ccc;
+    padding: 8px;
+  }
+  .header {
+    grid-column: 1 / -1;
+    background: #ffb347;
+    text-align: center;
+    line-height: 40px;
+    font-weight: bold;
+  }
+
+  .content {
+    display: grid;
+    grid-column: 1 / -1;
+    /*
+    subgrid 允许子元素的网格（如 .content）继承父网格（.container）的行和列轨道设置。
+    在 .content 上设置 grid-template-columns: subgrid 和 grid-template-rows: subgrid，
+    使其子项（.sidebar 和 .main）能够与父网格的列和行对齐，实现更灵活的嵌套布局。
+    这样可以保证子网格的列宽、行高与父网格保持一致，便于复杂布局的统一和对齐。
+  */
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+    gap: 8px;
+    background: #f5f5f5;
+    padding: 4px;
+  }
+  .sidebar {
+    background: #ffd580;
+    text-align: center;
+    line-height: 80px;
+  }
+  .main {
+    background: #fffbe7;
+    text-align: center;
+    line-height: 80px;
+  }
+</style>
+
+<div class="container">
+  <div class="header">header</div>
+  <div class="content">
+    <div class="sidebar">sidebar</div>
+    <div class="main">main</div>
+  </div>
+</div>

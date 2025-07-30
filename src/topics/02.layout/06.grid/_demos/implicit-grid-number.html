@@ -1,0 +1,37 @@
+<style>
+  .container {
+    display: grid;
+    /* 显式列：1-2-3 */
+    grid-template-columns: repeat(3, 30px); 
+    gap: 10px;
+    border: 2px dashed #ccc;
+  }
+
+  .cell {
+    background: #eee;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .implicit-end {
+    background: #add8e6;
+    /* 只针对显示式网格的最后一列 */
+    grid-column: -1;
+  }
+
+  .implicit-5 {
+    background: #add8e6;
+    /* 若设置的列数超出显示网格范围，则会自动创建隐式网格，来容纳额外内容 */
+    grid-column: 6;
+  }
+</style>
+
+<div class="container">
+  <div class="cell">1</div>
+  <div class="cell">2</div>
+  <div class="cell">3</div>
+  <div class="cell implicit-end">4 </div>
+  <div class="cell implicit-5">5</div>
+</div>
