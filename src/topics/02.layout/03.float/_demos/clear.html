@@ -1,0 +1,61 @@
+<style>
+  :root {
+    clear: none;
+  }
+  article {
+    border: 20px solid #000;
+    padding: 10px;
+  }
+  article img {
+    border: 5px solid red;
+    margin: 5px;
+  }
+  .left {
+    float: left;
+    border-color: red;
+  }
+  .right {
+    float: right;
+    border-color: aqua;
+  }
+  article p {
+    background: yellow;
+    clear: var(--clear)
+  }
+</style>
+
+<select name="clear" id="clear">
+  <option value="none">不清除</option>
+  <option value="left">清除左侧</option>
+  <option value="right">清除右侧</option>
+  <option value="both">清除两侧</option>
+</select>
+<article>
+  <p>
+    <img
+      class="left"
+      src="https://dummyimage.com/100x100/000/fff&text=test"
+      alt="测试图片"
+    />
+    <p>文本左右均有图片，此时文字会同时环绕在左右两个图片周围。</p>
+    <img
+      class="right"
+      src="https://dummyimage.com/100x100/000/666&text=test1"
+      alt="测试图片"
+    />
+    <p> 这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果
+    这是测试文案，用来保证环绕效果。</p>
+  </p>
+</article>
+<script>
+  const select = document.querySelector('#clear');
+  select.addEventListener('change', (e) => {
+    document.documentElement.style.setProperty('--clear', e.target.value);
+  });
+</script>

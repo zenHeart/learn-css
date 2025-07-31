@@ -1,0 +1,91 @@
+---
+title: 浮动
+tags: [float]
+description: 说明浮动布局
+keywords: CSS 浮动, margin 塌陷
+---
+
+通过本章理解
+
+1. 浮动布局的原理
+2. 如何使用浮动实现图文环绕等效果
+
+## float
+
+浮动用来实现图文排版中环绕效果，文本流会围绕浮动元素进行铺排。
+
+{/* @playground id="float" mode="demo" */}
+
+当设置元素为浮动时，[参考规范](https://www.w3.org/TR/CSS22/visuren.html#floats) 引擎会按照如下规则铺排元素。
+
+以 `float` 属性为 `left` 为例，元素会向左浮动, 和其包含块左边界对齐，这里的包含块可以简单理解为
+父容器的内容盒左边界。
+
+{/* @playground id="float-align-contain-block" mode="demo" */}
+
+如果出现多个浮动元素，则下一个浮动元素会以前面一个元素的右边界对齐。
+
+{/* @playground id="float-align-multi" mode="demo" */}
+
+
+上述现象总结为一句话就是
+
+> 浮动元素永远向着包含块可用的内容区边界对齐，如果设置 `left` 则左对齐，如果是 right 则右对齐。
+
+{/* @playground id="float-align-content-edge" mode="demo" */}
+
+这也正体现了浮动元素的特点，永远向可用的边缘对齐。想象一个水中漂浮的小船，它如果飘向岸边只能贴着岸边，
+如果岸边还有其他小船，则会在岸边排成一排。或者一个靠着一个。
+
+
+## clear
+
+由于内联元素会环绕浮动元素布局，在排版中我们希望实现单边环绕的效果，此时可以利用 clear 属性
+来控制内联元素的环绕行为。
+
+例如当存在左右两个浮动图片时。
+
+{/* @playground id="clear" mode="demo" */}
+
+如果希望文本不围绕 test 图片环绕，通过 `clear:left` 属性文字会在 test 图片下方开始布局。
+打开注释查看效果。
+
+同理 
+
+* `clear:right` 可以让文字不围绕右侧的图片环绕
+* `clear:both` 可以让文字不围绕左右两个图片环绕
+
+
+## 浮动塌陷(float collapse)
+
+由于浮动元素脱离了文档流，因此会出现父元素高度塌陷的现象。
+
+{/* @playground id="float-collapse" mode="demo" */}
+
+浮动元素本身是为了解决文字环绕的排版问题，而文字能够环绕意味着父容器高度一定大于浮动元素所以实际使用中
+不会出现高度塌陷的问题。
+
+最简答的方法，通过给内容区设置一个最小高度解决此问题
+
+{/* @playground id="collapse-min-height" mode="demo" */}
+
+
+此外还可以利用在父容器盒上使用伪元素设置 clear 属性，避免塌陷
+
+{/* @playground id="collapse-pesude-clear" mode="demo" */}
+
+
+此外还可利用 BFC 的特性，为父容器创建一个 BFC 来包含浮动元素。
+
+{/* @playground id="collapse-bfc" mode="demo" */}
+
+
+## 浮动布局
+
+由于浮动机制在很早就被引入， 在早起浏览器中会利用浮动来实现复杂布局，目前已经逐渐被 Flexbox 和 Grid 布局所取代。
+此处只做了解即可。
+
+采用 float 实现圣杯布局
+
+{/* @playground id="float-holy" mode="demo" */}
+

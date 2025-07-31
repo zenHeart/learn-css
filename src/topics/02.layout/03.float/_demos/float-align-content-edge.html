@@ -1,0 +1,24 @@
+<style>
+  article {
+    padding: 10px;
+    width: 600px;
+  }
+  article img {
+    float: left;
+    border: 5px solid red;
+    margin: 10px;
+  }
+  article p {
+    background: yellow;
+  }
+
+</style>
+<article>
+  <img src="https://dummyimage.com/100x100/000/fff&text=1" alt="测试图片" />
+  <p>
+    注意图片 2 的对齐原则，向外层父容器可用的边缘对齐
+    1. 由于左边是一个浮动图片，所以左边界，基于图片 1 的 marigin 盒右边距对齐
+    2. 由于顶部有文本内容，所以基于文本内容的 margin 盒底边距对齐
+  </p>
+  <img style="border-color:aqua" src="https://dummyimage.com/50x50/000/666&text=2" alt="测试图片" />
+</article>

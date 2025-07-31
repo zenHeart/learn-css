@@ -1,0 +1,22 @@
+<style>
+  article {
+    border: 20px solid #000;
+    margin: 50px;
+    padding: 10px;
+  }
+  article img {
+    float: left;
+    border: 5px solid red;
+  }
+  article p {
+    background: yellow;
+  }
+
+</style>
+<article>
+  <img src="https://dummyimage.com/100x100/000/fff&text=test" alt="测试图片" />
+  <p>
+    注意图片的对齐位置是相对外层父容器的内容盒左边界对齐，所以父容器设置了 margin/border/padding 会调整父容器内容盒的位置
+    从而影响浮动的对齐效果。
+  </p>
+</article>
