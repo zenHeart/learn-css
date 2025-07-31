@@ -1,0 +1,18 @@
+{
+  "Insert Playground (Auto-detected)": {
+    "prefix": "pgauto",
+    "body": [
+      "{/* @playground id=\"${1|align-content,flex-align-cont,flex-align-items,flex-anonymous,flex-basic,flex-basis,flex-basis-auto-0,flex-basis-content-limit,flex-concept,flex-context,flex-direction,flex-grow,flex-item,flex-justify-content,flex-layout1,flex-shrink,img-text-online|}\" mode=\"${2|demo,exercise,test|}\" */}"
+    ],
+    "description": "Insert playground with auto-detected IDs from _demos folder: align-content, flex-align-cont, flex-align-items, flex-anonymous, flex-basic, flex-basis, flex-basis-auto-0, flex-basis-content-limit, flex-concept, flex-context, flex-direction, flex-grow, flex-item, flex-justify-content, flex-layout1, flex-shrink, img-text-online",
+    "scope": "mdx"
+  },
+  "Insert Demo Playground (Auto-detected)": {
+    "prefix": "pgdemoauto",
+    "body": [
+      "{/* @playground id=\"${1|align-content,flex-align-cont,flex-align-items,flex-anonymous,flex-basic,flex-basis,flex-basis-auto-0,flex-basis-content-limit,flex-concept,flex-context,flex-direction,flex-grow,flex-item,flex-justify-content,flex-layout1,flex-shrink,img-text-online|}\" mode=\"demo\" */}"
+    ],
+    "description": "Insert demo playground with auto-detected IDs: align-content, flex-align-cont, flex-align-items, flex-anonymous, flex-basic, flex-basis, flex-basis-auto-0, flex-basis-content-limit, flex-concept, flex-context, flex-direction, flex-grow, flex-item, flex-justify-content, flex-layout1, flex-shrink, img-text-online",
+    "scope": "mdx"
+  }
+}

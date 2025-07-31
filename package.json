@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-snippets": "cd $PWD && node scripts/generate-snippets.js",
+    "test-snippets": "node scripts/test-snippets.js"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.1",

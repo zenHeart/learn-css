@@ -1,36 +1,31 @@
 <h3>基本示例说明动画的使用</h3>
 <button onclick="location.reload()">重载触发动画</button>
-
 <p class="demo">
   Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius, atque debitis.
   Corrupti cupiditate laudantium quos ullam maiores vel odio ad repellat?
   Suscipit facilis et ratione fugiat consequuntur repellendus ad perspiciatis.
 </p>
-
 <style>
-  /* 1. 定义动画名称和持续时间 */
-  p.demo {
-    animation-name: slidein;
-    animation-duration: 3s;
-  }
-
-  /* 2. 定义动画的关键帧  */
+  /* 1. 定义动画的关键帧  */
   @keyframes slidein {
     /* 定义起始帧的状态 */
     from {
       margin-left: 100%;
-      width: 300%;
     }
-    75% {
-      font-size: 300%;
-      margin-left: 25%;
-      width: 150%;
+    /* 定义中间帧的状态 */
+    50% {
+      margin-left: 50%;
     }
-
     /* 定义结束帧的状态 */
     to {
       margin-left: 0%;
-      width: 100%;
     }
+  }
+  /* 2. 定义动画名称和持续时间 */
+  p.demo {
+    /* 指定动画名称 */
+    animation-name: slidein;
+    /* 指定动画持续时间 */
+    animation-duration: 2s;
   }
 </style>

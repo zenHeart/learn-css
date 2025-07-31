@@ -1,0 +1,91 @@
+---
+title: 动画 animation
+tags: [animation]
+description: 说明动画的使用方法和原理
+---
+
+
+
+
+## 学习目标
+
+CSS Animation 来创建过渡和动画效果。通过本章学习
+
+1. 理解动画的基本概念
+2. 掌握动画的常用属性
+
+## 核心概念
+
+
+### 关键帧 (keyframes)
+
+关键帧是动画的核心概念，它定义了动画在不同时间点的状态。
+通过设置关键帧，可以指定动画的起始状态、中间状态和结束状态。
+
+在 css 中采用 `@keyframes` 规则定义关键帧动画。
+
+
+{/* @playground id="basic" mode="demo" */}
+
+上例采用 `@keyframes` 定义了  slidein 动画其中设置
+
+1. 在动画开始时 
+   - 元素从左侧外部开始，位置为 `-100%`
+2. 动画 50% 时
+   - 元素移动到屏幕中央，位置为 `50%`
+3. 动画结束时
+   - 元素移动到默认布局位置
+4. 通过在元素上使用
+  * `animation` 属性来指定动画名称
+  * `animation-duration` 属性来设置动画持续时间为 2 秒
+
+> 注意这里的百分比是相对于动画持续时间的，`50%` 表示动画进行到一半时的状态。
+
+### 动画属性
+
+CSS 提供了一系列属性控制动画的行为
+
+属性| 作用
+---|---
+`animation-name` | 指定动画的名称，对应 `@keyframes` 中定义的动画名称
+`animation-duration` | 设置动画的持续时间
+`animation-timing-function` | 定义动画的速度曲线，控制动画的加速和减速
+`animation-delay` | 设置动画开始前的延迟时间
+`animation-iteration-count` | 定义动画的循环次数，可以是整数或 `infinite`（无限循环）
+`animation-direction` | 定义动画的播放方向，可以是 `normal`（正常播放）、`reverse`（反向播放）、`alternate`（交替播放）等
+`animation-fill-mode` | 定义动画结束后元素的状态，可以是 `none`（无效果）、`forwards`（保持最后一帧状态）、`backwards`（保持第一帧状态）等
+`animation-play-state` | 控制动画的播放状态，可以是 `running`（运行中）或 `paused`（暂停）  
+`animation` | 复合属性，包含上述所有动画属性，可以简写为 `animation: name duration timing-function delay iteration-count direction fill-mode play-state;`
+
+
+如何记住这些属性呢？笔者采用如下口诀
+
+> 命时速延此向动，停!
+
+想象一下你现在学习一个魔法，这个魔法的作用是让物体按照你固定的方向和速度运动，你可以控制物体什么时候停。
+现在你用魔方棒指向物体时候念出这个咒语 `命时速延此向动，停!`， 想象物体按照你的要求控制方向和速度和突然暂停的画面！类似哈利波特的 [飞来咒](https://baike.baidu.com/item/%E9%A3%9E%E6%9D%A5%E5%92%92?fromModule=lemma_search-box)
+
+* `命` 对应 `animation-name` 表示动画的命名名称，魔法里可以想象为你要控制的物体名称
+* `时` 对应 `animation-duration` 表示动画的持续时间，魔法里可以想象你希望物体飞多久
+* `速` 对应 `animation-timing-function` 表示动画的速度曲线，魔法里可以想象为物体飞行的速度
+* `延` 对应 `animation-delay` 表示动画开始前的延迟，魔法里可以控制物体延迟动作的时间
+* `此` 是次的谐音、对应 `animation-iteration-count` 表示动画的循环次数，魔法里可以想象为你希望物体重复多少次运动
+* `向` 对应 `animation-direction` 表示动画的播放方向，魔法里可以想象为你希望物体朝哪个方向移动
+* `动` 对应 `animation-fill-mode` 表示动画结束后物体的动作状态停在哪里，魔法里可以想象为你希望物体在结束后保持什么样的动作状态
+* `停` 对应 `animation-play-state` 表示动画的播放停止状态，魔法里可以想象为你希望物体什么时候暂停
+
+
+
+
+
+## 性能优化
+
+参考 [animation guide](https://web.dev/articles/animations-guide?hl=zh-cn)
+
+## 使用
+
+## 延伸阅读
+
+* [js 控制动画](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations#Examples#Using_animation_events)
+
+## 知识点

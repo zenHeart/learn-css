@@ -1,0 +1,62 @@
+<style>
+  .demo {
+    width: 100px;
+    height: 100px;
+    background: lightblue;
+    color: red;
+    align-content: center;
+    text-align: center;
+    opacity: 0.5;
+  }
+  .container {
+    width: 100px;
+    height: 100px;
+    margin: 100px;
+    border: 1px solid #000;
+  }
+</style>
+<select name="transforms" id="transform-select"></select>
+<div class="container">
+  <div class="demo">
+    <strong>transform demo</strong>
+  </div>
+</div>
+
+<script>
+  const TransformDemos = [
+    {
+      label: "重置(none)",
+      code: "transform: none;",
+    },
+    {
+      label: "平移(translate)",
+      code: "transform: translate(50px, 50px);",
+    },
+    {
+      label: "缩放(scale)",
+      code: "transform: scale(1.5);",
+    },
+    {
+      label: "旋转(rotate)",
+      code: "transform: rotate(45deg);",
+    },
+    {
+      label: "倾斜(skew)",
+      code: "transform: skew(20deg, 10deg);",
+    },
+    {
+      label: "多重变换",
+      code: "transform: translate(50px, 50px) scale(1.5) rotate(45deg);",
+    },
+  ];
+  const select = document.querySelector("#transform-select");
+  TransformDemos.forEach((demo) => {
+    const option = document.createElement("option");
+    option.value = demo.code;
+    option.textContent = demo.label;
+    select.appendChild(option);
+  });
+  select.addEventListener("change", (e) => {
+    document.querySelector(".demo").style.cssText = e.target.value;
+  });
+</script>
