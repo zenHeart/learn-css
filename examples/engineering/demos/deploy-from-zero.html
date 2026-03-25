@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端部署从 0 到 1 完整指南</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+    h1 { font-size: 20px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 16px; margin: 24px 0 12px; color: #333; border-left: 4px solid #667eea; padding-left: 12px; }
+    h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .note { font-size: 13px; color: #666; margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #667eea; }
+    .warning { background: #fff3cd; border-left-color: #ffc107; }
+    .success { background: #d4edda; border-left-color: #28a745; }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 6px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    .code-block .comment { color: #6a9955; }
+    .code-block .keyword { color: #569cd6; }
+    .code-block .prop { color: #9cdcfe; }
+    .code-block .value { color: #ce9178; }
+    .code-block .string { color: #ce9178; }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .flow-step {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .flow-arrow {
+      color: #999;
+      font-size: 18px;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .compare-table th {
+      text-align: left;
+      padding: 12px;
+      background: #f5f5f5;
+      border-bottom: 2px solid #ddd;
+    }
+    .compare-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+    .compare-table tr:hover { background: #f9f9f9; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .tag-recommend { background: #d4edda; color: #155724; }
+    .tag-old { background: #f8d7da; color: #721c24; }
+    .tag-nginx { background: #cce5ff; color: #004085; }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+    .checklist li {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .check-icon { color: #27ae60; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>📦 前端部署从 0 到 1 完整指南</h1>
+
+  <!-- 部署流程总览 -->
+  <div class="container">
+    <div class="label">部署流程总览</div>
+    <div class="flow">
+      <div class="flow-step">1. 代码打包</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">2. 资源优化</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">3. 服务器配置</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">4. CI/CD 自动化</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">5. 监控与回滚</div>
+    </div>
+  </div>
+
+  <!-- 1. 代码打包 -->
+  <div class="container">
+    <h2>1. 代码打包</h2>
+    <p class="note">构建产物（dist/） = 打包后的 HTML/CSS/JS/图片 等静态资源</p>
+
+    <h3>主流构建工具</h3>
+    <div class="code-block"><span class="comment"># Vite（推荐，现代项目）</span>
+npm create vite@latest my-app -- --template vue
+<span class="keyword">cd</span> my-app
+npm install
+npm run build  <span class="comment"># 输出到 dist/</span>
+
+<span class="comment"># Webpack（大型项目）</span>
+npm run build  <span class="comment"># webpack --mode production</span>
+
+<span class="comment"># Parcel（零配置）</span>
+npx parcel index.html</span></div>
+
+    <h3>打包优化配置</h3>
+    <div class="code-block"><span class="comment">// vite.config.js</span>
+<span class="keyword">export default</span> <span class="prop">{</span>
+  build: <span class="prop">{</span>
+    <span class="prop">target</span>: <span class="string">'es2015'</span>,      <span class="comment">// 兼容目标</span>
+    <span class="prop">cssCodeSplit</span>: <span class="string">true</span>,       <span class="comment">// CSS 代码分割</span>
+    <span class="prop">rollupOptions</span>: <span class="prop">{</span>
+      <span class="prop">output</span>: <span class="prop">{</span>
+        <span class="prop">manualChunks</span>: <span class="prop">{</span>         <span class="comment">// 拆包策略</span>
+          <span class="prop">vendor</span>: <span class="prop">[</span><span class="string">'vue'</span>, <span class="string">'vue-router'</span><span class="prop">]</span>,
+          <span class="prop">element-plus</span>: <span class="prop">[</span><span class="string">'element-plus'</span><span class="prop">]</span>
+        <span class="prop">}</span>
+      <span class="prop">}</span>
+    <span class="prop">}</span>,
+    <span class="prop">terserOptions</span>: <span class="prop">{</span>       <span class="comment">// JS 压缩配置</span>
+      <span class="prop">compress</span>: <span class="prop">{</span>
+        <span class="prop">drop_console</span>: <span class="string">true</span>,   <span class="comment">// 移除 console</span>
+        <span class="prop">drop_debugger</span>: <span class="string">true</span>
+      <span class="prop">}</span>
+    <span class="prop">}</span>
+  <span class="prop">}</span>
+<span class="prop">}</span></div>
+  </div>
+
+  <!-- 2. 资源优化 -->
+  <div class="container">
+    <h2>2. 资源优化</h2>
+
+    <h3>静态资源处理</h3>
+    <ul class="checklist">
+      <li><span class="check-icon">✓</span> <strong>代码压缩</strong>：JS/CSS/HTML minify，移除注释和空格</li>
+      <li><span class="check-icon">✓</span> <strong>Gzip/Brotli</strong>：服务器开启压缩，体积减少 60-80%</li>
+      <li><span class="check-icon">✓</span> <strong>图片优化</strong>：WebP 格式、懒加载、CDN 加速</li>
+      <li><span class="check-icon">✓</span> <strong>长缓存</strong>：静态资源使用 contenthash 命名</li>
+      <li><span class="check-icon">✓</span> <strong>CDN 分发</strong>：将静态资源部署到 CDN</li>
+    </ul>
+
+    <h3>关键 HTTP Headers</h3>
+    <div class="code-block"><span class="comment"># Nginx 配置关键响应头</span>
+add_header Cache-Control <span class="string">"public, max-age=31536000, immutable"</span>;  <span class="comment"># 静态资源一年</span>
+add_header Strict-Transport-Security <span class="string">"max-age=63072000"</span>;           <span class="comment"># HSTS</span>
+add_header X-Content-Type-Options <span class="string">"nosniff"</span>;                       <span class="comment"># 防止 MIME 嗅探</span>
+add_header X-Frame-Options <span class="string">"SAMEORIGIN"</span>;                          <span class="comment"># 防点击劫持</span></div>
+  </div>
+
+  <!-- 3. 服务器配置 -->
+  <div class="container">
+    <h2>3. 服务器配置</h2>
+
+    <h3>Nginx 部署 SPA（单页应用）</h3>
+    <div class="code-block"><span class="comment"># /etc/nginx/conf.d/vue-app.conf</span>
+<span class="keyword">server</span> <span class="prop">{</span>
+    <span class="prop">listen</span> <span class="value">80</span>;
+    <span class="prop">server_name</span> <span class="string">example.com</span>;
+    <span class="prop">root</span> <span class="string">/var/www/my-app/dist</span>;        <span class="comment"># 构建产物目录</span>
+    <span class="prop">index</span> <span class="string">index.html</span>;
+
+    <span class="comment"># Gzip 压缩</span>
+    <span class="prop">gzip</span> <span class="value">on</span>;
+    <span class="prop">gzip_types</span> <span class="string">text/plain application/javascript application/json text/css application/xml;</span>
+    <span class="prop">gzip_min_length</span> <span class="value">1000</span>;
+
+    <span class="comment"># SPA 路由 fallback 到 index.html</span>
+    <span class="prop">location</span> <span class="value">/</span> <span class="prop">{</span>
+        <span class="prop">try_files</span> <span class="string">$uri $uri/ /index.html</span>;   <span class="comment"># ← 关键！</span>
+    <span class="prop">}</span>
+
+    <span class="comment"># 静态资源缓存</span>
+    <span class="prop">location</span> <span class="value">~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$</span> <span class="prop">{</span>
+        <span class="prop">expires</span> <span class="value">1y</span>;
+        <span class="prop">add_header</span> <span class="string">Cache-Control</span> <span class="string">"public, immutable"</span>;
+    <span class="prop">}</span>
+
+    <span class="comment"># API 代理（可选）</span>
+    <span class="prop">location</span> <span class="value">/api/</span> <span class="prop">{</span>
+        <span class="prop">proxy_pass</span> <span class="string">http://localhost:3000/</span>;
+        <span class="prop">proxy_set_header</span> <span class="string">Host</span> <span class="string">$host</span>;
+    <span class="prop">}</span>
+<span class="prop">}</span></div>
+
+    <h3>HTTPS 配置（Let's Encrypt 免费证书）</h3>
+    <div class="code-block"><span class="comment"># 安装 Certbot</span>
+apt install certbot python3-certbot-nginx
+
+<span class="comment"># 获取证书（自动配置 Nginx）</span>
+certbot --nginx -d example.com -d www.example.com
+
+<span class="comment"># 自动续期（Certbot 已配置 cron）</span>
+certbot renew --dry-run</div>
+
+    <h3>Docker 部署</h3>
+    <div class="code-block"><span class="comment"># Dockerfile</span>
+<span class="keyword">FROM</span> nginx:alpine
+<span class="keyword">COPY</span> dist/ /usr/share/nginx/html/
+<span class="keyword">COPY</span> nginx.conf /etc/nginx/conf.d/default.conf
+<span class="keyword">EXPOSE</span> <span class="value">80</span>
+<span class="keyword">CMD</span> [<span class="string">"nginx", "-g", "daemon off;"</span>]
+
+<span class="comment"># docker-compose.yml</span>
+<span class="keyword">services</span>:
+  <span class="prop">web</span>:
+    <span class="prop">build</span>: <span class="string">.</span>
+    <span class="prop">ports</span>:
+      - <span class="string">"80:80"</span>
+    <span class="prop">restart</span>: <span class="string">unless-stopped</span></div>
+  </div>
+
+  <!-- 4. CI/CD 自动化 -->
+  <div class="container">
+    <h2>4. CI/CD 自动化</h2>
+
+    <h3>GitHub Actions 部署流程</h3>
+    <div class="code-block"><span class="comment"># .github/workflows/deploy.yml</span>
+<span class="keyword">name</span>: Deploy
+
+<span class="keyword">on</span>:
+  <span class="prop">push</span>:
+    <span class="prop">branches</span>: [main]
+
+<span class="keyword">jobs</span>:
+  <span class="prop">deploy</span>:
+    <span class="prop">runs-on</span>: <span class="string">ubuntu-latest</span>
+    <span class="prop">steps</span>:
+      - <span class="prop">uses</span>: <span class="string">actions/checkout@v4</span>
+
+      - <span class="prop">name</span>: <span class="string">Setup Node</span>
+        <span class="prop">uses</span>: <span class="string">actions/setup-node@v4</span>
+        <span class="prop">with</span>:
+          <span class="prop">node-version</span>: <span class="string">'20'</span>
+          <span class="prop">cache</span>: <span class="string">'npm'</span>
+
+      - <span class="prop">name</span>: <span class="string">Install & Build</span>
+        <span class="prop">run</span>: |
+          npm ci
+          npm run build
+
+      - <span class="prop">name</span>: <span class="string">Deploy to Server</span>
+        <span class="prop">uses</span>: <span class="string">appleboy/scp-action@master</span>
+        <span class="prop">with</span>:
+          <span class="prop">host</span>: <span class="string">${{ secrets.SERVER_HOST }}</span>
+          <span class="prop">username</span>: <span class="string">ubuntu</span>
+          <span class="prop">key</span>: <span class="string">${{ secrets.SERVER_SSH_KEY }}</span>
+          <span class="prop">source</span>: <span class="string">dist/*</span>
+          <span class="prop">target</span>: <span class="string">/var/www/my-app</span>
+          <span class="prop">strip_components</span>: <span class="value">0</span>
+
+      - <span class="prop">name</span>: <span class="string">Restart Nginx</span>
+        <span class="prop">uses</span>: <span class="string">appleboy/ssh-action@master</span>
+        <span class="prop">with</span>:
+          <span class="prop">host</span>: <span class="string">${{ secrets.SERVER_HOST }}</span>
+          <span class="prop">username</span>: <span class="string">ubuntu</span>
+          <span class="prop">key</span>: <span class="string">${{ secrets.SERVER_SSH_KEY }}</span>
+          <span class="prop">script</span>: |
+            <span class="string">sudo nginx -t && sudo systemctl reload nginx</span></div>
+  </div>
+
+  <!-- 5. 监控与回滚 -->
+  <div class="container">
+    <h2>5. 监控与回滚</h2>
+
+    <h3>健康检查</h3>
+    <div class="code-block"><span class="comment"># Nginx 健康检查配置</span>
+<span class="prop">location</span> <span class="value">/health</span> <span class="prop">{</span>
+    <span class="prop">access_log</span> <span class="string">off</span>;
+    <span class="prop">return</span> <span class="value">200</span> <span class="string">"ok"</span>;
+    <span class="prop">add_header</span> <span class="string">Content-Type</span> <span class="string">"text/plain"</span>;
+<span class="prop">}</span></div>
+
+    <h3>快速回滚方案</h3>
+    <div class="code-block"><span class="comment"># 方案一：软链接切换（推荐）</span>
+<span class="prop">/var/www/
+├── my-app-v1.0.0/      <span class="comment"># 版本 1</span>
+├── my-app-v1.1.0/      <span class="comment"># 版本 2（新版本）</span>
+└── current -> my-app-v1.1.0/   <span class="comment"># 软链接指向当前版本</span>
+
+<span class="comment"># 回滚：切换软链接即可</span>
+ln -sfn /var/www/my-app-v1.0.0 /var/www/current
+sudo systemctl reload nginx</div>
+
+    <h3>监控指标</h3>
+    <ul class="checklist">
+      <li><span class="check-icon">✓</span> <strong>99 线</strong>：P99 响应时间 &lt; 1s</li>
+      <li><span class="check-icon">✓</span> <strong>错误率</strong>：5xx 错误率 &lt; 1%</li>
+      <li><span class="check-icon">✓</span> <strong>可用性</strong>：SLA 99.9%（年停机 &lt; 8.7h）</li>
+      <li><span class="check-icon">✓</span> <strong>资源使用</strong>：CPU &lt; 70%, Memory &lt; 80%</li>
+    </ul>
+  </div>
+
+  <!-- 部署检查清单 -->
+  <div class="container">
+    <h2>✅ 部署检查清单</h2>
+    <ul class="checklist">
+      <li><span class="check-icon">✓</span> <strong>环境变量</strong>：生产环境 .env.production 配置正确</li>
+      <li><span class="check-icon">✓</span> <strong>API 地址</strong>：后端 API 地址切换到生产环境</li>
+      <li><span class="check-icon">✓</span> <strong>代码压缩</strong>：production 模式构建，console 已移除</li>
+      <li><span class="check-icon">✓</span> <strong>SPA 路由</strong>：Nginx try_files fallback 已配置</li>
+      <li><span class="check-icon">✓</span> <strong>HTTPS</strong>：证书有效，HTTP 自动跳转 HTTPS</li>
+      <li><span class="check-icon">✓</span> <strong>静态缓存</strong>：contenthash 命名 + 1年缓存</li>
+      <li><span class="check-icon">✓</span> <strong>CDN</strong>：静态资源已部署到 CDN</li>
+      <li><span class="check-icon">✓</span> <strong>域名解析</strong>：DNS A 记录指向服务器 IP</li>
+      <li><span class="check-icon">✓</span> <strong>跨域配置</strong>：CORS 白名单已配置</li>
+      <li><span class="check-icon">✓</span> <strong>回滚方案</strong>：软链接切换 + 一键回滚脚本</li>
+    </ul>
+  </div>
+
+</body>
+</html>
