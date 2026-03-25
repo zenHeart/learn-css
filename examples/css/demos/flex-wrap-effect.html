@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>包裹效果 — flex-wrap 布局演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 14px; margin: 20px 0 10px; color: #555; }
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .note { font-size: 12px; color: #666; margin-top: 12px; padding: 8px 12px; background: #f9f9f9; border-radius: 4px; }
+
+    .flex-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .flex-item {
+      width: 120px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    /* nowrap 对比 */
+    .flex-nowrap {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    .flex-nowrap .flex-item {
+      flex-shrink: 0;
+    }
+
+    /* wrap-reverse */
+    .flex-wrap-reverse {
+      display: flex;
+      flex-wrap: wrap-reverse;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    /* align-content */
+    .flex-align-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+      min-height: 200px;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 6px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    .code-block .comment { color: #6a9955; }
+    .code-block .property { color: #9cdcfe; }
+    .code-block .value { color: #ce9178; }
+
+    /* RN 代码对比 */
+    .rn-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .rn-compare { grid-template-columns: 1fr; }
+    }
+    .rn-panel {
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .rn-panel-header {
+      background: #333;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: #888;
+    }
+    .rn-panel pre {
+      padding: 16px;
+      margin: 0;
+      font-size: 13px;
+      color: #d4d4d4;
+      overflow-x: auto;
+    }
+    .rn-keyword { color: #569cd6; }
+    .rn-string { color: #ce9178; }
+    .rn-prop { color: #9cdcfe; }
+    .rn-value { color: #b5cea8; }
+  </style>
+</head>
+<body>
+
+  <h1>包裹效果 — flex-wrap 布局演示</h1>
+
+  <!-- 包裹 vs 不包裹对比 -->
+  <div class="container">
+    <div class="label">flex-wrap: wrap vs nowrap</div>
+    <div class="rn-compare">
+      <div>
+        <h2>❌ nowrap（不包裹）</h2>
+        <div class="flex-nowrap">
+          <div class="flex-item">元素 A</div>
+          <div class="flex-item">元素 B</div>
+          <div class="flex-item">元素 C</div>
+          <div class="flex-item">元素 D</div>
+          <div class="flex-item">元素 E</div>
+        </div>
+        <div class="note">⚠️ 元素被压缩（flex-shrink: 1）挤在一行，超出容器可滚动</div>
+      </div>
+      <div>
+        <h2>✅ wrap（包裹）</h2>
+        <div class="flex-demo">
+          <div class="flex-item">元素 A</div>
+          <div class="flex-item">元素 B</div>
+          <div class="flex-item">元素 C</div>
+          <div class="flex-item">元素 D</div>
+          <div class="flex-item">元素 E</div>
+        </div>
+        <div class="note">✅ 元素保持设定宽度，超出一行自动换行</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- wrap-reverse -->
+  <div class="container">
+    <div class="label">flex-wrap: wrap-reverse（反向换行）</div>
+    <div class="flex-wrap-reverse">
+      <div class="flex-item">元素 A (row 3)</div>
+      <div class="flex-item">元素 B (row 3)</div>
+      <div class="flex-item">元素 C (row 2)</div>
+      <div class="flex-item">元素 D (row 2)</div>
+      <div class="flex-item">元素 E (row 1)</div>
+      <div class="flex-item">元素 F (row 1)</div>
+    </div>
+    <div class="note">✅ wrap-reverse 从底部开始向上堆叠，第一行出现在底部</div>
+  </div>
+
+  <!-- align-content 多行对齐 -->
+  <div class="container">
+    <div class="label">align-content: 多行对齐方式</div>
+    <div style="display:grid;grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+      <div>
+        <h2>align-content: flex-start</h2>
+        <div class="flex-align-content" style="align-content: flex-start;">
+          <div class="flex-item" style="width:80px;height:50px;">A</div>
+          <div class="flex-item" style="width:80px;height:50px;">B</div>
+          <div class="flex-item" style="width:80px;height:50px;">C</div>
+          <div class="flex-item" style="width:80px;height:50px;">D</div>
+        </div>
+      </div>
+      <div>
+        <h2>align-content: center</h2>
+        <div class="flex-align-content" style="align-content: center;">
+          <div class="flex-item" style="width:80px;height:50px;">A</div>
+          <div class="flex-item" style="width:80px;height:50px;">B</div>
+          <div class="flex-item" style="width:80px;height:50px;">C</div>
+          <div class="flex-item" style="width:80px;height:50px;">D</div>
+        </div>
+      </div>
+      <div>
+        <h2>align-content: space-between</h2>
+        <div class="flex-align-content" style="align-content: space-between;">
+          <div class="flex-item" style="width:80px;height:50px;">A</div>
+          <div class="flex-item" style="width:80px;height:50px;">B</div>
+          <div class="flex-item" style="width:80px;height:50px;">C</div>
+          <div class="flex-item" style="width:80px;height:50px;">D</div>
+        </div>
+      </div>
+      <div>
+        <h2>align-content: stretch</h2>
+        <div class="flex-align-content" style="align-content: stretch;">
+          <div class="flex-item" style="width:80px;min-height:50px;">A</div>
+          <div class="flex-item" style="width:80px;min-height:50px;">B</div>
+          <div class="flex-item" style="width:80px;min-height:50px;">C</div>
+          <div class="flex-item" style="width:80px;min-height:50px;">D</div>
+        </div>
+      </div>
+    </div>
+    <div class="note">align-content 只在多行（flex-wrap: wrap/wrap-reverse）时生效</div>
+  </div>
+
+  <!-- RN 对应实现 -->
+  <div class="container">
+    <div class="label">React Native 对应实现</div>
+    <div class="rn-compare">
+      <div class="rn-panel">
+        <div class="rn-panel-header">CSS → React Native 映射</div>
+        <pre><span class="rn-keyword">// CSS</span>
+<span class="rn-prop">display</span>: <span class="rn-value">flex</span>;
+<span class="rn-prop">flex-wrap</span>: <span class="rn-value">wrap</span>;
+<span class="rn-prop">gap</span>: <span class="rn-value">10px</span>;
+
+<span class="rn-keyword">// RN (React Native)</span>
+<span class="rn-prop">display</span>: <span class="rn-string">'flex'</span>;
+<span class="rn-prop">flexWrap</span>: <span class="rn-string">'wrap'</span>;
+<span class="rn-prop">gap</span>: <span class="rn-string">10</span>;
+
+<span class="rn-comment">// 注意：gap 在 RN 0.76+ 支持</span></pre>
+      </div>
+      <div class="rn-panel">
+        <div class="rn-panel-header">完整 RN 包裹布局示例</div>
+        <pre><span class="rn-keyword">import</span> { View, StyleSheet } <span class="rn-keyword">from</span> <span class="rn-string">'react-native'</span>;
+
+<span class="rn-keyword">const</span> WrapDemo = () => (
+  <span class="rn-keyword">View</span> style=<span class="rn-prop">{</span>styles.container<span class="rn-prop">}</span>>
+    <span class="rn-keyword">View</span> style=<span class="rn-prop">{</span>styles.item<span class="rn-prop">}</span>>A&lt;/<span class="rn-keyword">View</span>>
+    <span class="rn-keyword">View</span> style=<span class="rn-prop">{</span>styles.item<span class="rn-prop">}</span>>B&lt;/<span class="rn-keyword">View</span>>
+    <span class="rn-keyword">View</span> style=<span class="rn-prop">{</span>styles.item<span class="rn-prop">}</span>>C&lt;/<span class="rn-keyword">View</span>>
+  &lt;/<span class="rn-keyword">View</span>>
+);
+
+<span class="rn-keyword">const</span> styles = StyleSheet.create(<span class="rn-prop">{</span>
+  container: <span class="rn-prop">{</span>
+    <span class="rn-prop">display</span>: <span class="rn-string">'flex'</span>,
+    <span class="rn-prop">flexDirection</span>: <span class="rn-string">'row'</span>,
+    <span class="rn-prop">flexWrap</span>: <span class="rn-string">'wrap'</span>,
+    <span class="rn-prop">gap</span>: <span class="rn-string">10</span>,
+  <span class="rn-prop">}</span>,
+  item: <span class="rn-prop">{</span>
+    <span class="rn-prop">width</span>: <span class="rn-string">100</span>,
+    <span class="rn-prop">height</span>: <span class="rn-string">60</span>,
+    <span class="rn-prop">backgroundColor</span>: <span class="rn-string">'#667eea'</span>,
+    <span class="rn-prop">borderRadius</span>: <span class="rn-string">6</span>,
+  <span class="rn-prop">}</span>,
+<span class="rn-prop">}</span>);</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关键属性对比表 -->
+  <div class="container">
+    <div class="label">flex-wrap 关键属性对比</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="background:#f5f5f5;">
+          <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">CSS 属性</th>
+          <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">RN 属性</th>
+          <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">值</th>
+          <th style="padding:10px;text-align:left;border-bottom:1px solid #ddd;">说明</th>
+        </tr>
+      </thead>
+      <tbody style="color:#333;">
+        <tr><td style="padding:8px;border-bottom:1px solid #eee;">flex-wrap</td><td style="padding:8px;border-bottom:1px solid #eee;">flexWrap</td><td style="padding:8px;border-bottom:1px solid #eee;">'wrap'</td><td style="padding:8px;border-bottom:1px solid #eee;">允许换行</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee;"></td><td style="padding:8px;border-bottom:1px solid #eee;"></td><td style="padding:8px;border-bottom:1px solid #eee;">'nowrap'</td><td style="padding:8px;border-bottom:1px solid #eee;">不换行（默认）</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee;"></td><td style="padding:8px;border-bottom:1px solid #eee;"></td><td style="padding:8px;border-bottom:1px solid #eee;">'wrap-reverse'</td><td style="padding:8px;border-bottom:1px solid #eee;">反向换行</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee;">gap</td><td style="padding:8px;border-bottom:1px solid #eee;">gap</td><td style="padding:8px;border-bottom:1px solid #eee;">10</td><td style="padding:8px;border-bottom:1px solid #eee;">间距 RN 0.76+</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee;">align-content</td><td style="padding:8px;border-bottom:1px solid #eee;">alignContent</td><td style="padding:8px;border-bottom:1px solid #eee;">'flex-start'</td><td style="padding:8px;border-bottom:1px solid #eee;">多行顶部对齐</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>
