@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>clamp() CSS 响应式字体与值控制</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; background: #f5f5f5; }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 14px; margin: 20px 0 10px; color: #555; }
+    .container { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .note { font-size: 13px; color: #666; margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #667eea; }
+    .code-block { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 13px; overflow-x: auto; }
+    .code-block .comment { color: #6a9955; }
+    .code-block .keyword { color: #569cd6; }
+    .code-block .prop { color: #9cdcfe; }
+    .code-block .value { color: #b5cea8; }
+
+    /* 演示区域 */
+    .demo-section { margin: 20px 0; }
+    .demo-title { font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600; }
+    .demo-box { padding: 16px; background: #f9f9f9; border-radius: 6px; }
+
+    /* clamp 字体大小演示 */
+    .fluid-title { font-size: clamp(1.5rem, 5vw, 3rem); font-weight: 700; line-height: 1.2; color: #333; }
+    .fluid-text { font-size: clamp(0.875rem, 2vw, 1.125rem); line-height: 1.6; color: #666; }
+    .fluid-small { font-size: clamp(0.75rem, 1.5vw, 0.875rem); color: #999; }
+
+    /* 响应式 padding */
+    .fluid-padding { padding: clamp(10px, 5vw, 40px); background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 8px; }
+
+    /* 响应式 margin */
+    .fluid-margin { margin: clamp(8px, 2vw, 24px) clamp(16px, 4vw, 48px); }
+
+    /* 宽度控制 */
+    .fluid-width { width: clamp(200px, 80vw, 800px); margin: 0 auto; background: #27ae60; color: #fff; padding: 20px; border-radius: 8px; }
+
+    /* 网格布局 */
+    .grid-clamp { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 30vw, 300px), 1fr)); gap: 16px; }
+    .grid-item { background: linear-gradient(135deg, #f093fb, #f5576c); color: #fff; padding: 20px; border-radius: 8px; min-width: 0; }
+
+    /* 比较表 */
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare-table th { text-align: left; padding: 10px; background: #f5f5f5; border-bottom: 2px solid #ddd; }
+    .compare-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .tag-recommend { background: #d4edda; color: #155724; }
+    .tag-old { background: #f8d7da; color: #721c24; }
+
+    /* 可视化公式 */
+    .formula-viz { background: #1e1e1e; padding: 24px; border-radius: 8px; text-align: center; margin: 20px 0; }
+    .formula-viz .formula { font-family: 'Consolas', monospace; font-size: 20px; color: #d4d4d4; margin-bottom: 16px; }
+    .formula-viz .formula .min { color: #27ae60; }
+    .formula-viz .formula .val { color: #667eea; }
+    .formula-viz .formula .max { color: #e74c3c; }
+    .formula-viz .explanation { color: #888; font-size: 13px; }
+    .formula-viz .bar { height: 40px; background: linear-gradient(to right, #27ae60, #667eea, #e74c3c); border-radius: 4px; margin-top: 12px; position: relative; }
+    .formula-viz .bar::after { content: 'min← viewport →max'; position: absolute; width: 100%; text-align: center; top: -18px; color: #888; font-size: 11px; }
+
+    /* 视口滑块 */
+    .viewport-slider { position: sticky; top: 20px; z-index: 100; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; }
+    .viewport-slider label { font-size: 13px; color: #666; display: flex; align-items: center; gap: 12px; }
+    .viewport-slider input[type="range"] { flex: 1; height: 6px; -webkit-appearance: none; background: #ddd; border-radius: 3px; }
+    .viewport-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #667eea; border-radius: 50%; cursor: pointer; }
+    .viewport-slider .size-display { font-weight: 700; color: #667eea; min-width: 60px; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <h1>clamp() CSS — 响应式值控制的利器</h1>
+
+  <!-- 视口模拟器 -->
+  <div class="viewport-slider">
+    <label>
+      <span>👆 拖动调整视口宽度：</span>
+      <input type="range" id="viewportSlider" min="300" max="1200" value="800">
+      <span class="size-display" id="viewportDisplay">800px</span>
+    </label>
+  </div>
+
+  <!-- 公式可视化 -->
+  <div class="container">
+    <div class="label">核心公式</div>
+    <div class="formula-viz">
+      <div class="formula">
+        <span class="val">clamp</span>(<span class="min">最小值</span>, <span class="val">首选值</span>, <span class="max">最大值</span>)
+      </div>
+      <div class="explanation">在最小值和最大值之间，优先使用基于视口的计算值</div>
+      <div class="bar"></div>
+    </div>
+
+    <div class="code-block"><span class="comment">/* 语法 */</span>
+<span class="prop">font-size</span>: <span class="keyword">clamp</span>(<span class="value">最小值</span>, <span class="value">首选值</span>, <span class="value">最大值</span>);
+
+<span class="comment">/* 示例：字体大小在 14px ~ 24px 之间响应式变化 */</span>
+<span class="prop">font-size</span>: <span class="keyword">clamp</span>(<span class="value">14px</span>, <span class="value">2.5vw</span>, <span class="value">24px</span>);
+
+<span class="comment">/* 等效于 */</span>
+<span class="keyword">min</span>(<span class="value">最大值</span>, <span class="keyword">max</span>(<span class="value">最小值</span>, <span class="value">首选值</span>))</div>
+  </div>
+
+  <!-- 字体大小响应式 -->
+  <div class="container">
+    <div class="label">clamp() 字体大小响应式演示</div>
+
+    <div class="demo-section">
+      <div class="demo-title">主标题：clamp(1.5rem, 5vw, 3rem)</div>
+      <div class="demo-box">
+        <div class="fluid-title">响应式主标题</div>
+        <div class="note">当前值：<span id="titleSize">-</span>px（范围 1.5rem ~ 3rem）</div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-title">正文：clamp(0.875rem, 2vw, 1.125rem)</div>
+      <div class="demo-box">
+        <div class="fluid-text">这是一段响应式正文内容。拖动上方滑块调整视口宽度，观察文字大小的变化。当视口较小时，字体保持最小值；当视口较大时，字体不会超过最大值。</div>
+        <div class="note">当前值：<span id="textSize">-</span>px（范围 0.875rem ~ 1.125rem）</div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <div class="demo-title">辅助文字：clamp(0.75rem, 1.5vw, 0.875rem)</div>
+      <div class="demo-box">
+        <div class="fluid-small">辅助说明文字，当前值：<span id="smallSize">-</span>px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 响应式 Padding/Margin -->
+  <div class="container">
+    <div class="label">响应式间距</div>
+    <div class="demo-section">
+      <div class="demo-title">padding: clamp(10px, 5vw, 40px)</div>
+      <div class="fluid-padding">
+        这是一个响应式内边距的演示。拖动视口滑块，观察内边距如何在 10px 到 40px 之间平滑过渡。
+      </div>
+    </div>
+  </div>
+
+  <!-- 响应式宽度 -->
+  <div class="container">
+    <div class="label">响应式宽度（居中）</div>
+    <div class="fluid-width">
+      响应式宽度：clamp(200px, 80vw, 800px)
+      <br><small>当前值：<span id="widthVal">-</span>px</small>
+    </div>
+  </div>
+
+  <!-- Grid 响应式列 -->
+  <div class="container">
+    <div class="label">Grid + clamp 实现响应式列</div>
+    <div class="demo-title">grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 30vw, 300px), 1fr))</div>
+    <div class="grid-clamp">
+      <div class="grid-item">项目 A</div>
+      <div class="grid-item">项目 B</div>
+      <div class="grid-item">项目 C</div>
+      <div class="grid-item">项目 D</div>
+      <div class="grid-item">项目 E</div>
+    </div>
+    <div class="note">clamp 控制每列最小 150px，最大 300px，中间自动填充</div>
+  </div>
+
+  <!-- clamp vs 传统方法 -->
+  <div class="container">
+    <div class="label">clamp() vs 传统方法对比</div>
+    <table class="compare-table">
+      <thead><tr><th>特性</th><th>clamp()</th><th>Media Queries</th><th>仅用 vw/vh</th></tr></thead>
+      <tbody style="color:#333;">
+        <tr>
+          <td>代码量</td>
+          <td><span class="tag tag-recommend">少</span> 一行</td>
+          <td><span class="tag tag-old">多</span> 多处断点</td>
+          <td><span class="tag tag-recommend">少</span> 一行</td>
+        </tr>
+        <tr>
+          <td>过渡平滑</td>
+          <td><span class="tag tag-recommend">✅</span> 连续</td>
+          <td><span class="tag tag-old">❌</span> 跳跃</td>
+          <td><span class="tag tag-recommend">✅</span> 连续</td>
+        </tr>
+        <tr>
+          <td>边界控制</td>
+          <td><span class="tag tag-recommend">✅</span> 精确</td>
+          <td><span class="tag tag-recommend">✅</span> 精确</td>
+          <td><span class="tag tag-old">❌</span> 无</td>
+        </tr>
+        <tr>
+          <td>维护性</td>
+          <td><span class="tag tag-recommend">✅</span> 高</td>
+          <td><span class="tag tag-old">差</span></td>
+          <td><span class="tag tag-recommend">✅</span> 高</td>
+        </tr>
+        <tr>
+          <td>兼容性</td>
+          <td><span class="tag tag-recommend">✅</span> 现代</td>
+          <td><span class="tag tag-recommend">✅</span> IE9+</td>
+          <td><span class="tag tag-recommend">✅</span> IE9+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 常用 clamp 场景 -->
+  <div class="container">
+    <div class="label">clamp() 常用场景</div>
+    <div class="code-block"><span class="comment">/* 1. 响应式字体（最常用）*/</span>
+<span class="prop">font-size</span>: <span class="keyword">clamp</span>(<span class="value">1rem</span>, <span class="value">2.5vw</span>, <span class="value">2rem</span>);
+
+<span class="comment">/* 2. 响应式间距 */</span>
+<span class="prop">padding</span>: <span class="keyword">clamp</span>(<span class="value">1rem</span>, <span class="value">3vw</span>, <span class="value">3rem</span>);
+<span class="prop">gap</span>: <span class="keyword">clamp</span>(<span class="value">8px</span>, <span class="value">2vw</span>, <span class="value">24px</span>);
+
+<span class="comment">/* 3. 响应式宽度/高度 */</span>
+<span class="prop">width</span>: <span class="keyword">clamp</span>(<span class="value">200px</span>, <span class="value">70vw</span>, <span class="value">1000px</span>);
+
+<span class="comment">/* 4. 响应式网格列（配合 minmax） */</span>
+<span class="prop">grid-template-columns</span>: repeat(auto-fit, <span class="keyword">minmax</span>(<span class="keyword">clamp</span>(<span class="value">150px</span>, <span class="value">30vw</span>, <span class="value">300px</span>), 1fr));
+
+<span class="comment">/* 5. 响应式圆角 */</span>
+<span class="prop">border-radius</span>: <span class="keyword">clamp</span>(<span class="value">4px</span>, <span class="value">1vw</span>, <span class="value">20px</span>);
+
+<span class="comment">/* 6. 响应式阴影 */</span>
+<span class="prop">box-shadow</span>: 0 <span class="keyword">clamp</span>(<span class="value">2px</span>, <span class="value">0.5vw</span>, <span class="value">10px</span>) <span class="keyword">clamp</span>(<span class="value">4px</span>, <span class="value">1vw</span>, <span class="value">20px</span>) rgba(0,0,0,0.1);</div>
+  </div>
+
+  <!-- 工具推荐 -->
+  <div class="container">
+    <div class="label">clamp() 生成工具</div>
+    <ul style="list-style:none;padding:0;font-size:13px;color:#333;">
+      <li style="padding:8px 0;border-bottom:1px solid #eee;">🔗 <strong>Utopia</strong> — https://utopia.fyi/ （推荐，交互式生成）</li>
+      <li style="padding:8px 0;border-bottom:1px solid #eee;">🔗 <strong>min-max-calculator</strong> — https://min-max-calculator.com/</li>
+      <li style="padding:8px 0;">🔗 <strong>CSS Tricks</strong> — https://css-tricks.com/css-clamps/</li>
+    </ul>
+  </div>
+
+  <script>
+    const slider = document.getElementById('viewportSlider');
+    const display = document.getElementById('viewportDisplay');
+    const titleEl = document.querySelector('.fluid-title');
+    const textEl = document.querySelector('.fluid-text');
+    const smallEl = document.querySelector('.fluid-small');
+
+    function updateViewport() {
+      const vw = slider.value;
+      display.textContent = vw + 'px';
+      document.body.style.width = vw + 'px';
+      document.body.style.margin = '0 auto';
+
+      // 计算 clamp 实际值
+      // font-size: clamp(1.5rem, 5vw, 3rem)
+      // base font = 16px
+      const vwVal = vw / 100;
+      const titleVal = Math.min(48, Math.max(24, 5 * vwVal)); // clamp(24px, 5vw, 48px)
+      const textVal = Math.min(18, Math.max(14, 2 * vwVal)); // clamp(14px, 2vw, 18px)
+      const smallVal = Math.min(14, Math.max(12, 1.5 * vwVal)); // clamp(12px, 1.5vw, 14px)
+      const widthVal = Math.min(800, Math.max(200, 0.8 * vw)); // clamp(200px, 80vw, 800px)
+
+      document.getElementById('titleSize').textContent = Math.round(titleVal);
+      document.getElementById('textSize').textContent = Math.round(textVal);
+      document.getElementById('smallSize').textContent = Math.round(smallVal);
+      document.getElementById('widthVal').textContent = Math.round(widthVal);
+
+      // 动态更新样式
+      titleEl.style.fontSize = titleVal + 'px';
+      textEl.style.fontSize = textVal + 'px';
+      smallEl.style.fontSize = smallVal + 'px';
+    }
+
+    slider.addEventListener('input', updateViewport);
+    updateViewport();
+  </script>
+
+</body>
+</html>
