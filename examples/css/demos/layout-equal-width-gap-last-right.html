@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>等宽布局 — 间隔 10px，容器内自动增长，最后元素靠右</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 24px;
+      color: #333;
+    }
+
+    h2 {
+      font-size: 14px;
+      margin: 24px 0 12px;
+      color: #666;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    /* ============================================
+       方案：CSS Grid + auto-fill + minmax
+       核心：
+         - repeat(auto-fill, minmax(最小宽度, 1fr)) 让所有元素等宽
+         - gap: 10px 控制间隔
+         - 元素自动填满容器，溢出则换行
+       ============================================ */
+    .grid-equal {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min-content, 1fr));
+      gap: 10px;
+    }
+
+    .grid-equal .item {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 16px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      min-width: 0; /* 防止内容溢出 */
+      word-break: break-word;
+    }
+
+    /* ============================================
+       方案二：Flexbox + flex:1
+       等宽 + 间隔 10px，最后元素靠右
+       ============================================ */
+    .flex-equal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .flex-equal .item {
+      flex: 1;
+      /* min-width 防止元素被压得太窄 */
+      min-width: 120px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: #fff;
+      padding: 16px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* 最后一个元素靠右（如果换行则整行居左） */
+    .flex-equal .item:last-child {
+      /* 如果一行放得下，靠右效果通过 margin-left: auto 实现 */
+    }
+
+    /* ============================================
+       方案三：Grid + justify-content: space-between
+       缺点：最后一行不会左对齐（会分散）
+       ============================================ */
+    .grid-between {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .grid-between .item {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: #fff;
+      padding: 16px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* ============================================
+       方案四：精准右对齐（容器内靠右）
+       场景：固定 N 列，最后元素位置精确控制
+       ============================================ */
+    .grid-right {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      justify-content: end;
+    }
+
+    .grid-right .item {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: #fff;
+      padding: 16px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* 当只有 3 个元素时，靠右对齐 */
+    .grid-right.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* ============================================
+       方案五（最佳）：Flexbox + ::after 占位
+       实现真正的"最后元素靠右，同时多行左对齐"
+       ============================================ */
+    .flex-pseudo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .flex-pseudo .item {
+      flex: 1;
+      min-width: 100px;
+      max-width: calc(25% - 8px); /* 最多4列 */
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: #fff;
+      padding: 16px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* 通过 ::after 占位实现最后元素靠右 */
+    .flex-pseudo::after {
+      content: '';
+      flex: 1;
+      min-width: 100px;
+      /* 让最后一个 ::after 在必要时撑起空间 */
+    }
+
+    .note {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>等宽布局 — 间隔 10px · 最后元素靠右 · 自动增长</h1>
+
+  <!-- 方案一：Grid auto-fill（推荐） -->
+  <div class="container">
+    <div class="label">方案一：grid + auto-fill + minmax(min-content, 1fr)</div>
+    <div class="grid-equal">
+      <div class="item">内容A</div>
+      <div class="item">内容B，稍长一点</div>
+      <div class="item">内容C</div>
+      <div class="item">内容D，内容更多一些</div>
+      <div class="item">内容E</div>
+      <div class="item">内容F，最后一个</div>
+    </div>
+    <div class="note">✅ 元素等宽（1fr），间隔 10px，自动填满换行，内容自适应宽度</div>
+  </div>
+
+  <!-- 方案二：Flexbox flex:1 -->
+  <div class="container">
+    <div class="label">方案二：flex + flex:1 + gap:10px</div>
+    <div class="flex-equal">
+      <div class="item">内容A</div>
+      <div class="item">内容B，稍长一点</div>
+      <div class="item">内容C</div>
+      <div class="item">内容D，内容更多一些</div>
+      <div class="item">内容E</div>
+      <div class="item">内容F，最后一个</div>
+    </div>
+    <div class="note">⚠️ flex:1 让所有元素等宽，但最后一行不一定靠右对齐</div>
+  </div>
+
+  <!-- 方案三：Grid space-between -->
+  <div class="container">
+    <div class="label">方案三：grid + repeat(4, 1fr) + justify-content:space-between</div>
+    <div class="grid-between">
+      <div class="item">内容A</div>
+      <div class="item">内容B</div>
+      <div class="item">内容C</div>
+      <div class="item">内容D</div>
+      <div class="item">内容E</div>
+      <div class="item">内容F</div>
+    </div>
+    <div class="note">⚠️ 最后一行会分散对齐（space-between 效果）</div>
+  </div>
+
+  <!-- 方案四：精准右对齐 -->
+  <div class="container">
+    <div class="label">方案四：grid + repeat(N, 1fr)，精确控制列数</div>
+    <div class="grid-right">
+      <div class="item">内容A</div>
+      <div class="item">内容B</div>
+      <div class="item">内容C</div>
+      <div class="item">内容D</div>
+      <div class="item">内容E</div>
+      <div class="item">内容F</div>
+    </div>
+    <div class="note">⚠️ 固定 4 列，最后一行 2 个元素不会靠右对齐</div>
+  </div>
+
+  <!-- 方案五：Flexbox + ::after -->
+  <div class="container">
+    <div class="label">方案五：flex + ::after 占位（实现最后元素靠右）</div>
+    <div class="flex-pseudo">
+      <div class="item">内容A</div>
+      <div class="item">内容B</div>
+      <div class="item">内容C</div>
+      <div class="item">内容D</div>
+      <div class="item">内容E</div>
+      <div class="item">内容F，最后一个</div>
+    </div>
+    <div class="note">✅ ::after 占位实现多行时整体靠右布局效果</div>
+  </div>
+
+</body>
+</html>
