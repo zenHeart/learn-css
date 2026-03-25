@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>clamp() 基础语法演示</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+			min-height: 100vh;
+			color: #fff;
+		}
+
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			margin-bottom: 30px;
+			color: #00d9ff;
+		}
+
+		.demo-box {
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			padding: 30px;
+			margin-bottom: 20px;
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.demo-title {
+			font-size: 1.2rem;
+			margin-bottom: 15px;
+			color: #00d9ff;
+		}
+
+		.target-element {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			padding: clamp(20px, 5vw, 60px);
+			border-radius: 8px;
+			text-align: center;
+			font-size: clamp(14px, 3vw, 28px);
+			transition: all 0.3s ease;
+		}
+
+		.controls {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 20px;
+			margin-top: 20px;
+		}
+
+		.control-group {
+			background: rgba(0, 0, 0, 0.2);
+			padding: 15px;
+			border-radius: 8px;
+		}
+
+		.control-group label {
+			display: block;
+			margin-bottom: 8px;
+			color: #aaa;
+			font-size: 0.9rem;
+		}
+
+		.control-group input[type="range"] {
+			width: 100%;
+			margin-bottom: 5px;
+		}
+
+		.control-group .value {
+			font-family: monospace;
+			color: #00d9ff;
+			font-size: 1.1rem;
+		}
+
+		.css-output {
+			background: #0d1117;
+			padding: 15px;
+			border-radius: 8px;
+			font-family: 'Fira Code', 'Consolas', monospace;
+			font-size: 0.95rem;
+			overflow-x: auto;
+			margin-top: 20px;
+		}
+
+		.css-output .property {
+			color: #ff79c6;
+		}
+
+		.css-output .function {
+			color: #50fa7b;
+		}
+
+		.css-output .value {
+			color: #f1fa8c;
+		}
+
+		.info-panel {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 15px;
+			margin-top: 20px;
+		}
+
+		.info-box {
+			background: rgba(0, 0, 0, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+		}
+
+		.info-box .label {
+			color: #888;
+			font-size: 0.85rem;
+			margin-bottom: 5px;
+		}
+
+		.info-box .value {
+			font-size: 1.5rem;
+			font-weight: bold;
+		}
+
+		.info-box.min .value { color: #ff5555; }
+		.info-box.preferred .value { color: #50fa7b; }
+		.info-box.max .value { color: #8be9fd; }
+
+		.viewport-info {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			background: rgba(0, 0, 0, 0.7);
+			padding: 10px 20px;
+			border-radius: 8px;
+			font-family: monospace;
+		}
+	</style>
+</head>
+<body>
+	<div class="viewport-info">
+		视口宽度: <span id="viewportWidth">0</span>px
+	</div>
+
+	<div class="container">
+		<h1>🎛️ clamp() 基础语法演示</h1>
+
+		<div class="demo-box">
+			<div class="demo-title">📐 可视化 clamp(min, preferred, max)</div>
+			
+			<div class="target-element" id="target">
+				调整下方滑块查看效果
+			</div>
+
+			<div class="info-panel">
+				<div class="info-box min">
+					<div class="label">最小值 (min)</div>
+					<div class="value" id="minDisplay">16px</div>
+				</div>
+				<div class="info-box preferred">
+					<div class="label">首选值 (preferred)</div>
+					<div class="value" id="preferredDisplay">3vw</div>
+				</div>
+				<div class="info-box max">
+					<div class="label">最大值 (max)</div>
+					<div class="value" id="maxDisplay">48px</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-box">
+			<div class="demo-title">⚙️ 控制面板</div>
+			
+			<div class="controls">
+				<div class="control-group">
+					<label>最小值 (min)</label>
+					<input type="range" id="minSlider" min="8" max="32" value="16">
+					<div class="value"><span id="minValue">16</span>px</div>
+				</div>
+				<div class="control-group">
+					<label>首选值 (preferred)</label>
+					<input type="range" id="preferredSlider" min="1" max="8" value="3" step="0.5">
+					<div class="value"><span id="preferredValue">3</span>vw</div>
+				</div>
+				<div class="control-group">
+					<label>最大值 (max)</label>
+					<input type="range" id="maxSlider" min="32" max="80" value="48">
+					<div class="value"><span id="maxValue">48</span>px</div>
+				</div>
+			</div>
+
+			<div class="css-output">
+				<span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value"><span id="cssMin">16</span>px, <span id="cssPreferred">3</span>vw, <span id="cssMax">48</span>px</span>);
+			</div>
+		</div>
+
+		<div class="demo-box">
+			<div class="demo-title">💡 clamp() 工作原理</div>
+			<p id="explanation">
+				当视口宽度为 <strong>500px</strong> 时，首选值为 15px (500 * 3%)，小于最小值 16px，所以字体大小为 <strong>16px</strong>。
+			</p>
+		</div>
+	</div>
+
+	<script>
+		const minSlider = document.getElementById('minSlider');
+		const preferredSlider = document.getElementById('preferredSlider');
+		const maxSlider = document.getElementById('maxSlider');
+		const target = document.getElementById('target');
+
+		const minDisplay = document.getElementById('minDisplay');
+		const preferredDisplay = document.getElementById('preferredDisplay');
+		const maxDisplay = document.getElementById('maxDisplay');
+		const minValue = document.getElementById('minValue');
+		const preferredValue = document.getElementById('preferredValue');
+		const maxValue = document.getElementById('maxValue');
+		const cssMin = document.getElementById('cssMin');
+		const cssPreferred = document.getElementById('cssPreferred');
+		const cssMax = document.getElementById('cssMax');
+		const explanation = document.getElementById('explanation');
+		const viewportWidthDisplay = document.getElementById('viewportWidth');
+
+		function update() {
+			const min = parseInt(minSlider.value);
+			const preferred = parseFloat(preferredSlider.value);
+			const max = parseInt(maxSlider.value);
+
+			// Update display values
+			minDisplay.textContent = min + 'px';
+			preferredDisplay.textContent = preferred + 'vw';
+			maxDisplay.textContent = max + 'px';
+			minValue.textContent = min;
+			preferredValue.textContent = preferred;
+			maxValue.textContent = max;
+			cssMin.textContent = min;
+			cssPreferred.textContent = preferred;
+			cssMax.textContent = max;
+
+			// Update target element
+			target.style.fontSize = `clamp(${min}px, ${preferred}vw, ${max}px)`;
+
+			// Update explanation
+			const viewportWidth = window.innerWidth;
+			const preferredPx = (viewportWidth * preferred / 100).toFixed(2);
+			const actualValue = Math.min(Math.max(preferredPx, min), max);
+			
+			viewportWidthDisplay.textContent = viewportWidth;
+
+			let state = '';
+			if (preferredPx < min) {
+				state = `首选值 ${preferredPx}px 小于最小值 ${min}px，所以使用最小值 <strong>${min}px</strong>`;
+			} else if (preferredPx > max) {
+				state = `首选值 ${preferredPx}px 大于最大值 ${max}px，所以使用最大值 <strong>${max}px</strong>`;
+			} else {
+				state = `首选值 ${preferredPx}px 在范围内，所以使用首选值 <strong>${preferredPx}px</strong>`;
+			}
+
+			explanation.innerHTML = `当视口宽度为 <strong>${viewportWidth}px</strong> 时：<br><br>${state}`;
+		}
+
+		minSlider.addEventListener('input', update);
+		preferredSlider.addEventListener('input', update);
+		maxSlider.addEventListener('input', update);
+		window.addEventListener('resize', update);
+
+		update();
+	</script>
+</body>
+</html>

@@ -431,6 +431,65 @@ img {
 }
 ```
 
+## clamp() 流体布局
+
+除了媒体查询，`clamp()` 函数是实现响应式设计的另一种强大工具。它可以在最小值和最大值之间选择一个流体的中间值。
+
+### 基本语法
+
+```css
+font-size: clamp(min, preferred, max);
+```
+
+- **min**: 最小值
+- **preferred**: 首选值（通常是视口相关的计算）
+- **max**: 最大值
+
+### clamp() vs 媒体查询
+
+```css
+/* 媒体查询方式 - 需要多个断点 */
+.title {
+  font-size: 16px;
+}
+@media (min-width: 480px) { .title { font-size: 20px; } }
+@media (min-width: 768px) { .title { font-size: 28px; } }
+@media (min-width: 1200px) { .title { font-size: 36px; } }
+
+/* clamp() 方式 - 一行搞定 */
+.title {
+  font-size: clamp(16px, 4vw, 36px);
+}
+```
+
+### 常见应用
+
+#### 流体字体
+
+```css
+h1 { font-size: clamp(1.75rem, 5vw, 4rem); }
+p  { font-size: clamp(1rem, 2.5vw, 1.25rem); }
+```
+
+#### 流体间距
+
+```css
+.card {
+  padding: clamp(1rem, 3vw, 2rem);
+  gap: clamp(0.5rem, 2vw, 1.5rem);
+}
+```
+
+#### 流体容器宽度
+
+```css
+.container {
+  width: clamp(300px, 80vw, 1200px);
+}
+```
+
+详细的 `clamp()` 用法请参考 [CSS clamp() 函数](../01.basics/15.clamp/)。
+
 ## 最佳实践
 
 ### 1. 性能优化
