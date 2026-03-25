@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>判断层叠组件是否可见 — 组件可见性检测</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 14px; margin: 20px 0 10px; color: #555; }
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+
+    /* ============================================
+       场景一：z-index 层叠遮盖检测
+       ============================================ */
+    .stacking-demo {
+      position: relative;
+      height: 120px;
+      background: #eee;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .box {
+      position: absolute;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #fff;
+    }
+    .box-red {
+      top: 20px; left: 20px;
+      width: 100px; height: 80px;
+      background: #e74c3c;
+      z-index: 1;
+    }
+    .box-green {
+      top: 40px; left: 40px;
+      width: 100px; height: 80px;
+      background: #27ae60;
+      z-index: 2;
+    }
+    .box-blue {
+      top: 60px; left: 60px;
+      width: 100px; height: 80px;
+      background: #3498db;
+      z-index: 3;
+    }
+    .mask {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    /* ============================================
+       场景二：Viewport 可见性检测（IntersectionObserver）
+       ============================================ */
+    .viewport-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 400px;
+      padding: 20px 0;
+    }
+    .viewport-box {
+      height: 100px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      transition: opacity 0.3s;
+    }
+    .viewport-box.hidden {
+      opacity: 0.3;
+    }
+    .viewport-status {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      z-index: 9999;
+      max-width: 280px;
+    }
+    .viewport-status .item {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .viewport-status .item:last-child { border-bottom: none; }
+    .viewport-status .visible { color: #2ecc71; }
+    .viewport-status .hidden { color: #e74c3c; }
+
+    /* ============================================
+       场景三：opacity + visibility 隐藏检测
+       ============================================ */
+    .opacity-demo {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .opacity-box {
+      flex: 1;
+      min-width: 120px;
+      padding: 20px;
+      border-radius: 6px;
+      text-align: center;
+      color: #fff;
+      font-size: 13px;
+    }
+    .opacity-visible { background: #27ae60; }
+    .opacity-zero { background: #e74c3c; opacity: 0; }
+    .opacity-point1 { background: #e67e22; opacity: 0.1; }
+    .visibility-hidden { background: #9b59b6; visibility: hidden; }
+    .display-none { background: #34495e; display: none; }
+
+    /* ============================================
+       场景四：Stacking Context 创建条件
+       ============================================ */
+    .context-demo {
+      position: relative;
+      padding: 20px;
+      background: #eee;
+      border-radius: 6px;
+    }
+    .context-item {
+      position: relative;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #fff;
+    }
+    .parent-z {
+      background: #e74c3c;
+      z-index: 1; /* 创建新的 stacking context */
+    }
+    .child-z {
+      background: #3498db;
+      z-index: 999; /* 即使数值很大，仍在父级的 context 内 */
+      margin-top: -20px;
+    }
+    .no-context {
+      background: #95a5a6;
+      opacity: 0.5; /* 创建 stacking context */
+    }
+    .no-context-child {
+      background: #f39c12;
+      z-index: 9999; /* 仍在 no-context 的 context 内 */
+      margin-top: -20px;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+
+    .result-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      z-index: 99999;
+      min-width: 240px;
+    }
+    .result-panel h3 { font-size: 14px; margin-bottom: 10px; color: #f39c12; }
+    .result-panel .row { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .result-panel .row:last-child { border-bottom: none; }
+    .result-panel .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 6px;
+    }
+    .tag-yes { background: #27ae60; }
+    .tag-no { background: #e74c3c; }
+  </style>
+</head>
+<body>
+
+  <h1>判断层叠组件是否可见 — 组件可见性检测</h1>
+
+  <!-- 检测结果面板 -->
+  <div class="result-panel" id="resultPanel">
+    <h3>🔍 可见性检测结果</h3>
+    <div class="row">viewport内可见: <span id="r1">-</span></div>
+    <div class="row">z-index遮盖: <span id="r2">-</span></div>
+    <div class="row">opacity隐藏: <span id="r3">-</span></div>
+    <div class="row">visibility隐藏: <span id="r4">-</span></div>
+    <div class="row">stacking context: <span id="r5">-</span></div>
+  </div>
+
+  <!-- 场景一：z-index 层叠 -->
+  <div class="container">
+    <div class="label">场景一：z-index 层叠遮盖检测</div>
+    <div class="stacking-demo" id="stackingDemo">
+      <div class="box box-red">z-index: 1</div>
+      <div class="box box-green">z-index: 2</div>
+      <div class="box box-blue">z-index: 3</div>
+      <div class="mask" id="stackingMask">检测遮盖区域</div>
+    </div>
+    <div class="note">通过 elementFromPoint() 检测某点是否被特定元素遮挡</div>
+  </div>
+
+  <!-- 场景二：Viewport 可见性 -->
+  <div class="viewport-status" id="viewportStatus">
+    <div class="item">viewport 可见性:</div>
+    <div id="viewportItems"></div>
+  </div>
+  <div class="container">
+    <div class="label">场景二：IntersectionObserver 检测 viewport 可见性</div>
+    <div class="viewport-demo" id="viewportDemo">
+      <div class="viewport-box" data-id="box1">元素 1（滚动查看）</div>
+      <div class="viewport-box" data-id="box2">元素 2</div>
+      <div class="viewport-box" data-id="box3">元素 3</div>
+    </div>
+    <div class="note">绿色 = 可见 | 灰色 = 不可见（已滚出 viewport）</div>
+  </div>
+
+  <!-- 场景三：opacity / visibility / display -->
+  <div class="container">
+    <div class="label">场景三：opacity / visibility / display 隐藏检测</div>
+    <div class="opacity-demo">
+      <div class="opacity-box opacity-visible">opacity: 1<br>可见</div>
+      <div class="opacity-box opacity-zero">opacity: 0<br>不可见</div>
+      <div class="opacity-box opacity-point1">opacity: 0.1<br>几乎不可见</div>
+      <div class="opacity-box visibility-hidden">visibility: hidden<br>不可见</div>
+      <div class="opacity-box display-none">display: none<br>不可见</div>
+    </div>
+    <div class="note">opacity: 0 元素仍占位且可被检测到，但视觉上不可见</div>
+  </div>
+
+  <!-- 场景四：Stacking Context -->
+  <div class="container">
+    <div class="label">场景四：Stacking Context 对 z-index 的限制</div>
+    <div class="context-demo">
+      <div class="context-item parent-z">
+        父级 z-index: 1（创建新 context）
+        <div class="context-item child-z">子级 z-index: 999（仍在父 context 内，不能超出）</div>
+      </div>
+      <div class="context-item no-context">
+        父级 opacity: 0.5（创建新 context）
+        <div class="context-item no-context-child">子级 z-index: 9999（仍在父 context 内）</div>
+      </div>
+    </div>
+    <div class="note">即使子级 z-index 数值再大，只要父级创建了 stacking context，子级就无法超出父级的层叠范围</div>
+  </div>
+
+  <script>
+    // ============================================
+    // 方法一：getComputedStyle + 几何计算
+    // ============================================
+    function isElementVisible(el) {
+      const style = getComputedStyle(el);
+      if (style.display === 'none') return false;
+      if (style.visibility === 'hidden') return false;
+      if (parseFloat(style.opacity) === 0) return false;
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return false;
+      return true;
+    }
+
+    function isElementObscured(el) {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const topEl = document.elementFromPoint(cx, cy);
+      return topEl && topEl !== el && !el.contains(topEl);
+    }
+
+    // ============================================
+    // 方法二：IntersectionObserver（viewport 可见性）
+    // ============================================
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.dataset.id;
+        const visible = entry.isIntersecting;
+        entry.target.classList.toggle('hidden', !visible);
+        const statusEl = document.getElementById(`status-${id}`);
+        if (statusEl) {
+          statusEl.textContent = visible ? '✅ 可见' : '❌ 不可见';
+          statusEl.className = visible ? 'visible' : 'hidden';
+        }
+        document.getElementById('r1').textContent = visible ? '是' : '否';
+        document.getElementById('r1').className = visible ? 'tag-yes' : 'tag-no';
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.viewport-box').forEach(box => {
+      observer.observe(box);
+      // 添加状态显示
+      const statusDiv = document.createElement('div');
+      statusDiv.id = `status-${box.dataset.id}`;
+      statusDiv.style.cssText = 'margin-top:8px;font-size:12px;color:#2ecc71';
+      statusDiv.textContent = '✅ 可见';
+      box.appendChild(statusDiv);
+    });
+
+    // ============================================
+    // 方法三：Stacking Context 检测
+    // ============================================
+    function hasStackingContext(el) {
+      const style = getComputedStyle(el);
+      const props = [
+        'z-index', 'opacity', 'transform', 'filter',
+        'mix-blend-mode', 'isolation', 'clip-path', 'mask'
+      ];
+      const zIndex = style.zIndex;
+      const opacity = parseFloat(style.opacity);
+      const transform = style.transform;
+      const hasZIndex = zIndex !== 'auto' && zIndex !== '0';
+      const hasOpacity = opacity < 1;
+      const hasTransform = transform !== 'none' && transform !== '';
+      return hasZIndex || hasOpacity || hasTransform;
+    }
+
+    // 初始检测
+    function runDetection() {
+      const stackingDemo = document.getElementById('stackingDemo');
+      const boxGreen = document.querySelector('.box-green');
+      const boxBlue = document.querySelector('.box-blue');
+
+      // 检测绿色框是否被蓝色框遮挡
+      const obscured = isElementObscured(boxGreen);
+      document.getElementById('r2').textContent = obscured ? '是' : '否';
+      document.getElementById('r2').className = obscured ? 'tag-no' : 'tag-yes';
+
+      // 检测 opacity
+      const opacityBoxes = document.querySelectorAll('.opacity-box');
+      const zeroOpacityBox = opacityBoxes[1];
+      document.getElementById('r3').textContent = isElementVisible(zeroOpacityBox) ? '否（opacity:0）' : '是';
+      document.getElementById('r3').className = isElementVisible(zeroOpacityBox) ? 'tag-yes' : 'tag-no';
+
+      // 检测 visibility
+      const visBox = document.querySelector('.visibility-hidden');
+      document.getElementById('r4').textContent = isElementVisible(visBox) ? '是' : '否（visibility:hidden）';
+      document.getElementById('r4').className = isElementVisible(visBox) ? 'tag-yes' : 'tag-no';
+
+      // 检测 stacking context
+      const parentZ = document.querySelector('.parent-z');
+      document.getElementById('r5').textContent = hasStackingContext(parentZ) ? '是' : '否';
+      document.getElementById('r5').className = hasStackingContext(parentZ) ? 'tag-yes' : 'tag-no';
+    }
+
+    runDetection();
+  </script>
+
+</body>
+</html>
