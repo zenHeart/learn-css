@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Variables 完全指南 - 交互演示</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      
+      /* Demo variables */
+      --demo-color: #3b82f6;
+      --demo-spacing: 16px;
+      --demo-radius: 8px;
+      --demo-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .header p { opacity: 0.9; font-size: 0.95rem; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 1rem 1.25rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--primary); }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Content */
+    .content { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    h2 { font-size: 1.25rem; margin-bottom: 1rem; color: var(--gray-900); }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.75rem; color: var(--gray-700); }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Demo Box */
+    .demo-box {
+      background: var(--demo-color);
+      padding: var(--demo-spacing);
+      border-radius: var(--demo-radius);
+      box-shadow: var(--demo-shadow);
+      color: white;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    /* Controls */
+    .control-group {
+      margin-bottom: 1.5rem;
+    }
+    .control-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-700);
+    }
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--gray-200);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+    }
+    .control-group input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .property { color: #67e8f9; }
+    .code-block .value { color: #fcd34d; }
+    .code-block .variable { color: #34d399; }
+
+    /* Theme Switcher */
+    .theme-switcher {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .theme-btn {
+      padding: 0.75rem 1.25rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--primary); }
+    .theme-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Theme Preview */
+    [data-theme="light"] {
+      --theme-bg: #ffffff;
+      --theme-text: #111827;
+      --theme-border: #e5e7eb;
+    }
+    [data-theme="dark"] {
+      --theme-bg: #111827;
+      --theme-text: #f9fafb;
+      --theme-border: #374151;
+    }
+    [data-theme="blue"] {
+      --theme-bg: #1e3a5f;
+      --theme-text: #bfdbfe;
+      --theme-border: #3b82f6;
+    }
+
+    .theme-preview {
+      background: var(--theme-bg);
+      color: var(--theme-text);
+      border: 1px solid var(--theme-border);
+      padding: 1.5rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    .theme-preview h4 { margin-bottom: 0.5rem; }
+    .theme-preview p { opacity: 0.8; font-size: 0.9rem; }
+
+    /* Component Demo */
+    .component-demo {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .demo-button {
+      --btn-bg: var(--primary);
+      --btn-color: white;
+      --btn-padding: 12px 24px;
+      --btn-radius: 8px;
+      
+      background: var(--btn-bg);
+      color: var(--btn-color);
+      padding: var(--btn-padding);
+      border-radius: var(--btn-radius);
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .demo-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .demo-button.secondary {
+      --btn-bg: transparent;
+      --btn-color: var(--primary);
+      --btn-padding: 10px 20px;
+      border: 2px solid var(--primary);
+    }
+    .demo-button.large {
+      --btn-padding: 16px 32px;
+      font-size: 1.1rem;
+    }
+
+    /* Table */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    .info-table th, .info-table td {
+      padding: 0.75rem;
+      border: 1px solid var(--gray-200);
+      text-align: left;
+    }
+    .info-table th {
+      background: var(--gray-100);
+      font-weight: 600;
+    }
+    .info-table tr:hover { background: var(--gray-50); }
+
+    /* Checklist */
+    .checklist { list-style: none; }
+    .checklist li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    /* Tip */
+    .tip {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .tip-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Responsive Demo */
+    .responsive-demo {
+      --columns: 1;
+      --gap: 16px;
+      display: grid;
+      grid-template-columns: repeat(var(--columns), 1fr);
+      gap: var(--gap);
+    }
+    .responsive-item {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray-500);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🎨 CSS Variables 完全指南</h1>
+    <p>CSS 自定义属性（Custom Properties）深度学习</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="basics">基础语法</button>
+    <button class="tab" data-tab="scope">作用域</button>
+    <button class="tab" data-tab="js">JavaScript</button>
+    <button class="tab" data-tab="theme">主题切换</button>
+    <button class="tab" data-tab="responsive">响应式</button>
+    <button class="tab" data-tab="cheatsheet">速查表</button>
+  </nav>
+
+  <main class="content">
+    <!-- 基础语法 -->
+    <div class="panel active" id="panel-basics">
+      <h2>基础语法</h2>
+      
+      <div class="card">
+        <h3>定义与使用</h3>
+        <p>CSS 变量以 <code>--</code> 开头，使用 <code>var()</code> 函数调用：</p>
+        <div class="code-block">
+<span class="keyword">:root</span> {
+  <span class="property">--primary-color</span>: <span class="value">#3b82f6</span>;
+  <span class="property">--spacing</span>: <span class="value">16px</span>;
+}
+
+<span class="keyword">.button</span> {
+  <span class="property">background</span>: <span class="function">var</span>(<span class="variable">--primary-color</span>);
+  <span class="property">padding</span>: <span class="function">var</span>(<span class="variable">--spacing</span>);
+}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>实时演示</h3>
+        <div class="demo-box" id="demoBox">
+          演示方块
+        </div>
+
+        <div class="control-group">
+          <label>背景颜色</label>
+          <input type="color" id="colorPicker" value="#3b82f6" onchange="updateVariable('--demo-color', this.value)">
+        </div>
+
+        <div class="control-group">
+          <label>间距 (padding): <span id="spacingValue">16</span>px</label>
+          <input type="range" id="spacingSlider" min="8" max="48" value="16" oninput="updateVariable('--demo-spacing', this.value + 'px'); this.previousElementSibling.textContent = this.value">
+        </div>
+
+        <div class="control-group">
+          <label>圆角: <span id="radiusValue">8</span>px</label>
+          <input type="range" id="radiusSlider" min="0" max="24" value="8" oninput="updateVariable('--demo-radius', this.value + 'px'); this.previousElementSibling.textContent = this.value">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>var() 函数</h3>
+        <div class="code-block">
+<span class="property">color</span>: <span class="function">var</span>(<span class="variable">--color</span>);                    <span class="comment">/* 基本用法 */</span>
+<span class="property">color</span>: <span class="function">var</span>(<span class="variable">--color</span>, <span class="value">#000</span>);           <span class="comment">/* 带默认值 */</span>
+<span class="property">color</span>: <span class="function">var</span>(<span class="variable">--color</span>, <span class="value">#000</span>, <span class="value">#fff</span>);  <span class="comment">/* 多默认值 */</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 作用域 -->
+    <div class="panel" id="panel-scope">
+      <h2>作用域与继承</h2>
+
+      <div class="card">
+        <h3>DOM 树查找</h3>
+        <p>CSS 变量会沿着 DOM 树向上查找：</p>
+        <div class="code-block">
+<span class="keyword">:root</span> { <span class="property">--color</span>: <span class="value">blue</span>; }   <span class="comment">/* 全局 */</span>
+<span class="keyword">.parent</span> { <span class="property">--color</span>: <span class="value">red</span>; }     <span class="comment">/* 覆盖 */</span>
+<span class="keyword">.child</span> { <span class="property">--color</span>: <span class="value">green</span>; }    <span class="comment">/* 最优先 */</span>
+        </div>
+        
+        <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="background: #3b82f6; color: white; padding: 0.5rem; border-radius: 4px;">
+            :root (blue)
+          </div>
+          <div style="background: #ef4444; color: white; padding: 0.5rem; border-radius: 4px;">
+            .parent (red)
+            <div style="background: #22c55e; color: white; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+              .child (green) - 最优先
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>局部作用域</h3>
+        <p>组件变量只在组件内部有效：</p>
+        <div class="code-block">
+<span class="keyword">.card</span> {
+  <span class="property">--card-bg</span>: <span class="value">white</span>;       <span class="comment">/* 仅 .card 及其后代可用 */</span>
+  <span class="property">background</span>: <span class="function">var</span>(<span class="variable">--card-bg</span>);
+}
+
+<span class="keyword">.card__title</span> {
+  <span class="comment">/* 自动继承 --card-bg */</span>
+  <span class="property">background</span>: <span class="function">var</span>(<span class="variable">--card-bg</span>);
+}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>层级覆盖示例</h3>
+        <ul class="checklist">
+          <li>🔵 :root --color: blue (全局)</li>
+          <li>🔴 .parent --color: red (覆盖 :root)</li>
+          <li>🟢 .child --color: green (覆盖 .parent)</li>
+          <li>📌 子元素会使用最近祖先定义的值</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <div class="panel" id="panel-js">
+      <h2>JavaScript 交互</h2>
+
+      <div class="card">
+        <h3>读取变量</h3>
+        <div class="code-block">
+<span class="keyword">const</span> styles = getComputedStyle(element);
+<span class="keyword">const</span> color = styles.<span class="function">getPropertyValue</span>(<span class="value">'--primary-color'</span>);
+console.<span class="function">log</span>(color); <span class="comment">// #3b82f6</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>设置变量</h3>
+        <div class="code-block">
+<span class="comment">// 设置变量</span>
+element.style.<span class="function">setProperty</span>(<span class="value">'--primary-color'</span>, <span class="value">'#10b981'</span>);
+
+<span class="comment">// 带单位</span>
+element.style.<span class="function">setProperty</span>(<span class="value">'--spacing'</span>, <span class="value">'24px'</span>);
+
+<span class="comment">// 移除变量</span>
+element.style.<span class="function">removeProperty</span>(<span class="value">'--primary-color'</span>);
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>实时操作</h3>
+        <div class="demo-box" id="jsDemoBox">
+          点击按钮改变我
+        </div>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <button class="demo-button" onclick="setBoxColor('#3b82f6')">蓝色</button>
+          <button class="demo-button" onclick="setBoxColor('#10b981')">绿色</button>
+          <button class="demo-button" onclick="setBoxColor('#f59e0b')">橙色</button>
+          <button class="demo-button" onclick="setBoxColor('#ef4444')">红色</button>
+          <button class="demo-button" onclick="document.getElementById('jsDemoBox').style.removeProperty('--demo-color')">重置</button>
+        </div>
+        <div class="code-block" id="jsCode">
+element.style.<span class="function">setProperty</span>(<span class="value">'--demo-color'</span>, <span class="value">'#3b82f6'</span>);
+        </div>
+      </div>
+    </div>
+
+    <!-- 主题切换 -->
+    <div class="panel" id="panel-theme">
+      <h2>主题切换实战</h2>
+
+      <div class="card">
+        <h3>多主题系统</h3>
+        <p>选择主题预览效果：</p>
+        <div class="theme-switcher">
+          <button class="theme-btn active" onclick="setTheme('light')">☀️ 浅色</button>
+          <button class="theme-btn" onclick="setTheme('dark')">🌙 深色</button>
+          <button class="theme-btn" onclick="setTheme('blue')">💙 蓝色</button>
+        </div>
+        <div class="theme-preview" id="themePreview">
+          <h4>卡片标题</h4>
+          <p>这是卡片内容，展示了不同主题下的背景色、文字颜色和边框颜色。</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>组件变体</h3>
+        <p>使用 CSS 变量实现按钮变体：</p>
+        <div class="component-demo">
+          <button class="demo-button">默认按钮</button>
+          <button class="demo-button secondary">次要按钮</button>
+          <button class="demo-button large">大按钮</button>
+        </div>
+        <div class="code-block">
+<span class="keyword">.button</span> {
+  <span class="property">--btn-bg</span>: <span class="function">var</span>(<span class="variable">--primary</span>);
+  <span class="property">--btn-color</span>: <span class="value">white</span>;
+  <span class="property">--btn-padding</span>: <span class="value">12px 24px</span>;
+  
+  <span class="property">background</span>: <span class="function">var</span>(<span class="variable">--btn-bg</span>);
+  <span class="property">color</span>: <span class="function">var</span>(<span class="variable">--btn-color</span>);
+  <span class="property">padding</span>: <span class="function">var</span>(<span class="variable">--btn-padding</span>);
+}
+
+<span class="keyword">.button.secondary</span> {
+  <span class="property">--btn-bg</span>: <span class="value">transparent</span>;
+  <span class="property">--btn-color</span>: <span class="function">var</span>(<span class="variable">--primary</span>);
+}
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-title">💡 主题切换最佳实践</div>
+        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+          <li>使用 data-theme 属性而非 class</li>
+          <li>将主题变量定义在 :root 或 [data-theme] 上</li>
+          <li>配合 localStorage 保存用户偏好</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 响应式 -->
+    <div class="panel" id="panel-responsive">
+      <h2>响应式设计</h2>
+
+      <div class="card">
+        <h3>视口单位 + CSS 变量</h3>
+        <p>在不同断点下改变变量值：</p>
+        <div class="code-block">
+<span class="keyword">:root</span> {
+  <span class="property">--columns</span>: <span class="value">1</span>;
+  <span class="property">--gap</span>: <span class="value">16px</span>;
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">640px</span>) {
+  <span class="keyword">:root</span> { <span class="property">--columns</span>: <span class="value">2</span>; }
+}
+
+<span class="keyword">@media</span> (<span class="property">min-width</span>: <span class="value">1024px</span>) {
+  <span class="keyword">:root</span> { <span class="property">--columns</span>: <span class="value">3</span>; <span class="property">--gap</span>: <span class="value">24px</span>; }
+}
+        </div>
+
+        <div class="responsive-demo" id="responsiveGrid">
+          <div class="responsive-item">1</div>
+          <div class="responsive-item">2</div>
+          <div class="responsive-item">3</div>
+          <div class="responsive-item">4</div>
+          <div class="responsive-item">5</div>
+          <div class="responsive-item">6</div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <label>列数: <span id="colValue">1</span></label>
+          <input type="range" id="colSlider" min="1" max="4" value="1" 
+            oninput="updateGrid(this.value)" style="width: 100%;">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>间距系统</h3>
+        <div class="code-block">
+<span class="keyword">:root</span> {
+  <span class="property">--space-xs</span>: <span class="value">4px</span>;
+  <span class="property">--space-sm</span>: <span class="value">8px</span>;
+  <span class="property">--space-md</span>: <span class="value">16px</span>;
+  <span class="property">--space-lg</span>: <span class="value">24px</span>;
+  <span class="property">--space-xl</span>: <span class="value">32px</span>;
+}
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: flex-end; margin-top: 1rem;">
+          <div style="width: var(--space-xs, 4px); height: 20px; background: var(--primary);"></div>
+          <div style="width: var(--space-sm, 8px); height: 30px; background: var(--primary);"></div>
+          <div style="width: var(--space-md, 16px); height: 40px; background: var(--primary);"></div>
+          <div style="width: var(--space-lg, 24px); height: 50px; background: var(--primary);"></div>
+          <div style="width: var(--space-xl, 32px); height: 60px; background: var(--primary);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 速查表 -->
+    <div class="panel" id="panel-cheatsheet">
+      <h2>速查表</h2>
+
+      <div class="card">
+        <h3>变量定义与使用</h3>
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>语法</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--name: value;</code></td>
+              <td>定义变量</td>
+            </tr>
+            <tr>
+              <td><code>var(--name)</code></td>
+              <td>使用变量</td>
+            </tr>
+            <tr>
+              <td><code>var(--name, fallback)</code></td>
+              <td>带默认值</td>
+            </tr>
+            <tr>
+              <td><code>:root</code></td>
+              <td>全局作用域</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>JavaScript API</h3>
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>方法</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>getPropertyValue()</code></td>
+              <td>读取变量</td>
+            </tr>
+            <tr>
+              <td><code>setProperty()</code></td>
+              <td>设置变量</td>
+            </tr>
+            <tr>
+              <td><code>removeProperty()</code></td>
+              <td>移除变量</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>常见用途</h3>
+        <ul class="checklist">
+          <li>✅ 统一管理颜色、间距等设计 token</li>
+          <li>✅ 主题切换（亮色/暗色/品牌色）</li>
+          <li>✅ 组件变体（大小、颜色、样式覆盖）</li>
+          <li>✅ 响应式设计（断点切换变量值）</li>
+          <li>✅ 动画过渡（动态修改变量实现动画）</li>
+        </ul>
+      </div>
+
+      <div class="tip">
+        <div class="tip-title">📌 命名规范</div>
+        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+          <li>使用 kebab-case: <code>--primary-color</code></li>
+          <li>使用语义化命名: <code>--color-text-primary</code></li>
+          <li>避免通用名称: <code>--temp-1</code></li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>📚 相关文档：<a href="../docs/css/css-variables.md">CSS Variables 完全指南</a></p>
+    <p>💡 学习仓库：<a href="https://github.com/zenHeart/learn-css">zenHeart/learn-css</a></p>
+  </footer>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Update CSS variable
+    function updateVariable(name, value) {
+      document.documentElement.style.setProperty(name, value);
+    }
+
+    // JS Demo
+    function setBoxColor(color) {
+      const box = document.getElementById('jsDemoBox');
+      box.style.setProperty('--demo-color', color);
+      document.getElementById('jsCode').innerHTML = 
+        `element.style.<span class="function">setProperty</span>(<span class="value">'--demo-color'</span>, <span class="value">'${color}'</span>);`;
+    }
+
+    // Theme switcher
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(
+          theme === 'light' ? '浅色' : 
+          theme === 'dark' ? '深色' : '蓝色'
+        ));
+      });
+    }
+
+    // Responsive grid
+    function updateGrid(columns) {
+      document.getElementById('responsiveGrid').style.setProperty('--columns', columns);
+      document.getElementById('colValue').textContent = columns;
+    }
+
+    // Initialize
+    document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+</body>
+</html>
