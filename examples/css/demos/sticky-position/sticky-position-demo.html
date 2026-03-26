@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Sticky Position 交互演示</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+  }
+
+  /* Tab 导航 */
+  .tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+
+  .tab-btn:hover {
+    color: #eee;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .tab-btn.active {
+    color: #00d9ff;
+    border-bottom-color: #00d9ff;
+  }
+
+  /* Tab 内容区 */
+  .tab-content {
+    display: none;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* 通用标题 */
+  h2 {
+    color: #00d9ff;
+    margin: 20px 0 15px;
+    font-size: 18px;
+  }
+
+  h3 {
+    color: #fff;
+    margin: 15px 0 10px;
+    font-size: 16px;
+  }
+
+  p, li {
+    color: #ccc;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+
+  li {
+    margin: 5px 0;
+  }
+
+  code {
+    background: #0f3460;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    color: #e94560;
+  }
+
+  pre {
+    background: #0f3460;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: #a8dadc;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* 卡片通用样式 */
+  .demo-card {
+    background: #16213e;
+    border-radius: 12px;
+    margin: 20px 0;
+    overflow: hidden;
+    border: 1px solid #0f3460;
+  }
+
+  .demo-card-header {
+    padding: 12px 16px;
+    background: #0f3460;
+    font-size: 13px;
+    color: #00d9ff;
+    font-weight: 600;
+  }
+
+  .demo-card-body {
+    padding: 16px;
+  }
+
+  /* 模拟滚动区域 */
+  .scroll-container {
+    height: 300px;
+    overflow-y: auto;
+    background: linear-gradient(to bottom, #16213e, #0f3460, #16213e);
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .scroll-content {
+    padding: 20px;
+    min-height: 600px;
+  }
+
+  /* Sticky 元素样式 */
+  .sticky-element {
+    position: sticky;
+    background: linear-gradient(135deg, #00d9ff, #00ff88);
+    color: #1a1a2e;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,217,255,0.3);
+  }
+
+  .sticky-top {
+    top: 0;
+  }
+
+  .sticky-bottom {
+    bottom: 0;
+  }
+
+  /* 按钮样式 */
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s;
+  }
+
+  .btn:hover {
+    transform: scale(1.05);
+  }
+
+  /* 代码对比表 */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 13px;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid #0f3460;
+  }
+
+  .compare-table th {
+    background: #0f3460;
+    color: #00d9ff;
+    font-weight: 600;
+  }
+
+  .compare-table tr:nth-child(even) {
+    background: rgba(15,52,96,0.3);
+  }
+
+  /* 检查清单 */
+  .checklist {
+    background: #0f3460;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .checklist-item:last-child {
+    border-bottom: none;
+  }
+
+  .check-icon {
+    color: #00ff88;
+    font-size: 16px;
+  }
+
+  /* 流程图 */
+  .flow-diagram {
+    background: #0f3460;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+  }
+
+  .flow-number {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #00d9ff, #00ff88);
+    color: #1a1a2e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .flow-text {
+    color: #eee;
+    font-size: 14px;
+  }
+
+  /* Quiz */
+  .quiz-container {
+    background: #0f3460;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+  }
+
+  .quiz-question {
+    font-size: 15px;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .quiz-option {
+    padding: 12px 16px;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #ccc;
+  }
+
+  .quiz-option:hover {
+    border-color: #00d9ff;
+    background: rgba(0,217,255,0.1);
+  }
+
+  .quiz-option.selected {
+    border-color: #00d9ff;
+    background: rgba(0,217,255,0.2);
+  }
+
+  .quiz-option.correct {
+    border-color: #00ff88;
+    background: rgba(0,255,136,0.2);
+  }
+
+  .quiz-option.incorrect {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.2);
+  }
+
+  .quiz-result {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .quiz-result.show {
+    display: block;
+  }
+
+  .quiz-result.correct {
+    background: rgba(0,255,136,0.2);
+    color: #00ff88;
+  }
+
+  .quiz-result.incorrect {
+    background: rgba(233,69,96,0.2);
+    color: #e94560;
+  }
+
+  /* Demo 页面特有样式 */
+  .demo-page {
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .demo-header {
+    text-align: center;
+    padding: 30px 0;
+    margin-bottom: 20px;
+  }
+
+  .demo-header h1 {
+    color: #00d9ff;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .demo-header p {
+    color: #888;
+    font-size: 14px;
+  }
+
+  .card-demo {
+    max-width: 400px;
+    margin: 0 auto;
+    background: #16213e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .card-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+
+  .card-content {
+    padding: 16px;
+  }
+
+  .card-title {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .card-text {
+    color: #888;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .card-footer {
+    position: sticky;
+    bottom: 0;
+    background: #16213e;
+    padding: 12px 16px;
+    border-top: 1px solid #0f3460;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+  }
+
+  .sticky-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .sticky-btn:hover {
+    transform: scale(1.02);
+  }
+
+  .spacer {
+    height: 100vh;
+  }
+
+  .scroll-indicator {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: #0f3460;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #00d9ff;
+    z-index: 99;
+  }
+
+  /* 滚动条样式 */
+  .scroll-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scroll-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: #00d9ff;
+    border-radius: 3px;
+  }
+
+  /* 提示框 */
+  .tip-box {
+    background: rgba(0,217,255,0.1);
+    border: 1px solid #00d9ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 15px 0;
+  }
+
+  .tip-box.warning {
+    background: rgba(233,69,96,0.1);
+    border-color: #e94560;
+  }
+
+  .tip-box.success {
+    background: rgba(0,255,136,0.1);
+    border-color: #00ff88;
+  }
+
+  .tip-title {
+    color: #00d9ff;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .tip-box.warning .tip-title {
+    color: #e94560;
+  }
+
+  .tip-box.success .tip-title {
+    color: #00ff88;
+  }
+
+  .tip-content {
+    color: #ccc;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Tab 导航 -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="overview">📚 概念总览</button>
+  <button class="tab-btn" data-tab="demo">🎯 交互演示</button>
+  <button class="tab-btn" data-tab="solution">💡 解决方案</button>
+  <button class="tab-btn" data-tab="troubleshoot">🔧 问题排查</button>
+  <button class="tab-btn" data-tab="quiz">📝 自测题</button>
+</nav>
+
+<!-- 概念总览 -->
+<div id="overview" class="tab-content active">
+  <h2>什么是 Sticky 定位？</h2>
+  <div class="tip-box">
+    <div class="tip-title">一句话理解</div>
+    <div class="tip-content">Sticky = relative + fixed 的混合体。元素在滚动时表现为 relative，达到阈值后表现为 fixed。</div>
+  </div>
+
+  <h2>核心特性</h2>
+  <ul>
+    <li><strong>未滚动时</strong>：像 <code>position: relative</code> 一样占据文档流位置</li>
+    <li><strong>滚动超过阈值</strong>：像 <code>position: fixed</code> 一样固定在视口</li>
+    <li><strong>不会脱离文档流</strong>：占据的空间始终保留</li>
+    <li><strong>父容器是关键</strong>：父容器的高度和 overflow 属性直接影响 sticky 行为</li>
+  </ul>
+
+  <h2>与其他定位对比</h2>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>定位类型</th>
+        <th>参照物</th>
+        <th>脱标</th>
+        <th>滚动行为</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>relative</code></td>
+        <td>元素原位置</td>
+        <td>否</td>
+        <td>随页面滚动</td>
+      </tr>
+      <tr>
+        <td><code>absolute</code></td>
+        <td>定位祖先</td>
+        <td>是</td>
+        <td>随容器滚动</td>
+      </tr>
+      <tr>
+        <td><code>fixed</code></td>
+        <td>视口</td>
+        <td>是</td>
+        <td>固定不动</td>
+      </tr>
+      <tr style="background: rgba(0,217,255,0.1);">
+        <td><code>sticky</code></td>
+        <td>滚动容器</td>
+        <td>否</td>
+        <td>阈值前随页面滚动，阈值后固定</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>工作原理图解</h2>
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <span class="flow-number">1</span>
+      <span class="flow-text">初始状态：sticky 元素在文档流中正常定位（relative 行为）</span>
+    </div>
+    <div class="flow-step">
+      <span class="flow-number">2</span>
+      <span class="flow-text">用户开始滚动，sticky 元素随页面移动</span>
+    </div>
+    <div class="flow-step">
+      <span class="flow-number">3</span>
+      <span class="flow-text">滚动超过 <code>top</code> 值设定的阈值</span>
+    </div>
+    <div class="flow-step">
+      <span class="flow-number">4</span>
+      <span class="flow-text">sticky 元素"粘"在视口指定位置（fixed 行为）</span>
+    </div>
+    <div class="flow-step">
+      <span class="flow-number">5</span>
+      <span class="flow-text">滚动到父容器底部，sticky 效果解除</span>
+    </div>
+  </div>
+
+  <h2>必须条件</h2>
+  <div class="checklist">
+    <div class="checklist-item">
+      <span class="check-icon">✓</span>
+      <span>父容器不能有 <code>overflow: hidden/auto/scroll</code></span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">✓</span>
+      <span>父容器高度必须大于 sticky 元素</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">✓</span>
+      <span>必须指定 <code>top/bottom/left/right</code> 之一</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">✓</span>
+      <span>祖先元素不能有 <code>transform</code> 属性</span>
+    </div>
+  </div>
+</div>
+
+<!-- 交互演示 -->
+<div id="demo" class="tab-content">
+  <h2>Sticky 卡片按钮固定演示</h2>
+  <p>向下滚动页面，观察卡片底部的按钮如何固定：</p>
+
+  <div class="demo-card">
+    <div class="demo-card-header">📱 卡片按钮 Sticky 固定效果</div>
+    <div class="demo-card-body">
+      <div class="card-demo">
+        <img src="https://picsum.photos/400/150?random=1" alt="卡片图片" class="card-image">
+        <div class="card-content">
+          <h3 class="card-title">卡片标题</h3>
+          <p class="card-text">
+            向下滚动这个页面。当卡片滚过视口顶部时，底部的操作按钮将自动固定在视口底部...
+          </p>
+        </div>
+        <div class="card-footer">
+          <button class="sticky-btn">🎯 操作按钮（已固定）</button>
+        </div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+  </div>
+
+  <h2>Sticky 元素在容器内固定</h2>
+  <p>在滚动容器内，sticky 元素会在容器内固定：</p>
+
+  <div class="demo-card">
+    <div class="demo-card-header">📦 滚动容器内的 Sticky 效果</div>
+    <div class="demo-card-body">
+      <div class="scroll-container">
+        <div class="scroll-content">
+          <div class="sticky-element sticky-top">🔥 我在顶部 sticky 固定</div>
+          <p style="margin: 20px 0; color: #888;">
+            继续向下滚动... 我是占位内容，用于增加滚动区域的高度。
+          </p>
+          <p style="margin: 20px 0; color: #888;">
+            Sticky 元素的固定范围受限于父容器。当父容器滚动到底部时，sticky 效果会自动解除。
+          </p>
+          <p style="margin: 20px 0; color: #888;">
+            这是为了确保 sticky 元素不会超出其容器的边界。
+          </p>
+          <div class="sticky-element sticky-bottom">🎯 我在底部 sticky 固定</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>实际应用场景</h2>
+  <div class="demo-card">
+    <div class="demo-card-header">📝 表单提交按钮固定</div>
+    <div class="demo-card-body">
+      <div class="flow-diagram">
+        <p style="color: #ccc; font-size: 14px;">
+          场景：长表单页面，提交按钮需要始终可见。<br>
+          方案：使用 <code>position: sticky</code> + <code>bottom: 0</code> 让按钮固定在视口底部。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">📊 表格列头固定</div>
+    <div class="demo-card-body">
+      <div class="flow-diagram">
+        <p style="color: #ccc; font-size: 14px;">
+          场景：数据表格很长，滚动时列头需要始终可见。<br>
+          方案：给 <code>thead th</code> 设置 <code>position: sticky</code> + <code>top: 0</code>。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 解决方案 -->
+<div id="solution" class="tab-content">
+  <h2>卡片内按钮固定：完整代码</h2>
+
+  <h3>HTML 结构</h3>
+  <pre><code>&lt;div class="card"&gt;
+  &lt;div class="card-content"&gt;
+    &lt;h3&gt;卡片标题&lt;/h3&gt;
+    &lt;p&gt;卡片内容...&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="card-footer"&gt;
+    &lt;button&gt;操作按钮&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+  <h3>CSS 样式</h3>
+  <pre><code>.card {
+  position: relative; /* 关键：创建定位上下文 */
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.card-footer {
+  position: sticky;    /* 启用 sticky */
+  bottom: 0;          /* 距离底部 0 时固定 */
+  background: white;   /* 背景色覆盖下方内容 */
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}</code></pre>
+
+  <h2>方案对比</h2>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>方案</th>
+        <th>优点</th>
+        <th>缺点</th>
+        <th>适用场景</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sticky 包裹按钮</td>
+        <td>简单、原生支持</td>
+        <td>父容器 overflow 影响</td>
+        <td>大多数场景</td>
+      </tr>
+      <tr>
+        <td>按钮独立 sticky</td>
+        <td>更灵活</td>
+        <td>需要预留空间</td>
+        <td>按钮在内容区底部</td>
+      </tr>
+      <tr>
+        <td>Fixed 定位</td>
+        <td>不受父容器影响</td>
+        <td>需要 JS 控制显隐</td>
+        <td>复杂交互场景</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>iOS Safari 兼容处理</h2>
+  <div class="tip-box warning">
+    <div class="tip-title">⚠️ iOS Safari 问题</div>
+    <div class="tip-content">iOS Safari 14.5 以下版本对 sticky 支持不完整，需要使用 -webkit- 前缀。</div>
+  </div>
+  <pre><code>/* iOS Safari Hack */
+.sticky-footer {
+  position: sticky;
+  position: -webkit-sticky; /* iOS Safari */
+  bottom: 0;
+  /* 添加 transform 触发 GPU 加速 */
+  transform: translateZ(0);
+}</code></pre>
+
+  <h2>降级方案</h2>
+  <div class="tip-box success">
+    <div class="tip-title">✅ 推荐降级写法</div>
+    <div class="tip-content">使用 @supports 检测浏览器支持情况，不支持时降级为 fixed。</div>
+  </div>
+  <pre><code>@supports (position: sticky) {
+  .sticky-element {
+    position: sticky;
+    top: 0;
+  }
+}
+
+@supports not (position: sticky) {
+  .sticky-element {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+}</code></pre>
+</div>
+
+<!-- 问题排查 -->
+<div id="troubleshoot" class="tab-content">
+  <h2>Sticky 不生效？按顺序检查！</h2>
+
+  <div class="checklist">
+    <div class="checklist-item">
+      <span class="check-icon">1</span>
+      <span><strong>是否指定了 top/bottom/left/right？</strong><br>
+      <code style="color:#888;">position: sticky</code> 单独写不会生效，必须配合偏移值。</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">2</span>
+      <span><strong>父容器是否有 overflow 设置？</strong><br>
+      <code style="color:#888;">overflow: hidden/auto/scroll</code> 会阻断 sticky 效果。</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">3</span>
+      <span><strong>父容器高度是否足够？</strong><br>
+      如果父容器比 sticky 元素还矮，就不会有滚动空间。</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">4</span>
+      <span><strong>祖先元素是否有 transform？</strong><br>
+      transform 会创建新的 containing block，影响 sticky 参照。</span>
+    </div>
+    <div class="checklist-item">
+      <span class="check-icon">5</span>
+      <span><strong>是否在 flex 容器内？</strong><br>
+      flex 子元素的 sticky 行为可能不符合预期。</span>
+    </div>
+  </div>
+
+  <h2>常见错误代码</h2>
+
+  <h3>错误 1：忘记写偏移值</h3>
+  <div class="demo-card">
+    <div class="demo-card-header">❌ 错误写法</div>
+    <div class="demo-card-body">
+      <pre><code>.sticky {
+  position: sticky;
+  /* 忘记写 top/bottom! */
+}</code></pre>
+    </div>
+  </div>
+  <div class="demo-card">
+    <div class="demo-card-header">✅ 正确写法</div>
+    <div class="demo-card-body">
+      <pre><code>.sticky {
+  position: sticky;
+  top: 0; /* 必须写！ */
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>错误 2：父容器 overflow 阻断</h3>
+  <div class="demo-card">
+    <div class="demo-card-header">❌ 错误写法</div>
+    <div class="demo-card-body">
+      <pre><code>.parent {
+  overflow: hidden; /* 阻断 sticky! */
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+}</code></pre>
+    </div>
+  </div>
+  <div class="demo-card">
+    <div class="demo-card-header">✅ 正确写法</div>
+    <div class="demo-card-body">
+      <pre><code>.parent {
+  overflow: visible; /* 或不设置 */
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>错误 3：祖先元素有 transform</h3>
+  <div class="demo-card">
+    <div class="demo-card-header">❌ 错误写法</div>
+    <div class="demo-card-body">
+      <pre><code>.ancestor {
+  transform: translateZ(0); /* 创建新的 containing block! */
+}
+
+.parent {
+  /* sticky 效果会被影响 */
+}</code></pre>
+    </div>
+  </div>
+
+  <h2>iOS Safari 特殊处理</h2>
+  <div class="tip-box warning">
+    <div class="tip-title">iOS Safari 兼容清单</div>
+    <div class="tip-content">
+      1. 使用 <code>-webkit-</code> 前缀<br>
+      2. 确保父容器不是 <code>overflow: hidden</code><br>
+      3. 添加 <code>transform: translateZ(0)</code> 触发 GPU 加速
+    </div>
+  </div>
+</div>
+
+<!-- 自测题 -->
+<div id="quiz" class="tab-content">
+  <h2>自测检验学习成果</h2>
+
+  <div class="quiz-container">
+    <div class="quiz-question">1. position: sticky 必须配合哪个属性才能生效？</div>
+    <div class="quiz-options">
+      <div class="quiz-option" data-correct="true">top / bottom / left / right 之一</div>
+      <div class="quiz-option">z-index</div>
+      <div class="quiz-option">display: flex</div>
+      <div class="quiz-option">overflow: visible</div>
+    </div>
+    <div class="quiz-result"></div>
+  </div>
+
+  <div class="quiz-container">
+    <div class="quiz-question">2. 什么情况下 sticky 会失效？</div>
+    <div class="quiz-options">
+      <div class="quiz-option">父容器设置 overflow: hidden</div>
+      <div class="quiz-option">父容器高度小于 sticky 元素</div>
+      <div class="quiz-option">祖先元素有 transform</div>
+      <div class="quiz-option" data-correct="true">以上都是</div>
+    </div>
+    <div class="quiz-result"></div>
+  </div>
+
+  <div class="quiz-container">
+    <div class="quiz-question">3. sticky 元素滚动超过阈值后会变成什么定位？</div>
+    <div class="quiz-options">
+      <div class="quiz-option">relative</div>
+      <div class="quiz-option" data-correct="true">fixed</div>
+      <div class="quiz-option">absolute</div>
+      <div class="quiz-option">static</div>
+    </div>
+    <div class="quiz-result"></div>
+  </div>
+
+  <div class="quiz-container">
+    <div class="quiz-question">4. iOS Safari 需要加什么前缀？</div>
+    <div class="quiz-options">
+      <div class="quiz-option">-ms-sticky</div>
+      <div class="quiz-option">-moz-sticky</div>
+      <div class="quiz-option" data-correct="true">-webkit-sticky</div>
+      <div class="quiz-option">不需要前缀</div>
+    </div>
+    <div class="quiz-result"></div>
+  </div>
+
+  <div class="quiz-container">
+    <div class="quiz-question">5. sticky 相对于什么定位？</div>
+    <div class="quiz-options">
+      <div class="quiz-option">视口</div>
+      <div class="quiz-option">html 元素</div>
+      <div class="quiz-option" data-correct="true">滚动容器（父元素）</div>
+      <div class="quiz-option">body 元素</div>
+    </div>
+    <div class="quiz-result"></div>
+  </div>
+</div>
+
+<div style="height: 100px;"></div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // 移除所有 active
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    // 添加 active
+    btn.classList.add('active');
+    const tabId = btn.dataset.tab;
+    document.getElementById(tabId).classList.add('active');
+  });
+});
+
+// Quiz 交互
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', function() {
+    const container = this.closest('.quiz-container');
+    const options = container.querySelectorAll('.quiz-option');
+    const result = container.querySelector('.quiz-result');
+    const isCorrect = this.dataset.correct === 'true';
+
+    // 清除所有选中状态
+    options.forEach(opt => {
+      opt.classList.remove('selected', 'correct', 'incorrect');
+    });
+
+    // 标记当前选中
+    this.classList.add('selected');
+
+    // 显示结果
+    result.classList.add('show');
+    if (isCorrect) {
+      this.classList.add('correct');
+      result.textContent = '✅ 回答正确！';
+      result.classList.add('correct');
+      result.classList.remove('incorrect');
+    } else {
+      this.classList.add('incorrect');
+      // 显示正确答案
+      options.forEach(opt => {
+        if (opt.dataset.correct === 'true') {
+          opt.classList.add('correct');
+        }
+      });
+      result.textContent = '❌ 回答错误，正确答案是绿色高亮的选项。';
+      result.classList.add('incorrect');
+      result.classList.remove('correct');
+    }
+  });
+});
+</script>
+
+</body>
+</html>
