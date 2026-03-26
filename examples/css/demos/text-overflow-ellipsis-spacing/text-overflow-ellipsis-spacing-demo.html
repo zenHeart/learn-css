@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 省略号与空格间距控制</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; padding: 2rem; }
+    h1 { font-size: 1.8rem; color: #fff; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.2rem; color: #00d4ff; margin: 1.5rem 0 0.8rem; }
+    h3 { font-size: 1rem; color: #ffd700; margin: 1rem 0 0.5rem; }
+
+    .tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 0.85rem; transition: all 0.2s; }
+    .tab-btn:hover { border-color: #00d4ff; color: #00d4ff; }
+    .tab-btn.active { background: #00d4ff; color: #0a0a0a; font-weight: bold; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 1rem 0; }
+    .mini-card { background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; }
+    .mini-card h4 { font-size: 0.85rem; color: #00d4ff; margin-bottom: 6px; }
+    .mini-card p { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
+
+    .highlight { color: #00d4ff; font-weight: bold; }
+    .warning { color: #ff6b6b; }
+    .success { color: #4ade80; }
+
+    pre { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.8rem; line-height: 1.6; margin: 0.8rem 0; }
+    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+    .comment { color: #666; }
+    .keyword { color: #ff79c6; }
+    .string { color: #f1fa8c; }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.85rem; }
+    th { background: #111; color: #00d4ff; padding: 8px 12px; text-align: left; border: 1px solid #2a2a2a; }
+    td { padding: 8px 12px; border: 1px solid #2a2a2a; color: #ccc; }
+
+    .input-group { display: flex; gap: 8px; margin: 1rem 0; flex-wrap: wrap; align-items: center; }
+    .input-group label { font-size: 0.85rem; color: #888; flex-shrink: 0; }
+    .input-group input, .input-group select { background: #111; border: 1px solid #333; color: #e0e0e0; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; flex: 1; min-width: 200px; }
+    .input-group input:focus, .input-group select:focus { outline: none; border-color: #00d4ff; }
+    .btn { background: #00d4ff; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+    .btn:hover { opacity: 0.9; }
+    .btn.danger { background: #ff6b6b; color: white; }
+    .btn.success { background: #4ade80; color: #0a0a0a; }
+    .btn.secondary { background: #333; color: #e0e0e0; }
+
+    .demo-stage { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 20px; margin: 1rem 0; position: relative; }
+
+    .demo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .demo-row label { font-size: 0.8rem; color: #888; min-width: 160px; flex-shrink: 0; }
+    .demo-box-wrap { flex: 1; min-width: 200px; }
+    .demo-box {
+      background: #0d0d0d;
+      border: 1px solid #333;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      color: #ccc;
+    }
+    .demo-box:hover { border-color: #00d4ff; }
+
+    .multi-demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 1rem 0; }
+    .multi-demo-item { background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; }
+    .multi-demo-item h4 { font-size: 0.85rem; color: #00d4ff; margin-bottom: 8px; }
+    .multi-demo-box {
+      background: #0d0d0d;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #ccc;
+      min-height: 60px;
+      overflow: hidden;
+    }
+
+    .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 1rem 0; }
+    .compare-item { background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; }
+    .compare-item h4 { font-size: 0.8rem; color: #ffd700; margin-bottom: 4px; }
+    .compare-item .css { font-size: 0.75rem; color: #888; margin-bottom: 8px; font-family: monospace; }
+    .compare-box { background: #0d0d0d; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; color: #ccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .result-panel { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1rem; margin: 1rem 0; font-family: monospace; font-size: 0.85rem; }
+    .result-panel .ok { color: #4ade80; }
+    .result-panel .fail { color: #ff6b6b; }
+    .result-panel .info { color: #ffd700; }
+
+    .slider-row { display: flex; align-items: center; gap: 12px; margin: 0.5rem 0; }
+    .slider-row label { font-size: 0.8rem; color: #888; min-width: 120px; flex-shrink: 0; }
+    .slider-row input[type="range"] { flex: 1; accent-color: #00d4ff; }
+    .slider-row .val { font-size: 0.8rem; color: #00d4ff; min-width: 50px; text-align: right; font-family: monospace; }
+
+    .badge { display: inline-block; background: #333; color: #ccc; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 8px; }
+    .badge.success { background: #4ade8030; color: #4ade80; }
+    .badge.fail { background: #ff6b6b30; color: #ff6b6b; }
+
+    .formula-box { background: #0d0d0d; border: 1px solid #333; border-radius: 8px; padding: 1.2rem; text-align: center; margin: 1rem 0; }
+    .formula-box .formula { font-size: 1.1rem; color: #00d4ff; font-family: monospace; margin: 0.5rem 0; }
+    .formula-box .desc { font-size: 0.85rem; color: #888; }
+
+    .quiz-question { background: #1a1a1a; border-left: 3px solid #00d4ff; padding: 1rem; margin: 1rem 0; }
+    .quiz-question p { margin-bottom: 0.5rem; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option { background: #111; border: 1px solid #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+    .quiz-option:hover { border-color: #00d4ff; }
+    .quiz-option.selected { border-color: #00d4ff; background: #00d4ff20; }
+    .quiz-option.correct { border-color: #4ade80; background: #4ade8020; }
+    .quiz-option.wrong { border-color: #ff6b6b; background: #ff6b6b20; }
+
+    .char-visual { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px; background: #111; border-radius: 6px; min-height: 40px; margin: 0.5rem 0; }
+    .char-chip { display: inline-flex; align-items: center; justify-content: center; background: #1a1a1a; border: 1px solid #333; padding: 3px 6px; border-radius: 3px; font-size: 0.78rem; color: #ccc; min-width: 18px; font-family: monospace; }
+    .char-chip.space { background: #222; border-color: #444; color: #555; }
+    .char-chip.ellipsis { background: #00d4ff; border-color: #00d4ff; color: #0a0a0a; font-weight: bold; }
+    .char-chip.truncated { background: #ff6b6b30; border-color: #ff6b6b; color: #ff6b6b; }
+  </style>
+</head>
+<body>
+
+<h1>CSS 省略号与空格间距控制</h1>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="overview">概念总览</button>
+  <button class="tab-btn" data-tab="whitespace">white-space 影响</button>
+  <button class="tab-btn" data-tab="spacing">间距控制</button>
+  <button class="tab-btn" data-tab="multiline">多行截断</button>
+  <button class="tab-btn" data-tab="interactive">交互演示</button>
+  <button class="tab-btn" data-tab="quiz">自测题</button>
+</div>
+
+<!-- 概念总览 -->
+<div id="tab-overview" class="tab-content active">
+  <div class="formula-box">
+    <div class="desc">省略号生效的三要素</div>
+    <div class="formula">white-space: nowrap + overflow: hidden + text-overflow: ellipsis</div>
+    <div class="desc">三个条件必须同时满足，缺一不可</div>
+  </div>
+
+  <div class="card">
+    <h2>省略号截断的是字符序列，包括空格</h2>
+    <div class="demo-stage">
+      <div class="demo-row">
+        <label>文本（含多个空格）:</label>
+        <div class="demo-box-wrap">
+          <div class="demo-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px;">
+            Hello   World    CSS    Tricks
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">
+        渲染为：<code style="color:#00d4ff;">Hello   Wor&hellip;</code> — 末尾空格被截断，不保留
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>关键属性速查表</h2>
+    <table>
+      <tr><th>属性</th><th>作用</th><th>是否影响省略号</th></tr>
+      <tr><td>white-space</td><td>控制换行与空格处理</td><td><span class="badge success">决定省略号是否生效</span></td></tr>
+      <tr><td>overflow</td><td>控制溢出显示</td><td><span class="badge success">省略号需要 overflow:hidden</span></td></tr>
+      <tr><td>text-overflow</td><td>溢出时显示内容</td><td><span class="badge success">核心属性</span></td></tr>
+      <tr><td>letter-spacing</td><td>字符间距</td><td><span class="badge success">影响省略号位置</span></td></tr>
+      <tr><td>word-spacing</td><td>单词间距</td><td><span class="badge fail">不影响省略号</span></td></tr>
+      <tr><td>line-clamp</td><td>多行截断</td><td><span class="badge success">多行省略号专用</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- white-space 影响 -->
+<div id="tab-whitespace" class="tab-content">
+  <div class="card">
+    <h2>white-space 取值对比</h2>
+    <p style="color: #aaa; margin-bottom: 1rem;">容器宽度固定，所有都设置了 <code>overflow:hidden</code> 和 <code>text-overflow:ellipsis</code></p>
+
+    <div class="compare-grid">
+      <div class="compare-item">
+        <h4>normal <span class="badge fail">无省略号</span></h4>
+        <div class="css">white-space: normal</div>
+        <div class="compare-box" style="white-space: normal; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">自动换行，不溢出</p>
+      </div>
+
+      <div class="compare-item">
+        <h4>nowrap <span class="badge success">省略号</span></h4>
+        <div class="css">white-space: nowrap</div>
+        <div class="compare-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">不换行，溢出截断</p>
+      </div>
+
+      <div class="compare-item">
+        <h4>pre <span class="badge fail">无省略号</span></h4>
+        <div class="css">white-space: pre</div>
+        <div class="compare-box" style="white-space: pre; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">保留空格，但省略号不显示</p>
+      </div>
+
+      <div class="compare-item">
+        <h4>pre-wrap <span class="badge fail">无省略号</span></h4>
+        <div class="css">white-space: pre-wrap</div>
+        <div class="compare-box" style="white-space: pre-wrap; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">保留空格且换行</p>
+      </div>
+
+      <div class="compare-item">
+        <h4>pre-line <span class="badge fail">无省略号</span></h4>
+        <div class="css">white-space: pre-line</div>
+        <div class="compare-box" style="white-space: pre-line; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">合并空格，换行</p>
+      </div>
+
+      <div class="compare-item">
+        <h4>break-word <span class="badge fail">无省略号</span></h4>
+        <div class="css">word-break: break-word</div>
+        <div class="compare-box" style="white-space: normal; word-break: break-word; overflow: hidden; text-overflow: ellipsis;">
+          Hello   World CSS Tricks
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">自动换行到单词边界</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 间距控制 -->
+<div id="tab-spacing" class="tab-content">
+  <div class="card">
+    <h2>letter-spacing 对省略号的影响</h2>
+    <p style="color: #aaa; margin-bottom: 1rem;">letter-spacing 作用于所有字符，包括省略号 <code>&hellip;</code></p>
+
+    <div class="compare-grid">
+      <div class="compare-item">
+        <h4>letter-spacing: 0px</h4>
+        <div class="compare-box" style="letter-spacing: 0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello World CSS
+        </div>
+      </div>
+      <div class="compare-item">
+        <h4>letter-spacing: 2px</h4>
+        <div class="compare-box" style="letter-spacing: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello World CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #ffd700; margin-top: 4px;">间距增大，省略号更靠右</p>
+      </div>
+      <div class="compare-item">
+        <h4>letter-spacing: 5px</h4>
+        <div class="compare-box" style="letter-spacing: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello World CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #ffd700; margin-top: 4px;">间距更大，省略号更靠右</p>
+      </div>
+      <div class="compare-item">
+        <h4>letter-spacing: -1px</h4>
+        <div class="compare-box" style="letter-spacing: -1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello World CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #ff6b6b; margin-top: 4px;">负值收紧，省略号靠左</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>word-spacing 对省略号的影响</h2>
+    <p style="color: #aaa; margin-bottom: 1rem;">word-spacing 只作用于空格字符，省略号不受影响</p>
+
+    <div class="compare-grid">
+      <div class="compare-item">
+        <h4>word-spacing: normal</h4>
+        <div class="compare-box" style="word-spacing: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello   World   CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">空格间距正常</p>
+      </div>
+      <div class="compare-item">
+        <h4>word-spacing: 20px</h4>
+        <div class="compare-box" style="word-spacing: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello   World   CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">空格间距增大，但省略号位置不变</p>
+      </div>
+      <div class="compare-item">
+        <h4>word-spacing: -5px</h4>
+        <div class="compare-box" style="word-spacing: -5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+          Hello   World   CSS
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">空格收紧，省略号位置不受影响</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>省略号前保留间距的方法</h2>
+    <div class="compare-grid">
+      <div class="compare-item">
+        <h4>无间距（紧贴）</h4>
+        <div class="compare-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">
+          Hello World
+        </div>
+      </div>
+      <div class="compare-item">
+        <h4>padding-right: 8px <span class="badge success">推荐</span></h4>
+        <div class="compare-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; max-width: 130px;">
+          Hello World
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 4px;">最简单有效</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 多行截断 -->
+<div id="tab-multiline" class="tab-content">
+  <div class="card">
+    <h2>单行 vs 多行省略号</h2>
+    <div class="compare-grid">
+      <div class="compare-item">
+        <h4>单行省略号</h4>
+        <div class="compare-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">
+          这是单行文本，超出的部分会用省略号显示。
+        </div>
+        <pre style="font-size: 0.7rem; margin-top: 8px;"><code>white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;</code></pre>
+      </div>
+      <div class="compare-item">
+        <h4>多行省略号 (-webkit)</h4>
+        <div class="compare-box" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.5; max-width: 160px;">
+          这是多行文本，第二行末尾会显示省略号。超出两行的部分被隐藏。
+        </div>
+        <pre style="font-size: 0.7rem; margin-top: 8px;"><code>display: -webkit-box;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: 2;
+overflow: hidden;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>line-clamp vs -webkit-line-clamp</h2>
+    <table>
+      <tr><th>属性</th><th>浏览器支持</th><th>说明</th></tr>
+      <tr><td>-webkit-line-clamp</td><td>Chrome 1+, Safari 3+, Edge 17+</td><td>WebKit 前缀，兼容性好</td></tr>
+      <tr><td>line-clamp (标准)</td><td>Firefox 121+</td><td>CSS Working Group 标准</td></tr>
+    </table>
+    <pre><code><span class="comment">/* 兼容性最佳写法：同时写两种属性 */</span>
+.line-clamp {
+  <span class="keyword">display</span>: -webkit-box;
+  -webkit-box-orient: vertical;
+  <span class="keyword">-webkit-line-clamp</span>: <span class="highlight">3</span>;   <span class="comment">/* Safari/Chrome */</span>
+  <span class="keyword">line-clamp</span>: <span class="highlight">3</span>;          <span class="comment">/* Firefox 121+ */</span>
+  <span class="keyword">overflow</span>: hidden;
+}</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>多行省略号：不同行数对比</h2>
+    <div class="multi-demo-grid">
+      <div class="multi-demo-item">
+        <h4>-webkit-line-clamp: 1</h4>
+        <div class="multi-demo-box" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; line-height: 1.5;">
+          这是第一行文本。这是第二行文本。这是第三行文本。这是第四行文本。
+        </div>
+      </div>
+      <div class="multi-demo-item">
+        <h4>-webkit-line-clamp: 2</h4>
+        <div class="multi-demo-box" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.5;">
+          这是第一行文本。这是第二行文本。这是第三行文本。这是第四行文本。
+        </div>
+      </div>
+      <div class="multi-demo-item">
+        <h4>-webkit-line-clamp: 3</h4>
+        <div class="multi-demo-box" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; line-height: 1.5;">
+          这是第一行文本。这是第二行文本。这是第三行文本。这是第四行文本。
+        </div>
+      </div>
+      <div class="multi-demo-item">
+        <h4>-webkit-line-clamp: 4</h4>
+        <div class="multi-demo-box" style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; line-height: 1.5;">
+          这是第一行文本。这是第二行文本。这是第三行文本。这是第四行文本。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>flex 布局中的多行省略号</h2>
+    <div class="demo-stage">
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px; background: #0d0d0d; border: 1px solid #333; border-radius: 4px; padding: 12px;">
+          <div style="font-size: 0.8rem; color: #888; margin-bottom: 4px;">图标 + 标题</div>
+          <div style="display: flex; align-items: flex-start; gap: 8px;">
+            <div style="width: 32px; height: 32px; background: #00d4ff; border-radius: 4px; flex-shrink: 0;"></div>
+            <div style="flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 0.85rem; line-height: 1.4; color: #ccc;">
+              这是多行文本省略号演示，在flex布局中也能正常工作，只需要正确设置min-width: 0
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="comment">/* flex 子元素的 min-width: 0 是关键！ */</span>
+.text-ellipsis {
+  <span class="keyword">flex</span>: 1;
+  <span class="keyword">min-width</span>: <span class="highlight">0</span>;       <span class="comment">/* 允许收缩到 0 */</span>
+  <span class="keyword">display</span>: -webkit-box;
+  -webkit-box-orient: vertical;
+  <span class="keyword">-webkit-line-clamp</span>: 2;
+  <span class="keyword">overflow</span>: hidden;
+}</code></pre>
+  </div>
+</div>
+
+<!-- 交互演示 -->
+<div id="tab-interactive" class="tab-content">
+  <div class="card">
+    <h2>灵活调整各项参数</h2>
+
+    <div class="input-group" style="margin-top: 1rem;">
+      <label>white-space:</label>
+      <select id="ws-select">
+        <option value="nowrap" selected>nowrap</option>
+        <option value="normal">normal</option>
+        <option value="pre">pre</option>
+        <option value="pre-wrap">pre-wrap</option>
+        <option value="pre-line">pre-line</option>
+      </select>
+    </div>
+
+    <div class="slider-row">
+      <label>letter-spacing:</label>
+      <input type="range" id="interactive-ls" min="-2" max="10" value="0" step="1">
+      <span class="val" id="interactive-ls-val">0px</span>
+    </div>
+
+    <div class="slider-row">
+      <label>word-spacing:</label>
+      <input type="range" id="interactive-ws" min="-10" max="30" value="0" step="1">
+      <span class="val" id="interactive-ws-val">0px</span>
+    </div>
+
+    <div class="slider-row">
+      <label>容器宽度:</label>
+      <input type="range" id="interactive-width" min="80" max="320" value="200" step="10">
+      <span class="val" id="interactive-width-val">200px</span>
+    </div>
+
+    <div class="input-group">
+      <label>text-overflow:</label>
+      <select id="overflow-select">
+        <option value="ellipsis" selected>ellipsis</option>
+        <option value="clip">clip</option>
+      </select>
+    </div>
+
+    <div class="demo-stage">
+      <div class="demo-box" id="interactive-demo-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+        Hello   World   CSS   Tricks   Forever
+      </div>
+    </div>
+
+    <div class="result-panel" id="interactive-result">
+      当前样式：<br>
+      <span class="info">white-space: nowrap</span> |
+      <span class="info">overflow: hidden</span> |
+      <span class="info">text-overflow: ellipsis</span><br>
+      letter-spacing: 0px | word-spacing: 0px
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>字符可视化：省略号截断了什么？</h2>
+    <p style="color: #aaa; margin-bottom: 1rem;">点击"分析"查看文本被截断的字符序列</p>
+    <div class="input-group">
+      <input type="text" id="char-input" value="Hello   World   CSS" placeholder="输入文本（含空格）" style="flex: 2;">
+      <input type="number" id="char-width" value="140" placeholder="宽度" style="flex: 0.5; min-width: 80px;">
+      <button class="btn" onclick="analyzeChars()">分析</button>
+    </div>
+    <div class="char-visual" id="char-visual"></div>
+    <div class="result-panel" id="char-result">点击"分析"查看字符截断详情</div>
+  </div>
+</div>
+
+<!-- 自测题 -->
+<div id="tab-quiz" class="tab-content">
+  <div class="card">
+    <h2>判断题</h2>
+
+    <div class="quiz-question">
+      <p><strong>1.</strong> 只要设置了 <code>text-overflow: ellipsis</code>，文本就会显示省略号？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">正确</div>
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">错误</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：错误 — 必须同时设置 white-space: nowrap 和 overflow: hidden</p>
+    </div>
+
+    <div class="quiz-question">
+      <p><strong>2.</strong> <code>word-spacing</code> 会影响省略号 <code>&hellip;</code> 的位置吗？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">会</div>
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">不会</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：不会 — word-spacing 只作用于空格字符，省略号不是空格</p>
+    </div>
+    <div class="quiz-question">
+      <p><strong>3.</strong> flex 子元素使用省略号时，为什么需要设置 min-width: 0？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">正确</div>
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">错误</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：错误 — min-width: auto 是默认值，flex 子元素默认不能收缩到 0 以下</p>
+    </div>
+
+    <div class="quiz-question">
+      <p><strong>4.</strong> -webkit-line-clamp 和 line-clamp 同时写可以兼容更多浏览器？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">正确</div>
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">错误</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：正确 — -webkit-line-clamp 兼容 Safari/Chrome，line-clamp 兼容 Firefox 121+</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Quiz interactions
+  function selectAnswer(el) {
+    const question = el.closest('.quiz-question');
+    question.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    el.classList.add('selected');
+    
+    const answer = el.dataset.answer;
+    if (answer === 'correct') {
+      el.classList.add('correct');
+    } else if (answer === 'wrong') {
+      el.classList.add('wrong');
+      question.querySelectorAll('.quiz-option').forEach(opt => {
+        if (opt.dataset.answer === 'correct') {
+          opt.classList.add('correct');
+        }
+      });
+    }
+    
+    const info = question.querySelector('.info');
+    if (info) info.style.display = 'block';
+  }
+
+  // Interactive demo
+  const demoBox = document.getElementById('interactive-demo-box');
+  const resultPanel = document.getElementById('interactive-result');
+
+  document.getElementById('ws-select').addEventListener('change', updateDemo);
+  document.getElementById('interactive-ls').addEventListener('input', function() {
+    document.getElementById('interactive-ls-val').textContent = this.value + 'px';
+    updateDemo();
+  });
+  document.getElementById('interactive-ws').addEventListener('input', function() {
+    document.getElementById('interactive-ws-val').textContent = this.value + 'px';
+    updateDemo();
+  });
+  document.getElementById('interactive-width').addEventListener('input', function() {
+    document.getElementById('interactive-width-val').textContent = this.value + 'px';
+    updateDemo();
+  });
+  document.getElementById('overflow-select').addEventListener('change', updateDemo);
+
+  function updateDemo() {
+    const ws = document.getElementById('ws-select').value;
+    const ls = document.getElementById('interactive-ls').value + 'px';
+    const wss = document.getElementById('interactive-ws').value + 'px';
+    const width = document.getElementById('interactive-width').value + 'px';
+    const overflow = document.getElementById('overflow-select').value;
+
+    demoBox.style.whiteSpace = ws;
+    demoBox.style.letterSpacing = ls;
+    demoBox.style.wordSpacing = wss;
+    demoBox.style.maxWidth = width;
+    demoBox.style.textOverflow = overflow;
+
+    const ellipsisActive = (ws === 'nowrap' || ws === 'pre') && overflow === 'ellipsis';
+    resultPanel.innerHTML = '当前样式：<br>' +
+      '<span class="' + (ws === 'nowrap' ? 'ok' : 'fail') + '">white-space: ' + ws + '</span> | ' +
+      '<span class="ok">overflow: hidden</span> | ' +
+      '<span class="' + (overflow === 'ellipsis' ? 'ok' : 'info') + '">text-overflow: ' + overflow + '</span><br>' +
+      'letter-spacing: ' + ls + ' | word-spacing: ' + wss +
+      (ellipsisActive ? '<br><span class="success">省略号生效中</span>' : '<br><span class="fail">省略号未生效（需 white-space: nowrap）</span>');
+  }
+
+  // Character visualizer
+  function analyzeChars() {
+    const text = document.getElementById('char-input').value;
+    const width = parseInt(document.getElementById('char-width').value) || 140;
+    const visual = document.getElementById('char-visual');
+    const result = document.getElementById('char-result');
+
+    // Create a temporary div to measure
+    const temp = document.createElement('div');
+    temp.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;overflow:hidden;font-size:0.8rem;padding:8px 12px;letter-spacing:0px;word-spacing:0px;';
+    temp.textContent = text;
+    document.body.appendChild(temp);
+
+    const charWidth = temp.getBoundingClientRect().width;
+    const containerWidth = width;
+    const chars = text.split('');
+
+    let html = '';
+    let visibleChars = '';
+    let ellipsisAdded = false;
+    let lastSpaceIndex = -1;
+
+    // Find last space for potential word boundary optimization
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] === ' ') lastSpaceIndex = i;
+    }
+
+    // Simulate truncation
+    for (let i = 0; i < chars.length; i++) {
+      const char = chars[i];
+      visibleChars += char;
+      temp.textContent = visibleChars + (ellipsisAdded ? '' : (char === ' ' ? '' : ''));
+
+      // Check if we would need ellipsis
+      let testWidth = charWidth * visibleChars.length;
+      if (visibleChars.length > 1) {
+        temp.textContent = visibleChars;
+        testWidth = temp.getBoundingClientRect().width;
+      }
+
+      // Rough estimate: each char ~8px at this font size
+      const estimatedWidth = visibleChars.length * 8.5;
+      
+      if (estimatedWidth > containerWidth && !ellipsisAdded) {
+        html += '<span class="char-chip ellipsis">&hellip;</span>';
+        ellipsisAdded = true;
+        html += '<span class="char-chip truncated">' + char + '</span>';
+      } else if (ellipsisAdded) {
+        html += '<span class="char-chip truncated">' + char + '</span>';
+      } else if (char === ' ') {
+        html += '<span class="char-chip space">sp</span>';
+      } else {
+        html += '<span class="char-chip">' + char + '</span>';
+      }
+    }
+
+    if (!ellipsisAdded) {
+      result.innerHTML = '<span class="ok">文本未溢出（估算宽度 ' + Math.round(estimatedWidth) + 'px &lt; 容器宽度 ' + containerWidth + 'px）</span>';
+    } else {
+      result.innerHTML = '<span class="fail">文本被截断</span><br>' +
+        '可见字符数：约 ' + visibleChars.length + ' 个字符<br>' +
+        '被截断：' + (chars.length - visibleChars.length + 1) + ' 个字符（含省略号）';
+    }
+
+    visual.innerHTML = html;
+    document.body.removeChild(temp);
+  }
+
+  // Auto-analyze on load
+  analyzeChars();
+
+  // Also run the initial demo update
+  updateDemo();
+</script>
+</body>
+</html>
