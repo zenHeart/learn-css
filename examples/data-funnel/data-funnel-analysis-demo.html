@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据漏斗分析 — 交互演示</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --text: #1d1d1f;
+      --text-secondary: #86868b;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --success: #34c759;
+      --warning: #ff9500;
+      --danger: #ff3b30;
+      --border: #d2d2d7;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 32px; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #e8e8ed;
+      padding: 4px;
+      border-radius: 10px;
+      width: fit-content;
+      margin-bottom: 32px;
+    }
+    .tab {
+      padding: 8px 20px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    /* Funnel CSS */
+    .funnel-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin: 24px 0;
+    }
+    .funnel-stage {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    .funnel-bar-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+    .funnel-bar {
+      height: 52px;
+      background: linear-gradient(135deg, var(--accent), #5856d6);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 60px;
+    }
+    .funnel-label {
+      width: 100px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-align: right;
+    }
+    .funnel-arrow {
+      color: var(--border);
+      font-size: 0.8rem;
+    }
+    .conversion-rate {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .drop-rate {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    th {
+      background: #f5f5f7;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge-success { background: #e8f5e9; color: #2e7d32; }
+    .badge-danger { background: #ffebee; color: #c62828; }
+    .badge-info { background: #e3f2fd; color: #1565c0; }
+
+    /* Form */
+    .form-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .form-row label {
+      width: 140px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .form-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      max-width: 200px;
+    }
+    .form-row input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+    }
+
+    /* AARRR */
+    .aarrr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .aarrr-item {
+      background: linear-gradient(135deg, #f0f0f5, #e8e8ed);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .aarrr-icon { font-size: 2rem; margin-bottom: 8px; }
+    .aarrr-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .aarrr-desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .metric-change {
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+    .metric-change.up { color: var(--success); }
+    .metric-change.down { color: var(--danger); }
+
+    /* Button */
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+
+    /* Code */
+    pre {
+      background: #1d1d1f;
+      color: #f5f5f7;
+      padding: 20px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+    .comment { color: #6a9955; }
+    .keyword { color: #569cd6; }
+    .string { color: #ce9178; }
+    .number { color: #b5cea8; }
+
+    /* Quiz */
+    .quiz-question {
+      margin-bottom: 24px;
+    }
+    .quiz-question h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .quiz-option:hover { border-color: var(--accent); background: #f0f7ff; }
+    .quiz-option.selected { border-color: var(--accent); background: #e3f2fd; }
+    .quiz-option.correct { border-color: var(--success); background: #e8f5e9; }
+    .quiz-option.wrong { border-color: var(--danger); background: #ffebee; }
+    .quiz-result {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .quiz-result.show { display: block; }
+    .quiz-result.pass { background: #e8f5e9; color: #2e7d32; }
+    .quiz-result.fail { background: #ffebee; color: #c62828; }
+
+    /* Sim */
+    .sim-result {
+      background: #f8f8fa;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 16px;
+    }
+    .sim-result p { font-size: 0.9rem; margin-bottom: 6px; }
+    .sim-result strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<h1>数据漏斗分析 — 交互演示</h1>
+<p class="subtitle">数据漏斗的作用、方法和目标可视化学习</p>
+
+<div class="tabs">
+  <button class="tab active" data-tab="overview">概念总览</button>
+  <button class="tab" data-tab="funnel">漏斗演示</button>
+  <button class="tab" data-tab="aarrr">AARRR 模型</button>
+  <button class="tab" data-tab="metrics">核心指标</button>
+  <button class="tab" data-tab="code">前端实现</button>
+  <button class="tab" data-tab="quiz">自测题</button>
+</div>
+
+<!-- Tab 1: 概念总览 -->
+<div class="tab-content active" id="tab-overview">
+  <div class="card">
+    <h2>什么是数据漏斗</h2>
+    <p>数据漏斗（Conversion Funnel）是一种分析和可视化用户流程的模型，展示用户在完成目标过程中，每一步的转化和流失情况。</p>
+    <div style="margin-top:20px; padding:20px; background:#f8f8fa; border-radius:12px;">
+      <div style="font-family:monospace; font-size:0.9rem; line-height:2;">
+        访问用户: 10000 ──→ 注册用户: 6000 ──→ 付费用户: 800 ──→ 复购用户: 200<br>
+        <span style="color:var(--text-secondary)">转化率: 60%          转化率: 13.3%       转化率: 25%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>漏斗分析的 5 大作用</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>作用</th>
+          <th>说明</th>
+          <th>典型场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-info">定位流失</span></td>
+          <td>找出用户流失最严重的环节</td>
+          <td>注册转化低 → 排查表单问题</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">量化效果</span></td>
+          <td>验证改版前后转化率变化</td>
+          <td>A/B Test 对比</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">预测增长</span></td>
+          <td>通过漏斗拆解预测 ROI</td>
+          <td>获客成本计算</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">设置北极星</span></td>
+          <td>确定核心指标作为目标</td>
+          <td>OKR 制定</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">跨部门对齐</span></td>
+          <td>统一语言，协作优化</td>
+          <td>产品 + 运营 + 技术</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>漏斗分析常用方法</h2>
+    <table>
+      <thead>
+        <tr><th>方法</th><th>描述</th><th>适用场景</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>同比/环比分析</td>
+          <td>对比不同时间段转化率</td>
+          <td>趋势监控</td>
+        </tr>
+        <tr>
+          <td>分群漏斗</td>
+          <td>按渠道/设备/地区拆解</td>
+          <td>精细化运营</td>
+        </tr>
+        <tr>
+          <td>微漏斗</td>
+          <td>细化到每步操作的微小漏斗</td>
+          <td>转化率 > 1% 的精细优化</td>
+        </tr>
+        <tr>
+          <td>归因分析</td>
+          <td>最后点击/首次点击/线性归因</td>
+          <td>多渠道效果评估</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tab 2: 漏斗演示 -->
+<div class="tab-content" id="tab-funnel">
+  <div class="card">
+    <h2>实时漏斗模拟器</h2>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px;">调整各阶段用户数，观察转化率变化</p>
+
+    <div class="form-row">
+      <label>访问用户数：</label>
+      <input type="number" id="funnel-1" value="10000" min="100" max="100000">
+    </div>
+    <div class="form-row">
+      <label>注册用户数：</label>
+      <input type="number" id="funnel-2" value="6000" min="0">
+    </div>
+    <div class="form-row">
+      <label>激活用户数：</label>
+      <input type="number" id="funnel-3" value="2400" min="0">
+    </div>
+    <div class="form-row">
+      <label>付费用户数：</label>
+      <input type="number" id="funnel-4" value="800" min="0">
+    </div>
+    <div class="form-row">
+      <label>复购用户数：</label>
+      <input type="number" id="funnel-5" value="200" min="0">
+    </div>
+
+    <button class="btn" onclick="renderFunnel()">更新漏斗</button>
+
+    <div class="funnel-container" id="funnel-display" style="margin-top:28px;">
+      <!-- Rendered by JS -->
+    </div>
+
+    <div class="sim-result" id="funnel-summary">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Tab 3: AARRR -->
+<div class="tab-content" id="tab-aarrr">
+  <div class="card">
+    <h2>AARRR 海盗模型</h2>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:4px;">Acquisition → Activation → Retention → Revenue → Referral</p>
+    <div class="aarrr-grid">
+      <div class="aarrr-item">
+        <div class="aarrr-icon">🎣</div>
+        <div class="aarrr-name">Acquisition</div>
+        <div class="aarrr-desc">用户获取<br>SEO / 广告 / 裂变</div>
+      </div>
+      <div class="aarrr-item">
+        <div class="aarrr-icon">⚡</div>
+        <div class="aarrr-name">Activation</div>
+        <div class="aarrr-desc">用户激活<br>完成关键行为</div>
+      </div>
+      <div class="aarrr-item">
+        <div class="aarrr-icon">🔄</div>
+        <div class="aarrr-name">Retention</div>
+        <div class="aarrr-desc">用户留存<br>持续使用产品</div>
+      </div>
+      <div class="aarrr-item">
+        <div class="aarrr-icon">💰</div>
+        <div class="aarrr-name">Revenue</div>
+        <div class="aarrr-desc">收入<br>付费 / 订阅</div>
+      </div>
+      <div class="aarrr-item">
+        <div class="aarrr-icon">🤝</div>
+        <div class="aarrr-name">Referral</div>
+        <div class="aarrr-desc">推荐传播<br>口碑 / 裂变</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>电商漏斗 vs 内容漏斗</h2>
+    <table>
+      <thead>
+        <tr><th>维度</th><th>电商漏斗</th><th>内容漏斗</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>目标</td>
+          <td>成交转化</td>
+          <td>内容消费 + 互动</td>
+        </tr>
+        <tr>
+          <td>阶段示例</td>
+          <td>浏览→加购→下单→支付</td>
+          <td>阅读→点赞→收藏→关注</td>
+        </tr>
+        <tr>
+          <td>核心指标</td>
+          <td>GMV / 客单价 / 转化率</td>
+          <td>PV / 阅读时长 / 互动率</td>
+        </tr>
+        <tr>
+          <td>优化重点</td>
+          <td>支付链路 / 促销策略</td>
+          <td>内容质量 / 推荐算法</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tab 4: 核心指标 -->
+<div class="tab-content" id="tab-metrics">
+  <div class="card">
+    <h2>漏斗核心指标</h2>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">6.7%</div>
+        <div class="metric-label">总体转化率</div>
+        <div class="metric-change up">↑ 1.2pp vs 上月</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">60%</div>
+        <div class="metric-label">注册转化率</div>
+        <div class="metric-change up">↑ 5% vs 上月</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">¥128</div>
+        <div class="metric-label">ARPU</div>
+        <div class="metric-change down">↓ 3% vs 上月</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">¥45</div>
+        <div class="metric-label">CAC（获客成本）</div>
+        <div class="metric-change up">↓ 8% vs 上月</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">¥890</div>
+        <div class="metric-label">LTV</div>
+        <div class="metric-change up">↑ 12% vs 上月</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">19.8</div>
+        <div class="metric-label">LTV/CAC</div>
+        <div class="metric-change up">↑ 健康值 > 3</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>关键公式</h2>
+    <table>
+      <thead>
+        <tr><th>指标</th><th>公式</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>转化率</td>
+          <td>本阶段用户 / 上一阶段用户 × 100%</td>
+          <td>衡量每步转化效率</td>
+        </tr>
+        <tr>
+          <td>流失率</td>
+          <td>(上一阶段 - 本阶段) / 上一阶段 × 100%</td>
+          <td>1 - 转化率</td>
+        </tr>
+        <tr>
+          <td>LTV</td>
+          <td>ARPU × 平均生命周期（月）</td>
+          <td>用户总价值</td>
+        </tr>
+        <tr>
+          <td>ROI</td>
+          <td>(LTV - CAC) / CAC × 100%</td>
+          <td>投资回报率，健康值 > 300%</td>
+        </tr>
+        <tr>
+          <td>CAC</td>
+          <td>营销总支出 / 新增用户数</td>
+          <td>单用户获客成本</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tab 5: 前端实现 -->
+<div class="tab-content" id="tab-code">
+  <div class="card">
+    <h2>前端埋点采集</h2>
+    <pre><span class="comment">// 页面访问埋点</span>
+<span class="keyword">const</span> track = <span class="keyword">async</span> (event, properties = {}) => {
+  <span class="keyword">await</span> fetch(<span class="string">'/api/track'</span>, {
+    method: <span class="string">'POST'</span>,
+    headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+    body: JSON.stringify({
+      event,
+      properties,
+      <span class="string">timestamp'</span>: Date.now(),
+      <span class="string">'user_id'</span>: getUserId(),
+      <span class="string">'session_id'</span>: getSessionId()
+    })
+  });
+};
+
+<span class="comment">// 页面曝光</span>
+track(<span class="string">'page_view'</span>, {
+  page: location.pathname,
+  referrer: document.referrer
+});
+
+<span class="comment">// 关键行为</span>
+track(<span class="string">'add_to_cart'</span>, {
+  product_id: <span class="string">'SKU123'</span>,
+  price: <span class="number">99.9</span>
+});</pre>
+  </div>
+
+  <div class="card">
+    <h2>漏斗计算</h2>
+    <pre><span class="keyword">const</span> stages = [
+  { name: <span class="string">'访问'</span>, users: <span class="number">10000</span> },
+  { name: <span class="string">'注册'</span>, users: <span class="number">6000</span> },
+  { name: <span class="string">'激活'</span>, users: <span class="number">2400</span> },
+  { name: <span class="string">'付费'</span>, users: <span class="number">800</span> },
+  { name: <span class="string">'复购'</span>, users: <span class="number">200</span> }
+];
+
+<span class="keyword">const</span> funnel = stages.map((stage, i) => {
+  <span class="keyword">const</span> prev = i === <span class="number">0</span> ? stage.users : stages[i-<span class="number">1</span>].users;
+  <span class="keyword">return</span> {
+    ...stage,
+    conversionRate: stage.users / prev,
+    dropRate: (prev - stage.users) / prev
+  };
+});
+
+<span class="comment">// 输出：转化率和流失率</span>
+funnel.forEach(s => {
+  console.log(<span class="string">`</span>${s.name}: <span class="string">${(s.conversionRate*100).toFixed(1)}%</span> | 流失: <span class="string">${(s.dropRate*100).toFixed(1)}%</span><span class="string">`</span>);
+});</pre>
+  </div>
+</div>
+
+<!-- Tab 6: 自测题 -->
+<div class="tab-content" id="tab-quiz">
+  <div class="card">
+    <h2>自测题</h2>
+
+    <div class="quiz-question">
+      <h3>Q1: 某产品访问用户 10000，注册用户 3000，注册转化率是多少？</h3>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">3%</button>
+      <button class="quiz-option" onclick="checkAnswer(this, true)">30%</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">300%</button>
+      <div class="quiz-result" id="q1-result"></div>
+    </div>
+
+    <div class="quiz-question">
+      <h3>Q2: 以下哪个不是数据漏斗的核心作用？</h3>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">定位流失点</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">量化改进效果</button>
+      <button class="quiz-option" onclick="checkAnswer(this, true)">直接提升服务器性能</button>
+      <div class="quiz-result" id="q2-result"></div>
+    </div>
+
+    <div class="quiz-question">
+      <h3>Q3: AARRR 模型中，R 代表什么？</h3>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">Review（评价）</button>
+      <button class="quiz-option" onclick="checkAnswer(this, true)">Retention（留存）</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">Return（退货）</button>
+      <div class="quiz-result" id="q3-result"></div>
+    </div>
+
+    <div class="quiz-question">
+      <h3>Q4: LTV/CAC 的健康值通常应该大于多少？</h3>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">1</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">2</button>
+      <button class="quiz-option" onclick="checkAnswer(this, true)">3</button>
+      <div class="quiz-result" id="q4-result"></div>
+    </div>
+
+    <div class="quiz-question">
+      <h3>Q5: 漏斗优化优先级最高的是哪个环节？</h3>
+      <button class="quiz-option" onclick="checkAnswer(this, true)">流失率最高的那一步</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">用户量最大的那一步</button>
+      <button class="quiz-option" onclick="checkAnswer(this, false)">最后一步</button>
+      <div class="quiz-result" id="q5-result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Funnel rendering
+  const stageNames = ['访问', '注册', '激活', '付费', '复购'];
+  let currentFunnel = [10000, 6000, 2400, 800, 200];
+
+  function renderFunnel() {
+    const inputs = [
+      parseInt(document.getElementById('funnel-1').value) || 0,
+      parseInt(document.getElementById('funnel-2').value) || 0,
+      parseInt(document.getElementById('funnel-3').value) || 0,
+      parseInt(document.getElementById('funnel-4').value) || 0,
+      parseInt(document.getElementById('funnel-5').value) || 0
+    ];
+    currentFunnel = inputs;
+
+    const max = Math.max(...inputs.filter(v => v > 0), 1);
+    const container = document.getElementById('funnel-display');
+    let html = '';
+
+    inputs.forEach((users, i) => {
+      const rate = i === 0 ? 1 : inputs[i - 1] > 0 ? users / inputs[i - 1] : 0;
+      const dropRate = i === 0 ? 0 : inputs[i - 1] > 0 ? (inputs[i - 1] - users) / inputs[i - 1] : 0;
+      const width = users > 0 ? Math.max(10, (users / max) * 100) : 10;
+
+      if (i > 0) {
+        const arrowSymbol = rate >= 0.5 ? '↓' : rate >= 0.2 ? '↘' : '↘↘';
+        const arrowColor = rate >= 0.3 ? 'var(--success)' : rate >= 0.1 ? 'var(--warning)' : 'var(--danger)';
+        html += `<div class="funnel-arrow" style="color:${arrowColor}; font-size:1.1rem; text-align:center;">${arrowSymbol} 转化 <span class="conversion-rate">${(rate * 100).toFixed(1)}%</span> | 流失 <span class="drop-rate">${(dropRate * 100).toFixed(1)}%</span></div>`;
+      }
+
+      html += `<div class="funnel-stage">
+        <div class="funnel-label">${stageNames[i]}</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar" style="width:${width}%;">${users.toLocaleString()}</div>
+        </div>
+      </div>`;
+    });
+
+    container.innerHTML = html;
+
+    // Summary
+    const totalRate = inputs[inputs.length - 1] / Math.max(inputs[0], 1);
+    document.getElementById('funnel-summary').innerHTML = `
+      <p><strong>总体转化率：</strong>${(totalRate * 100).toFixed(2)}%</p>
+      <p><strong>总流失用户：</strong>${(inputs[0] - inputs[inputs.length - 1]).toLocaleString()}</p>
+      <p><strong>最大瓶颈：</strong>${stageNames[getBottleneck(inputs)]} 阶段（流失率最高）</p>
+    `;
+  }
+
+  function getBottleneck(inputs) {
+    let maxDrop = 0, idx = 0;
+    for (let i = 1; i < inputs.length; i++) {
+      const drop = (inputs[i-1] - inputs[i]) / Math.max(inputs[i-1], 1);
+      if (drop > maxDrop) { maxDrop = drop; idx = i; }
+    }
+    return idx;
+  }
+
+  // Initial render
+  renderFunnel();
+
+  // Quiz
+  function checkAnswer(btn, correct) {
+    const resultId = btn.closest('.quiz-question').querySelector('.quiz-result').id;
+    const result = document.getElementById(resultId);
+    const allBtns = btn.closest('.quiz-question').querySelectorAll('.quiz-option');
+
+    allBtns.forEach(b => {
+      b.classList.remove('selected', 'correct', 'wrong');
+      b.disabled = true;
+    });
+
+    if (correct) {
+      btn.classList.add('correct');
+      result.textContent = '✅ 回答正确！';
+      result.className = 'quiz-result show pass';
+    } else {
+      btn.classList.add('wrong');
+      allBtns.forEach(b => {
+        if (b.onclick.toString().includes('true')) b.classList.add('correct');
+      });
+      result.textContent = '❌ 回答错误，正确答案已标绿。';
+      result.className = 'quiz-result show fail';
+    }
+  }
+
+  // Sync inputs to funnel
+  ['funnel-1','funnel-2','funnel-3','funnel-4','funnel-5'].forEach((id, i) => {
+    document.getElementById(id).addEventListener('input', () => {
+      const val = parseInt(document.getElementById(id).value) || 0;
+      currentFunnel[i] = val;
+    });
+  });
+</script>
+
+</body>
+</html>
