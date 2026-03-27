@@ -1,0 +1,148 @@
+# Textarea Enter Key Interception
+
+> 拦截 Textarea 中的回车键避免意外提交
+
+## 问题描述
+
+在 textarea 中按 Enter 键时，不同场景下行为不同：
+
+| 场景 | 默认行为 | 期望行为 |
+|------|----------|----------|
+| IM 输入框 | 意外发送消息 | Shift+Enter 发送，Enter 换行 |
+| 表单评论框 | 意外提交表单 | Ctrl+Enter 或按钮提交 |
+| 代码编辑器 | 意外换行 | Tab 缩进，Enter 智能换行 |
+
+## 核心问题
+
+**Enter 在 textarea 中的默认行为：**
+
+```html
+<textarea>
+  按 Enter → 插入换行符 (\n)
+</textarea>
+```
+
+但当 textarea 在 `<form>` 中时：
+- 如果表单只有一个 textarea 且没有阻止回车
+- 某些浏览器可能触发表单提交
+
+## 解决方案
+
+### 方案一：阻止默认换行（不推荐）
+
+```js
+textarea.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    // 手动插入换行
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    textarea.value = textarea.value.substring(0, start) + '\n' + textarea.value.substring(end);
+    textarea.selectionStart = textarea.selectionEnd = start + 1;
+  }
+});
+```
+
+**问题**：这种方式会阻止正常的换行功能，用户无法在 textarea 中换行。
+
+### 方案二：IM 场景 — Shift+Enter 发送（推荐）
+
+```html
+<form id="chat-form">
+  <textarea id="message" placeholder="输入消息... (Shift+Enter 发送)"></textarea>
+  <button type="submit">发送</button>
+</form>
+```
+
+```js
+const textarea = document.getElementById('message');
+const form = document.getElementById('chat-form');
+
+textarea.addEventListener('keydown', (e) => {
+  // Shift + Enter 触发表单提交
+  if (e.key === 'Enter' && e.shiftKey) {
+    e.preventDefault(); // 阻止插入换行
+    form.requestSubmit(); // 触发表单提交
+  }
+});
+```
+
+### 方案三：Ctrl+Enter 提交（备选）
+
+```js
+textarea.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + Enter 发送
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    submitForm();
+  }
+});
+```
+
+### 方案四：阻止表单提交但保留换行
+
+```html
+<form onsubmit="return false;">
+  <textarea id="comment"></textarea>
+  <button onclick="submitComment()">提交</button>
+</form>
+```
+
+```js
+// 彻底阻止回车提交
+textarea.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    // 不阻止换行，仅阻止表单自动提交
+    // 如果有 submit 按钮，回车不会触发表单提交
+  }
+});
+```
+
+## 最佳实践
+
+### 1. 明确告知用户
+
+```html
+<textarea placeholder="输入消息...
+Enter = 换行，Shift+Enter = 发送"></textarea>
+```
+
+### 2. 提供多种提交方式
+
+- 移动端：显示发送按钮
+- 键盘用户：支持快捷键
+- 无障碍：支持语音输入
+
+### 3. 视觉反馈
+
+```css
+/* 发送成功 */
+.message-sent {
+  animation: send-flash 0.3s ease;
+}
+
+@keyframes send-flash {
+  0%, 100% { background: transparent; }
+  50% { background: #e3f2fd; }
+}
+```
+
+## 常见问题
+
+| 问题 | 原因 | 解决方案 |
+|------|------|----------|
+| 按 Enter 提交了表单 | 表单有 submit 按钮 | 移除 submit 或阻止 keydown |
+| Shift+Enter 无效 | 事件被阻止 | 检查 keydown 阻止逻辑 |
+| 换行符变成空格 | 样式 white-space 处理 | 设置 white-space: pre-wrap |
+
+## 总结
+
+- **不要**：阻止 Enter 键的所有默认行为
+- **应该**：根据场景选择合适的交互模式
+- **推荐**：IM 用 Shift+Enter 发送，表单用 Ctrl+Enter 或按钮提交
+- **必要**：向用户清晰说明快捷键
+
+## 相关阅读
+
+- [MDN: KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
+- [IM 输入框设计规范](/topics/02.layout/09.textarea-enter-key/_demos/textarea-enter-key.html)
