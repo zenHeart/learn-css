@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 层叠上下文调试交互演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-area h3 {
+      color: #f093fb;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    .demo-area p {
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .demo-box {
+      background: #0f0f1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-box h4 {
+      color: #f093fb;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+    .code-block {
+      background: #0d0d1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 12px 0;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      color: #a0a0c0;
+      white-space: pre-wrap;
+    }
+    .code-block .keyword { color: #c678dd; }
+    .code-block .string { color: #98c379; }
+    .code-block .property { color: #e5c07b; }
+    .code-block .value { color: #61afef; }
+    .code-block .selector { color: #e06c75; }
+    .code-block .comment { color: #5c6370; font-style: italic; }
+
+    /* Demo Scenarios */
+    .scene-container {
+      position: relative;
+      border: 2px solid #f093fb;
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 200px;
+      margin: 16px 0;
+    }
+
+    /* Scene 1: Normal z-index stacking */
+    .scene1-box {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+    .scene1-a {
+      top: 20px;
+      left: 20px;
+      background: #e06c75;
+      z-index: 1;
+    }
+    .scene1-b {
+      top: 50px;
+      left: 50px;
+      background: #61afef;
+      z-index: 2;
+    }
+    .scene1-c {
+      top: 80px;
+      left: 80px;
+      background: #98c379;
+      z-index: 3;
+    }
+
+    /* Scene 2: Parent transform creates stacking context */
+    .scene2-parent {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 150px;
+      height: 150px;
+      background: rgba(240, 147, 251, 0.2);
+      border: 2px solid #f093fb;
+      border-radius: 8px;
+    }
+    .scene2-parent-inner {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      background: #e06c75;
+      z-index: 1000; /* High z-index inside parent */
+    }
+    .scene2-child {
+      position: absolute;
+      top: 60px;
+      left: 100px;
+      width: 80px;
+      height: 80px;
+      background: #61afef;
+      z-index: 1; /* Lower z-index outside */
+    }
+    .scene2-external {
+      position: absolute;
+      top: 120px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      background: #98c379;
+      z-index: 2;
+    }
+
+    /* Scene 3: Multiple stacking contexts */
+    .scene3-container {
+      position: relative;
+      padding: 10px;
+    }
+    .scene3-context {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.7rem;
+    }
+    .scene3-a {
+      top: 20px;
+      left: 20px;
+      background: rgba(224, 108, 117, 0.3);
+      border: 2px solid #e06c75;
+      z-index: 1;
+    }
+    .scene3-b {
+      top: 50px;
+      left: 60px;
+      background: rgba(97, 175, 239, 0.3);
+      border: 2px solid #61afef;
+      z-index: 2;
+    }
+    .scene3-c {
+      top: 80px;
+      left: 100px;
+      background: rgba(152, 195, 121, 0.3);
+      border: 2px solid #98c379;
+      z-index: 3;
+    }
+    .scene3-inner {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 50px;
+      height: 50px;
+      background: #f093fb;
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 10px 20px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    button:hover { background: #333355; border-color: #f093fb; }
+    button.primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border: none;
+    }
+    .info-box {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .info-box h4 { color: #f093fb; margin-bottom: 8px; }
+    .info-box p { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+    .warning-box {
+      background: rgba(245, 87, 108, 0.1);
+      border: 1px solid #f5576c;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .warning-box h4 { color: #f5576c; margin-bottom: 8px; }
+    .warning-box p { color: #ccc; font-size: 0.9rem; line-height: 1.6; }
+    code {
+      background: #1a1a2e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #e5c07b;
+    }
+    .label {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #333;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+    .label.warning { background: #f5576c; color: white; }
+    .label.success { background: #98c379; color: #0a0a0f; }
+  </style>
+</head>
+<body>
+  <h1>CSS 层叠上下文调试交互演示</h1>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="intro">概念介绍</button>
+    <button class="tab-btn" data-tab="scene1">场景1：正常层叠</button>
+    <button class="tab-btn" data-tab="scene2">场景2：transform 陷阱</button>
+    <button class="tab-btn" data-tab="scene3">场景3：多层上下文</button>
+    <button class="tab-btn" data-tab="debug">调试技巧</button>
+  </div>
+
+  <div id="tab-intro" class="tab-content active">
+    <div class="demo-area">
+      <h3>什么是层叠上下文（Stacking Context）</h3>
+      <p>层叠上下文是 HTML 元素在三维空间中按 z 轴顺序层叠的概念。当元素创建新的层叠上下文时，其子元素的 z-index 只在该上下文内部有效。</p>
+
+      <div class="demo-box">
+        <h4>创建层叠上下文的条件</h4>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>条件</th>
+              <th>示例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>根元素</td>
+              <td><code>&lt;html&gt;</code></td>
+            </tr>
+            <tr>
+              <td>position + z-index</td>
+              <td><code>position: relative; z-index: 1</code></td>
+            </tr>
+            <tr>
+              <td>opacity &lt; 1</td>
+              <td><code>opacity: 0.9</code></td>
+            </tr>
+            <tr>
+              <td>transform</td>
+              <td><code>transform: translateZ(0)</code></td>
+            </tr>
+            <tr>
+              <td>filter</td>
+              <td><code>filter: blur(1px)</code></td>
+            </tr>
+            <tr>
+              <td>backdrop-filter</td>
+              <td><code>backdrop-filter: blur(10px)</code></td>
+            </tr>
+            <tr>
+              <td>CSS Grid/Flex + z-index</td>
+              <td><code>display: flex; z-index: 1</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warning-box">
+        <h4>关键概念</h4>
+        <p>
+          <strong>z-index 是相对的！</strong><br>
+          子元素的 z-index 值只在创建它的层叠上下文内部有意义。
+          不同层叠上下文之间的比较只看它们"根"的 z-index 值。
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h4>核心规则</h4>
+        <p>
+          1. 层叠上下文 A 内的元素，永远无法超过层叠上下文 A 的边界<br>
+          2. 不同层叠上下文之间，根 z-index 大的优先<br>
+          3. 同一层叠上下文内，按 z-index 从低到高排序
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-scene1" class="tab-content">
+    <div class="demo-area">
+      <h3>场景1：正常 z-index 层叠</h3>
+      <p>没有层叠上下文干扰时，z-index 直接决定元素的层叠顺序。数值越大，越在上层。</p>
+
+      <div class="demo-box">
+        <h4>交互演示</h4>
+        <div class="scene-container" id="scene1-demo">
+          <div class="scene1-box scene1-a">z-index: 1</div>
+          <div class="scene1-box scene1-b">z-index: 2</div>
+          <div class="scene1-box scene1-c">z-index: 3</div>
+        </div>
+        <div class="controls">
+          <button onclick="scene1Toggle()">切换层叠顺序</button>
+          <button onclick="scene1Reset()">重置</button>
+        </div>
+      </div>
+
+      <div class="code-block"><span class="comment">/* 正常层叠：z-index 决定一切 */</span>
+<span class="selector">.box-1</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">1</span>; }
+<span class="selector">.box-2</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">2</span>; }
+<span class="selector">.box-3</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">3</span>; }
+
+<span class="comment">/* 结果：box-3 盖住 box-2，box-2 盖住 box-1 */</span></div>
+
+      <div class="info-box">
+        <h4>要点</h4>
+        <p>当所有元素都在同一个层叠上下文（根层叠上下文）中时，z-index 值直接比较，值大的在上。</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-scene2" class="tab-content">
+    <div class="demo-area">
+      <h3>场景2：transform 创建层叠上下文陷阱</h3>
+      <p>当父元素使用 transform 时，会创建新的层叠上下文。子元素的 z-index 只在该上下文内有效！</p>
+
+      <div class="demo-box">
+        <h4>问题演示</h4>
+        <p style="color: #f5576c;">紫色容器有 transform，红色方块 z-index: 1000 在它内部。<br>绿色方块 z-index: 2 在外部，但仍然盖住红色方块！</p>
+        <div class="scene-container" id="scene2-demo">
+          <div class="scene2-parent" id="scene2-parent">
+            <div class="scene2-parent-inner" id="scene2-inner">z-index: 1000</div>
+          </div>
+          <div class="scene2-child" id="scene2-child">z-index: 2</div>
+          <div class="scene2-external">z-index: 2</div>
+        </div>
+        <div class="controls">
+          <button onclick="scene2ToggleTransform()">切换 transform</button>
+          <button onclick="scene2Reset()">重置</button>
+        </div>
+      </div>
+
+      <div class="code-block"><span class="comment">/* 父元素没有 transform - 正常行为 */</span>
+<span class="selector">.parent</span> { <span class="property">position</span>: <span class="value">relative</span>; }
+<span class="selector">.child</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">1000</span>; }
+<span class="selector">.external</span> { <span class="property">position</span>: <span class="value">relative</span>; <span class="property">z-index</span>: <span class="value">2</span>; }
+
+<span class="comment">/* 问题：.child 会被 .external 盖住！ */</span>
+<span class="comment">/* 原因：.parent 的 transform 创建了新层叠上下文 */</span>
+<span class="selector">.parent</span> { <span class="property">transform</span>: <span class="value">scale(1)</span>; }</div>
+
+      <div class="warning-box">
+        <h4>为什么 z-index: 1000 输了？</h4>
+        <p>
+          因为 <code>.parent</code> 有 <code>transform</code>，它创建了一个新的层叠上下文。<br><br>
+          在这个新上下文中，<code>.child</code> 的 <code>z-index: 1000</code> 是相对于 <code>.parent</code> 的。<br><br>
+          而 <code>.parent</code> 本身的 z-index 是 <code>auto</code>（相当于 0），所以 <code>.parent</code> 整体会排在 <code>.external</code>（z-index: 2）下面。
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h4>解决方案</h4>
+        <p>
+          1. 移除不必要的 transform<br>
+          2. 将需要比较的元素放到同一个层叠上下文中<br>
+          3. 给父元素设置更高的 z-index
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-scene3" class="tab-content">
+    <div class="demo-area">
+      <h3>场景3：多个层叠上下文叠加</h3>
+      <p>展示多个层叠上下文同时存在时的层叠规则。</p>
+
+      <div class="demo-box">
+        <h4>三层嵌套的层叠上下文</h4>
+        <div class="scene-container" id="scene3-demo">
+          <div class="scene3-context scene3-a" id="ctx-a">
+            Context A<br>z-index: 1
+            <div class="scene3-inner" style="background: #e06c75;">inner: 999</div>
+          </div>
+          <div class="scene3-context scene3-b" id="ctx-b">
+            Context B<br>z-index: 2
+            <div class="scene3-inner" style="background: #61afef;">inner: 1</div>
+          </div>
+          <div class="scene3-context scene3-c" id="ctx-c">
+            Context C<br>z-index: 3
+            <div class="scene3-inner" style="background: #98c379;">inner: 1</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button onclick="scene3ToggleContext()">切换上下文 z-index</button>
+          <button onclick="scene3Reset()">重置</button>
+        </div>
+      </div>
+
+      <div class="code-block"><span class="comment">/* 每个容器都有自己的层叠上下文 */</span>
+<span class="selector">.context-a</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">1</span>; <span class="property">transform</span>: <span class="value">scale(1)</span>; }
+<span class="selector">.context-b</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">2</span>; <span class="property">transform</span>: <span class="value">scale(1)</span>; }
+<span class="selector">.context-c</span> { <span class="property">position</span>: <span class="value">absolute</span>; <span class="property">z-index</span>: <span class="value">3</span>; <span class="property">transform</span>: <span class="value">scale(1)</span>; }
+
+<span class="comment">/* 即使 inner 在 context-a 内有 z-index: 999 */</span>
+<span class="comment">/* 它的层级仍然受限于 context-a 的根 z-index: 1 */</span>
+<span class="comment">/* 所以它永远在 context-b（根 z-index: 2）之下 */</span></div>
+
+      <div class="warning-box">
+        <h4>层叠上下文之间的比较规则</h4>
+        <p>
+          比较两个层叠上下文时，只比较它们"根"的 z-index。<br><br>
+          <code>context-a.inner (z-index: 999)</code> vs <code>context-b (z-index: 2)</code><br>
+          → 比较的是 context-a 的根 (auto=0) 和 context-b 的根 (2)<br>
+          → 0 < 2，所以 context-b 整体在上层
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-debug" class="tab-content">
+    <div class="demo-area">
+      <h3>Chrome DevTools 调试技巧</h3>
+
+      <div class="demo-box">
+        <h4>1. 打开 Layers 面板</h4>
+        <p>使用快捷键 <code>Cmd+Shift+P</code>（Mac）或 <code>Ctrl+Shift+P</code>（Windows）打开命令面板，输入 "Layers"。</p>
+      </div>
+
+      <div class="demo-box">
+        <h4>2. 显示图层边框</h4>
+        <p>在命令面板中输入 "Show Layer Borders"，页面上的每个图层会显示彩色边框：</p>
+        <ul style="color: #aaa; margin: 12px; line-height: 1.8;">
+          <li>橙色边框：合成图层（Compositor Layer）</li>
+          <li>蓝色边框：GCD 纹理图层</li>
+        </ul>
+      </div>
+
+      <div class="demo-box">
+        <h4>3. Elements 面板检查</h4>
+        <p>在 Elements 面板中选中元素，查看 Styles 面板：</p>
+        <div class="code-block"><span class="comment">检查这些属性：*/</span>
+<span class="property">position</span>: <span class="value">relative</span> | <span class="value">absolute</span> | <span class="value">fixed</span>
+<span class="property">z-index</span>: <span class="value">数字</span> | <span class="value">auto</span>
+<span class="property">transform</span>: <span class="value">非 none 值会创建层叠上下文</span>
+<span class="property">opacity</span>: <span class="value">&lt; 1 会创建层叠上下文</span>
+<span class="property">filter</span>: <span class="value">非 none 值会创建层叠上下文</span></div>
+      </div>
+
+      <div class="demo-box">
+        <h4>4. 调试步骤流程</h4>
+        <div class="info-box">
+          <h4>步骤 1：定位问题元素</h4>
+          <p>使用选择工具点击被遮挡的元素</p>
+        </div>
+        <div class="info-box">
+          <h4>步骤 2：检查 z-index</h4>
+          <p>在 Styles 面板查看 z-index 值</p>
+        </div>
+        <div class="info-box">
+          <h4>步骤 3：检查父元素</h4>
+          <p>向上遍历，检查是否有 transform/filter/opacity/position+z-index</p>
+        </div>
+        <div class="info-box">
+          <h4>步骤 4：验证 Layers 面板</h4>
+          <p>在 Layers 面板中查看图层顺序是否正确</p>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <h4>常见踩坑点</h4>
+        <p>
+          <strong>1. transform 导致层叠上下文</strong><br>
+          给元素添加 transform（如 translateZ(0) 做 GPU 加速）会隐式创建层叠上下文。<br><br>
+          <strong>2. z-index 的相对性</strong><br>
+          z-index: 100 在层叠上下文 A 内，可能比 z-index: 1 在层叠上下文 B 内更低。<br><br>
+          <strong>3. opacity &lt; 1 也会创建</strong><br>
+          opacity: 0.99 看起来和不透明一样，但会创建新的层叠上下文！
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+      });
+    });
+
+    // Scene 1: Toggle z-index
+    let scene1Order = [1, 2, 3];
+    function scene1Toggle() {
+      scene1Order = scene1Order.map(v => 4 - v);
+      const boxes = document.querySelectorAll('.scene1-box');
+      boxes.forEach((box, i) => {
+        box.style.zIndex = scene1Order[i];
+        box.textContent = `z-index: ${scene1Order[i]}`;
+      });
+    }
+    function scene1Reset() {
+      scene1Order = [1, 2, 3];
+      const boxes = document.querySelectorAll('.scene1-box');
+      boxes.forEach((box, i) => {
+        box.style.zIndex = scene1Order[i];
+        box.textContent = `z-index: ${scene1Order[i]}`;
+      });
+    }
+
+    // Scene 2: Toggle transform
+    let hasTransform = true;
+    function scene2ToggleTransform() {
+      hasTransform = !hasTransform;
+      const parent = document.getElementById('scene2-parent');
+      const inner = document.getElementById('scene2-inner');
+      const child = document.getElementById('scene2-child');
+
+      if (hasTransform) {
+        parent.style.transform = 'scale(1)';
+        inner.textContent = 'z-index: 1000';
+        child.textContent = 'z-index: 2';
+        child.nextElementSibling.textContent = 'z-index: 2';
+      } else {
+        parent.style.transform = 'none';
+        inner.textContent = 'z-index: 1000 (无 transform)';
+        child.textContent = 'z-index: 2 (外部)';
+        child.nextElementSibling.textContent = 'z-index: 2';
+      }
+    }
+    function scene2Reset() {
+      hasTransform = true;
+      const parent = document.getElementById('scene2-parent');
+      const inner = document.getElementById('scene2-inner');
+      const child = document.getElementById('scene2-child');
+      parent.style.transform = 'scale(1)';
+      inner.textContent = 'z-index: 1000';
+      child.textContent = 'z-index: 2';
+      child.nextElementSibling.textContent = 'z-index: 2';
+    }
+
+    // Scene 3: Toggle context z-index
+    let scene3Order = [1, 2, 3];
+    function scene3ToggleContext() {
+      scene3Order = scene3Order.map(v => 4 - v);
+      const contexts = ['ctx-a', 'ctx-b', 'ctx-c'];
+      contexts.forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.style.zIndex = scene3Order[i];
+        el.querySelector('.scene3-inner').style.background =
+          ['#e06c75', '#61afef', '#98c379'][i];
+      });
+    }
+    function scene3Reset() {
+      scene3Order = [1, 2, 3];
+      const contexts = ['ctx-a', 'ctx-b', 'ctx-c'];
+      contexts.forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.style.zIndex = scene3Order[i];
+        el.querySelector('.scene3-inner').style.background =
+          ['#e06c75', '#61afef', '#98c379'][i];
+      });
+    }
+
+    // Initialize scene 2 with transform
+    scene2Reset();
+  </script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Alignment 交互式演示</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --border: #dee2e6;
+      --text: #212529;
+      --muted: #6c757d;
+      --accent: #4a90d9;
+      --accent2: #56b67e;
+      --danger: #e05252;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .demo-header {
+      padding: 12px 16px;
+      background: #f1f3f5;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .demo-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .demo-badge {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .badge-flex { background: #dbeafe; color: #1d4ed8; }
+    .badge-grid { background: #dcfce7; color: #15803d; }
+    .badge-block { background: #fef3c7; color: #b45309; }
+    .demo-body { padding: 16px; }
+    .demo-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .ctrl-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      width: 100%;
+      margin-bottom: 2px;
+    }
+    .controls button {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .controls button:hover { background: #e9ecef; }
+    .controls button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .stage {
+      background: #f8f9fa;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      position: relative;
+    }
+    /* Flex stage */
+    .stage-flex {
+      display: flex;
+      height: 120px;
+      padding: 8px;
+      gap: 6px;
+    }
+    .stage-flex .item {
+      width: 52px;
+      min-height: 52px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      font-weight: 600;
+    }
+    .stage-flex .item:nth-child(1) { background: #4a90d9; height: 52px; }
+    .stage-flex .item:nth-child(2) { background: #56b67e; height: 68px; }
+    .stage-flex .item:nth-child(3) { background: #e05252; height: 44px; }
+    .stage-flex .item:nth-child(4) { background: #f59e0b; height: 60px; }
+    /* Grid stage */
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 52px);
+      gap: 6px;
+      padding: 8px;
+    }
+    .stage-grid .item {
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      font-weight: 600;
+    }
+    .stage-grid .item:nth-child(1) { background: #4a90d9; }
+    .stage-grid .item:nth-child(2) { background: #56b67e; }
+    .stage-grid .item:nth-child(3) { background: #e05252; }
+    .stage-grid .item:nth-child(4) { background: #f59e0b; }
+    .stage-grid .item:nth-child(5) { background: #8b5cf6; }
+    .stage-grid .item:nth-child(6) { background: #06b6d4; }
+    /* Block stage */
+    .stage-block {
+      padding: 8px;
+      min-height: 120px;
+      position: relative;
+    }
+    .stage-block .block-item {
+      width: 80px;
+      height: 60px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      font-weight: 600;
+      background: #4a90d9;
+    }
+    /* Baseline demo */
+    .stage-baseline {
+      display: flex;
+      align-items: baseline;
+      height: 120px;
+      padding: 8px;
+      gap: 8px;
+    }
+    .stage-baseline .item {
+      width: 52px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      font-weight: 600;
+    }
+    .stage-baseline .item:nth-child(1) { background: #4a90d9; height: 40px; font-size: 1rem; }
+    .stage-baseline .item:nth-child(2) { background: #56b67e; height: 65px; font-size: 0.65rem; }
+    .stage-baseline .item:nth-child(3) { background: #e05252; height: 50px; font-size: 0.9rem; }
+    /* Section titles inside demos */
+    .axis-label {
+      position: absolute;
+      font-size: 0.65rem;
+      color: var(--muted);
+      background: var(--surface);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .axis-main { bottom: 2px; right: 4px; }
+    .axis-cross { top: 2px; left: 4px; }
+    /* gap demo */
+    .stage-gap {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 8px;
+      gap: 6px;
+    }
+    .stage-gap .item {
+      width: 52px;
+      height: 52px;
+      border-radius: 5px;
+      background: #4a90d9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      font-weight: 600;
+    }
+    /* reference section */
+    .ref-section {
+      max-width: 1200px;
+      margin: 32px auto 0;
+    }
+    .ref-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+    }
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .ref-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f1f3f5;
+      border: 1px solid var(--border);
+    }
+    .ref-table td {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+    }
+    .ref-table tr:nth-child(even) td { background: #fafafa; }
+    .tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+    .tag-flex { background: #dbeafe; color: #1d4ed8; }
+    .tag-grid { background: #dcfce7; color: #15803d; }
+    .tag-block { background: #fef3c7; color: #b45309; }
+    .tag-all { background: #ede9fe; color: #6d28d9; }
+  </style>
+</head>
+<body>
+
+<h1>CSS Box Alignment 交互式演示</h1>
+<p class="subtitle">Flexbox · Grid · Block 统一对齐规范 | 点击按钮切换对齐方式</p>
+
+<div class="demo-grid">
+
+  <!-- Flexbox: justify-content -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-flex">Flexbox</span>
+      <span class="demo-title">justify-content（主轴对齐）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">控制 flex 项在主轴方向（水平）的分布方式。</p>
+      <div class="controls" id="jc-controls">
+        <span class="ctrl-label">justify-content:</span>
+        <button data-val="flex-start" class="active">flex-start</button>
+        <button data-val="flex-end">flex-end</button>
+        <button data-val="center">center</button>
+        <button data-val="space-between">space-between</button>
+        <button data-val="space-around">space-around</button>
+        <button data-val="space-evenly">space-evenly</button>
+      </div>
+      <div class="stage stage-flex" id="jc-stage" style="justify-content:flex-start">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flexbox: align-items -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-flex">Flexbox</span>
+      <span class="demo-title">align-items（交叉轴对齐）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">控制 flex 项在交叉轴方向（垂直）的对齐。高度不同的项目演示效果。</p>
+      <div class="controls" id="ai-controls">
+        <span class="ctrl-label">align-items:</span>
+        <button data-val="stretch" class="active">stretch</button>
+        <button data-val="flex-start">flex-start</button>
+        <button data-val="flex-end">flex-end</button>
+        <button data-val="center">center</button>
+        <button data-val="baseline">baseline</button>
+      </div>
+      <div class="stage stage-flex" id="ai-stage" style="align-items:stretch">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flexbox: align-content -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-flex">Flexbox</span>
+      <span class="demo-title">align-content（多行整体对齐）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">多行内容在交叉轴上的整体对齐（需 flex-wrap: wrap）。</p>
+      <div class="controls" id="ac-controls">
+        <span class="ctrl-label">align-content:</span>
+        <button data-val="stretch" class="active">stretch</button>
+        <button data-val="flex-start">flex-start</button>
+        <button data-val="flex-end">flex-end</button>
+        <button data-val="center">center</button>
+        <button data-val="space-between">space-between</button>
+        <button data-val="space-around">space-around</button>
+      </div>
+      <div class="stage stage-flex" id="ac-stage" style="flex-wrap:wrap;align-content:stretch;height:150px">
+        <div class="item" style="width:52px;height:52px">1</div>
+        <div class="item" style="width:52px;height:52px">2</div>
+        <div class="item" style="width:52px;height:52px">3</div>
+        <div class="item" style="width:52px;height:52px">4</div>
+        <div class="item" style="width:52px;height:52px">5</div>
+        <div class="item" style="width:52px;height:52px">6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid: justify-items + align-items -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-grid">Grid</span>
+      <span class="demo-title">justify-items / align-items</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">容器级别：所有网格项的默认对齐方式。</p>
+      <div class="controls" id="ji-controls">
+        <span class="ctrl-label">justify-items:</span>
+        <button data-val="stretch" class="active">stretch</button>
+        <button data-val="start">start</button>
+        <button data-val="end">end</button>
+        <button data-val="center">center</button>
+      </div>
+      <div class="controls" id="gai-controls">
+        <span class="ctrl-label">align-items:</span>
+        <button data-val="stretch" class="active">stretch</button>
+        <button data-val="start">start</button>
+        <button data-val="end">end</button>
+        <button data-val="center">center</button>
+      </div>
+      <div class="stage stage-grid" id="ji-stage" style="justify-items:stretch;align-items:stretch">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+        <div class="item">5</div>
+        <div class="item">6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid: justify-self / align-self -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-grid">Grid</span>
+      <span class="demo-title">justify-self / align-self（单个项）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">单个网格项覆盖容器默认对齐。高亮项（#3）独立设置对齐。</p>
+      <div class="controls" id="gs-controls">
+        <span class="ctrl-label">item #3 justify-self:</span>
+        <button data-val="auto" class="active">auto</button>
+        <button data-val="start">start</button>
+        <button data-val="end">end</button>
+        <button data-val="center">center</button>
+        <button data-val="stretch">stretch</button>
+      </div>
+      <div class="controls" id="gas-controls">
+        <span class="ctrl-label">item #3 align-self:</span>
+        <button data-val="auto" class="active">auto</button>
+        <button data-val="start">start</button>
+        <button data-val="end">end</button>
+        <button data-val="center">center</button>
+        <button data-val="stretch">stretch</button>
+      </div>
+      <div class="stage stage-grid" id="gs-stage">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item" id="gs-target">3</div>
+        <div class="item">4</div>
+        <div class="item">5</div>
+        <div class="item">6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Baseline alignment -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-flex">Flexbox</span>
+      <span class="demo-title">align-items: baseline</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">不同高度的 flex 项按文本基线对齐，字体大小不同也能底部对齐。</p>
+      <div class="controls" id="bl-controls">
+        <span class="ctrl-label">align-items:</span>
+        <button data-val="baseline" class="active">baseline</button>
+        <button data-val="stretch">stretch</button>
+        <button data-val="flex-start">flex-start</button>
+        <button data-val="center">center</button>
+      </div>
+      <div class="stage stage-flex stage-baseline" id="bl-stage" style="align-items:baseline">
+        <div class="item">大字A</div>
+        <div class="item">中文字</div>
+        <div class="item">Sm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- gap -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-grid">通用</span>
+      <span class="demo-title">gap（间距）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">在 Flexbox 和 Grid 中设置元素之间的固定间距。</p>
+      <div class="controls" id="gap-controls">
+        <span class="ctrl-label">gap:</span>
+        <button data-val="6px" class="active">6px</button>
+        <button data-val="16px">16px</button>
+        <button data-val="30px">30px</button>
+        <button data-val="6px 30px">row col</button>
+      </div>
+      <div class="stage stage-flex stage-gap" id="gap-stage" style="flex-wrap:wrap;gap:6px">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+        <div class="item">5</div>
+        <div class="item">6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- place-items shorthand -->
+  <div class="demo-card">
+    <div class="demo-header">
+      <span class="demo-badge badge-grid">Grid</span>
+      <span class="demo-title">place-items（简写）</span>
+    </div>
+    <div class="demo-body">
+      <p class="demo-desc">place-items 是 align-items + justify-items 的简写。<code style="font-size:0.72rem">place-items: &lt;align&gt; &lt;justify&gt;</code></p>
+      <div class="controls" id="pi-controls">
+        <span class="ctrl-label">place-items:</span>
+        <button data-val="stretch stretch" class="active">stretch stretch</button>
+        <button data-val="center center">center center</button>
+        <button data-val="start end">start end</button>
+        <button data-val="center stretch">center stretch</button>
+      </div>
+      <div class="stage stage-grid" id="pi-stage" style="place-items:stretch stretch">
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+        <div class="item">5</div>
+        <div class="item">6</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Reference Table -->
+<div class="ref-section">
+  <h2 class="ref-title">属性参考总表</h2>
+  <table class="ref-table">
+    <thead>
+      <tr>
+        <th>属性</th>
+        <th>作用对象</th>
+        <th>方向</th>
+        <th>适用布局</th>
+        <th>说明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>justify-content</code></td>
+        <td>容器</td>
+        <td>主轴</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>主轴对齐方式</td>
+      </tr>
+      <tr>
+        <td><code>align-items</code></td>
+        <td>容器</td>
+        <td>交叉轴</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>交叉轴对齐方式</td>
+      </tr>
+      <tr>
+        <td><code>align-content</code></td>
+        <td>容器</td>
+        <td>交叉轴（多行）</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>多行/多列整体对齐</td>
+      </tr>
+      <tr>
+        <td><code>justify-items</code></td>
+        <td>容器</td>
+        <td>主轴</td>
+        <td><span class="tag tag-grid">Grid</span></td>
+        <td>网格项默认主轴对齐</td>
+      </tr>
+      <tr>
+        <td><code>justify-self</code></td>
+        <td>元素</td>
+        <td>主轴</td>
+        <td><span class="tag tag-block">Block</span> <span class="tag tag-grid">Grid</span></td>
+        <td>自身主轴对齐</td>
+      </tr>
+      <tr>
+        <td><code>align-self</code></td>
+        <td>元素</td>
+        <td>交叉轴</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-block">Block</span> <span class="tag tag-grid">Grid</span></td>
+        <td>自身交叉轴对齐</td>
+      </tr>
+      <tr>
+        <td><code>place-items</code></td>
+        <td>容器</td>
+        <td>两轴</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>align-items + justify-items 简写</td>
+      </tr>
+      <tr>
+        <td><code>place-self</code></td>
+        <td>元素</td>
+        <td>两轴</td>
+        <td><span class="tag tag-block">Block</span> <span class="tag tag-grid">Grid</span></td>
+        <td>align-self + justify-self 简写</td>
+      </tr>
+      <tr>
+        <td><code>place-content</code></td>
+        <td>容器</td>
+        <td>两轴</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>align-content + justify-content 简写</td>
+      </tr>
+      <tr>
+        <td><code>gap</code></td>
+        <td>容器</td>
+        <td>间距</td>
+        <td><span class="tag tag-flex">Flex</span> <span class="tag tag-grid">Grid</span></td>
+        <td>元素间固定间距</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Helper: set active button in a group
+  function setupControl(groupId, cssProp, stageId, isSelf) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    const stage = document.getElementById(stageId);
+
+    group.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const val = btn.dataset.val;
+
+        if (isSelf) {
+          stage.style.cssText += '; justify-self:' + val + '; align-self:' + val;
+        } else {
+          stage.style[cssProp] = val;
+        }
+      });
+    });
+  }
+
+  // Setup all demos
+  setupControl('jc-controls', 'justifyContent', 'jc-stage');
+  setupControl('ai-controls', 'alignItems', 'ai-stage');
+
+  // align-content needs flex-wrap
+  document.getElementById('ac-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('ac-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ac-stage').style.alignContent = btn.dataset.val;
+    });
+  });
+
+  // Grid justify-items + align-items
+  const jiStage = document.getElementById('ji-stage');
+  const jiBtnGroup = document.getElementById('ji-controls');
+  const gaiBtnGroup = document.getElementById('gai-controls');
+
+  function updateJiAi() {
+    const ji = jiBtnGroup.querySelector('.active').dataset.val;
+    const gai = gaiBtnGroup.querySelector('.active').dataset.val;
+    jiStage.style.justifyItems = ji;
+    jiStage.style.alignItems = gai;
+  }
+  jiBtnGroup.querySelectorAll('button').forEach(b => b.onclick = updateJiAi);
+  gaiBtnGroup.querySelectorAll('button').forEach(b => b.onclick = updateJiAi);
+
+  // Grid self
+  const gsTarget = document.getElementById('gs-target');
+  document.getElementById('gs-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('gs-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      gsTarget.style.justifySelf = btn.dataset.val;
+    });
+  });
+  document.getElementById('gas-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('gas-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      gsTarget.style.alignSelf = btn.dataset.val;
+    });
+  });
+
+  // Baseline
+  document.getElementById('bl-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('bl-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('bl-stage').style.alignItems = btn.dataset.val;
+    });
+  });
+
+  // gap
+  document.getElementById('gap-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('gap-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.val;
+      const gapStage = document.getElementById('gap-stage');
+      if (val.includes(' ')) {
+        const [r, c] = val.split(' ');
+        gapStage.style.gap = r + ' ' + c;
+      } else {
+        gapStage.style.gap = val;
+      }
+    });
+  });
+
+  // place-items
+  document.getElementById('pi-controls').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('pi-controls').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('pi-stage').style.placeItems = btn.dataset.val;
+    });
+  });
+</script>
+</body>
+</html>
