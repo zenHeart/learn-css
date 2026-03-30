@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Scroll 滚动交互演示</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+
+  /* Tab 导航 */
+  .tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-nav { scrollbar-width: none; -ms-overflow-style: none; }
+
+  .tab-btn {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn:hover { color: #eee; background: rgba(255,255,255,0.05); }
+  .tab-btn.active { color: #00d9ff; border-bottom-color: #00d9ff; }
+
+  /* Tab 内容区 */
+  .tab-content { display: none; padding: 24px 20px 60px; max-width: 900px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  h2 { font-size: 1.4rem; margin-bottom: 16px; color: #fff; }
+  h3 { font-size: 1.05rem; margin: 24px 0 10px; color: #00d9ff; }
+  p { color: #aaa; line-height: 1.7; margin-bottom: 10px; }
+
+  /* Demo 盒子通用样式 */
+  .demo-box {
+    background: #111128;
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .demo-label {
+    font-size: 0.78rem;
+    color: #666;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .demo-inner {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* 滚动演示容器 */
+  .scroll-demo {
+    height: 120px;
+    width: 100%;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    color: #aaa;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    overflow: auto;
+  }
+
+  .scroll-x-demo {
+    height: 80px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    scrollbar-width: none;
+  }
+  .scroll-x-demo::-webkit-scrollbar { display: none; }
+  .scroll-x-item {
+    display: inline-block;
+    width: 120px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 6px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  /* 代码块 */
+  .code-block {
+    background: #0d0d1a;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 0.8rem;
+    color: #a0d8ef;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    line-height: 1.6;
+    white-space: pre;
+  }
+
+  /* 操作按钮 */
+  .action-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+  }
+  .action-btn:hover { opacity: 0.85; }
+
+  /* 滚动条样式（仅 WebKit） */
+  .custom-scrollbar-demo {
+    overflow: auto;
+    height: 120px;
+  }
+  .custom-scrollbar-demo::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar-demo::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 3px; }
+  .custom-scrollbar-demo::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+  .custom-scrollbar-demo::-webkit-scrollbar-thumb:hover { background: #764ba2; }
+
+  /* 隐藏滚动条演示 */
+  .hide-scrollbar-demo {
+    overflow: auto;
+    height: 120px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar-demo::-webkit-scrollbar { display: none; }
+
+  /* scroll-snap 演示 */
+  .snap-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .snap-carousel::-webkit-scrollbar { display: none; }
+  .snap-card {
+    flex: 0 0 75%;
+    height: 140px;
+    scroll-snap-align: start;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #fff;
+  }
+  .snap-card:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .snap-card:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .snap-card:nth-child(3) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .snap-card:nth-child(4) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .snap-card:nth-child(5) { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+  .snap-vertical {
+    height: 280px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    scrollbar-width: none;
+  }
+  .snap-vertical::-webkit-scrollbar { display: none; }
+  .snap-section {
+    height: 280px;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  /* 平滑滚动演示 */
+  html { scroll-behavior: auto; }
+  .smooth-demo {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .smooth-demo a {
+    padding: 8px 16px;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #00d9ff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: background 0.2s;
+  }
+  .smooth-demo a:hover { background: #2a2a4a; }
+  .smooth-target {
+    height: 180px;
+    background: #111128;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+
+  /* 说明文字 */
+  .note {
+    background: #1a2a1a;
+    border-left: 3px solid #43e97b;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    color: #7ecf7e;
+    margin-bottom: 16px;
+  }
+  .note.warn {
+    background: #2a2a1a;
+    border-left-color: #fee140;
+    color: #fee140;
+  }
+
+  /* snap-type 选择器 */
+  .snap-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .snap-type-btn {
+    padding: 9px 12px;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #aaa;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .snap-type-btn:hover { border-color: #667eea; color: #fff; }
+  .snap-type-btn.active {
+    border-color: #667eea;
+    background: #1a1a3a;
+    color: #00d9ff;
+  }
+
+  /* 移动端 badge */
+  .mobile-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #764ba2;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: #fff;
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Tab 导航 -->
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="overflow">overflow 属性</button>
+  <button class="tab-btn" data-tab="overflow-xy">overflow-x/y</button>
+  <button class="tab-btn" data-tab="scroll-behavior">scroll-behavior</button>
+  <button class="tab-btn" data-tab="mobile">移动端优化</button>
+  <button class="tab-btn" data-tab="scroll-snap">scroll-snap</button>
+  <button class="tab-btn" data-tab="hide-scrollbar">隐藏滚动条</button>
+  <button class="tab-btn" data-tab="pits">踩坑点</button>
+</div>
+
+<!-- ========== Tab 1: overflow ========== -->
+<div class="tab-content active" id="tab-overflow">
+  <h2>CSS overflow 属性详解</h2>
+  <p>overflow 控制内容溢出元素盒子时的显示行为。下方演示展示 5 种不同的取值效果。</p>
+
+  <h3>overflow: visible（默认）</h3>
+  <p>内容会溢出到容器外部显示。这是新手最容易踩的坑——忘记给容器加 overflow，内容就直接"漏"出去了。</p>
+  <div class="demo-box">
+    <div class="demo-label">overflow: visible — 内容溢出显示</div>
+    <div style="height: 90px; overflow: visible; color: #666; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 12px; font-size: 0.85rem; line-height: 1.7;">
+      这是一段很长的文本，它会直接溢出容器边界。容器高度只有 90px，但这里有大量文字...看，内容跑到边框外面去了！
+    </div>
+  </div>
+
+  <h3>overflow: hidden</h3>
+  <p>溢出内容被裁剪隐藏，不显示滚动条。但注意：JS 仍然可以通过 scrollTop 滚动内容。</p>
+  <div class="demo-box">
+    <div class="demo-label">overflow: hidden — 溢出内容被裁剪</div>
+    <div class="scroll-demo" style="overflow: hidden;">
+      这是一段很长的文本内容，它会被裁剪在容器内部。你看不到这些超出高度的文字。它们被无情的裁剪掉了，连滚动条都没有。
+      更多内容填充...
+      尾部内容
+    </div>
+  </div>
+
+  <h3>overflow: scroll</h3>
+  <p><strong>始终</strong>显示滚动条，即使内容没有溢出。这适合需要始终提示用户这里可以滚动的场景。</p>
+  <div class="demo-box">
+    <div class="demo-label">overflow: scroll — 始终显示滚动条</div>
+    <div class="scroll-demo" style="overflow: scroll;">
+      <p style="color: #888; font-size: 0.8rem;">这是足够多的内容让容器产生滚动。继续添加更多文字使容器高度被撑开产生溢出效果，用户才能看到滚动条。</p>
+    </div>
+  </div>
+
+  <h3>overflow: auto</h3>
+  <p><strong>按需显示</strong>滚动条——内容溢出才显示，不溢出就不显示。日常开发最常用的值。</p>
+  <div class="demo-box">
+    <div class="demo-label">overflow: auto — 内容溢出才显示滚动条</div>
+    <div class="scroll-demo">
+      <p style="color: #888; font-size: 0.8rem;">这是足够多的内容让容器产生滚动...继续添加更多文字使容器高度被撑开产生溢出效果，用户才能看到滚动条。</p>
+    </div>
+  </div>
+
+  <h3>overflow: clip vs hidden</h3>
+  <p>clip 是 hidden 的严格版本——连编程方式的滚动都不允许。点击按钮尝试用 JS 强制滚动，可以看到 hidden 容器会滚动，而 clip 容器不会。</p>
+  <div class="demo-box">
+    <div class="demo-label">overflow: clip vs hidden — clip 完全禁止滚动</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <div class="demo-label" style="color:#43e97b">overflow: hidden — 可滚动</div>
+        <div id="hidden-clip-box" style="height: 90px; overflow: hidden; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 10px; font-size: 0.8rem; color: #aaa; line-height: 1.6;">
+          <span style="display:inline-block; padding:2px 7px; background:#667eea; border-radius:4px; color:#fff; font-size:0.72rem; margin-bottom:6px;">可滚动</span><br>
+          点击下方按钮，JS 可以滚动这里的内容。
+          <br>第2行<br>第3行<br>第4行<br>第5行<br>第6行
+        </div>
+        <button class="action-btn" onclick="forceScroll('hidden')">JS 强制滚动 →</button>
+      </div>
+      <div>
+        <div class="demo-label" style="color:#f5576c">overflow: clip — 不可滚动</div>
+        <div id="clip-clip-box" style="height: 90px; overflow: clip; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 10px; font-size: 0.8rem; color: #aaa; line-height: 1.6;">
+          <span style="display:inline-block; padding:2px 7px; background:#764ba2; border-radius:4px; color:#fff; font-size:0.72rem; margin-bottom:6px;">不可滚动</span><br>
+          点击下方按钮，JS 滚动无效。
+          <br>第2行<br>第3行<br>第4行<br>第5行<br>第6行
+        </div>
+        <button class="action-btn" onclick="forceScroll('clip')">JS 强制滚动 →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    💡 提示：在 Chrome DevTools 中更改 overflow 值，观察元素盒子模型的变化。
+  </div>
+</div>
+
+<!-- ========== Tab 2: overflow-x / overflow-y ========== -->
+<div class="tab-content" id="tab-overflow-xy">
+  <h2>overflow-x 和 overflow-y 分别控制</h2>
+  <p>这两个属性允许独立控制水平方向和垂直方向的溢出行为。</p>
+
+  <h3>水平溢出容器（横向滚动）</h3>
+  <p>设置 overflow-x: auto + overflow-y: hidden + white-space: nowrap 可以创建水平滚动容器。</p>
+  <div class="demo-box">
+    <div class="demo-label">水平滚动 — overflow-x: auto + white-space: nowrap</div>
+    <div class="scroll-x-demo">
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+      <div class="scroll-x-item"></div>
+    </div>
+  </div>
+
+  <h3>组合策略</h3>
+  <div class="demo-box">
+    <div class="demo-label">overflow-x: hidden; overflow-y: auto — 垂直溢出</div>
+    <div class="scroll-demo" style="overflow-x: hidden; overflow-y: auto;">
+      <p style="color: #888; font-size: 0.8rem;">
+        垂直方向可以滚动查看更多内容。
+        <br>第1行内容<br>第2行内容<br>第3行内容<br>第4行内容<br>第5行内容<br>第6行内容<br>第7行内容<br>第8行内容<br>第9行内容<br>第10行内容
+      </p>
+    </div>
+  </div>
+
+  <div class="code-block">/* 常用组合：水平溢出容器 */
+.scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 常用组合：垂直溢出容器 */
+.scroll-y {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* 陷阱：同时 hidden 会导致内容完全不可见 */
+.bad-example {
+  overflow-x: hidden;
+  overflow-y: hidden; /* ⚠️ 内容完全无法滚动查看 */
+}</div>
+
+  <div class="note">
+    💡 提示：同时设置 overflow-x: visible 和 overflow-y: 非 visible 时，浏览器会将 visible 重置为 auto。
+  </div>
+</div>
+
+<!-- ========== Tab 3: scroll-behavior ========== -->
+<div class="tab-content" id="tab-scroll-behavior">
+  <h2>scroll-behavior 平滑滚动</h2>
+  <p>scroll-behavior 控制用户点击锚链接或 JS 触发滚动时的过渡效果。</p>
+
+  <h3>平滑滚动演示</h3>
+  <p>点击下方按钮/链接，观察页面平滑滚动到目标位置（而不是瞬间跳转）。</p>
+
+  <div class="demo-box">
+    <div class="demo-label">scroll-behavior: smooth — 锚点跳转演示</div>
+    <div class="smooth-demo">
+      <a href="#smooth-target">跳转到区块1</a>
+      <a href="#smooth-target2">跳转到区块2</a>
+      <button class="action-btn" onclick="smoothScrollTop()">滚动到顶部</button>
+    </div>
+  </div>
+
+  <div id="smooth-target" class="smooth-target" style="scroll-margin-top:80px;">区块 1</div>
+  <div style="height: 260px;"></div>
+  <div id="smooth-target2" class="smooth-target" style="scroll-margin-top:80px;">区块 2</div>
+
+  <h3>代码示例</h3>
+  <div class="code-block">/* 全局启用平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 仅在特定容器内启用 */
+.container {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* JS 触发平滑滚动 */
+window.scrollTo({
+  top: 0,
+  behavior: 'smooth'
+});</div>
+
+  <div class="note">
+    💡 注意：频繁使用平滑滚动可能影响性能。如果页面有大量锚点，建议只在需要的局部容器上启用 smooth，而不是全局。
+  </div>
+</div>
+
+<!-- ========== Tab 4: 移动端优化 ========== -->
+<div class="tab-content" id="tab-mobile">
+  <h2>移动端滚动性能优化</h2>
+  <p>移动端（尤其 iOS）的滚动体验与桌面端有很大不同，需要针对性优化。</p>
+
+  <h3>-webkit-overflow-scrolling<span class="mobile-badge">私有属性</span></h3>
+  <p class="note warn">
+    ⚠️ 这是 WebKit 私有属性。在 iOS 13+ 中，浏览器默认行为已足够好，但在兼容旧版 iOS（&lt; 13）和特定场景时仍需要。
+  </p>
+  <div class="code-block">.scroll-container {
+  overflow: auto;
+  /* 启用 iOS 惯性滚动，手指离开后会有减速效果 */
+  -webkit-overflow-scrolling: touch;
+}</div>
+
+  <h3>scroll-snap 滚动吸附<span class="mobile-badge">核心用法</span></h3>
+  <p>scroll-snap 让滚动结束后自动吸附到指定位置，常用于轮播图、宫格滑动等场景。</p>
+
+  <div class="demo-box">
+    <div class="demo-label">水平轮播（scroll-snap-type: x mandatory）</div>
+    <div class="snap-carousel" id="snapCarousel">
+      <div class="snap-card">卡片 1</div>
+      <div class="snap-card">卡片 2</div>
+      <div class="snap-card">卡片 3</div>
+      <div class="snap-card">卡片 4</div>
+      <div class="snap-card">卡片 5</div>
+    </div>
+  </div>
+
+  <h3>scroll-snap-type 选择</h3>
+  <div class="snap-type-grid">
+    <div class="snap-type-btn active" onclick="setSnapType(this, 'x mandatory')">x mandatory</div>
+    <div class="snap-type-btn" onclick="setSnapType(this, 'x proximity')">x proximity</div>
+    <div class="snap-type-btn" onclick="setSnapType(this, 'y mandatory')">y mandatory</div>
+    <div class="snap-type-btn" onclick="setSnapType(this, 'y proximity')">y proximity</div>
+  </div>
+  <div class="note">mandatory = 滚动结束后必须吸附；proximity = 接近时吸附（浏览器判断）</div>
+
+  <h3>overscroll-behavior 防止滚动链</h3>
+  <p>当滚动到达边界时，滚动行为会传递给父元素（滚动链）。使用 overscroll-behavior 可以阻止这一行为。</p>
+  <div class="code-block">/* 阻止滚动链传递到父元素 */
+.modal-content {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* 完全阻止，包括橡皮筋效果 */
+.modal-content {
+  overflow: auto;
+  overscroll-behavior: none;
+}</div>
+  <div class="note">
+    💡 实际体验：在弹窗中使用 contain 可以让用户在弹窗内自由滚动，滚动到底部不会触发页面滚动。
+  </div>
+
+  <h3>垂直滚动吸附（分屏切换）</h3>
+  <div class="demo-box">
+    <div class="demo-label">垂直滚动 — scroll-snap-type: y mandatory</div>
+    <div class="snap-vertical" id="snapVertical">
+      <div class="snap-section" style="background: linear-gradient(135deg, #667eea, #764ba2);">第 1 屏</div>
+      <div class="snap-section" style="background: linear-gradient(135deg, #f093fb, #f5576c);">第 2 屏</div>
+      <div class="snap-section" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">第 3 屏</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Tab 5: scroll-snap ========== -->
+<div class="tab-content" id="tab-scroll-snap">
+  <h2>scroll-snap 完整指南</h2>
+  <p>scroll-snap 是 CSS Scroll Snap Level 2 规范的核心功能，让滚动有明确的吸附点。</p>
+
+  <h3>核心属性</h3>
+  <div class="code-block">/* 父容器：定义吸附类型 */
+.scroll-container {
+  /* mandatory = 强制吸附；proximity = 接近时吸附 */
+  scroll-snap-type: x mandatory;   /* 水平 */
+  scroll-snap-type: y mandatory;   /* 垂直 */
+  scroll-snap-type: both mandatory;
+}
+
+/* 子元素：定义吸附位置 */
+.snap-item {
+  /* start = 对齐起点；center = 居中；end = 对齐终点 */
+  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-align: end;
+}</div>
+
+  <h3>scroll-snap-align 对齐方式</h3>
+  <div class="demo-box">
+    <div class="demo-label">scroll-snap-align: start（子元素边缘对齐容器边缘）</div>
+    <div style="overflow-x:auto; scroll-snap-type:x mandatory; display:flex; gap:10px; padding-bottom:10px; scrollbar-width:none; -webkit-overflow-scrolling:touch;">
+      <div style="flex:0 0 60%; height:100px; scroll-snap-align:start; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">align: start</div>
+      <div style="flex:0 0 60%; height:100px; scroll-snap-align:start; background:linear-gradient(135deg,#f093fb,#f5576c); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">align: start</div>
+      <div style="flex:0 0 60%; height:100px; scroll-snap-align:start; background:linear-gradient(135deg,#4facfe,#00f2fe); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">align: start</div>
+    </div>
+  </div>
+
+  <h3>scroll-padding 调整吸附偏移</h3>
+  <p>默认吸附到容器边缘。通过 scroll-padding 可以调整吸附的目标位置（留出边距）。</p>
+  <div class="code-block">.snap-container {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* 吸附目标从容器边缘往内偏移 20px */
+  scroll-padding: 20px;
+}
+
+/* 也可以在子元素上单独设置 */
+.snap-item {
+  scroll-snap-align: start;
+  scroll-padding: 20px;
+}</div>
+
+  <h3>scroll-snap-stop 防止跳过</h3>
+  <p>scroll-snap-stop: always 确保滚动总是停在每个吸附点，不会跳过。</p>
+  <div class="code-block">.snap-item {
+  scroll-snap-align: start;
+  scroll-snap-stop: always; /* 禁止跳过吸附点 */
+}</div>
+
+  <h3>实用场景：图片画廊</h3>
+  <div class="demo-box">
+    <div class="demo-label">图片画廊（scroll-snap-align: center）</div>
+    <div style="overflow-x:auto; scroll-snap-type:x mandatory; display:flex; gap:10px; padding-bottom:10px; scrollbar-width:none; -webkit-overflow-scrolling:touch;">
+      <div style="flex:0 0 45%; height:100px; scroll-snap-align:center; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">图 1</div>
+      <div style="flex:0 0 45%; height:100px; scroll-snap-align:center; background:linear-gradient(135deg,#f093fb,#f5576c); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">图 2</div>
+      <div style="flex:0 0 45%; height:100px; scroll-snap-align:center; background:linear-gradient(135deg,#4facfe,#00f2fe); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">图 3</div>
+      <div style="flex:0 0 45%; height:100px; scroll-snap-align:center; background:linear-gradient(135deg,#43e97b,#38f9d7); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">图 4</div>
+      <div style="flex:0 0 45%; height:100px; scroll-snap-align:center; background:linear-gradient(135deg,#fa709a,#fee140); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold;">图 5</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Tab 6: 隐藏滚动条 ========== -->
+<div class="tab-content" id="tab-hide-scrollbar">
+  <h2>隐藏滚动条的各种方案</h2>
+  <p>有时候需要隐藏滚动条但保持滚动功能，比如自定义样式的滚动容器。</p>
+
+  <h3>方案一：伪元素遮罩（最常用）⭐</h3>
+  <p>通过 scrollbar-width（Firefox）、-ms-overflow-style（IE/旧 Edge）、::-webkit-scrollbar（Chrome/Safari）三管齐下隐藏滚动条。</p>
+  <div class="demo-box">
+    <div class="demo-label">隐藏滚动条 — scrollbar-width: none + ::-webkit-scrollbar { display: none }</div>
+    <div class="hide-scrollbar-demo">
+      <p style="color:#aaa; font-size:0.85rem; line-height:1.8;">这是一段足够长的内容，可以看到滚动功能正常，但滚动条被完全隐藏了。
+        <br>内容1<br>内容2<br>内容3<br>内容4<br>内容5<br>内容6<br>内容7<br>内容8<br>内容9<br>内容10
+      </p>
+    </div>
+  </div>
+  <div class="code-block">/* 完整兼容写法 */
+.scrollable {
+  overflow: auto;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE / 旧 Edge */
+}
+.scrollable::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari, Opera */
+}</div>
+
+  <h3>方案二：padding 撑开 + margin 偏移</h3>
+  <p>通过设置父容器宽度溢出，再在内部容器中把滚动条 padding 掉。</p>
+  <div class="demo-box">
+    <div class="demo-label">padding + margin 偏移法</div>
+    <div style="width:calc(100% + 20px); overflow:hidden;">
+      <div style="overflow-x:auto; overflow-y:hidden; margin-bottom:-20px; padding-bottom:20px; white-space:nowrap; scrollbar-width:none; -webkit-overflow-scrolling:touch;">
+        <span style="display:inline-block; width:150px; height:50px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:6px; margin-right:10px;"></span>
+        <span style="display:inline-block; width:150px; height:50px; background:linear-gradient(135deg,#f093fb,#f5576c); border-radius:6px; margin-right:10px;"></span>
+        <span style="display:inline-block; width:150px; height:50px; background:linear-gradient(135deg,#4facfe,#00f2fe); border-radius:6px; margin-right:10px;"></span>
+        <span style="display:inline-block; width:150px; height:50px; background:linear-gradient(135deg,#43e97b,#38f9d7); border-radius:6px; margin-right:10px;"></span>
+        <span style="display:inline-block; width:150px; height:50px; background:linear-gradient(135deg,#fa709a,#fee140); border-radius:6px; margin-right:10px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <h3>方案三：自定义滚动条样式（美观）</h3>
+  <p>如果只是想让滚动条更美观，而不是完全隐藏，可以自定义样式。</p>
+  <div class="demo-box">
+    <div class="demo-label">自定义滚动条样式（仅 WebKit）</div>
+    <div class="custom-scrollbar-demo">
+      <p style="color:#aaa; font-size:0.85rem; line-height:1.8;">自定义滚动条样式演示：滚动条变细变紫。这个方案只是美化滚动条，不会隐藏它，适合需要提示用户可以滚动的场景。
+        <br>内容1<br>内容2<br>内容3<br>内容4<br>内容5<br>内容6<br>内容7<br>内容8<br>内容9<br>内容10
+      </p>
+    </div>
+  </div>
+  <div class="code-block">/* 自定义滚动条样式（Chrome/Safari/Edge） */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+/* Firefox 细滚动条 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f1f1f1;
+}</div>
+
+  <div class="note">
+    💡 建议：完全隐藏滚动条时，请确保内容足够明显让用户知道这里可以滚动（例如添加滚动提示文字或图标），避免用户不知道有更多内容。
+  </div>
+</div>
+
+<!-- ========== Tab 7: 踩坑点 ========== -->
+<div class="tab-content" id="tab-pits">
+  <h2>常见踩坑点</h2>
+  <p>以下是大家在实际开发中经常会遇到的问题和解决方案。</p>
+
+  <h3>坑1: overflow: visible 导致布局错乱</h3>
+  <p>父容器没有设置 overflow，内容溢出后会影响外部布局。</p>
+  <div class="demo-box">
+    <div class="demo-label">陷阱演示：float 元素溢出</div>
+    <div style="overflow: visible; border: 1px dashed #555; padding: 12px; border-radius: 8px; background: #1a1a2e; margin-bottom: 12px;">
+      <div style="float: right; width: 80px; height: 80px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; margin-left: 10px;"></div>
+      <div style="color: #888; font-size: 0.85rem;">float 元素由于 overflow: visible（默认）会直接溢出显示，父容器不会包裹它。这就是很多新手奇怪"父容器高度怎么塌了"的原因。</div>
+    </div>
+    <div class="note warn">⚠️ 解决方案：给父容器加 overflow: hidden/auto，或使用 BFC（display: flow-root）</div>
+  </div>
+
+  <h3>坑2: 移动端滚动卡顿</h3>
+  <p>iOS Safari 默认的滚动可能不够流畅。</p>
+  <div class="code-block">/* 移动端滚动优化完整方案 */
+.smooth-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
+  overscroll-behavior: contain;      /* 阻止滚动链 */
+  will-change: scroll;                /* 提示浏览器优化 */
+}</div>
+
+  <h3>坑3: overflow: hidden 阻止了 transform 动画</h3>
+  <p>overflow: hidden 会创建新的 BFC，可能影响内部使用 position: fixed 或 transform 的元素定位。</p>
+  <div class="note">💡 解决方案：使用 overflow: clip，或在动画元素上添加 will-change: transform</div>
+
+  <h3>坑4: 同时设置 overflow-x/y 导致冲突</h3>
+  <p>当 overflow-x: visible 和 overflow-y 为非 visible 值时，浏览器会将 visible 重置为 auto。</p>
+  <div class="code-block">/* 这种写法会被浏览器修正为 auto */
+.bad {
+  overflow-x: visible;
+  overflow-y: hidden;
+  /* 浏览器实际表现为: overflow-x: auto; overflow-y: hidden; */
+}
+
+/* 正确做法：明确设置期望的值 */
+.good {
+  overflow-x: auto;
+  overflow-y: hidden;
+}</div>
+
+  <h3>坑5: 隐藏滚动条后无法确认滚动位置</h3>
+  <p>用户看不到滚动条，不知道内容是否还有更多。</p>
+  <div class="demo-box">
+    <div class="demo-label">陷阱演示：滚动到底部没有视觉反馈</div>
+    <div class="hide-scrollbar-demo" style="height: 100px; margin-bottom: 8px;">
+      <p style="color: #888; font-size: 0.8rem;">隐藏滚动条后，用户不知道底部还有多少内容。
+        <br>行1<br>行2<br>行3<br>行4<br>行5<br>行6<br>行7<br>行8
+      </p>
+    </div>
+    <div class="note warn">⚠️ 建议：添加视觉提示（渐变遮罩、滚动指示图标、"滚动查看更多"文字）</div>
+  </div>
+
+  <h3>坑6: scroll-behavior: smooth 影响页面性能</h3>
+  <p>页面有大量锚点链接时，平滑滚动动画可能导致性能问题。</p>
+  <div class="note">💡 解决方案：只在需要的局部容器上启用 smooth，而不是全局启用 html</div>
+
+  <h3>坑7: overflow: auto 导致内容闪烁</h3>
+  <p>内容高度动态变化时，滚动条在显示/隐藏之间闪烁。</p>
+  <div class="code-block">/* 方案：统一使用 overflow: scroll + 细滚动条 */
+.stable-scroll {
+  overflow: scroll;
+  scrollbar-width: thin;     /* Firefox 细滚动条 */
+}
+/* 或自定义美化滚动条，让它始终存在但更美观 */</div>
+</div>
+
+</div><!-- /.tab-content wrapper -->
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // JS 强制滚动测试（overflow: hidden vs clip）
+  function forceScroll(type) {
+    var el = type === 'hidden'
+      ? document.getElementById('hidden-clip-box')
+      : document.getElementById('clip-clip-box');
+    el.scrollTop = 50;
+  }
+
+  // 平滑滚动到顶部
+  function smoothScrollTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // scroll-snap-type 切换
+  function setSnapType(btn, type) {
+    var carousel = document.getElementById('snapCarousel');
+    carousel.style.scrollSnapType = type;
+    document.querySelectorAll('.snap-type-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
