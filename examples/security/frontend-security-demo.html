@@ -1,0 +1,620 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鍓嶇瀹夊叏绛栫暐 - 浜や簰婕旂ず</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-area h3 { color: #667eea; margin-bottom: 12px; font-size: 1.1rem; }
+    .demo-area h4 { color: #888; margin: 16px 0 8px; font-size: 0.95rem; }
+    .demo-area p { color: #aaa; font-size: 0.9rem; margin-bottom: 12px; }
+    .code-block {
+      background: #0f0f1a;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      border: 1px solid #333;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #c0c0c0;
+    }
+    .code-block .comment { color: #5c6370; }
+    .code-block .keyword { color: #c678dd; }
+    .code-block .string { color: #98c379; }
+    .code-block .property { color: #61afef; }
+    .info-box {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .info-box h4 { color: #667eea; margin-bottom: 8px; }
+    .info-box p { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+    .info-box.warning { border-color: #f39c12; }
+    .info-box.warning h4 { color: #f39c12; }
+    .info-box.danger { border-color: #e06c75; }
+    .info-box.danger h4 { color: #e06c75; }
+    .info-box.tip { border-color: #2ecc71; }
+    .info-box.tip h4 { color: #2ecc71; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; }
+    th { color: #667eea; font-weight: 600; background: #0f0f1a; }
+    td { color: #aaa; }
+    tr:hover td { background: #1a1a2e; }
+    .demo-section { margin: 20px 0; }
+    .demo-label { font-size: 0.85rem; color: #667eea; margin-bottom: 8px; font-weight: 600; }
+    .demo-box {
+      background: #252540;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 60px;
+    }
+    input[type="text"], input[type="password"] {
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #667eea; }
+    button {
+      padding: 10px 20px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      margin: 4px;
+    }
+    button:hover { background: #333355; border-color: #667eea; }
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+    }
+    .attack-viz {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: #0f0f1a;
+      border-radius: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .attack-step {
+      padding: 8px 16px;
+      background: #1a1a2e;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #aaa;
+      border: 1px solid #333;
+    }
+    .attack-step.malicious { border-color: #e06c75; color: #e06c75; }
+    .attack-step.safe { border-color: #2ecc71; color: #2ecc71; }
+    .attack-arrow { color: #667eea; font-size: 1.2rem; }
+    .quiz-question {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .quiz-question h4 { color: #667eea; margin-bottom: 12px; }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-option:hover { border-color: #667eea; }
+    .quiz-option.correct { border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+    .quiz-option.wrong { border-color: #e06c75; background: rgba(224, 108, 117, 0.1); }
+    .quiz-result { margin-top: 12px; padding: 12px; border-radius: 6px; display: none; }
+    .quiz-result.show { display: block; }
+    .quiz-result.pass { background: rgba(46, 204, 113, 0.1); border: 1px solid #2ecc71; color: #2ecc71; }
+    .quiz-result.fail { background: rgba(224, 108, 117, 0.1); border: 1px solid #e06c75; color: #e06c75; }
+    .header-row {
+      display: flex;
+      gap: 12px;
+      padding: 10px 12px;
+      background: #252540;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    .header-name { color: #667eea; font-family: monospace; min-width: 200px; font-size: 0.85rem; }
+    .header-val { color: #98c379; font-family: monospace; font-size: 0.8rem; flex: 1; word-break: break-all; }
+    .csp-line { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+    .csp-tag { padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-family: monospace; background: #252540; border: 1px solid #444; }
+    .csp-tag.src { color: #61afef; }
+    .csp-tag.val { color: #98c379; }
+    .xss-output { min-height: 40px; color: #e0e0e0; word-break: break-all; }
+    .score-display { font-size: 1.2rem; font-weight: bold; color: #667eea; text-align: center; padding: 12px; }
+    @media (max-width: 768px) {
+      .tab-btn { padding: 8px 12px; font-size: 0.85rem; }
+      .attack-viz { flex-direction: column; }
+      .header-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <h1>馃洝锔?鍓嶇瀹夊叏绛栫暐浜や簰婕旂ず</h1>
+  <p class="subtitle">XSS 路 CSRF 路 CSP 路 瀹夊叏鍝嶅簲澶?路 鑷祴棰?/p>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview">馃摉 姒傚康鎬昏</button>
+    <button class="tab-btn" data-tab="xss">馃拤 XSS 鏀诲嚮婕旂ず</button>
+    <button class="tab-btn" data-tab="csrf">馃攧 CSRF 鍘熺悊</button>
+    <button class="tab-btn" data-tab="csp">馃敀 CSP 閰嶇疆</button>
+    <button class="tab-btn" data-tab="headers">馃搵 瀹夊叏澶?/button>
+    <button class="tab-btn" data-tab="quiz">馃摑 鑷祴棰?/button>
+  </div>
+
+  <!-- 姒傚康鎬昏 -->
+  <div id="tab-overview" class="tab-content active">
+    <div class="demo-area">
+      <h3>鍓嶇瀹夊叏涓夊ぇ鏍稿績濞佽儊</h3>
+      <p>浜嗚В杩欎笁绉嶆渶甯歌鐨勫墠绔畨鍏ㄦ敾鍑伙紝鏄瀯寤哄畨鍏?Web 搴旂敤鐨勭涓€姝ャ€?/p>
+      <table>
+        <tr><th>濞佽儊</th><th>绫诲瀷</th><th>鏍稿績鍘熺悊</th><th>闃插尽鍏抽敭</th></tr>
+        <tr><td><strong style="color:#e06c75">XSS</strong></td><td>浠ｇ爜娉ㄥ叆</td><td>鎭舵剰鑴氭湰娉ㄥ叆鍒伴〉闈腑鎵ц</td><td>杈撳叆杩囨护 + 杈撳嚭缂栫爜</td></tr>
+        <tr><td><strong style="color:#f39c12">CSRF</strong></td><td>璇锋眰浼€?/td><td>鍒╃敤鐢ㄦ埛鐧诲綍鎬佸彂璧锋伓鎰忚姹?/td><td>Token + SameSite Cookie</td></tr>
+        <tr><td><strong style="color:#667eea">CSP</strong></td><td>绛栫暐鎺у埗</td><td>鐧藉悕鍗曟帶鍒惰祫婧愬姞杞芥潵婧?/td><td>鍐呭瀹夊叏绛栫暐閰嶇疆</td></tr>
+      </table>
+    </div>
+    <div class="demo-area">
+      <h3>XSS 涓夌绫诲瀷瀵规瘮</h3>
+      <table>
+        <tr><th>绫诲瀷</th><th>瀛樺偍浣嶇疆</th><th>瑙﹀彂鏂瑰紡</th><th>鍗遍櫓绛夌骇</th></tr>
+        <tr><td>瀛樺偍鍨?/td><td>鏈嶅姟鍣ㄦ暟鎹簱</td><td>璁块棶椤甸潰鑷姩鎵ц</td><td style="color:#e06c75">猸愨瓙猸愨瓙猸?/td></tr>
+        <tr><td>鍙嶅皠鍨?/td><td>URL 鍙傛暟</td><td>鐐瑰嚮鎭舵剰閾炬帴</td><td style="color:#f39c12">猸愨瓙猸?/td></tr>
+        <tr><td>DOM 鍨?/td><td>瀹㈡埛绔?DOM</td><td>璁块棶鐗瑰畾椤甸潰</td><td style="color:#f39c12">猸愨瓙猸?/td></tr>
+      </table>
+    </div>
+    <div class="demo-area">
+      <h3>瀹夊叏闃插尽灞傛</h3>
+      <div class="attack-viz">
+        <div class="attack-step safe">馃毇 杈撳叆楠岃瘉</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step safe">馃攧 杈撳嚭缂栫爜</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step safe">馃敀 CSP 绛栫暐</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step safe">馃崻 HttpOnly Cookie</div>
+      </div>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;">绾垫繁闃插尽锛氭瘡涓€灞傞兘鍙兘闃绘鏀诲嚮锛屽灞傞槻鎶ゆ洿瀹夊叏</p>
+    </div>
+    <div class="info-box tip">
+      <h4>馃挕 鍏抽敭鍘熷垯</h4>
+      <p><strong>姘歌繙涓嶈淇′换鐢ㄦ埛杈撳叆</strong> 鈥?鎵€鏈夎緭鍏ラ兘搴旇瑙嗕负娼滃湪鎭舵剰<br><strong>杈撳嚭鏃惰浆涔?/strong> 鈥?鏍规嵁杈撳嚭浣嶇疆浣跨敤姝ｇ‘鐨勭紪鐮佹柟寮?br><strong>鏈€灏忔潈闄?/strong> 鈥?CSP 鐧藉悕鍗曞彧鍏佽蹇呰鐨勮祫婧?/p>
+    </div>
+  </div>
+
+  <!-- XSS 婕旂ず -->
+  <div id="tab-xss" class="tab-content">
+    <div class="demo-area">
+      <h3>XSS 鏀诲嚮鍘熺悊</h3>
+      <p>灏濊瘯鍦ㄤ笅鏂硅緭鍏ユ杈撳叆涓嶅悓鍐呭锛岃瀵熻緭鍑虹粨鏋滅殑鍖哄埆锛?/p>
+      <div class="demo-section">
+        <div class="demo-label">杈撳叆鍐呭锛堟ā鎷熺敤鎴锋彁浜わ級锛?/div>
+        <input type="text" id="xss-input" placeholder="杈撳叆浠绘剰鍐呭..." style="width:100%;max-width:400px;">
+        <div style="margin-top:12px;">
+          <button class="primary" onclick="demoXssInnerHTML()">鉂?innerHTML 娓叉煋锛堜笉瀹夊叏锛?/button>
+          <button class="primary" onclick="demoXssTextContent()">鉁?textContent 娓叉煋锛堝畨鍏級</button>
+        </div>
+      </div>
+      <div class="demo-section">
+        <div class="demo-label">鈿狅笍 innerHTML 杈撳嚭锛堝嵄闄╋級:</div>
+        <div class="demo-box"><div id="xss-output-html" class="xss-output">绛夊緟杈撳叆...</div></div>
+      </div>
+      <div class="demo-section">
+        <div class="demo-label">鉁?textContent 杈撳嚭锛堝畨鍏級:</div>
+        <div class="demo-box"><div id="xss-output-safe" class="xss-output">绛夊緟杈撳叆...</div></div>
+      </div>
+      <div class="info-box danger">
+        <h4>鈿狅笍 鏀诲嚮婕旂ず</h4>
+        <p>灏濊瘯杈撳叆浠ヤ笅鍐呭瑙傚療 XSS 鏀诲嚮锛?br>
+        <code style="color:#e06c75">&lt;script&gt;alert('XSS!')&lt;/script&gt;</code><br>
+        <code style="color:#e06c75">&lt;img src=x onerror="alert('XSS via img!')"&gt;</code><br>
+        <code style="color:#e06c75">&lt;svg onload="alert('XSS via SVG!')"&gt;</code><br>
+        <code style="color:#e06c75">&lt;a href="javascript:alert('XSS')"&gt;鐐瑰嚮鎴?lt;/a&gt;</code></p>
+      </div>
+    </div>
+    <div class="demo-area">
+      <h3>XSS 鏀诲嚮娴佺▼</h3>
+      <div class="attack-viz">
+        <div class="attack-step">1. 鏀诲嚮鑰呮彁浜ゆ伓鎰忚剼鏈?/div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">2. 鎭舵剰鑴氭湰瀛樺叆鏈嶅姟鍣?/div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">3. 鐢ㄦ埛璁块棶椤甸潰</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">4. 鑴氭湰鍦ㄦ祻瑙堝櫒鎵ц</div>
+      </div>
+    </div>
+    <div class="demo-area">
+      <h3>XSS 闃插尽鏂规</h3>
+      <div class="code-block"><span class="comment">// 1. HTML 杞箟鍑芥暟</span>
+<span class="keyword">const</span> <span class="property">escapeHtml</span> = (str) => {
+  <span class="keyword">return</span> str
+    .<span class="property">replace</span>(<span class="string">/&/g</span>, <span class="string">'&amp;'</span>)
+    .<span class="property">replace</span>(<span class="string">/&lt;/g</span>, <span class="string">'&lt;'</span>)
+    .<span class="property">replace</span>(<span class="string">/&gt;/g</span>, <span class="string">'&gt;'</span>)
+    .<span class="property">replace</span>(<span class="string">/"/g</span>, <span class="string">'&quot;'</span>)
+    .<span class="property">replace</span>(<span class="string">/'/g</span>, <span class="string">'&#039;'</span>);
+};
+
+<span class="comment">// 2. 瀹夊叏娓叉煋鏂瑰紡</span>
+<span class="comment">// 鉁?textContent锛堟案杩滀笉鎵ц鑴氭湰锛?/span>
+element.<span class="property">textContent</span> = userInput;
+
+<span class="comment">// 鉁?浣跨敤 DOMPurify 娓呯悊 HTML</span>
+<span class="keyword">import</span> DOMPurify <span class="keyword">from</span> <span class="string">'dompurify'</span>;
+element.<span class="property">innerHTML</span> = DOMPurify.<span class="property">sanitize</span>(dirty);
+
+<span class="comment">// 3. CSP 绛栫暐锛堥樆姝㈠唴鑱旇剼鏈墽琛岋級</span>
+<span class="comment">// Content-Security-Policy: script-src 'self'</span></div>
+    </div>
+  </div>
+
+  <!-- CSRF 婕旂ず -->
+  <div id="tab-csrf" class="tab-content">
+    <div class="demo-area">
+      <h3>CSRF 鏀诲嚮鍘熺悊</h3>
+      <p>鏀诲嚮鑰呭埄鐢ㄧ敤鎴峰凡鐧诲綍鐨勮韩浠斤紝璇卞鐢ㄦ埛鍚戠洰鏍囩綉绔欏彂璧锋伓鎰忚姹傘€?/p>
+      <div class="attack-viz">
+        <div class="attack-step">馃懁 鐢ㄦ埛鐧诲綍閾惰</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step">馃帲 璁块棶鎭舵剰缃戠珯</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">馃挵 鑷姩鍙戣捣杞处璇锋眰</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">鈿狅笍 娴忚鍣ㄦ惡甯?Cookie</div>
+        <span class="attack-arrow">鈫?/span>
+        <div class="attack-step malicious">馃捀 杞处鎴愬姛锛?/div>
+      </div>
+      <div class="info-box warning">
+        <h4>鈿?鍏抽敭鐐?/h4>
+        <p><strong>娴忚鍣ㄧ壒鎬э細</strong>璺ㄥ煙璇锋眰浼氳嚜鍔ㄦ惡甯︾洰鏍囩綉绔欑殑 Cookie锛?br><strong>鏀诲嚮鑰呮棤娉曪細</strong>璇诲彇鐩爣缃戠珯鐨勫搷搴斿唴瀹癸紙鍙楀悓婧愮瓥鐣ラ檺鍒讹級<br><strong>鏀诲嚮鑰呭彲浠ワ細</strong>浠ョ敤鎴疯韩浠借Е鍙戠姸鎬佸彉鏇存搷浣滐紙POST/PUT/DELETE锛?/p>
+      </div>
+    </div>
+    <div class="demo-area">
+      <h3>CSRF 鏀诲嚮浠ｇ爜绀轰緥</h3>
+      <div class="code-block"><span class="comment">&lt;!-- 鏂瑰紡1: 鑷姩鎻愪氦琛ㄥ崟 --&gt;</span>
+<span class="keyword">&lt;form</span> <span class="property">action</span>=<span class="string">"https://bank.com/transfer"</span> <span class="property">method</span>=<span class="string">"POST"</span> <span class="property">id</span>=<span class="string">"malicious"</span>&gt;
+  <span class="keyword">&lt;input</span> <span class="property">type</span>=<span class="string">"hidden"</span> <span class="property">name</span>=<span class="string">"to"</span> <span class="property">value</span>=<span class="string">"attacker"</span>&gt;
+  <span class="keyword">&lt;input</span> <span class="property">type</span>=<span class="string">"hidden"</span> <span class="property">name</span>=<span class="string">"amount"</span> <span class="property">value</span>=<span class="string">"10000"</span>&gt;
+<span class="keyword">&lt;/form&gt;</span>
+<span class="keyword">&lt;script&gt;</span>document.<span class="property">getElementById</span>(<span class="string">'malicious'</span>).<span class="property">submit</span>();<span class="keyword">&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- 鏂瑰紡2: 鍥剧墖 src 瑙﹀彂 GET 璇锋眰 --&gt;</span>
+<span class="keyword">&lt;img</span> <span class="property">src</span>=<span class="string">"https://mail.com/delete?folder=inbox"</span> <span class="property">width</span>=<span class="string">"0"</span> <span class="property">height</span>=<span class="string">"0"</span>&gt;
+
+<span class="comment">&lt;!-- 鏂瑰紡3: Fetch API锛堥渶璁剧疆 credentials锛?--&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  <span class="property">fetch</span>(<span class="string">'https://bank.com/transfer'</span>, {
+    <span class="property">method</span>: <span class="string">'POST'</span>,
+    <span class="property">credentials</span>: <span class="string">'include'</span>,
+    <span class="property">body</span>: JSON.<span class="property">stringify</span>({ <span class="property">to</span>: <span class="string">'attacker'</span>, <span class="property">amount</span>: <span class="string">'10000'</span> })
+  });
+<span class="keyword">&lt;/script&gt;</span></div>
+    </div>
+    <div class="demo-area">
+      <h3>CSRF 闃插尽鏂规</h3>
+      <h4>鏂规1: CSRF Token锛堟渶甯哥敤锛?/h4>
+      <div class="code-block"><span class="comment">// 鍚庣锛氱敓鎴?Token</span>
+<span class="keyword">const</span> generateCsrfToken = () => crypto.<span class="property">randomBytes</span>(<span class="string">32</span>).<span class="property">toString</span>(<span class="string">'hex'</span>);
+
+<span class="comment">// 鍓嶇锛氳〃鍗曚腑鍖呭惈 Token</span>
+<span class="keyword">&lt;form</span> <span class="property">action</span>=<span class="string">"/transfer"</span> <span class="property">method</span>=<span class="string">"POST"</span>&gt;
+  <span class="keyword">&lt;input</span> <span class="property">type</span>=<span class="string">"hidden"</span> <span class="property">name</span>=<span class="string">"_csrf"</span> <span class="property">value</span>=<span class="string">"&lt;%= csrfToken %&gt;"</span>&gt;
+  <span class="keyword">&lt;button&gt;</span>杞处<span class="keyword">&lt;/button&gt;</span>
+<span class="keyword">&lt;/form&gt;</span>
+
+<span class="comment">// 鍚庣锛氶獙璇?Token</span>
+<span class="keyword">if</span> (token !== req.<span class="property">session</span>.csrfToken) {
+  <span class="keyword">return</span> res.<span class="property">status</span>(<span class="string">403</span>).<span class="property">json</span>({ <span class="property">error</span>: <span class="string">'Invalid CSRF token'</span> });
+}</div>
+      <h4>鏂规2: SameSite Cookie</h4>
+      <div class="code-block"><span class="comment">// 璁剧疆 SameSite Cookie</span>
+res.<span class="property">cookie</span>(<span class="string">'session_id'</span>, sessionId, {
+  <span class="property">httpOnly</span>: <span class="string">true</span>,    <span class="comment">// JavaScript 鏃犳硶璇诲彇</span>
+  <span class="property">secure</span>: <span class="string">true</span>,      <span class="comment">// 浠?HTTPS</span>
+  <span class="property">sameSite</span>: <span class="string">'strict'</span>  <span class="comment">// 瀹屽叏绂佹璺ㄧ珯鍙戦€?/span>
+});</div>
+      <h4>鏂规3: 楠岃瘉 Origin/Referer</h4>
+      <div class="code-block"><span class="keyword">const</span> validateOrigin = (req, res) => {
+  <span class="keyword">const</span> origin = req.<span class="property">headers</span>.<span class="property">origin</span>;
+  <span class="keyword">if</span> (![<span class="string">'https://example.com'</span>].<span class="property">includes</span>(origin)) {
+    <span class="keyword">return</span> res.<span class="property">status</span>(<span class="string">403</span>).<span class="property">json</span>({ <span class="property">error</span>: <span class="string">'Forbidden'</span> });
+  }
+};</div>
+    </div>
+    <div class="demo-area">
+      <h3>SameSite Cookie 鏁堟灉瀵规瘮</h3>
+      <table>
+        <tr><th>璇锋眰鍦烘櫙</th><th>Strict</th><th>Lax</th><th>None</th></tr>
+        <tr><td>鍚岀珯璇锋眰</td><td style="color:#2ecc71">鉁?鎼哄甫</td><td style="color:#2ecc71">鉁?鎼哄甫</td><td style="color:#2ecc71">鉁?鎼哄甫</td></tr>
+        <tr><td>璺ㄧ珯閾炬帴鐐瑰嚮</td><td style="color:#e06c75">鉂?涓嶆惡甯?/td><td style="color:#2ecc71">鉁?鎼哄甫</td><td style="color:#2ecc71">鉁?鎼哄甫</td></tr>
+        <tr><td>璺ㄧ珯琛ㄥ崟 POST</td><td style="color:#e06c75">鉂?涓嶆惡甯?/td><td style="color:#e06c75">鉂?涓嶆惡甯?/td><td style="color:#2ecc71">鉁?鎼哄甫</td></tr>
+        <tr><td>璺ㄧ珯璧勬簮鍔犺浇</td><td style="color:#e06c75">鉂?涓嶆惡甯?/td><td style="color:#e06c75">鉂?涓嶆惡甯?/td><td style="color:#2ecc71">鉁?鎼哄甫</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- CSP 閰嶇疆 -->
+  <div id="tab-csp" class="tab-content">
+    <div class="demo-area">
+      <h3>鍐呭瀹夊叏绛栫暐锛圕SP锛夌畝浠?/h3>
+      <p>CSP 閫氳繃 HTTP 鍝嶅簲澶村憡璇夋祻瑙堝櫒鍏佽鍔犺浇鍝簺璧勬簮锛屾槸闃叉 XSS 鐨勫己澶у伐鍏枫€?/p>
+      <div class="code-block"><span class="comment">// 鏈€涓ユ牸鐨?CSP 閰嶇疆</span>
+<span class="property">Content-Security-Policy</span>: 
+  <span class="string">default-src 'self'</span>;           <span class="comment">// 榛樿鍙厑璁稿悓婧?/span>
+  <span class="string">script-src 'self'</span>;            <span class="comment">// JS 鍙厑璁稿悓婧?/span>
+  <span class="string">style-src 'self'</span>;             <span class="comment">// 鏍峰紡鍙厑璁稿悓婧?/span>
+  <span class="string">img-src 'self' data: https:</span>; <span class="comment">// 鍥剧墖鍏佽鍚屾簮+data+https</span>
+  <span class="string">frame-ancestors 'none'</span>        <span class="comment">// 绂佹琚?iframe 宓屽叆</span></div>
+    </div>
+    <div class="demo-area">
+      <h3>CSP 甯哥敤鎸囦护閫熸煡</h3>
+      <div class="csp-line"><span class="csp-tag src">default-src</span><span class="csp-tag val">'self'</span><span>榛樿璧勬簮鏉ユ簮锛堝叾浠栨寚浠ゆ湭璁剧疆鏃朵娇鐢級</span></div>
+      <div class="csp-line"><span class="csp-tag src">script-src</span><span class="csp-tag val">'self' 'nonce-xxx'</span><span>JavaScript 鏉ユ簮</span></div>
+      <div class="csp-line"><span class="csp-tag src">style-src</span><span class="csp-tag val">'self' 'unsafe-inline'</span><span>鏍峰紡琛ㄦ潵婧愶紙unsafe-inline 涓嶆帹鑽愶級</span></div>
+      <div class="csp-line"><span class="csp-tag src">img-src</span><span class="csp-tag val">'self' data: https:</span><span>鍥剧墖鏉ユ簮锛坉ata: 鍏佽 base64 鍥剧墖锛?/span></div>
+      <div class="csp-line"><span class="csp-tag src">connect-src</span><span class="csp-tag val">'self' https://api.example.com</span><span>AJAX/Fetch/WebSocket 鐩爣</span></div>
+      <div class="csp-line"><span class="csp-tag src">frame-src</span><span class="csp-tag val">'none'</span><span>iframe 宓屽叆鏉ユ簮</span></div>
+      <div class="csp-line"><span class="csp-tag src">frame-ancestors</span><span class="csp-tag val">'none'/'self'</span><span>璋佸彲浠ュ祵鍏ュ綋鍓嶉〉闈紙闃叉鐐瑰嚮鍔寔锛?/span></div>
+    </div>
+    <div class="demo-area">
+      <h3>瀹炴垬閰嶇疆绀轰緥</h3>
+      <h4>绀轰緥1: 鍩虹瀹夊叏绛栫暐</h4>
+      <div class="code-block"><span class="property">Content-Security-Policy</span>: 
+  <span class="string">default-src 'self'</span>;
+  <span class="string">script-src 'self'</span>;
+  <span class="string">style-src 'self'</span>;
+  <span class="string">img-src 'self'</span>;
+  <span class="string">frame-ancestors 'none'</span></div>
+      <h4>绀轰緥2: 鏀寔 Google Fonts</h4>
+      <div class="code-block"><span class="property">Content-Security-Policy</span>: 
+  <span class="string">default-src 'self'</span>;
+  <span class="string">script-src 'self'</span>;
+  <span class="string">style-src 'self' 'unsafe-inline' https://fonts.googleapis.com</span>;
+  <span class="string">font-src 'self' https://fonts.gstatic.com</span>;
+  <span class="string">img-src 'self' data: https:</span></div>
+      <h4>绀轰緥3: 浣跨敤 nonce 鐨勫唴鑱旇剼鏈紙鏈€瀹夊叏锛?/h4>
+      <div class="code-block"><span class="comment">// 鍚庣姣忔璇锋眰鐢熸垚鏂?nonce</span>
+<span class="keyword">const</span> nonce = crypto.<span class="property">randomBytes</span>(<span class="string">16</span>).<span class="property">toString</span>(<span class="string">'base64'</span>);
+
+<span class="comment">// 鍝嶅簲澶?/span>
+res.<span class="property">setHeader</span>(<span class="string">'Content-Security-Policy'</span>, 
+  <span class="string">`script-src 'self' 'nonce-${nonce}'`</span>);
+
+<span class="comment">// 妯℃澘涓爣璁板唴鑱旇剼鏈?/span>
+<span class="keyword">&lt;script</span> <span class="property">nonce</span>=<span class="string">"&lt;%= nonce %&gt;"</span>&gt;
+  console.<span class="property">log</span>(<span class="string">'瀹夊叏鎵ц'</span>);
+<span class="keyword">&lt;/script&gt;</span></div>
+    </div>
+    <div class="demo-area">
+      <h3>CSP 鍏抽敭璇嶈鏄?/h3>
+      <table>
+        <tr><th>鍏抽敭璇?/th><th>璇存槑</th></tr>
+        <tr><td>'self'</td><td>鍚屾簮璧勬簮</td></tr>
+        <tr><td>'none'</td><td>绂佹浠讳綍鏉ユ簮</td></tr>
+        <tr><td>'unsafe-inline'</td><td>鍏佽鍐呰仈鑴氭湰/鏍峰紡锛堜笉瀹夊叏锛?/td></tr>
+        <tr><td>'unsafe-eval'</td><td>鍏佽 eval() 绛夊姩鎬佷唬鐮佹墽琛?/td></tr>
+        <tr><td>'nonce-xxx'</td><td>浠呭厑璁稿甫鐗瑰畾 nonce 鐨勫唴鑱旇剼鏈?/td></tr>
+        <tr><td>'sha256-xxx'</td><td>浠呭厑璁哥壒瀹氬搱甯岀殑鍐呰仈鑴氭湰</td></tr>
+        <tr><td>data:</td><td>鍏佽 data: URL锛堣皑鎱庝娇鐢級</td></tr>
+        <tr><td>https:</td><td>鍏佽鎵€鏈?HTTPS</td></tr>
+        <tr><td>*.example.com</td><td>鍏佽 example.com 鐨勬墍鏈夊瓙鍩?/td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 瀹夊叏澶?-->
+  <div id="tab-headers" class="tab-content">
+    <div class="demo-area">
+      <h3>瀹夊叏鍝嶅簲澶撮€熸煡</h3>
+      <p>閫氳繃鍚堢悊閰嶇疆 HTTP 鍝嶅簲澶达紝鍙互鍦ㄦ湇鍔＄灞傞潰澧炲己搴旂敤瀹夊叏鎬с€?/p>
+      <div class="header-row"><span class="header-name">Content-Security-Policy</span><span class="header-val">default-src 'self'; script-src 'self'; frame-ancestors 'none'</span></div>      <div class="header-row"><span class="header-name">Strict-Transport-Security</span><span class="header-val">max-age=31536000; includeSubDomains; preload</span></div>
+      <div class="header-row"><span class="header-name">X-Frame-Options</span><span class="header-val">DENY / SAMEORIGIN</span></div>
+      <div class="header-row"><span class="header-name">X-Content-Type-Options</span><span class="header-val">nosniff</span></div>
+      <div class="header-row"><span class="header-name">X-XSS-Protection</span><span class="header-val">1; mode=block</span></div>
+      <div class="header-row"><span class="header-name">Referrer-Policy</span><span class="header-val">strict-origin-when-cross-origin</span></div>
+      <div class="header-row"><span class="header-name">Permissions-Policy</span><span class="header-val">geolocation=(), microphone=(), camera=()</span></div>
+    </div>
+    <div class="demo-area">
+      <h3>头部防护目标</h3>
+      <table>
+        <tr><th>响应头</th><th>防护目标</th><th>优先级</th></tr>
+        <tr><td>Content-Security-Policy</td><td>XSS、数据注入</td><td style="color:#e06c75">5星</td></tr>
+        <tr><td>Strict-Transport-Security</td><td>中间人攻击</td><td style="color:#e06c75">5星</td></tr>
+        <tr><td>X-Frame-Options</td><td>点击劫持</td><td style="color:#f39c12">4星</td></tr>
+        <tr><td>X-Content-Type-Options</td><td>MIME sniffing</td><td style="color:#f39c12">3星</td></tr>
+        <tr><td>Referrer-Policy</td><td>隐私泄露</td><td style="color:#f39c12">3星</td></tr>
+        <tr><td>Permissions-Policy</td><td>功能滥用</td><td style="color:#f39c12">3星</td></tr>
+      </table>
+    </div>
+    <div class="demo-area">
+      <h3>Express.js 安全中间件示例</h3>
+      <div class="code-block"><span class="keyword">const</span> securityHeaders = (req, res, next) => {
+  res.<span class="property">setHeader</span>(<span class="string">'Content-Security-Policy'</span>, <span class="string">"default-src 'self'; script-src 'self'"</span>);
+  res.<span class="property">setHeader</span>(<span class="string">'Strict-Transport-Security'</span>, <span class="string">'max-age=31536000'</span>);
+  res.<span class="property">setHeader</span>(<span class="string">'X-Frame-Options'</span>, <span class="string">'SAMEORIGIN'</span>);
+  res.<span class="property">setHeader</span>(<span class="string">'X-Content-Type-Options'</span>, <span class="string">'nosniff'</span>);
+  next();
+};
+app.<span class="property">use</span>(securityHeaders);</div>
+    </div>
+  </div>
+  <div id="tab-quiz" class="tab-content">
+    <div class="demo-area">
+      <h3>前端安全自测</h3>
+      <p>检验你对前端安全知识的掌握程度！</p>
+      <div class="score-display">得分：<span id="quiz-score">0</span> / <span id="quiz-total">5</span></div>
+    </div>
+    <div class="quiz-question" data-answer="b">
+      <h4>1. 以下哪个是防止 XSS 最重要的手段？</h4>
+      <label class="quiz-option" onclick="selectOption(this, 'a')"><input type="radio" name="q1"> A. 使用 innerHTML 渲染用户输入</label>
+      <label class="quiz-option" onclick="selectOption(this, 'b')"><input type="radio" name="q1"> B. 输出转义 + CSP</label>
+      <label class="quiz-option" onclick="selectOption(this, 'c')"><input type="radio" name="q1"> C. 使用 eval 执行代码</label>
+      <label class="quiz-option" onclick="selectOption(this, 'd')"><input type="radio" name="q1"> D. 关闭浏览器 JavaScript</label>
+      <div class="quiz-result" id="result-q1"></div>
+    </div>
+    <div class="quiz-question" data-answer="b">
+      <h4>2. CSRF 攻击利用了浏览器的什么特性？</h4>
+      <label class="quiz-option" onclick="selectOption(this, 'a')"><input type="radio" name="q2"> A. 同源策略</label>
+      <label class="quiz-option" onclick="selectOption(this, 'b')"><input type="radio" name="q2"> B. 自动携带同站 Cookie</label>
+      <label class="quiz-option" onclick="selectOption(this, 'c')"><input type="radio" name="q2"> C. 跨域资源共享</label>
+      <label class="quiz-option" onclick="selectOption(this, 'd')"><input type="radio" name="q2"> D. Web Storage</label>
+      <div class="quiz-result" id="result-q2"></div>
+    </div>
+    <div class="quiz-question" data-answer="c">
+      <h4>3. SameSite=Strict 的 Cookie 有什么效果？</h4>
+      <label class="quiz-option" onclick="selectOption(this, 'a')"><input type="radio" name="q3"> A. 完全不发送 Cookie</label>
+      <label class="quiz-option" onclick="selectOption(this, 'b')"><input type="radio" name="q3"> B. 所有请求都携带</label>
+      <label class="quiz-option" onclick="selectOption(this, 'c')"><input type="radio" name="q3"> C. 完全禁止跨站请求携带</label>
+      <label class="quiz-option" onclick="selectOption(this, 'd')"><input type="radio" name="q3"> D. 只禁止 GET 请求</label>
+      <div class="quiz-result" id="result-q3"></div>
+    </div>
+    <div class="quiz-question" data-answer="d">
+      <h4>4. CSP 的哪个指令可以防止点击劫持？</h4>
+      <label class="quiz-option" onclick="selectOption(this, 'a')"><input type="radio" name="q4"> A. script-src</label>
+      <label class="quiz-option" onclick="selectOption(this, 'b')"><input type="radio" name="q4"> B. default-src</label>
+      <label class="quiz-option" onclick="selectOption(this, 'c')"><input type="radio" name="q4"> C. img-src</label>
+      <label class="quiz-option" onclick="selectOption(this, 'd')"><input type="radio" name="q4"> D. frame-ancestors</label>
+      <div class="quiz-result" id="result-q4"></div>
+    </div>
+    <div class="quiz-question" data-answer="b">
+      <h4>5. httpOnly Cookie 的主要作用是？</h4>
+      <label class="quiz-option" onclick="selectOption(this, 'a')"><input type="radio" name="q5"> A. 防止 CSRF 攻击</label>
+      <label class="quiz-option" onclick="selectOption(this, 'b')"><input type="radio" name="q5"> B. 防止 JavaScript 读取 Cookie</label>
+      <label class="quiz-option" onclick="selectOption(this, 'c')"><input type="radio" name="q5"> C. 防止 XSS 攻击</label>
+      <label class="quiz-option" onclick="selectOption(this, 'd')"><input type="radio" name="q5"> D. 加快页面加载</label>
+      <div class="quiz-result" id="result-q5"></div>
+    </div>
+    <div class="demo-area">
+      <button class="primary" onclick="resetQuiz()">重置测验</button>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+    function demoXssInnerHTML() {
+      const input = document.getElementById('xss-input').value;
+      document.getElementById('xss-output-html').innerHTML = input;
+    }
+    function demoXssTextContent() {
+      const input = document.getElementById('xss-input').value;
+      document.getElementById('xss-output-safe').textContent = input;
+    }
+    let score = 0, answered = {};
+    function selectOption(el, answer) {
+      const question = el.closest('.quiz-question');
+      const correct = question.dataset.answer;
+      const qId = question.querySelector('h4').textContent.charAt(0);
+      const result = document.getElementById('result-q' + qId);
+      if (answered[qId]) return;
+      answered[qId] = true;
+      if (answer === correct) {
+        el.classList.add('correct');
+        result.className = 'quiz-result show pass';
+        result.textContent = '正确！';
+        score++;
+      } else {
+        el.classList.add('wrong');
+        result.className = 'quiz-result show fail';
+        result.textContent = '错误，正确答案是 ' + correct.toUpperCase();
+      }
+      document.getElementById('quiz-score').textContent = score;
+    }
+    function resetQuiz() {
+      score = 0; answered = {};
+      document.getElementById('quiz-score').textContent = '0';
+      document.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.classList.remove('correct', 'wrong');
+        opt.style.pointerEvents = 'auto';
+      });
+      document.querySelectorAll('.quiz-result').forEach(r => { r.className = 'quiz-result'; });
+    }
+  </script>
+</body>
+</html>

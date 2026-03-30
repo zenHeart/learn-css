@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Animation 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 140px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .ball { width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .ball.purple { background: #a371f7; }
+    .ball.green { background: #3fb950; }
+    .ball.orange { background: #f0883e; }
+    .bar { width: 80px; height: 50px; background: #58a6ff; border-radius: 4px; flex-shrink: 0; }
+    .bar.purple { background: #a371f7; }
+    .bar.green { background: #3fb950; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .comparison-item { background: #0d1117; border-radius: 4px; padding: 16px; }
+    .comparison-item h4 { font-size: 14px; color: #f0f6fc; margin-bottom: 8px; }
+    .comparison-item p { font-size: 12px; color: #8b949e; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    .keyframe-viz { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; font-size: 12px; color: #8b949e; }
+    .keyframe-viz .dot { width: 12px; height: 12px; border-radius: 50%; background: #30363d; flex-shrink: 0; }
+    .keyframe-viz .dot.active { background: #58a6ff; }
+    .keyframe-viz .line { flex: 1; height: 1px; background: #30363d; }
+    @keyframes slideRight { to { transform: translateX(200px); opacity: 0.5; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes stepsDemo { from { width: 40px; } to { width: 200px; } }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    @keyframes widthGrow { from { width: 40px; } to { width: 200px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Animation 交互演示</h1>
+    <p class="subtitle">@keyframes + animation 属性详解 | 基于 learn-css 仓库示例风格</p>
+
+    <!-- @keyframes 语法 -->
+    <div class="section">
+      <h2>@keyframes 语法 — 0% / from / to</h2>
+      <div class="keyframe-viz">
+        <span class="dot active"></span>
+        <span class="line"></span>
+        <span class="dot"></span>
+        <span class="line"></span>
+        <span class="dot active"></span>
+      </div>
+      <p class="desc">三种写法完全等价：<span class="tag">0%</span> = <span class="tag">from</span>（起始帧），<span class="tag">100%</span> = <span class="tag">to</span>（结束帧）。中间可以插任意百分比的帧。</p>
+      <div class="code-block">/* 百分比写法 */
+@keyframes slideRight {
+  0%   { transform: translateX(0); opacity: 1; }
+  50%  { transform: translateX(100px); opacity: 0.8; }
+  100% { transform: translateX(200px); opacity: 0.5; }
+}
+
+/* from / to 写法（仅两帧时常用） */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}</div>
+    </div>
+
+    <!-- animation 缩写属性 -->
+    <div class="section">
+      <h2>animation 缩写属性顺序</h2>
+      <div class="controls" id="order-controls">
+        <button class="btn active" data-value="slideRight 1s ease-in-out 0s infinite normal none running">完整顺序</button>
+      </div>
+      <div class="demo-area" id="order-demo">
+        <div class="ball" id="order-ball">▶</div>
+      </div>
+      <div class="code-block" id="order-code">animation: name duration timing-function delay iteration-count direction fill-mode play-state;</div>
+      <p class="desc">缩写顺序记忆口诀：<strong>名 时 缓 延 次 方 模 态</strong>（name / duration / timing-function / delay / iteration-count / direction / fill-mode / play-state）</p>
+      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:12px;">
+        <div class="code-block" style="color:#ffa657;">animation: 2s <span style="color:#79c0ff;">ease</span> 0.5s;</div>
+        <div class="code-block" style="color:#ffa657;">animation: <span style="color:#f85149;">ease</span> 2s 0.5s;</div>
+        <div class="code-block" color="#ffa657"><span style="color:#79c0ff;">ease</span> 和 <span style="color:#f85149;">2s</span> 顺序颠倒，浏览器按 值类型 解析</div>
+      </div>
+    </div>
+
+    <!-- animation-name / animation-duration -->
+    <div class="section">
+      <h2>animation-name &amp; animation-duration</h2>
+      <div class="controls" id="name-controls">
+        <button class="btn active" data-value="slideRight 1s">slideRight 1s</button>
+        <button class="btn" data-value="pulse 0.8s">pulse 0.8s</button>
+        <button class="btn" data-value="fadeSlide 1.5s">fadeSlide 1.5s</button>
+      </div>
+      <div class="demo-area" id="name-demo">
+        <div class="ball" id="name-ball" style="animation: slideRight 1s infinite;">▶</div>
+      </div>
+      <div class="code-block" id="name-code">animation: slideRight 1s;</div>
+    </div>
+
+    <!-- animation-timing-function -->
+    <div class="section">
+      <h2>animation-timing-function 缓动函数</h2>
+      <div class="controls" id="tf-controls">
+        <button class="btn active" data-value="ease">ease</button>
+        <button class="btn" data-value="linear">linear</button>
+        <button class="btn" data-value="ease-in">ease-in</button>
+        <button class="btn" data-value="ease-out">ease-out</button>
+        <button class="btn" data-value="ease-in-out">ease-in-out</button>
+      </div>
+      <div class="demo-area" id="tf-demo">
+        <div class="ball" id="tf-ball" style="animation: slideRight 2s infinite;">▶</div>
+      </div>
+      <div class="code-block" id="tf-code">animation-timing-function: ease;</div>
+      <p class="desc">贝塞尔曲线对比：<span class="tag">ease</span> = cubic-bezier(0.25, 0.1, 0.25, 1) | <span class="tag">linear</span> = cubic-bezier(0, 0, 1, 1) | <span class="tag">ease-in</span> = cubic-bezier(0.42, 0, 1, 1) 慢开始快结束</p>
+    </div>
+
+    <!-- animation-delay -->
+    <div class="section">
+      <h2>animation-delay 延迟</h2>
+      <div class="controls" id="delay-controls">
+        <button class="btn active" data-value="0s">0s（无延迟）</button>
+        <button class="btn" data-value="0.5s">0.5s</button>
+        <button class="btn" data-value="1s">1s</button>
+        <button class="btn" data-value="-1s">-1s（从中途开始）</button>
+      </div>
+      <div class="demo-area" id="delay-demo">
+        <div class="ball" id="delay-ball" style="animation: slideRight 2s 0s infinite;">▶</div>
+      </div>
+      <div class="code-block" id="delay-code">animation-delay: 0s;</div>
+      <p class="desc"><span class="tag orange">负值</span>会让动画从中间的那个时间点开始播放。例如 -1s 表示"跳过第1秒，从第2秒开始"。</p>
+    </div>
+
+    <!-- animation-iteration-count -->
+    <div class="section">
+      <h2>animation-iteration-count 播放次数</h2>
+      <div class="controls" id="count-controls">
+        <button class="btn active" data-value="1">1 次</button>
+        <button class="btn" data-value="2">2 次</button>
+        <button class="btn" data-value="3">3 次</button>
+        <button class="btn" data-value="infinite">infinite（无限）</button>
+      </div>
+      <div class="demo-area" id="count-demo">
+        <div class="ball" id="count-ball" style="animation: slideRight 1.5s 1;">▶</div>
+      </div>
+      <div class="code-block" id="count-code">animation-iteration-count: 1;</div>
+    </div>
+
+    <!-- animation-direction -->
+    <div class="section">
+      <h2>animation-direction 播放方向</h2>
+      <div class="controls" id="dir-controls">
+        <button class="btn active" data-value="normal">normal（正向）</button>
+        <button class="btn" data-value="reverse">reverse（反向）</button>
+        <button class="btn" data-value="alternate">alternate（交替）</button>
+        <button class="btn" data-value="alternate-reverse">alternate-reverse</button>
+      </div>
+      <div class="demo-area" id="dir-demo">
+        <div class="ball" id="dir-ball" style="animation: slideRight 2s infinite normal;">▶</div>
+      </div>
+      <div class="code-block" id="dir-code">animation-direction: normal;</div>
+      <p class="desc"><span class="tag">alternate</span>常用于 loading 动画或呼吸效果，正向反向交替使运动更自然。</p>
+    </div>
+
+    <!-- animation-fill-mode -->
+    <div class="section">
+      <h2>animation-fill-mode 填充模式</h2>
+      <div class="controls" id="fill-controls">
+        <button class="btn active" data-value="none">none（默认）</button>
+        <button class="btn" data-value="forwards">forwards（定格）</button>
+        <button class="btn" data-value="backwards">backwards</button>
+        <button class="btn" data-value="both">both（结合）</button>
+      </div>
+      <div class="demo-area" id="fill-demo">
+        <div class="ball" id="fill-ball" style="animation: slideRight 1.5s 0s 1 none;">▶</div>
+        <div style="width:1px;height:60px;background:#f0883e;opacity:0.5;margin-left:10px;"></div>
+      </div>
+      <div class="code-block" id="fill-code">animation-fill-mode: none;</div>
+      <p class="desc">
+        <span class="tag">none</span>：动画前后都不受关键帧影响 |
+        <span class="tag">forwards</span>：停在最后一帧 |
+        <span class="tag">backwards</span>：在 delay 期间显示第一帧 |
+        <span class="tag">both</span>：delay期间显示第一帧 + 结束后停在最后帧
+      </p>
+    </div>
+
+    <!-- steps() 缓动函数 -->
+    <div class="section">
+      <h2>steps() 步进缓动函数</h2>
+      <div class="controls" id="steps-controls">
+        <button class="btn active" data-value="steps(4, start)">steps(4, start)</button>
+        <button class="btn" data-value="steps(4, end)">steps(4, end)</button>
+        <button class="btn" data-value="step-start">step-start</button>
+        <button class="btn" data-value="step-end">step-end</button>
+        <button class="btn" data-value="linear">linear（对比）</button>
+      </div>
+      <div class="demo-area" id="steps-demo">
+        <div class="bar" id="steps-bar" style="animation: widthGrow 1.6s infinite steps(4, start);"></div>
+      </div>
+      <div class="code-block" id="steps-code">animation-timing-function: steps(4, start);</div>
+      <p class="desc">
+        <span class="tag">steps(n, start)</span>：跳到每段的起点（共 n 步）|
+        <span class="tag">steps(n, end)</span>：停在每段的终点（共 n 步）<br>
+        适用于：Sprite 动画、进度条、帧动画。左侧对比 linear 平滑过渡。
+      </p>
+    </div>
+
+    <!-- 多动画并行 -->
+    <div class="section">
+      <h2>多动画并行</h2>
+      <div class="demo-area" id="multi-demo">
+        <div class="ball purple" style="animation: slideRight 2s infinite alternate, pulse 1s infinite alternate;">多动</div>
+      </div>
+      <div class="code-block">/* 多个动画用逗号分隔，同时播放 */
+.ball {
+  animation:
+    slideRight 2s infinite alternate,
+    pulse 1s infinite alternate;
+}</div>
+      <p class="desc">左侧球同时执行平移（slideRight）+ 缩放（pulse）两个动画。用逗号分隔即可，无数量限制。</p>
+    </div>
+
+    <!-- animation-play-state -->
+    <div class="section">
+      <h2>animation-play-state 暂停/继续</h2>
+      <div class="controls" id="play-controls">
+        <button class="btn active" data-value="running">running（播放）</button>
+        <button class="btn" data-value="paused">paused（暂停）</button>
+      </div>
+      <div class="demo-area" id="play-demo">
+        <div class="ball green" id="play-ball" style="animation: rotate 2s infinite running;">转</div>
+      </div>
+      <div class="code-block" id="play-code">animation-play-state: running;</div>
+      <p class="desc">常配合 <span class="tag">:hover</span> 使用：<span class="tag green">悬停时暂停</span>，鼠标移开继续播放。</p>
+    </div>
+
+    <!-- animation vs transition -->
+    <div class="section">
+      <h2>Animation vs Transition 对比</h2>
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4><span class="tag orange">Transition</span></h4>
+          <p>• 需要 <strong>触发条件</strong>（:hover、:active、JS）<br>
+          • 只能描述 <strong>两帧</strong>之间的过渡<br>
+          • 不能循环<br>
+          • 性能更好（GPU加速）<br>
+          • 适合：状态切换反馈</p>
+        </div>
+        <div class="comparison-item">
+          <h4><span class="tag">Animation</span></h4>
+          <p>• <strong>自动播放</strong>，无需触发<br>
+          • 支持 <strong>多帧</strong>关键帧<br>
+          • 可以循环<br>
+          • 可暂停/控制<br>
+          • 适合：复杂序列、循环动画、进入/退出动画</p>
+        </div>
+      </div>
+      <div class="code-block">/* Transition：需要 hover 触发 */
+.box { transition: transform 0.3s ease; }
+.box:hover { transform: scale(1.2); }
+
+/* Animation：自动播放，定义多帧 */
+.box { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}</div>
+    </div>
+
+    <!-- 非缩写属性 -->
+    <div class="section">
+      <h2>非缩写属性（独立设置）</h2>
+      <div class="demo-area">
+        <div class="ball orange" style="animation-name: slideRight; animation-duration: 1.5s; animation-timing-function: ease-in-out; animation-delay: 0.3s; animation-iteration-count: infinite; animation-direction: alternate; animation-fill-mode: forwards; animation-play-state: running;">独立</div>
+      </div>
+      <div class="code-block">/* 当只需要修改某一个动画属性时，使用非缩写属性更清晰 */
+animation-name: slideRight;
+animation-duration: 1.5s;
+animation-timing-function: ease-in-out;
+animation-delay: 0.3s;
+animation-iteration-count: infinite;
+animation-direction: alternate;
+animation-fill-mode: forwards;
+animation-play-state: running;</div>
+      <p class="desc">缩写会<strong>重置</strong>所有未写的子属性为初始值。修改单个属性时，使用非缩写写法更安全。</p>
+    </div>
+
+    <p class="info">CSS Animation 支持所有现代浏览器。交互演示基于 learn-css 仓库示例风格。</p>
+  </div>
+
+  <script>
+    // 复用：slideRight
+    function restartBall(ball, ...args) {
+      ball.style.animation = 'none';
+      ball.offsetHeight; // 触发重排，强制重启
+      ball.style.animation = args.join(' ');
+    }
+
+    // name + duration
+    const nameBall = document.getElementById('name-ball');
+    document.getElementById('name-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#name-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        const [name, dur] = e.target.dataset.value.split(' ');
+        restartBall(nameBall, `${name} ${dur} infinite`);
+        document.getElementById('name-code').textContent = `animation: ${name} ${dur};`;
+      }
+    });
+
+    // timing-function
+    const tfBall = document.getElementById('tf-ball');
+    document.getElementById('tf-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#tf-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        restartBall(tfBall, `slideRight 2s ${e.target.dataset.value} infinite`);
+        document.getElementById('tf-code').textContent = `animation-timing-function: ${e.target.dataset.value};`;
+      }
+    });
+
+    // delay
+    const delayBall = document.getElementById('delay-ball');
+    document.getElementById('delay-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#delay-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        restartBall(delayBall, `slideRight 2s ${e.target.dataset.value} 1`);
+        document.getElementById('delay-code').textContent = `animation-delay: ${e.target.dataset.value};`;
+      }
+    });
+
+    // iteration-count
+    const countBall = document.getElementById('count-ball');
+    document.getElementById('count-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#count-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        restartBall(countBall, `slideRight 1.5s ${e.target.dataset.value}`);
+        document.getElementById('count-code').textContent = `animation-iteration-count: ${e.target.dataset.value};`;
+      }
+    });
+
+    // direction
+    const dirBall = document.getElementById('dir-ball');
+    document.getElementById('dir-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#dir-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        restartBall(dirBall, `slideRight 2s infinite ${e.target.dataset.value}`);
+        document.getElementById('dir-code').textContent = `animation-direction: ${e.target.dataset.value};`;
+      }
+    });
+
+    // fill-mode
+    const fillBall = document.getElementById('fill-ball');
+    document.getElementById('fill-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#fill-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        restartBall(fillBall, `slideRight 1.5s 0s 1 ${e.target.dataset.value}`);
+        document.getElementById('fill-code').textContent = `animation-fill-mode: ${e.target.dataset.value};`;
+      }
+    });
+
+    // steps
+    const stepsBar = document.getElementById('steps-bar');
+    document.getElementById('steps-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#steps-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        stepsBar.style.animation = 'none';
+        stepsBar.offsetHeight;
+        const val = e.target.dataset.value;
+        stepsBar.style.animation = `widthGrow 1.6s ${val}`;
+        document.getElementById('steps-code').textContent = `animation-timing-function: ${val};`;
+      }
+    });
+
+    // play-state
+    const playBall = document.getElementById('play-ball');
+    document.getElementById('play-controls').addEventListener('click', e => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#play-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        playBall.style.animationPlayState = e.target.dataset.value;
+        document.getElementById('play-code').textContent = `animation-play-state: ${e.target.dataset.value};`;
+      }
+    });
+  </script>
+</body>
+</html>
