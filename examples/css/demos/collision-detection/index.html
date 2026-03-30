@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>碰撞检测交互演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-area h3 {
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    canvas {
+      background: #0f0f1a;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+      cursor: crosshair;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 10px 20px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    button:hover { background: #333355; border-color: #667eea; }
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+    .info-box {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .info-box h4 { color: #667eea; margin-bottom: 8px; }
+    .info-box p { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+    code {
+      background: #252540;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #667eea;
+    }
+    .result-box {
+      background: #0f0f1a;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #888;
+      min-height: 60px;
+    }
+    .collision { color: #e74c3c; }
+    .no-collision { color: #2ecc71; }
+    .legend {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat-card {
+      background: #15152a;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label { color: #666; font-size: 0.8rem; margin-top: 4px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+    th { color: #667eea; font-weight: 600; }
+    td { color: #aaa; }
+    .formula {
+      background: #0f0f1a;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
+      margin-top: 8px;
+      overflow-x: auto;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .comparison-card {
+      background: #15152a;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .comparison-card h4 {
+      color: #667eea;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      background: #667eea;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .badge.fast { background: #2ecc71; }
+    .badge.medium { background: #f39c12; }
+    .badge.slow { background: #e74c3c; }
+  </style>
+</head>
+<body>
+  <h1>🎮 碰撞检测交互演示</h1>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="aabb">AABB 矩形碰撞</button>
+    <button class="tab-btn" data-tab="circle">圆形碰撞</button>
+    <button class="tab-btn" data-tab="point">点与矩形</button>
+    <button class="tab-btn" data-tab="grid">空间网格分区</button>
+    <button class="tab-btn" data-tab="game">综合游戏演示</button>
+  </div>
+
+  <div id="tab-aabb" class="tab-content active">
+    <div class="demo-area">
+      <h3>🔲 AABB (Axis-Aligned Bounding Box) 矩形碰撞</h3>
+      <canvas id="canvas-aabb" width="600" height="350"></canvas>
+      <div class="controls">
+        <button class="primary" id="btn-add-rect">添加矩形</button>
+        <button id="btn-clear-rects">清空</button>
+        <button id="btn-drag-aabb">拖拽模式</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#3498db"></div>矩形</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>碰撞中</div>
+        <div class="legend-item"><div class="legend-color" style="background:#f39c12"></div>检测点</div>
+      </div>
+      <div class="result-box" id="result-aabb"></div>
+    </div>
+    <div class="info-box">
+      <h4>📚 AABB 碰撞原理</h4>
+      <p>两个矩形不碰撞的条件是：其中一个矩形在另一个的左侧、右侧、上方或下方。只要不满足这四个条件之一，就发生碰撞。</p>
+      <div class="formula">
+        <strong>不碰撞条件：</strong><br>
+        rect1.x + rect1.width ≤ rect2.x (左)<br>
+        rect2.x + rect2.width ≤ rect1.x (右)<br>
+        rect1.y + rect1.height ≤ rect2.y (上)<br>
+        rect2.y + rect2.height ≤ rect1.y (下)<br>
+        <strong>碰撞 = 以上都不满足</strong>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-circle" class="tab-content">
+    <div class="demo-area">
+      <h3>⭕ 圆形碰撞检测</h3>
+      <canvas id="canvas-circle" width="600" height="350"></canvas>
+      <div class="controls">
+        <button class="primary" id="btn-add-circle">添加圆形</button>
+        <button id="btn-clear-circles">清空</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#9b59b6"></div>圆形</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>碰撞中</div>
+        <div class="legend-item"><div class="legend-color" style="background:#2ecc71"></div>圆心距</div>
+      </div>
+      <div class="result-box" id="result-circle"></div>
+    </div>
+    <div class="info-box">
+      <h4>📚 圆形碰撞原理</h4>
+      <p>圆形碰撞通过计算两个圆心之间的距离来判断。如果距离小于两圆半径之和，则发生碰撞。</p>
+      <div class="formula">
+        <strong>碰撞条件：</strong><br>
+        distance = √((x₂-x₁)² + (y₂-y₁)²)<br>
+        <strong>碰撞 = distance &lt; radius₁ + radius₂</strong>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-point" class="tab-content">
+    <div class="demo-area">
+      <h3>📍 鼠标点击检测</h3>
+      <canvas id="canvas-point" width="600" height="350"></canvas>
+      <div class="controls">
+        <button id="btn-add-target">添加目标</button>
+        <button id="btn-clear-targets">清空</button>
+        <span style="color:#666;font-size:0.9rem;align-self:center;">点击画布检测</span>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#3498db"></div>目标矩形</div>
+        <div class="legend-item"><div class="legend-color" style="background:#2ecc71"></div>点击命中</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>点击未命中</div>
+      </div>
+      <div class="result-box" id="result-point">点击画布任意位置进行检测...</div>
+    </div>
+    <div class="info-box">
+      <h4>📚 点与矩形碰撞原理</h4>
+      <p>最简单的碰撞检测之一。只需检查点的坐标是否在矩形范围内即可。</p>
+      <div class="formula">
+        <strong>命中条件：</strong><br>
+        px ≥ rect.x AND px ≤ rect.x + rect.width<br>
+        py ≥ rect.y AND py ≤ rect.y + rect.height
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-grid" class="tab-content">
+    <div class="demo-area">
+      <h3>🔲 空间网格分区优化</h3>
+      <canvas id="canvas-grid" width="600" height="350"></canvas>
+      <div class="controls">
+        <button class="primary" id="btn-add-many">添加100个对象</button>
+        <button id="btn-clear-many">清空</button>
+        <button id="btn-check-grid">检测碰撞</button>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-count">0</div>
+          <div class="stat-label">对象数量</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-checks">0</div>
+          <div class="stat-label">碰撞检测次数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-pairs">0</div>
+          <div class="stat-label">碰撞对数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-time">0ms</div>
+          <div class="stat-label">检测耗时</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <h4>📚 空间分区优化</h4>
+      <p>当有大量对象时，O(n²) 的两两检测会变得很慢。空间分区通过将画布划分为网格，只检测同一格子或相邻格子中的对象，大幅减少检测次数。</p>
+      <div class="comparison-grid">
+        <div class="comparison-card">
+          <h4>暴力检测 <span class="badge slow">O(n²)</span></h4>
+          <p>100个对象需 100×100 = 10,000 次检测</p>
+        </div>
+        <div class="comparison-card">
+          <h4>网格分区 <span class="badge fast">O(n)</span></h4>
+          <p>每格平均 5 个对象，仅需约 500 次检测</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-game" class="tab-content">
+    <div class="demo-area">
+      <h3>🎮 综合游戏演示：弹珠台</h3>
+      <canvas id="canvas-game" width="600" height="400"></canvas>
+      <div class="controls">
+        <button class="primary" id="btn-start-game">开始游戏</button>
+        <button id="btn-pause-game">暂停</button>
+        <span style="color:#666;font-size:0.9rem;align-self:center;">点击画布发射小球</span>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-score">0</div>
+          <div class="stat-label">得分</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-balls">0</div>
+          <div class="stat-label">活跃球数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-bounces">0</div>
+          <div class="stat-label">弹跳次数</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <h4>📚 碰撞检测在游戏中的应用</h4>
+      <p>弹珠台游戏综合使用了多种碰撞检测算法：</p>
+      <table>
+        <tr><th>场景</th><th>算法</th></tr>
+        <tr><td>球与墙壁边界</td><td>AABB 矩形碰撞</td></tr>
+        <tr><td>球与圆形障碍物</td><td>圆形碰撞</td></tr>
+        <tr><td>球与球碰撞</td><td>圆形碰撞</td></tr>
+        <tr><td>球与挡板</td><td>AABB + 圆形组合</td></tr>
+      </table>
+    </div>
+  </div>
+
+<script>
+// ==================== AABB 矩形碰撞 ====================
+(function() {
+  const canvas = document.getElementById('canvas-aabb');
+  const ctx = canvas.getContext('2d');
+  let rects = [];
+  let dragRect = null;
+  let isDragging = false;
+  let isDragMode = false;
+  let mousePos = { x: 0, y: 0 };
+  let rectIdCounter = 0;
+
+  function rectIntersect(r1, r2) {
+    return !(
+      r1.x + r1.width <= r2.x ||
+      r2.x + r2.width <= r1.x ||
+      r1.y + r1.height <= r2.y ||
+      r2.y + r2.height <= r1.y
+    );
+  }
+
+  function draw() {
+    ctx.fillStyle = '#0f0f1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = '#1a1a2e';
+    for (let x = 0; x < canvas.width; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+    
+    ctx.fillStyle = '#f39c12';
+    ctx.beginPath();
+    ctx.arc(mousePos.x, mousePos.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    rects.forEach(function(r) {
+      const colliding = rects.some(function(other) { return other !== r && rectIntersect(r, other); });
+      ctx.fillStyle = colliding ? 'rgba(231,76,60,0.3)' : 'rgba(52,152,219,0.3)';
+      ctx.fillRect(r.x, r.y, r.width, r.height);
+      ctx.strokeStyle = colliding ? '#e74c3c' : '#3498db';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(r.x, r.y, r.width, r.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '14px sans-serif';
+      ctx.fillText(r.id, r.x + 5, r.y + 20);
+    });
+    
+    const collisions = [];
+    rects.forEach(function(r, i) {
+      rects.forEach(function(r2, j) {
+        if (i < j && rectIntersect(r, r2)) {
+          collisions.push(r.id + ' ∩ ' + r2.id);
+        }
+      });
+    });
+    document.getElementById('result-aabb').innerHTML = collisions.length > 0
+      ? '<span class="collision">⚠️ 碰撞检测:</span> ' + collisions.join(', ')
+      : '<span class="no-collision">✅ 无碰撞</span>';
+  }
+
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    if (isDragging && dragRect) {
+      dragRect.x = mousePos.x - dragRect.width / 2;
+      dragRect.y = mousePos.y - dragRect.height / 2;
+    }
+    draw();
+  });
+
+  canvas.addEventListener('click', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const clicked = rects.find(function(r) { return x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height; });
+    if (!clicked && !isDragMode) {
+      rects.push({
+        id: 'R' + (++rectIdCounter),
+        x: x - 30,
+        y: y - 25,
+        width: 60,
+        height: 50
+      });
+      draw();
+    }
+  });
+
+  canvas.addEventListener('mousedown', function(e) {
+    if (!isDragMode) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const clicked = rects.find(function(r) { return x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height; });
+    if (clicked) {
+      dragRect = clicked;
+      isDragging = true;
+    }
+  });
+
+  canvas.addEventListener('mouseup', function() {
+    isDragging = false;
+    dragRect = null;
+  });
+
+  document.getElementById('btn-add-rect').addEventListener('click', function() {
+    rects.push({
+      id: 'R' + (++rectIdCounter),
+      x: Math.random() * 500,
+      y: Math.random() * 250,
+      width: 60 + Math.random() * 40,
+      height: 50 + Math.random() * 30
+    });
+    draw();
+  });
+
+  document.getElementById('btn-clear-rects').addEventListener('click', function() {
+    rects = [];
+    rectIdCounter = 0;
+    draw();
+  });
+
+  document.getElementById('btn-drag-aabb').addEventListener('click', function() {
+    isDragMode = !isDragMode;
+    this.style.background = isDragMode ? '#667eea' : '#252540';
+  });
+
+  draw();
+})();
+
+// ==================== 圆形碰撞 ====================
+(function() {
+  const canvas = document.getElementById('canvas-circle');
+  const ctx = canvas.getContext('2d');
+  let circles = [];
+  let circleIdCounter = 0;
+
+  function circleIntersect(c1, c2) {
+    return Math.hypot(c1.x - c2.x, c1.y - c2.y) < c1.radius + c2.radius;
+  }
+
+  function draw() {
+    ctx.fillStyle = '#0f0f1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    circles.forEach(function(c) {
+      const colliding = circles.some(function(other) { return other !== c && circleIntersect(c, other); });
+      
+      circles.forEach(function(c2) {
+        if (c !== c2) {
+          const dist = Math.hypot(c.x - c2.x, c.y - c2.y);
+          if (dist < c.radius + c2.radius + 50) {
+            ctx.strokeStyle = dist < c.radius + c2.radius ? 'rgba(46,204,113,0.5)' : 'rgba(100,100,100,0.2)';
+            ctx.lineWidth = dist < c.radius + c2.radius ? 2 : 1;
+            ctx.beginPath();
+            ctx.moveTo(c.x, c.y);
+            ctx.lineTo(c2.x, c2.y);
+            ctx.stroke();
+          }
+        }
+      });
+      
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+      ctx.fillStyle = colliding ? 'rgba(231,76,60,0.4)' : 'rgba(155,89,182,0.4)';
+      ctx.fill();
+      ctx.strokeStyle = colliding ? '#e74c3c' : '#9b59b6';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.fillStyle = colliding ? '#e74c3c' : '#2ecc71';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(c.id, c.x - 8, c.y + 4);
+    });
+    
+    const pairs = [];
+    circles.forEach(function(c, i) {
+      circles.forEach(function(c2, j) {
+        if (i < j && circleIntersect(c, c2)) {
+          pairs.push(c.id + ' ∩ ' + c2.id);
+        }
+      });
+    });
+    document.getElementById('result-circle').innerHTML = pairs.length > 0
+      ? '<span class="collision">⚠️ 碰撞:</span> ' + pairs.join(', ')
+      : '<span class="no-collision">✅ 无碰撞</span>';
+  }
+
+  canvas.addEventListener('click', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    circles.push({
+      id: 'C' + (++circleIdCounter),
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      radius: 25 + Math.random() * 25
+    });
+    draw();
+  });
+
+  document.getElementById('btn-add-circle').addEventListener('click', function() {
+    circles.push({
+      id: 'C' + (++circleIdCounter),
+      x: 50 + Math.random() * 500,
+      y: 50 + Math.random() * 250,
+      radius: 25 + Math.random() * 25
+    });
+    draw();
+  });
+
+  document.getElementById('btn-clear-circles').addEventListener('click', function() {
+    circles = [];
+    circleIdCounter = 0;
+    draw();
+  });
+  draw();
+})();
+
+// ==================== 点与矩形 ====================
+(function() {
+  const canvas = document.getElementById('canvas-point');
+  const ctx = canvas.getContext('2d');
+  let targets = [];
+  let targetIdCounter = 0;
+  let clickPos = null;
+
+  function pointInRect(px, py, rect) {
+    return px >= rect.x && px <= rect.x + rect.width && py >= rect.y && py <= rect.y + rect.height;
+  }
+
+  function draw() {
+    ctx.fillStyle = '#0f0f1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    targets.forEach(function(t) {
+      ctx.fillStyle = 'rgba(52,152,219,0.4)';
+      ctx.fillRect(t.x, t.y, t.width, t.height);
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(t.x, t.y, t.width, t.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '14px sans-serif';
+      ctx.fillText(t.id, t.x + 5, t.y + 20);
+      ctx.font = '11px sans-serif';
+      ctx.fillText(t.width + 'x' + t.height, t.x + 5, t.y + 35);
+    });
+    
+    if (clickPos) {
+      const hit = targets.find(function(t) { return pointInRect(clickPos.x, clickPos.y, t); });
+      ctx.fillStyle = hit ? '#2ecc71' : '#e74c3c';
+      ctx.beginPath();
+      ctx.arc(clickPos.x, clickPos.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = hit ? '#2ecc71' : '#e74c3c';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(clickPos.x - 15, clickPos.y);
+      ctx.lineTo(clickPos.x + 15, clickPos.y);
+      ctx.moveTo(clickPos.x, clickPos.y - 15);
+      ctx.lineTo(clickPos.x, clickPos.y + 15);
+      ctx.stroke();
+      document.getElementById('result-point').innerHTML = hit
+        ? '<span class="no-collision">✅ 命中: ' + hit.id + '</span><br>坐标: (' + Math.round(clickPos.x) + ', ' + Math.round(clickPos.y) + ')'
+        : '<span class="collision">❌ 未命中</span><br>坐标: (' + Math.round(clickPos.x) + ', ' + Math.round(clickPos.y) + ')';
+    }
+  }
+
+  canvas.addEventListener('click', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    clickPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    draw();
+  });
+
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    clickPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    draw();
+  });
+
+  document.getElementById('btn-add-target').addEventListener('click', function() {
+    targets.push({
+      id: 'T' + (++targetIdCounter),
+      x: Math.random() * 400,
+      y: Math.random() * 250,
+      width: 80 + Math.random() * 60,
+      height: 60 + Math.random() * 40
+    });
+    draw();
+  });
+
+  document.getElementById('btn-clear-targets').addEventListener('click', function() {
+    targets = [];
+    targetIdCounter = 0;
+    draw();
+  });
+  draw();
+})();
+
+// ==================== 空间网格分区 ====================
+(function() {
+  const canvas = document.getElementById('canvas-grid');
+  const ctx = canvas.getContext('2d');
+  let manyObjects = [];
+  let objIdCounter = 0;
+  const CELL_SIZE = 50;
+
+  function SpatialGrid(cellSize) {
+    this.cellSize = cellSize;
+    this.cells = new Map();
+  }
+  SpatialGrid.prototype.getKey = function(x, y) {
+    return Math.floor(x / this.cellSize) + ',' + Math.floor(y / this.cellSize);
+  };
+  SpatialGrid.prototype.insert = function(obj) {
+    var key = this.getKey(obj.x, obj.y);
+    if (!this.cells.has(key)) this.cells.set(key, []);
+    this.cells.get(key).push(obj);
+  };
+  SpatialGrid.prototype.query = function(x, y, radius) {
+    var results = [];
+    var checked = new Set();
+    var cellRadius = Math.ceil(radius / this.cellSize);
+    var cx = Math.floor(x / this.cellSize);
+    var cy = Math.floor(y / this.cellSize);
+    for (var dx = -cellRadius; dx <= cellRadius; dx++) {
+      for (var dy = -cellRadius; dy <= cellRadius; dy++) {
+        var key = (cx + dx) + ',' + (cy + dy);
+        var cell = this.cells.get(key);
+        if (cell) {
+          cell.forEach(function(obj) {
+            if (!checked.has(obj.id)) {
+              checked.add(obj.id);
+              var dist = Math.hypot(obj.x - x, obj.y - y);
+              if (dist <= radius + obj.radius) {
+                results.push(obj);
+              }
+            }
+          });
+        }
+      }
+    }
+    return results;
+  };
+  SpatialGrid.prototype.clear = function() { this.cells.clear(); };
+
+  var grid = new SpatialGrid(CELL_SIZE);
+
+  function draw() {
+    ctx.fillStyle = '#0f0f1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#252540';
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= canvas.width; x += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (var y = 0; y <= canvas.height; y += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+    manyObjects.forEach(function(obj) {
+      ctx.fillStyle = obj.colliding ? '#e74c3c' : '#3498db';
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px sans-serif';
+      ctx.fillText(obj.id, obj.x - 5, obj.y + 3);
+    });
+    document.getElementById('stat-count').textContent = manyObjects.length;
+  }
+
+  function checkCollisions() {
+    grid.clear();
+    manyObjects.forEach(function(obj) { obj.colliding = false; grid.insert(obj); });
+    var checks = 0;
+    var pairs = 0;
+    var startTime = performance.now();
+    manyObjects.forEach(function(obj) {
+      var nearby = grid.query(obj.x, obj.y, obj.radius * 2);
+      nearby.forEach(function(other) {
+        if (obj.id < other.id) {
+          checks++;
+          var dist = Math.hypot(obj.x - other.x, obj.y - other.y);
+          if (dist < obj.radius + other.radius) {
+            obj.colliding = true;
+            other.colliding = true;
+            pairs++;
+          }
+        }
+      });
+    });
+    var endTime = performance.now();
+    document.getElementById('stat-checks').textContent = checks;
+    document.getElementById('stat-pairs').textContent = pairs;
+    document.getElementById('stat-time').textContent = (endTime - startTime).toFixed(2) + 'ms';
+    draw();
+  }
+
+  document.getElementById('btn-add-many').addEventListener('click', function() {
+    for (var i = 0; i < 100; i++) {
+      manyObjects.push({
+        id: 'O' + (++objIdCounter),
+        x: Math.random() * 550 + 25,
+        y: Math.random() * 300 + 25,
+        radius: 8 + Math.random() * 8,
+        colliding: false
+      });
+    }
+    draw();
+  });
+
+  document.getElementById('btn-clear-many').addEventListener('click', function() {
+    manyObjects = [];
+    objIdCounter = 0;
+    document.getElementById('stat-checks').textContent = '0';
+    document.getElementById('stat-pairs').textContent = '0';
+    document.getElementById('stat-time').textContent = '0ms';
+    draw();
+  });
+
+  document.getElementById('btn-check-grid').addEventListener('click', checkCollisions);
+  draw();
+})();
+
+// ==================== 综合游戏演示 ====================
+(function() {
+  var canvas = document.getElementById('canvas-game');
+  var ctx = canvas.getContext('2d');
+  var gameRunning = false;
+  var balls = [];
+  var obstacles = [];
+  var paddle = { x: 250, y: 360, width: 100, height: 15 };
+  var score = 0;
+  var bounces = 0;
+  var gameLoopId = null;
+
+  function initGame() {
+    balls = [];
+    obstacles = [];
+    score = 0;
+    bounces = 0;
+    var colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+    for (var i = 0; i < 8; i++) {
+      obstacles.push({
+        type: 'circle',
+        x: 80 + Math.random() * 440,
+        y: 80 + Math.random() * 200,
+        radius: 20 + Math.random() * 20,
+        color: colors[i % colors.length]
+      });
+    }
+    updateStats();
+  }
+
+  function updateStats() {
+    document.getElementById('stat-score').textContent = score;
+    document.getElementById('stat-balls').textContent = balls.length;
+    document.getElementById('stat-bounces').textContent = bounces;
+  }
+
+  function circleRectCollide(ball, rect) {
+    var closestX = Math.max(rect.x, Math.min(ball.x, rect.x + rect.width));
+    var closestY = Math.max(rect.y, Math.min(ball.y, rect.y + rect.height));
+    var dx = ball.x - closestX;
+    var dy = ball.y - closestY;
+    return (dx * dx + dy * dy) < (ball.radius * ball.radius);
+  }
+
+  function drawGame() {
+    ctx.fillStyle = '#0f0f1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    obstacles.forEach(function(obs) {
+      if (obs.type === 'circle') {
+        ctx.beginPath();
+        ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
+        ctx.fillStyle = obs.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.stroke();
+      }
+    });
+    
+    ctx.fillStyle = '#667eea';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    
+    balls.forEach(function(ball) {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    });
+  }
+
+  function update() {
+    balls.forEach(function(ball) {
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      
+      if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+        ball.vx *= -1;
+        bounces++;
+      }
+      if (ball.y - ball.radius <= 0) {
+        ball.vy *= -1;
+        bounces++;
+      }
+      if (ball.y + ball.radius >= canvas.height) {
+        ball.vy *= -1;
+        bounces++;
+        score = Math.max(0, score - 10);
+      }
+      
+      if (circleRectCollide(ball, paddle)) {
+        ball.vy = -Math.abs(ball.vy);
+        ball.vx += (ball.x - (paddle.x + paddle.width / 2)) * 0.1;
+        bounces++;
+        score += 10;
+      }
+      
+      obstacles.forEach(function(obs) {
+        if (obs.type === 'circle') {
+          var dx = ball.x - obs.x;
+          var dy = ball.y - obs.y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < ball.radius + obs.radius) {
+            var nx = dx / dist;
+            var ny = dy / dist;
+            var dvx = ball.vx - 0;
+            var dvy = ball.vy - 0;
+            var dvn = dvx * nx + dvy * ny;
+            ball.vx = ball.vx - 2 * dvn * nx;
+            ball.vy = ball.vy - 2 * dvn * ny;
+            bounces++;
+            score += 5;
+          }
+        }
+      });
+    });
+    
+    updateStats();
+    drawGame();
+  }
+
+  function gameLoop() {
+    if (!gameRunning) return;
+    update();
+    gameLoopId = requestAnimationFrame(gameLoop);
+  }
+
+  initGame();
+  drawGame();
+  
+  canvas.addEventListener('click', function(e) {
+    if (!gameRunning) return;
+    var rect = canvas.getBoundingClientRect();
+    balls.push({
+      x: e.clientX - rect.left,
+      y: 340,
+      vx: (Math.random() - 0.5) * 4,
+      vy: -5 - Math.random() * 3,
+      radius: 8
+    });
+  });
+
+  document.getElementById('btn-start-game').addEventListener('click', function() {
+    gameRunning = true;
+    gameLoop();
+  });
+
+  document.getElementById('btn-pause-game').addEventListener('click', function() {
+    gameRunning = false;
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  });
+})();
+
+// ==================== Tab 切换 ====================
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
