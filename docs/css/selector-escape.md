@@ -1,0 +1,271 @@
+# CSS 选择器转义规则
+
+> CSS 选择器语法 vs HTML ID 属性：为什么 `#1` 无法被 `querySelector` 识别？
+
+## 1. 问题背景
+
+### 1.1 现象
+
+```javascript
+// HTML 中完全合法
+<div id="1">元素1</div>
+<div id="123">元素2</div>
+
+// JavaScript 中报错
+document.querySelector('#1');  // DOMException: #1 is not a valid selector
+document.querySelector('#123'); // DOMException: #123 is not a valid selector
+```
+
+### 1.2 根因
+
+| 规范 | 规则 |
+|------|------|
+| **HTML 规范** | ID 可以以数字开头（如 `id="1"`、`id="123abc"`） |
+| **CSS 选择器语法** | 标识符不能以数字开头，必须转义 |
+
+CSS 选择器语法遵循 [CSS Syntax Level 3](https://www.w3.org/TR/css-syntax-3/)，其中 **ID 选择器**被解析为**标识符**，而标识符的首字符有严格限制：
+
+```
+identifier → --?[a-zA-Z_] | --?[^\x00-\x7F] | ...
+number-start → [0-9] | ...
+```
+
+这意味着 CSS 标识符（用于 ID、类名等）**不能以数字开头**。
+
+---
+
+## 2. CSS 转义规则
+
+### 2.1 转义原理
+
+CSS 中的转义使用反斜杠 `\` 后跟字符的十六进制 Unicode 编码。
+
+```
+\31  → 数字 "1"（1 的 Unicode 码点）
+\32  → 数字 "2"
+\33  → 数字 "3"
+...
+\41  → 字母 "A"
+```
+
+### 2.2 转义格式
+
+| 格式 | 说明 | 示例 |
+|------|------|------|
+| `\xxxxxx` | 6 位十六进制（完整 Unicode） | `\000031` = "1" |
+| `\xxxx` | 4 位十六进制 | `\0031` = "1" |
+| `\xxx` | 3 位十六进制 | `\31` = "1" |
+
+**推荐使用 4 位或 6 位格式**，避免歧义。
+
+### 2.3 完整转义示例
+
+```
+原始ID          CSS转义形式
+---------       -------------
+1               #\31 或 #\000031
+123             #\31\33 或 #\000031\000033
+1a              #\31 a（1后加空格分隔）
+a1              #a\31
+a-b             #a\-b
+```
+
+---
+
+## 3. JavaScript 中的正确用法
+
+### 3.1 方法一：CSS 转义（推荐）
+
+```javascript
+// 转义数字开头的 ID
+document.querySelector('#\\31');       // 对应 "1"，需双反斜杠转义
+document.querySelector('#\\31\\33');   // 对应 "13"
+document.querySelector('#\\31 a');     // 对应 "1a"，空格分隔
+
+// 更清晰的方式：使用 CSS.escape()
+const id = '123';
+document.querySelector('#' + CSS.escape(id));
+```
+
+### 3.2 方法二：CSS.escape()（现代浏览器）
+
+```javascript
+const id = '1';
+const element = document.querySelector('#' + CSS.escape(id));
+// 或者直接
+const element = document.querySelector(CSS.escape(id));
+```
+
+`CSS.escape()` 会自动处理：
+- 数字开头的 ID
+- 特殊字符（如 `.`、`:`、`#`）
+- Unicode 字符
+
+### 3.3 方法三：getElementById()（绕过选择器语法）
+
+```javascript
+// getElementById() 遵循 HTML 规范，不受 CSS 选择器语法限制
+document.getElementById('1');      // ✅ 正常工作
+document.getElementById('123');    // ✅ 正常工作
+```
+
+**适用场景**：只需要获取单个元素时，`getElementById()` 是更简单直接的选择。
+
+### 3.4 方法四：属性选择器
+
+```javascript
+// 使用属性选择器绕过语法限制
+document.querySelector('[id="1"]');      // ✅ 正常工作
+document.querySelector('[id="123"]');    // ✅ 正常工作
+```
+
+---
+
+## 4. 特殊字符处理
+
+### 4.1 常见需要转义的字符
+
+| 字符 | CSS 转义 | 说明 |
+|------|----------|------|
+| `.` | `\.` | 点号是类选择器语法 |
+| `#` | `\#` | 井号是 ID 选择器语法 |
+| `:` | `\:` | 冒号是伪类/伪元素语法 |
+| `[` | `\[` | 方括号是属性选择器语法 |
+| `空格` | `\ ` | 空格是选择器分隔符 |
+| `-` | `\-` | 开头的短横线需转义（避免被解析为负数） |
+
+### 4.2 完整示例
+
+```javascript
+// ID 包含特殊字符
+<div id="my.class">...</div>     → document.querySelector('#my\\.class')
+<div id="a:b">...</div>          → document.querySelector('#a\\:b')
+<div id="a[0]">...</div>         → document.querySelector('#a\\[0\\]')
+
+// 类名包含特殊字符
+<div class="a.b">...</div>       → document.querySelector('.a\\.b')
+
+// 混合场景
+<div id="1.2.3">...</div>        → document.querySelector('#1\\.2\\.3')
+```
+
+---
+
+## 5. querySelector vs getElementById 对比
+
+| 维度 | querySelector | getElementById |
+|------|---------------|----------------|
+| **遵循规范** | CSS 选择器语法 | HTML 规范 |
+| **ID 格式限制** | 不能以数字开头（需转义） | 允许数字开头 |
+| **选择灵活性** | 支持复杂选择器 | 仅限 ID |
+| **性能** | 略慢（需要解析器） | 略快（哈希查找） |
+| **兼容性** | IE7+（有限），现代浏览器全支持 | 所有浏览器 |
+
+### 5.1 选择建议
+
+```
+获取单个元素，ID 以数字开头？
+  → 是 → getElementById() 或 [id="xxx"]
+  → 否 → querySelector() 更灵活
+```
+
+---
+
+## 6. 常见错误案例
+
+### 6.1 错误写法
+
+```javascript
+// ❌ 数字开头的 ID 未转义
+document.querySelector('#1');
+document.querySelector('#123');
+
+// ❌ 类名中包含点号未转义
+document.querySelector('.my.class');  // 会被解析为 "my" 类 + "class" 类
+
+// ❌ 伪类语法未转义
+document.querySelector(':hover');     // 会匹配 :hover 伪类
+```
+
+### 6.2 正确写法
+
+```javascript
+// ✅ 数字开头的 ID
+document.querySelector('#\\31');
+document.querySelector('#' + CSS.escape('1'));
+document.getElementById('1');
+
+// ✅ 类名中的点号
+document.querySelector('.my\\.class');
+
+// ✅ 使用 CSS.escape() 自动处理
+const className = 'my.class';
+document.querySelector('.' + CSS.escape(className));
+```
+
+---
+
+## 7. 实用工具函数
+
+### 7.1 生成安全的选择器
+
+```javascript
+/**
+ * 将任意字符串转换为有效的 CSS 选择器
+ * @param {string} id - 原始 ID
+ * @returns {string} - 可用于 querySelector 的字符串
+ */
+function toSelector(id) {
+  // 如果是纯数字或数字开头，使用 CSS.escape
+  if (/^\d/.test(id)) {
+    return '#' + CSS.escape(id);
+  }
+  // 如果包含特殊字符
+  if (/[.#:[\]()]/.test(id)) {
+    return '#' + CSS.escape(id);
+  }
+  // 普通 ID
+  return '#' + id;
+}
+
+// 使用
+toSelector('1');        // "#\\31"
+toSelector('123');     // "#\\31\\33\\33"
+toSelector('my-id');   // "#my-id"
+```
+
+### 7.2 测试工具
+
+```javascript
+/**
+ * 测试给定 ID 是否可以被 querySelector 正常选择
+ */
+function testSelector(id) {
+  try {
+    const el = document.querySelector('#' + CSS.escape(id));
+    return { success: true, element: el };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// 使用
+testSelector('1');     // { success: true, element: div }
+testSelector('123');   // { success: true, element: div }
+```
+
+---
+
+## 8. 参考资料
+
+- [MDN - CSS escape](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_escape)
+- [MDN - CSS.escape()](https://developer.mozilla.org/en-US/docs/Web/API/CSS/escape)
+- [CSS Syntax Level 3 - identifier](https://www.w3.org/TR/css-syntax-3/#identifier)
+- [HTML spec - id attribute](https://html.spec.whatwg.org/multipage/dom.html#the-id-attribute)
+
+---
+
+## 9. 相关主题
+
+- [CSS 选择器基础](../css/selectors.md)
+- [JavaScript DOM 操作](../js/dom-manipulation.md)

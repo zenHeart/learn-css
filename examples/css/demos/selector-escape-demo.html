@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 选择器转义演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #f0f6fc;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 16px;
+      color: #f0f6fc;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .demo-box {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .demo-box label {
+      display: block;
+      font-size: 12px;
+      color: #8b949e;
+      margin-bottom: 8px;
+    }
+
+    .test-element {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #238636;
+      color: white;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      background: #238636;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn:hover {
+      background: #2ea043;
+    }
+
+    .btn-danger {
+      background: #da3633;
+    }
+
+    .btn-danger:hover {
+      background: #f85149;
+    }
+
+    .result {
+      margin-top: 12px;
+      padding: 12px;
+      background: #0d1117;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 13px;
+    }
+
+    .result.success {
+      border-left: 3px solid #238636;
+    }
+
+    .result.error {
+      border-left: 3px solid #da3633;
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .keyword { color: #ff7b72; }
+    .string { color: #a5d6ff; }
+    .comment { color: #8b949e; }
+    .function { color: #d2a8ff; }
+    .property { color: #79c0ff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    th {
+      color: #f0f6fc;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-pass {
+      background: rgba(35, 134, 54, 0.3);
+      color: #3fb950;
+    }
+
+    .badge-fail {
+      background: rgba(218, 54, 51, 0.3);
+      color: #f85149;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-dot.success { background: #3fb950; }
+    .status-dot.error { background: #f85149; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 CSS 选择器转义演示</h1>
+
+    <!-- 测试区域 -->
+    <div class="section">
+      <h2>交互式测试</h2>
+      
+      <div class="demo-box">
+        <label>输入任意 ID（支持数字开头、特殊字符）</label>
+        <input type="text" id="testId" value="1" placeholder="例如: 1, 123abc, my.id, a:b">
+        
+        <div id="targetElements">
+          <label>对应元素</label>
+          <div id="elementDisplay" style="margin-top:8px;">
+            <span class="test-element" id="testEl">等待输入...</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="updateElement()">更新元素</button>
+      <button class="btn" onclick="testQuerySelector()">测试 querySelector</button>
+      <button class="btn" onclick="testGetElementById()">测试 getElementById</button>
+      <button class="btn" onclick="testAttributeSelector()">测试属性选择器</button>
+      <button class="btn btn-danger" onclick="clearResult()">清空结果</button>
+
+      <div id="result" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- 转义规则 -->
+    <div class="section">
+      <h2>转义规则速查</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>原始 ID</th>
+            <th>CSS 转义写法</th>
+            <th>CSS.escape() 结果</th>
+            <th>getElementById</th>
+          </tr>
+        </thead>
+        <tbody id="escapeTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 常见错误 -->
+    <div class="section">
+      <h2>常见错误案例</h2>
+      <div id="errorCases"></div>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block" id="codeExample"></div>
+    </div>
+  </div>
+
+  <script>
+    // 测试数据
+    const testCases = [
+      { id: '1', desc: '数字开头' },
+      { id: '123', desc: '纯数字' },
+      { id: '1a', desc: '数字+字母' },
+      { id: 'a1', desc: '字母+数字' },
+      { id: 'my-id', desc: '普通连字符' },
+      { id: 'my.id', desc: '含点号' },
+      { id: 'a:b', desc: '含冒号' },
+      { id: 'a[0]', desc: '含方括号' },
+      { id: 'a b', desc: '含空格' },
+    ];
+
+    // 初始化测试元素
+    function initElements() {
+      const container = document.getElementById('targetElements');
+      const existingElements = container.querySelectorAll('.test-element');
+      existingElements.forEach(el => el.remove());
+
+      testCases.forEach(testCase => {
+        const el = document.createElement('span');
+        el.className = 'test-element';
+        el.id = testCase.id;
+        el.textContent = testCase.id;
+        el.style.marginRight = '8px';
+        el.style.marginBottom = '8px';
+        el.style.display = 'inline-block';
+        container.appendChild(el);
+      });
+    }
+
+    // 更新单个元素
+    function updateElement() {
+      const id = document.getElementById('testId').value.trim();
+      if (!id) {
+        showResult('请输入有效的 ID', 'error');
+        return;
+      }
+
+      // 移除已存在的同名元素
+      const existing = document.getElementById(id);
+      if (existing) existing.remove();
+
+      // 创建新元素
+      const el = document.createElement('span');
+      el.className = 'test-element';
+      el.id = id;
+      el.textContent = id;
+      el.style.marginRight = '8px';
+      el.style.marginBottom = '8px';
+      el.style.display = 'inline-block';
+
+      const display = document.getElementById('elementDisplay');
+      display.innerHTML = '';
+      display.appendChild(el);
+      showResult(`✅ 已创建元素: <code>id="${escapeHtml(id)}"</code>`, 'success');
+    }
+
+    // 测试 querySelector
+    function testQuerySelector() {
+      const id = document.getElementById('testId').value.trim();
+      if (!id) {
+        showResult('请先输入 ID', 'error');
+        return;
+      }
+
+      try {
+        // 模拟用户的错误写法
+        const wrongSelector = '#' + id;
+        try {
+          document.querySelector(wrongSelector);
+        } catch (e) {
+          // 预期会失败
+        }
+
+        // 正确写法
+        const escaped = CSS.escape(id);
+        const element = document.querySelector('#' + escaped);
+
+        if (element) {
+          showResult(`✅ querySelector('#${escapeHtml(escaped)}') 成功找到元素`, 'success');
+        } else {
+          showResult(`❌ querySelector 未能找到 id="${escapeHtml(id)}" 的元素\n提示：请先点击「更新元素」创建测试元素`, 'error');
+        }
+      } catch (e) {
+        showResult(`❌ querySelector 错误: ${e.message}`, 'error');
+      }
+    }
+
+    // 测试 getElementById
+    function testGetElementById() {
+      const id = document.getElementById('testId').value.trim();
+      if (!id) {
+        showResult('请先输入 ID', 'error');
+        return;
+      }
+
+      try {
+        const element = document.getElementById(id);
+        if (element) {
+          showResult(`✅ getElementById("${escapeHtml(id)}") 成功找到元素\n注意：getElementById 不受 CSS 选择器语法限制`, 'success');
+        } else {
+          showResult(`❌ getElementById 未能找到 id="${escapeHtml(id)}" 的元素\n提示：请先点击「更新元素」创建测试元素`, 'error');
+        }
+      } catch (e) {
+        showResult(`❌ getElementById 错误: ${e.message}`, 'error');
+      }
+    }
+
+    // 测试属性选择器
+    function testAttributeSelector() {
+      const id = document.getElementById('testId').value.trim();
+      if (!id) {
+        showResult('请先输入 ID', 'error');
+        return;
+      }
+
+      try {
+        const element = document.querySelector('[id="' + id.replace(/"/g, '\\"') + '"]');
+        if (element) {
+          showResult(`✅ 属性选择器 [id="${escapeHtml(id)}"] 成功找到元素`, 'success');
+        } else {
+          showResult(`❌ 属性选择器未能找到 id="${escapeHtml(id)}" 的元素\n提示：请先点击「更新元素」创建测试元素`, 'error');
+        }
+      } catch (e) {
+        showResult(`❌ 属性选择器错误: ${e.message}`, 'error');
+      }
+    }
+
+    // 显示结果
+    function showResult(message, type) {
+      const result = document.getElementById('result');
+      result.style.display = 'block';
+      result.className = 'result ' + type;
+      result.innerHTML = message.replace(/\n/g, '<br>');
+    }
+
+    // 清空结果
+    function clearResult() {
+      document.getElementById('result').style.display = 'none';
+    }
+
+    // HTML 转义
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // 初始化转义规则表
+    function initEscapeTable() {
+      const table = document.getElementById('escapeTable');
+      table.innerHTML = testCases.map(tc => {
+        const escaped = CSS.escape(tc.id);
+        const canQuerySelector = /^[^0-9]/.test(tc.id) || tc.id.length > 0;
+        let status = '';
+        try {
+          document.querySelector('#' + escaped);
+          status = '<span class="badge badge-pass">✅</span>';
+        } catch {
+          status = '<span class="badge badge-fail">❌</span>';
+        }
+
+        return `
+          <tr>
+            <td><code>"${escapeHtml(tc.id)}"</code></td>
+            <td><code>#${escapeHtml(escaped)}</code></td>
+            <td><code>"${escapeHtml(escaped)}"</code></td>
+            <td><span class="badge badge-pass">✅ 正常</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 初始化错误案例
+    function initErrorCases() {
+      const container = document.getElementById('errorCases');
+      const errors = [
+        { code: "document.querySelector('#1')", desc: '数字开头的 ID 未转义' },
+        { code: "document.querySelector('.my.class')", desc: '类名中含点号未转义，被解析为两个类' },
+        { code: "document.querySelector(':hover')", desc: '伪类语法未转义' },
+      ];
+
+      container.innerHTML = errors.map(e => `
+        <div class="demo-box" style="margin-bottom:12px;">
+          <div class="code-block"><span class="function">document</span>.<span class="property">querySelector</span>(<span class="string">'${escapeHtml(e.code.split("querySelector('")[1].replace("')", ""))}'</span>)</div>
+          <div style="margin-top:8px;color:#8b949e;font-size:13px;">
+            <span class="status-dot error"></span>${e.desc}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 初始化代码示例
+    function initCodeExample() {
+      const code = `<span class="comment">// 1. CSS.escape() 推荐用法</span>
+<span class="keyword">const</span> id = <span class="string">'123'</span>;
+<span class="keyword">const</span> el = document.<span class="function">querySelector</span>(<span class="string">'#'</span> + CSS.<span class="function">escape</span>(id));
+
+<span class="comment">// 2. getElementById() 简单场景</span>
+<span class="keyword">const</span> el = document.<span class="function">getElementById</span>(<span class="string">'123'</span>);
+
+<span class="comment">// 3. 属性选择器</span>
+<span class="keyword">const</span> el = document.<span class="function">querySelector</span>(<span class="string">'[id="123"]'</span>);
+
+<span class="comment">// 4. 完整转义（数字)</span>
+<span class="comment">// #123 → #\\31\\33\\33</span>
+<span class="keyword">const</span> el = document.<span class="function">querySelector</span>(<span class="string">'#\\\\31\\\\33\\\\33'</span>);`;
+
+      document.getElementById('codeExample').innerHTML = code;
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      initElements();
+      initEscapeTable();
+      initErrorCases();
+      initCodeExample();
+    });
+  </script>
+</body>
+</html>
