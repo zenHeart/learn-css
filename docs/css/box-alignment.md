@@ -1,0 +1,282 @@
+# CSS Box Alignment
+
+## 概述
+
+CSS Box Alignment 模块（CSS Box Alignment Level 3）定义了 CSS 中各种布局模型（Block、Flex、Grid、Table）的对齐规范，旨在创建统一的对齐方式。
+
+> 核心目标：让 Flexbox、Grid、Block 的对齐属性保持一致。
+
+## 核心概念
+
+### 两轴体系
+
+| 轴 | 说明 | 别名 |
+|----|------|------|
+| **Main Axis（主轴）** | 元素排列方向 | Justify Axis |
+| **Cross Axis（交叉轴）** | 垂直于主轴的方向 | Alignment Axis |
+
+### 关键属性分布
+
+| 属性 | 作用范围 | 作用轴 |
+|------|---------|--------|
+| `justify-content` | 容器 | 主轴 |
+| `align-content` | 容器 | 交叉轴 |
+| `justify-items` | 容器 | 主轴 |
+| `align-items` | 容器 | 交叉轴 |
+| `justify-self` | 子元素 | 主轴 |
+| `align-self` | 子元素 | 交叉轴 |
+
+## 关键值
+
+所有对齐属性共享以下值：
+
+| 值 | 说明 | 适用场景 |
+|----|------|---------|
+| `normal` | 默认行为（stretch 对于 flex/grid，start 对于 block） | 通用 |
+| `start` | 从起始位置对齐 | 通用 |
+| `end` | 从结束位置对齐 | 通用 |
+| `center` | 居中对齐 | 通用 |
+| `stretch` | 拉伸至填满容器 | Flex/Grid 项目 |
+| `baseline` | 按基线对齐 | 文字内容对齐 |
+| `first baseline` | 首个基线对齐 | 跨轴对齐 |
+| `last baseline` | 末级基线对齐 | 跨轴对齐 |
+| `space-between` | 均匀分布，首尾贴边 | 主轴 |
+| `space-around` | 均匀分布，首尾半间距 | 主轴 |
+| `space-evenly` | 均匀分布，间距相等 | 主轴 |
+
+## Flexbox 对齐
+
+### 容器属性
+
+```css
+.container {
+  display: flex;
+
+  /* 主轴对齐（默认：stretch） */
+  justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;
+
+  /* 交叉轴对齐（默认：stretch） */
+  align-items: stretch | flex-start | flex-end | center | baseline;
+
+  /* 多行时交叉轴对齐（默认：stretch） */
+  align-content: stretch | flex-start | flex-end | center | space-between | space-around | space-evenly;
+}
+```
+
+### 子元素属性
+
+```css
+.item {
+  /* 单独覆盖 align-items */
+  align-self: auto | stretch | flex-start | flex-end | center | baseline;
+}
+```
+
+### 对齐示例
+
+```html
+<div class="flex-demo">
+  <div class="box">1</div>
+  <div class="box tall">2</div>
+  <div class="box">3</div>
+</div>
+
+<style>
+.flex-demo {
+  display: flex;
+  height: 200px;
+  gap: 8px;
+  /* 水平居中，垂直拉伸 */
+  justify-content: center;
+  align-items: stretch;
+}
+
+.box {
+  width: 80px;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.box.tall {
+  height: 120px;
+}
+</style>
+```
+
+## Grid 对齐
+
+### 容器属性
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(2, 80px);
+  height: 300px;
+  gap: 16px;
+
+  /* 所有网格项的主轴对齐 */
+  justify-items: stretch | start | end | center;
+
+  /* 所有网格项的交叉轴对齐 */
+  align-items: stretch | start | end | center | baseline;
+
+  /* 整个网格在容器中的主轴对齐 */
+  justify-content: start | end | center | stretch | space-between | space-around | space-evenly;
+
+  /* 整个网格在容器中的交叉轴对齐 */
+  align-content: start | end | center | stretch | space-between | space-around | space-evenly;
+}
+```
+
+### 子元素属性
+
+```css
+.item {
+  /* 覆盖容器的 justify-items */
+  justify-self: stretch | start | end | center;
+
+  /* 覆盖容器的 align-items */
+  align-self: stretch | start | end | center | baseline;
+}
+```
+
+### 简写属性
+
+```css
+/* place-items: <align-items> / <justify-items> */
+place-items: center / start;
+
+/* place-content: <align-content> / <justify-content> */
+place-content: center / space-between;
+
+/* place-self: <align-self> / <justify-self> */
+place-self: center / end;
+```
+
+## Block 对齐
+
+Block 布局主要使用 `justify-self` 和 `align-self`：
+
+```css
+.block-container {
+  height: 200px;
+  border: 1px solid #ccc;
+}
+
+.block-item {
+  /* 主轴（块方向）对齐 */
+  justify-self: start | end | center | stretch;
+
+  /* 交叉轴对齐（如果有 height） */
+  align-self: start | end | center | stretch;
+}
+```
+
+> **注意**：在标准 Block 布局中，`justify-self` 通常不生效（因为块方向没有"justify"概念），需要开启 `display: inline-block` 或使用绝对定位。
+
+## Baseline 对齐
+
+`baseline` 用于对齐具有文本内容的元素：
+
+```css
+.flex-container {
+  display: flex;
+  align-items: baseline;
+}
+
+.flex-container .tall {
+  font-size: 32px;
+}
+
+.flex-container .small {
+  font-size: 14px;
+}
+```
+
+```html
+<div class="flex-container">
+  <div class="item tall">大文字ABC</div>
+  <div class="item small">小文字xyz</div>
+  <div class="item">普通文字</div>
+</div>
+```
+
+## gap 属性
+
+`gap` 用于设置行列间距，是 `row-gap` 和 `column-gap` 的简写：
+
+```css
+.container {
+  display: flex;
+  gap: 16px;          /* 行列统一间距 */
+  gap: 16px 24px;     /* 行间距 16px，列间距 24px */
+  row-gap: 16px;      /* 行间距 */
+  column-gap: 24px;   /* 列间距 */
+}
+```
+
+## 各布局系统对比
+
+| 布局 | 主轴对齐 | 交叉轴对齐 | 自身对齐 |
+|------|---------|-----------|---------|
+| **Flexbox** | `justify-content` | `align-items`（容器）/ `align-content`（多行） | `align-self` |
+| **Grid** | `justify-items`（容器）/ `justify-content`（网格位置） | `align-items`（容器）/ `align-content`（网格位置） | `justify-self` + `align-self` |
+| **Block** | N/A | N/A | `justify-self` + `align-self`（非标准） |
+
+## 实用技巧
+
+### 1. Flex 子元素居中
+
+```css
+.center-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+```
+
+### 2. Grid 项目居中
+
+```css
+.center-grid {
+  display: grid;
+  place-items: center; /* 等价于 align-items: center; justify-items: center; */
+}
+```
+
+### 3. 最后一个元素靠右
+
+```css
+.last-right {
+  display: flex;
+  justify-content: space-between;
+}
+```
+
+### 4. Flex 底部贴齐
+
+```css
+.items-bottom {
+  display: flex;
+  align-items: flex-end;
+}
+```
+
+## 浏览器支持
+
+CSS Box Alignment 在现代浏览器中支持良好：
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| Flex 对齐 | ✅ 29+ | ✅ 28+ | ✅ 9+ | ✅ 12+ |
+| Grid 对齐 | ✅ 29+ | ✅ 28+ | ✅ 9+ | ✅ 12+ |
+| `gap` | ✅ 66+ | ✅ 61+ | ✅ 12+ | ✅ 16+ |
+| `baseline` | ✅ 57+ | ✅ 52+ | ✅ 11+ | ✅ 79+ |
+
+## 参考资源
+
+- [MDN CSS Box Alignment Overview](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment)
+- [MDN Box Alignment in Flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment/Box_alignment_in_flexbox)
+- [MDN Box Alignment in Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment/Box_alignment_in_grid_layout)
+- [CSS Box Alignment W3C Spec](https://www.w3.org/TR/css-align-3/)

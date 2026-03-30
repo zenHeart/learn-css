@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Alignment 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 8px; min-height: 120px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: flex-start; }
+    .box { width: 60px; height: 60px; background: #3b82f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; }
+    .box.tall { height: 90px; }
+    .box.wide { width: 90px; }
+    .box.purple { background: #a371f7; }
+    .box.green { background: #3fb950; }
+    .box.orange { background: #f0883e; }
+    .box.pink { background: #db61a2; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .label { font-size: 13px; color: #8b949e; min-width: 120px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; }
+    .grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Box Alignment 交互演示</h1>
+
+    <!-- Flexbox 主轴对齐 -->
+    <div class="section">
+      <h2>Flexbox — justify-content（主轴对齐）</h2>
+      <div class="controls" id="jc-controls">
+        <button class="btn active" data-value="flex-start">flex-start</button>
+        <button class="btn" data-value="flex-end">flex-end</button>
+        <button class="btn" data-value="center">center</button>
+        <button class="btn" data-value="space-between">space-between</button>
+        <button class="btn" data-value="space-around">space-around</button>
+        <button class="btn" data-value="space-evenly">space-evenly</button>
+      </div>
+      <div class="demo-area" id="jc-demo" style="justify-content: flex-start;">
+        <div class="box">1</div>
+        <div class="box purple">2</div>
+        <div class="box green">3</div>
+      </div>
+      <div class="code-block" id="jc-code">justify-content: flex-start;</div>
+    </div>
+
+    <!-- Flexbox 交叉轴对齐 -->
+    <div class="section">
+      <h2>Flexbox — align-items（交叉轴对齐）</h2>
+      <div class="controls" id="ai-controls">
+        <button class="btn active" data-value="stretch">stretch</button>
+        <button class="btn" data-value="flex-start">flex-start</button>
+        <button class="btn" data-value="flex-end">flex-end</button>
+        <button class="btn" data-value="center">center</button>
+        <button class="btn" data-value="baseline">baseline</button>
+      </div>
+      <div class="demo-area" id="ai-demo" style="align-items: stretch; height: 120px;">
+        <div class="box">1</div>
+        <div class="box tall purple">2 tall</div>
+        <div class="box green">3</div>
+      </div>
+      <div class="code-block" id="ai-code">align-items: stretch;</div>
+      <p class="desc">baseline 值使所有项目按文字基线对齐，适用于含有不同字号文本的对齐场景。</p>
+    </div>
+
+    <!-- Flexbox align-content（多行时交叉轴） -->
+    <div class="section">
+      <h2>Flexbox — align-content（多行/列时交叉轴对齐）</h2>
+      <p class="desc" style="margin-bottom:12px;">flex-wrap: wrap 后多行时的对齐，需要容器高度足够</p>
+      <div class="controls" id="ac-controls">
+        <button class="btn active" data-value="stretch">stretch</button>
+        <button class="btn" data-value="flex-start">flex-start</button>
+        <button class="btn" data-value="flex-end">flex-end</button>
+        <button class="btn" data-value="center">center</button>
+        <button class="btn" data-value="space-between">space-between</button>
+        <button class="btn" data-value="space-around">space-around</button>
+      </div>
+      <div class="demo-area" id="ac-demo" style="flex-wrap: wrap; align-content: stretch; height: 200px; align-items: stretch;" id="ai-demo">
+        <div class="box" style="width:60px;height:60px;">1</div>
+        <div class="box purple" style="width:60px;height:60px;">2</div>
+        <div class="box green" style="width:60px;height:60px;">3</div>
+        <div class="box orange" style="width:60px;height:60px;">4</div>
+        <div class="box pink" style="width:60px;height:60px;">5</div>
+        <div class="box" style="width:60px;height:60px;">6</div>
+      </div>
+      <div class="code-block" id="ac-code">align-content: stretch;</div>
+    </div>
+
+    <!-- Grid justify-items / align-items -->
+    <div class="section">
+      <h2>Grid — justify-items / align-items（网格项对齐）</h2>
+      <div class="controls" id="gi-controls">
+        <button class="btn" data-value="stretch">stretch</button>
+        <button class="btn" data-value="start">start</button>
+        <button class="btn" data-value="end">end</button>
+        <button class="btn active" data-value="center">center</button>
+      </div>
+      <div class="demo-area" id="gi-demo" style="display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(2, 60px); gap: 8px; justify-items: center; align-items: center;">
+        <div class="box" style="width:60px;height:60px;">1</div>
+        <div class="box purple tall" style="width:60px;">2</div>
+        <div class="box green" style="width:60px;height:60px;">3</div>
+        <div class="box orange" style="width:60px;height:60px;">4</div>
+        <div class="box pink tall" style="width:60px;">5</div>
+        <div class="box" style="width:60px;height:60px;">6</div>
+      </div>
+      <div class="code-block" id="gi-code">justify-items: center; align-items: center;</div>
+    </div>
+
+    <!-- Grid justify-content / align-content -->
+    <div class="section">
+      <h2>Grid — justify-content / align-content（整个网格对齐）</h2>
+      <div class="controls" id="gc-controls">
+        <button class="btn active" data-value="start">start</button>
+        <button class="btn" data-value="center">center</button>
+        <button class="btn" data-value="end">end</button>
+        <button class="btn" data-value="stretch">stretch</button>
+        <button class="btn" data-value="space-between">space-between</button>
+      </div>
+      <div class="demo-area" id="gc-demo" style="display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(2, 50px); gap: 8px; justify-content: start; align-content: start; height: 180px; background: #1a1a1a;">
+        <div class="box" style="width:60px;height:50px;">1</div>
+        <div class="box purple" style="width:60px;height:50px;">2</div>
+        <div class="box green" style="width:60px;height:50px;">3</div>
+        <div class="box orange" style="width:60px;height:50px;">4</div>
+        <div class="box pink" style="width:60px;height:50px;">5</div>
+        <div class="box" style="width:60px;height:50px;">6</div>
+      </div>
+      <div class="code-block" id="gc-code">justify-content: start; align-content: start;</div>
+      <p class="desc">灰色背景显示网格容器边界，观察整个网格在容器中的对齐位置变化。</p>
+    </div>
+
+    <!-- Grid 自身对齐 -->
+    <div class="section">
+      <h2>Grid — justify-self / align-self（单个项目自身对齐）</h2>
+      <div class="controls" id="gs-controls">
+        <button class="btn active" data-value="start">start</button>
+        <button class="btn" data-value="end">end</button>
+        <button class="btn" data-value="center">center</button>
+        <button class="btn" data-value="stretch">stretch</button>
+      </div>
+      <div class="demo-area" id="gs-demo" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 80px); gap: 8px;">
+        <div class="box" style="justify-self: start; align-self: start;">1</div>
+        <div class="box purple" style="justify-self: start; align-self: start;">2</div>
+        <div class="box green" style="justify-self: start; align-self: start;">3</div>
+        <div class="box orange">4</div>
+        <div class="box pink">5</div>
+        <div class="box">6</div>
+      </div>
+      <div class="code-block" id="gs-code">/* 项目 1, 2, 3 */ justify-self: start; align-self: start;</div>
+    </div>
+
+    <!-- gap 演示 -->
+    <div class="section">
+      <h2>gap（间距）</h2>
+      <div class="controls" id="gap-controls">
+        <button class="btn active" data-value="8px">gap: 8px</button>
+        <button class="btn" data-value="16px">gap: 16px</button>
+        <button class="btn" data-value="24px">gap: 24px</button>
+        <button class="btn" data-value="8px 24px">gap: 8px 24px</button>
+      </div>
+      <div class="demo-area" id="gap-demo" style="gap: 8px; flex-wrap: wrap;">
+        <div class="box">1</div>
+        <div class="box purple">2</div>
+        <div class="box green">3</div>
+        <div class="box orange">4</div>
+        <div class="box pink">5</div>
+      </div>
+      <div class="code-block" id="gap-code">gap: 8px;</div>
+    </div>
+
+    <!-- place-items 简写 -->
+    <div class="section">
+      <h2>place-items 简写</h2>
+      <div class="controls" id="pi-controls">
+        <button class="btn active" data-value="center / center">center / center</button>
+        <button class="btn" data-value="center / start">center / start</button>
+        <button class="btn" data-value="stretch / end">stretch / end</button>
+      </div>
+      <div class="demo-area" id="pi-demo" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 70px); gap: 8px; place-items: center / center;">
+        <div class="box">1</div>
+        <div class="box purple tall">2</div>
+        <div class="box green">3</div>
+        <div class="box orange">4</div>
+        <div class="box pink tall">5</div>
+        <div class="box">6</div>
+      </div>
+      <div class="code-block" id="pi-code">place-items: center / center; /* align-items / justify-items */</div>
+    </div>
+
+    <p class="info">CSS Box Alignment 统一了 Flexbox、Grid、Block 的对齐属性。交互演示基于 learn-css 仓库示例风格。</p>
+  </div>
+
+  <script>
+    function setupControls(containerId, demoId, codeId, properties) {
+      const container = document.getElementById(containerId);
+      const demo = document.getElementById(demoId);
+      const code = document.getElementById(codeId);
+
+      container.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const value = btn.dataset.value;
+          demo.style[properties.style] = value;
+          code.textContent = `${properties.prop}: ${value};`;
+        });
+      });
+    }
+
+    // justify-content
+    setupControls('jc-controls', 'jc-demo', 'jc-code', {
+      style: 'justifyContent',
+      prop: 'justify-content'
+    });
+
+    // align-items
+    setupControls('ai-controls', 'ai-demo', 'ai-code', {
+      style: 'alignItems',
+      prop: 'align-items'
+    });
+
+    // align-content
+    setupControls('ac-controls', 'ac-demo', 'ac-code', {
+      style: 'alignContent',
+      prop: 'align-content'
+    });
+
+    // Grid justify-items / align-items
+    setupControls('gi-controls', 'gi-demo', 'gi-code', {
+      style: 'justifyItems',
+      prop: 'justify-items / align-items'
+    });
+
+    // Grid justify-content / align-content
+    setupControls('gc-controls', 'gc-demo', 'gc-code', {
+      style: 'justifyContent',
+      prop: 'justify-content'
+    });
+
+    // Grid self
+    setupControls('gs-controls', 'gs-demo', 'gs-code', {
+      style: 'justifySelf',
+      prop: 'justify-self / align-self'
+    });
+
+    // gap
+    setupControls('gap-controls', 'gap-demo', 'gap-code', {
+      style: 'gap',
+      prop: 'gap'
+    });
+
+    // place-items
+    setupControls('pi-controls', 'pi-demo', 'pi-code', {
+      style: 'placeItems',
+      prop: 'place-items'
+    });
+  </script>
+</body>
+</html>
