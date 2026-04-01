@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>典型 CSS 布局交互演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-area h3 {
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    .demo-area p {
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .demo-box {
+      background: #0f0f1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-box h4 {
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+    .code-block {
+      background: #0d0d1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 12px 0;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      color: #a0a0c0;
+      white-space: pre-wrap;
+    }
+    .code-block .keyword { color: #c678dd; }
+    .code-block .string { color: #98c379; }
+    .code-block .property { color: #e5c07b; }
+    .code-block .value { color: #61afef; }
+    .code-block .selector { color: #e06c75; }
+    .code-block .comment { color: #5c6370; font-style: italic; }
+    /* Layout Demos */
+    .single-column-demo {
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      min-height: 200px;
+    }
+    .single-column-demo header {
+      background: #667eea;
+      padding: 12px;
+      text-align: center;
+      border-radius: 6px 6px 0 0;
+    }
+    .single-column-demo main {
+      flex: 1;
+      padding: 12px;
+      background: #1a1a2e;
+    }
+    .single-column-demo footer {
+      background: #764ba2;
+      padding: 12px;
+      text-align: center;
+      border-radius: 0 0 6px 6px;
+    }
+    .two-column-demo {
+      display: flex;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      min-height: 150px;
+      overflow: hidden;
+    }
+    .two-column-demo .sidebar {
+      width: 120px;
+      background: #764ba2;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    .two-column-demo .content {
+      flex: 1;
+      background: #1a1a2e;
+      padding: 12px;
+    }
+    .three-column-demo {
+      display: flex;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      min-height: 120px;
+      overflow: hidden;
+    }
+    .three-column-demo .left-sidebar,
+    .three-column-demo .right-sidebar {
+      width: 80px;
+      background: #764ba2;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    .three-column-demo .main {
+      flex: 1;
+      background: #1a1a2e;
+      padding: 12px;
+    }
+    .holy-grail-demo {
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      min-height: 200px;
+      overflow: hidden;
+    }
+    .holy-grail-demo .body {
+      display: flex;
+      flex: 1;
+    }
+    .holy-grail-demo header,
+    .holy-grail-demo footer {
+      background: #667eea;
+      padding: 12px;
+      text-align: center;
+    }
+    .holy-grail-demo .left-sidebar,
+    .holy-grail-demo .right-sidebar {
+      width: 80px;
+      background: #764ba2;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    .holy-grail-demo .main {
+      flex: 1;
+      background: #1a1a2e;
+      padding: 12px;
+    }
+    .grid-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .grid-demo .grid-item {
+      background: #764ba2;
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+    }
+    .masonry-demo {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      grid-auto-rows: 60px;
+      gap: 8px;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .masonry-demo .masonry-item {
+      background: #764ba2;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+    .masonry-demo .masonry-item:nth-child(odd) { grid-row: span 3; }
+    .masonry-demo .masonry-item:nth-child(even) { grid-row: span 2; }
+    .flex-center-demo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      height: 150px;
+      background: #1a1a2e;
+    }
+    .flex-center-demo .center-box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 10px 20px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    button:hover { background: #333355; border-color: #667eea; }
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+    .info-box {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .info-box h4 { color: #667eea; margin-bottom: 8px; }
+    .info-box p { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .comparison-table th {
+      background: #1a1a2e;
+      color: #667eea;
+    }
+    .comparison-table td {
+      background: #0d0d1a;
+      color: #aaa;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #333;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-right: 4px;
+    }
+    .tag.recommended {
+      background: #667eea;
+      color: white;
+    }
+    .tag.traditional {
+      background: #764ba2;
+      color: white;
+    }
+    .tag.modern {
+      background: #98c379;
+      color: #0a0a0f;
+    }
+    code {
+      background: #1a1a2e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #e5c07b;
+    }
+  </style>
+</head>
+<body>
+  <h1>典型 CSS 布局交互演示</h1>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview">总览</button>
+    <button class="tab-btn" data-tab="single">单栏布局</button>
+    <button class="tab-btn" data-tab="two">两栏布局</button>
+    <button class="tab-btn" data-tab="three">三栏布局</button>
+    <button class="tab-btn" data-tab="holy-grail">圣杯布局</button>
+    <button class="tab-btn" data-tab="grid">Grid 布局</button>
+    <button class="tab-btn" data-tab="comparison">方案对比</button>
+  </div>
+
+  <div id="tab-overview" class="tab-content active">
+    <div class="demo-area">
+      <h3>CSS 布局方案总览</h3>
+      <p>CSS 布局经历了从 Table 到 Float 到 Flexbox 再到 CSS Grid 的演进。以下是常见布局模式及其适用场景：</p>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>布局类型</th>
+            <th>推荐方案</th>
+            <th>适用场景</th>
+            <th>难度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>单栏布局</td>
+            <td><span class="tag recommended">Flexbox</span></td>
+            <td>博客、文档</td>
+            <td>入门</td>
+          </tr>
+          <tr>
+            <td>两栏布局</td>
+            <td><span class="tag recommended">Flexbox/Grid</span></td>
+            <td>后台、侧边栏</td>
+            <td>入门</td>
+          </tr>
+          <tr>
+            <td>三栏布局</td>
+            <td><span class="tag recommended">Grid</span></td>
+            <td>门户网站</td>
+            <td>中等</td>
+          </tr>
+          <tr>
+            <td>圣杯布局</td>
+            <td><span class="tag modern">Flexbox</span></td>
+            <td>管理后台</td>
+            <td>中等</td>
+          </tr>
+          <tr>
+            <td>卡片网格</td>
+            <td><span class="tag recommended">Grid auto-fit</span></td>
+            <td>产品列表</td>
+            <td>入门</td>
+          </tr>
+          <tr>
+            <td>瀑布流</td>
+            <td><span class="tag modern">Grid + span</span></td>
+            <td>图片展示</td>
+            <td>中等</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-box">
+        <h4>💡 选择建议</h4>
+        <p>
+          <strong>一维布局</strong>（导航、列表、居中）→ Flexbox<br>
+          <strong>二维布局</strong>（页面框架、卡片网格）→ CSS Grid<br>
+          <strong>传统 Float</strong> → 仅需了解，新项目不再使用
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-single" class="tab-content">
+    <div class="demo-area">
+      <h3>单栏布局 (Single Column)</h3>
+      <p>内容居中，头部、主体、底部垂直排列。Flexbox 方案最简洁。</p>
+      <div class="demo-box">
+        <div class="single-column-demo">
+          <header>Header 头部</header>
+          <main>Main Content 主内容区，自动填充剩余高度</main>
+          <footer>Footer 底部</footer>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.single-column</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">flex-direction</span>: <span class="value">column</span>;
+  <span class="property">min-height</span>: <span class="value">100vh</span>;
+}
+<span class="selector">.single-column main</span> {
+  <span class="property">flex</span>: <span class="value">1</span>; <span class="comment">/* 主内容自动撑满 */</span>
+}</div>
+      <div class="info-box">
+        <h4>Flexbox 优势</h4>
+        <p>
+          相比 Float，无需处理清除浮动问题。<br>
+          相比 Table，语义更清晰，性能更好。<br>
+          相比 absolute 定位，不会脱离文档流。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-two" class="tab-content">
+    <div class="demo-area">
+      <h3>两栏布局 (Two Column)</h3>
+      <p>左侧固定宽度侧栏 + 右侧自适应内容区。</p>
+      <div class="demo-box">
+        <div class="two-column-demo">
+          <aside class="sidebar">Sidebar 250px</aside>
+          <main class="content">Main Content 自适应填充</main>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.two-column</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+}
+<span class="selector">.sidebar</span> {
+  <span class="property">width</span>: <span class="value">250px</span>;
+  <span class="property">flex-shrink</span>: <span class="value">0</span>; <span class="comment">/* 禁止压缩 */</span>
+}
+<span class="selector">.content</span> {
+  <span class="property">flex</span>: <span class="value">1</span>; <span class="comment">/* 自动填充 */</span>
+}</div>
+      <div class="info-box">
+        <h4>关键技巧</h4>
+        <p>
+          <code>flex-shrink: 0</code> 确保侧栏宽度固定不被压缩。<br>
+          <code>flex: 1</code> 让内容区自动填充剩余空间。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-three" class="tab-content">
+    <div class="demo-area">
+      <h3>三栏布局 (Three Column)</h3>
+      <p>左右侧栏固定宽度，中间内容自适应。</p>
+      <div class="demo-box">
+        <div class="three-column-demo">
+          <aside class="left-sidebar">Left</aside>
+          <main class="main">Main Content</main>
+          <aside class="right-sidebar">Right</aside>
+        </div>
+      </div>
+      <div class="code-block"><span class="comment">/* Flexbox 方案 */</span>
+<span class="selector">.three-column</span> { <span class="property">display</span>: <span class="value">flex</span>; }
+<span class="selector">.left-sidebar, .right-sidebar</span> { <span class="property">width</span>: <span class="value">200px</span>; <span class="property">flex-shrink</span>: <span class="value">0</span>; }
+<span class="selector">.main</span> { <span class="property">flex</span>: <span class="value">1</span>; }
+
+<span class="comment">/* Grid 方案（更简洁）*/</span>
+<span class="selector">.three-column</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">200px 1fr 200px</span>;
+}</div>
+    </div>
+  </div>
+
+  <div id="tab-holy-grail" class="tab-content">
+    <div class="demo-area">
+      <h3>圣杯布局 (Holy Grail)</h3>
+      <p>经典五区域布局：Header + Left + Main + Right + Footer。Flexbox 一行搞定。</p>
+      <div class="demo-box">
+        <div class="holy-grail-demo">
+          <header>Header</header>
+          <div class="body">
+            <aside class="left-sidebar">Left</aside>
+            <main class="main">Main Content</main>
+            <aside class="right-sidebar">Right</aside>
+          </div>
+          <footer>Footer</footer>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.holy-grail</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">flex-direction</span>: <span class="value">column</span>;
+  <span class="property">min-height</span>: <span class="value">100vh</span>;
+}
+<span class="selector">.holy-grail .body</span> { <span class="property">display</span>: <span class="value">flex</span>; <span class="property">flex</span>: <span class="value">1</span>; }
+<span class="selector">.holy-grail main</span> { <span class="property">flex</span>: <span class="value">1</span>; }
+<span class="selector">.holy-grail .left-sidebar, .holy-grail .right-sidebar</span> {
+  <span class="property">width</span>: <span class="value">200px</span>;
+  <span class="property">flex-shrink</span>: <span class="value">0</span>;
+}</div>
+      <div class="info-box">
+        <h4>历史回顾</h4>
+        <p>
+          圣杯布局诞生于 2006 年，最初使用 Float 实现，代码复杂。<br>
+          现代 Flexbox 让这个经典布局变得异常简单，10 行 CSS 即可。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-grid" class="tab-content">
+    <div class="demo-area">
+      <h3>Grid 布局</h3>
+      <p>CSS Grid 是二维布局的终极方案，特别适合卡片网格和复杂页面结构。</p>
+      
+      <h4 style="color:#667eea;margin:16px 0 8px;">基础网格</h4>
+      <div class="demo-box">
+        <div class="grid-demo">
+          <div class="grid-item">Item 1</div>
+          <div class="grid-item">Item 2</div>
+          <div class="grid-item">Item 3</div>
+          <div class="grid-item">Item 4</div>
+          <div class="grid-item">Item 5</div>
+          <div class="grid-item">Item 6</div>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.grid</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(3, 1fr)</span>;
+  <span class="property">gap</span>: <span class="value">12px</span>;
+}</div>
+
+      <h4 style="color:#667eea;margin:16px 0 8px;">瀑布流 (Masonry)</h4>
+      <div class="demo-box">
+        <div class="masonry-demo">
+          <div class="masonry-item">1</div>
+          <div class="masonry-item">2</div>
+          <div class="masonry-item">3</div>
+          <div class="masonry-item">4</div>
+          <div class="masonry-item">5</div>
+          <div class="masonry-item">6</div>
+          <div class="masonry-item">7</div>
+          <div class="masonry-item">8</div>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.masonry</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(auto-fill, minmax(120px, 1fr))</span>;
+  <span class="property">grid-auto-rows</span>: <span class="value">60px</span>;
+  <span class="property">grid-auto-flow</span>: <span class="value">dense</span>; <span class="comment">/* 填充空隙 */</span>
+}</div>
+
+      <h4 style="color:#667eea;margin:16px 0 8px;">Flexbox 居中</h4>
+      <div class="demo-box">
+        <div class="flex-center-demo">
+          <div class="center-box"></div>
+        </div>
+      </div>
+      <div class="code-block"><span class="selector">.container</span> {
+  <span class="property">display</span>: <span class="value">flex</span>;
+  <span class="property">justify-content</span>: <span class="value">center</span>;
+  <span class="property">align-items</span>: <span class="value">center</span>;
+  <span class="property">height</span>: <span class="value">300px</span>;
+}</div>
+    </div>
+  </div>
+
+  <div id="tab-comparison" class="tab-content">
+    <div class="demo-area">
+      <h3>布局方案对比</h3>
+      <p>根据不同场景选择最合适的布局方案：</p>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th>推荐方案</th>
+            <th>原因</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>页面整体结构</td>
+            <td><span class="tag recommended">Grid</span></td>
+            <td>二维控制，轨道定义清晰</td>
+          </tr>
+          <tr>
+            <td>导航栏</td>
+            <td><span class="tag recommended">Flexbox</span></td>
+            <td>一维分布，space-between 神器</td>
+          </tr>
+          <tr>
+            <td>卡片列表</td>
+            <td><span class="tag recommended">Grid auto-fit</span></td>
+            <td>自动响应式，无需 Media Query</td>
+          </tr>
+          <tr>
+            <td>垂直居中</td>
+            <td><span class="tag recommended">Flexbox</span></td>
+            <td>一行搞定，兼容性好</td>
+          </tr>
+          <tr>
+            <td>圣杯布局</td>
+            <td><span class="tag modern">Flexbox</span></td>
+            <td>现代方案，代码简洁</td>
+          </tr>
+          <tr>
+            <td>组件内部布局</td>
+            <td><span class="tag modern">Container Queries</span></td>
+            <td>根据容器而非视口自适应</td>
+          </tr>
+          <tr>
+            <td>瀑布流</td>
+            <td><span class="tag modern">Grid + span</span></td>
+            <td>自动填充空隙</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <h4>🎯 Grid vs Flexbox 选择决策树</h4>
+        <p>
+          <strong>需要同时控制行和列？</strong> → Grid<br>
+          <strong>只需要控制一行或一列？</strong> → Flexbox<br>
+          <strong>两者都行？</strong> → 优先 Flexbox（兼容性更好）
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
