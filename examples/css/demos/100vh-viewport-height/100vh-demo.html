@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>100vh 移动端视口高度问题 - CSS 学习</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #27272a;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      background: var(--bg-secondary);
+      padding: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin: 1.25rem 0 0.75rem;
+      color: var(--accent-hover);
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .code-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 0.75rem 0;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .code-block code {
+      color: var(--text-primary);
+    }
+
+    .comment { color: var(--text-muted); }
+    .keyword { color: #c678dd; }
+    .string { color: #98c379; }
+    .variable { color: #e5c07b; }
+    .property { color: #61afef; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--accent-hover);
+      font-weight: 600;
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+    .demo-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .demo-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-container {
+      position: relative;
+      background: #1a1a2e;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .demo-header {
+      background: #252540;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .demo-content {
+      padding: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .demo-footer {
+      background: #252540;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .element-vh {
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .element-percent {
+      background: linear-gradient(135deg, var(--success), #16a34a);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .comparison-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .comparison-card h4 {
+      color: var(--accent-hover);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .comparison-card ul {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .comparison-card li {
+      padding: 0.25rem 0;
+    }
+
+    .comparison-card li::before {
+      content: "• ";
+      color: var(--accent);
+    }
+
+    .info-box {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .info-box p {
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .warning-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--warning);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .warning-box p {
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .measurement {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 0.85rem;
+    }
+
+    .measurement-bar {
+      flex: 1;
+      height: 20px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .measurement-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      font-weight: 600;
+    }
+
+    .fill-vh { background: linear-gradient(90deg, var(--accent), #818cf8); }
+    .fill-dvh { background: linear-gradient(90deg, var(--success), #16a34a); }
+    .fill-percent { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+    .browser-support {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .browser-badge {
+      padding: 0.4rem 0.75rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .browser-badge.supported {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .browser-badge.partial {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .btn {
+      padding: 0.6rem 1.25rem;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
+
+    .output-area {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-top: 0.75rem;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.8rem;
+      min-height: 80px;
+    }
+
+    .output-line {
+      padding: 0.2rem 0;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      nav {
+        gap: 0.25rem;
+      }
+
+      .tab-btn {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.8rem;
+      }
+
+      .tab-content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📐 100vh 移动端视口高度问题</h1>
+      <p class="subtitle">理解 CSS Viewport 单位与移动端 100vh 的经典问题</p>
+    </header>
+
+    <nav>
+      <button class="tab-btn active" data-tab="concept">📖 概念解析</button>
+      <button class="tab-btn" data-tab="problem">⚠️ 问题分析</button>
+      <button class="tab-btn" data-tab="solutions">🔧 解决方案</button>
+      <button class="tab-btn" data-tab="demo">🧪 交互演示</button>
+    </nav>
+
+    <!-- 概念解析 -->
+    <div id="concept" class="tab-content active">
+      <h2>Viewport 单位基础</h2>
+      
+      <p>Viewport 单位是相对于浏览器视口尺寸的 CSS 长度单位，在响应式设计中非常有用。</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>单位</th>
+            <th>含义</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>vw</code></td>
+            <td>Viewport Width</td>
+            <td>视口宽度的 1%</td>
+          </tr>
+          <tr>
+            <td><code>vh</code></td>
+            <td>Viewport Height</td>
+            <td>视口高度的 1%</td>
+          </tr>
+          <tr>
+            <td><code>vmin</code></td>
+            <td>Viewport Minimum</td>
+            <td>vw/vh 中较小值的 1%</td>
+          </tr>
+          <tr>
+            <td><code>vmax</code></td>
+            <td>Viewport Maximum</td>
+            <td>vw/vh 中较大值的 1%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>基本用法</h3>
+      <div class="code-block">
+        <code>
+.<span class="variable">hero</span> {
+  <span class="property">height</span>: <span class="keyword">100vh</span>;      <span class="comment">/* 100% 视口高度 */</span>
+  <span class="property">width</span>: <span class="keyword">100vw</span>;       <span class="comment">/* 100% 视口宽度 */</span>
+}
+
+.<span class="variable">sidebar</span> {
+  <span class="property">width</span>: <span class="keyword">20vmin</span>;    <span class="comment">/* 较小边的 20% */</span>
+}
+        </code>
+      </div>
+
+      <h3>动态视口单位（现代浏览器）</h3>
+      <div class="info-box">
+        <p><strong>💡 新增单位：</strong>Chrome 108+、Safari 15+ 支持动态视口单位</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>单位</th>
+            <th>含义</th>
+            <th>适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>dvh</code></td>
+            <td>Dynamic VH</td>
+            <td>当前可见视口高度（推荐）</td>
+          </tr>
+          <tr>
+            <td><code>svh</code></td>
+            <td>Small VH</td>
+            <td>地址栏展开时的视口高度</td>
+          </tr>
+          <tr>
+            <td><code>lvh</code></td>
+            <td>Large VH</td>
+            <td>地址栏收起时的视口高度</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 问题分析 -->
+    <div id="problem" class="tab-content">
+      <h2>100vh 在移动端的问题</h2>
+
+      <div class="warning-box">
+        <p><strong>⚠️ 问题：</strong>在 iOS Safari 和 Android Chrome 中，<code>100vh</code> 并不等于屏幕可见区域的高度。</p>
+      </div>
+
+      <h3>问题原因</h3>
+      <p>移动端浏览器将 <code>vh</code> 基于"最大可能视口高度"计算，而非"当前可见视口高度"。</p>
+
+      <div class="demo-box">
+        <div class="demo-title">视口组成示意图</div>
+        <div class="demo-container" style="height: 200px;">
+          <div class="demo-header">
+            <span>📱 地址栏 (60px)</span>
+            <span class="status-badge status-warning">不包含在可见区域</span>
+          </div>
+          <div class="demo-content" style="height: 100px; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+              <div class="element-vh" style="width: 100%; height: 80px; border-radius: 8px;">100vh = 全部高度</div>
+              <p style="margin-top: 8px; font-size: 0.75rem;">实际可见区域可能小于 100vh</p>
+            </div>
+          </div>
+          <div class="demo-footer">
+            <span>📍 导航栏 (50px)</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>实际表现</h3>
+      <div class="code-block">
+        <code>
+<span class="comment">/* 桌面浏览器：正常占满整个窗口 */</span>
+.<span class="variable">full-height</span> {
+  <span class="property">height</span>: <span class="keyword">100vh</span>;
+}
+
+<span class="comment">/* 移动端 Chrome/Safari：</span>
+<span class="comment">   - 地址栏展开时：底部内容被遮挡</span>
+<span class="comment">   - 地址栏收起时：底部有多余空白</span>
+<span class="comment">   - 滚动时：视口高度不断变化</span>
+        </code>
+      </div>
+
+      <h3>浏览器兼容性</h3>
+      <div class="browser-support">
+        <span class="browser-badge partial">Chrome (Android) ⚠️</span>
+        <span class="browser-badge partial">Safari (iOS) ⚠️</span>
+        <span class="browser-badge supported">Chrome 108+ ✅</span>
+        <span class="browser-badge supported">Safari 15+ ✅</span>
+        <span class="browser-badge supported">Firefox 126+ ✅</span>
+      </div>
+    </div>
+
+    <!-- 解决方案 -->
+    <div id="solutions" class="tab-content">
+      <h2>解决方案</h2>
+
+      <div class="comparison-grid">
+        <div class="comparison-card">
+          <h4>方案一：使用 dvh（推荐）</h4>
+          <ul>
+            <li>最简单直接</li>
+            <li>现代浏览器支持</li>
+            <li>自动适应地址栏变化</li>
+            <li>需要 fallback</li>
+          </ul>
+          <div class="code-block" style="margin-top: 0.5rem;">
+            <code>
+<span class="property">height</span>: <span class="keyword">100dvh</span>;
+            </code>
+          </div>
+        </div>
+
+        <div class="comparison-card">
+          <h4>方案二：min-height 变通</h4>
+          <ul>
+            <li>兼容性最好</li>
+            <li>不需要 JavaScript</li>
+            <li>可能有边界情况</li>
+            <li>配合 dvh fallback</li>
+          </ul>
+          <div class="code-block" style="margin-top: 0.5rem;">
+            <code>
+<span class="property">min-height</span>: <span class="keyword">100vh</span>;
+<span class="property">min-height</span>: <span class="keyword">100dvh</span>;
+            </code>
+          </div>
+        </div>
+
+        <div class="comparison-card">
+          <h4>方案三：JS 动态计算</h4>
+          <ul>
+            <li>完全可控</li>
+            <li>所有浏览器支持</li>
+            <li>需要 JavaScript</li>
+            <li>可能影响性能</li>
+          </ul>
+          <div class="code-block" style="margin-top: 0.5rem;">
+            <code>
+<span class="keyword">--vh</span>: <span class="keyword">${vh}px</span>;
+            </code>
+          </div>
+        </div>
+      </div>
+
+      <h3>完整代码示例</h3>
+      
+      <h4>方法 1：dvh + fallback</h4>
+      <div class="code-block">
+        <code>
+.<span class="variable">full-page</span> {
+  <span class="comment">/* 基础：100vh 作为 fallback */</span>
+  <span class="property">height</span>: <span class="keyword">100vh</span>;
+  
+  <span class="comment">/* 增强：使用 dvh */</span>
+  <span class="property">height</span>: <span class="keyword">100dvh</span>;
+}
+
+<span class="comment">/* 或使用 @supports 特性检测 */</span>
+@<span class="keyword">supports</span> (<span class="property">height</span>: <span class="keyword">100dvh</span>) {
+  .<span class="variable">full-page</span> {
+    <span class="property">height</span>: <span class="keyword">100dvh</span>;
+  }
+}
+        </code>
+      </div>
+
+      <h4>方法 2：JavaScript 动态计算</h4>
+      <div class="code-block">
+        <code>
+<span class="comment">// JavaScript</span>
+<span class="keyword">const</span> setFullHeight = () => {
+  <span class="keyword">const</span> vh = window.innerHeight * <span class="keyword">0.01</span>;
+  document.documentElement.style.setProperty(<span class="string">'--vh'</span>, <span class="string">`\${vh}px`</span>);
+};
+
+setFullHeight();
+window.addEventListener(<span class="string">'resize'</span>, setFullHeight);
+
+<span class="comment">// CSS</span>
+.<span class="variable">full-height</span> {
+  <span class="property">height</span>: <span class="keyword">calc(var(--vh, 1vh) * 100)</span>;
+}
+        </code>
+      </div>
+
+      <h4>方法 3：处理安全区域（刘海屏）</h4>
+      <div class="code-block">
+        <code>
+.<span class="variable">safe-area</span> {
+  <span class="property">padding-top</span>: <span class="keyword">env</span>(safe-area-inset-top);
+  <span class="property">padding-bottom</span>: <span class="keyword">env</span>(safe-area-inset-bottom);
+  <span class="property">padding-left</span>: <span class="keyword">env</span>(safe-area-inset-left);
+  <span class="property">padding-right</span>: <span class="keyword">env</span>(safe-area-inset-right);
+}
+        </code>
+      </div>
+
+      <div class="info-box">
+        <p><strong>💡 建议：</strong>优先使用 <code>100dvh</code> 作为主要方案，配合 <code>100vh</code> 作为 fallback，确保在所有浏览器中正常工作。</p>
+      </div>
+    </div>
+
+    <!-- 交互演示 -->
+    <div id="demo" class="tab-content">
+      <h2>交互演示</h2>
+
+      <p>点击按钮查看不同视口单位在当前浏览器中的实际表现：</p>
+
+      <div class="demo-box">
+        <div class="demo-title">视口尺寸测量</div>
+        <div class="measurement">
+          <span style="width: 80px; font-size: 0.8rem;">100vh</span>
+          <div class="measurement-bar">
+            <div class="measurement-fill fill-vh" id="vhBar" style="width: 0%;">0px</div>
+          </div>
+        </div>
+        <div class="measurement">
+          <span style="width: 80px; font-size: 0.8rem;">100dvh</span>
+          <div class="measurement-bar">
+            <div class="measurement-fill fill-dvh" id="dvhBar" style="width: 0%;">0px</div>
+          </div>
+        </div>
+        <div class="measurement">
+          <span style="width: 80px; font-size: 0.8rem;">window.innerHeight</span>
+          <div class="measurement-bar">
+            <div class="measurement-fill fill-percent" id="innerBar" style="width: 0%;">0px</div>
+          </div>
+        </div>
+        <button class="btn" onclick="measureViewport()" style="margin-top: 0.75rem;">📏 测量当前视口</button>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-title">三种写法的对比</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+          <div style="background: var(--bg-secondary); border-radius: 8px; overflow: hidden;">
+            <div style="background: var(--accent); padding: 6px 10px; font-size: 0.75rem;">100vh</div>
+            <div id="vhDemo" class="element-vh" style="height: 100vh; margin: 4px; border-radius: 4px;">
+              <span style="font-size: 0.7rem;">100vh</span>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 8px; overflow: hidden;">
+            <div style="background: var(--success); padding: 6px 10px; font-size: 0.75rem;">100dvh</div>
+            <div id="dvhDemo" class="element-percent" style="height: 100dvh; margin: 4px; border-radius: 4px;">
+              <span style="font-size: 0.7rem;">100dvh</span>
+            </div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: 8px; overflow: hidden;">
+            <div style="background: var(--warning); padding: 6px 10px; font-size: 0.75rem;">100%</div>
+            <div id="percentDemo" class="element-percent" style="height: 100%; margin: 4px; border-radius: 4px;">
+              <span style="font-size: 0.7rem;">100%</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="updateDemoContent()" style="margin-top: 0.75rem;">🔄 更新显示</button>
+      </div>
+
+      <div class="output-area" id="viewportOutput">
+        <div class="output-line">点击"测量当前视口"查看结果...</div>
+      </div>
+
+      <h3>浏览器支持检测</h3>
+      <div id="supportCheck" class="demo-box">
+        <button class="btn" onclick="checkSupport()">🔍 检测浏览器支持</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Measure viewport
+    function measureViewport() {
+      const vh = window.innerHeight;
+      const dvh = window.innerHeight; // Fallback for browsers without dvh
+      const maxVh = screen.height;
+      
+      const vhPercent = (vh / maxVh * 100).toFixed(1);
+      const dvhPercent = (dvh / maxVh * 100).toFixed(1);
+      
+      // Update bars
+      document.getElementById('vhBar').style.width = vhPercent + '%';
+      document.getElementById('vhBar').textContent = vh + 'px (' + vhPercent + '%)';
+      
+      document.getElementById('dvhBar').style.width = dvhPercent + '%';
+      document.getElementById('dvhBar').textContent = dvh + 'px (' + dvhPercent + '%)';
+      
+      document.getElementById('innerBar').style.width = (vh / maxVh * 100) + '%';
+      document.getElementById('innerBar').textContent = vh + 'px';
+      
+      // Update output
+      const output = document.getElementById('viewportOutput');
+      output.innerHTML = `
+        <div class="output-line"><strong>视口测量结果：</strong></div>
+        <div class="output-line">• window.innerHeight: <strong>${vh}px</strong></div>
+        <div class="output-line">• window.outerHeight: <strong>${window.outerHeight}px</strong></div>
+        <div class="output-line">• screen.height: <strong>${screen.height}px</strong></div>
+        <div class="output-line">• document.documentElement.clientHeight: <strong>${document.documentElement.clientHeight}px</strong></div>
+        <div class="output-line" style="margin-top: 0.5rem; color: var(--accent);">💡 100vh = ${vh}px（如果地址栏可见，实际可见区域会更小）</div>
+      `;
+      
+      updateDemoContent();
+    }
+
+    function updateDemoContent() {
+      const vh = window.innerHeight;
+      
+      // Update demo labels
+      const vhDemo = document.getElementById('vhDemo');
+      const dvhDemo = document.getElementById('dvhDemo');
+      const percentDemo = document.getElementById('percentDemo');
+      
+      if (vhDemo && dvhDemo && percentDemo) {
+        vhDemo.querySelector('span').textContent = '100vh = ' + vh + 'px';
+        dvhDemo.querySelector('span').textContent = '100dvh = ' + vh + 'px';
+        percentDemo.querySelector('span').textContent = '100% = ' + percentDemo.parentElement.clientHeight + 'px';
+      }
+    }
+
+    function checkSupport() {
+      const container = document.getElementById('supportCheck');
+      
+      // Check for dvh support
+      const dvhSupport = CSS.supports('height', '100dvh');
+      const svhSupport = CSS.supports('height', '100svh');
+      const lvhSupport = CSS.supports('height', '100lvh');
+      const safeAreaSupport = CSS.supports('padding-top', 'env(safe-area-inset-top)');
+      
+      container.innerHTML = `
+        <div style="margin-bottom: 0.75rem;"><strong>浏览器支持检测结果：</strong></div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          <span class="browser-badge ${dvhSupport ? 'supported' : ''}">
+            dvh: ${dvhSupport ? '✅ 支持' : '❌ 不支持'}
+          </span>
+          <span class="browser-badge ${svhSupport ? 'supported' : ''}">
+            svh: ${svhSupport ? '✅ 支持' : '❌ 不支持'}
+          </span>
+          <span class="browser-badge ${lvhSupport ? 'supported' : ''}">
+            lvh: ${lvhSupport ? '✅ 支持' : '❌ 不支持'}
+          </span>
+          <span class="browser-badge ${safeAreaSupport ? 'supported' : ''}">
+            safe-area: ${safeAreaSupport ? '✅ 支持' : '❌ 不支持'}
+          </span>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-secondary);">
+          <p>UA: ${navigator.userAgent}</p>
+        </div>
+      `;
+    }
+
+    // Initial measurement
+    window.addEventListener('load', () => {
+      setTimeout(measureViewport, 100);
+    });
+  </script>
+</body>
+</html>
