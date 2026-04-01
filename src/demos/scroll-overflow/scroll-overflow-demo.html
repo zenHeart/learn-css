@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Scroll & Overflow 交互式演示</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: #00d9ff;
+        }
+
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #16213e;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            border: 1px solid #0f3460;
+        }
+
+        .tab-btn:hover {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background: #00d9ff;
+            color: #1a1a2e;
+            font-weight: bold;
+            border-color: #00d9ff;
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #0f3460;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: #00d9ff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .demo-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .demo-box {
+            flex: 1;
+            min-width: 220px;
+            background: #0a0a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #0f3460;
+        }
+
+        .demo-box-header {
+            padding: 8px 12px;
+            background: #0f3460;
+            font-size: 0.8rem;
+            color: #00d9ff;
+            font-family: "Courier New", monospace;
+        }
+
+        .demo-box-content {
+            padding: 12px;
+            height: 120px;
+            overflow: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .scroll-demo {
+            width: 100%;
+            height: 120px;
+            background: #0a0a1a;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #ccc;
+            resize: none;
+            outline: none;
+        }
+
+        .scroll-demo:focus {
+            border-color: #00d9ff;
+        }
+
+        .scroll-demo-smooth {
+            scroll-behavior: smooth;
+        }
+
+        .snap-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 10px 0;
+            background: #0a0a1a;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+        }
+
+        .snap-item {
+            flex: 0 0 160px;
+            height: 100px;
+            scroll-snap-align: start;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .snap-item:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .snap-item:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .snap-item:nth-child(3) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .snap-item:nth-child(4) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .snap-item:nth-child(5) { background: linear-gradient(135deg, #fa709a, #fee140); }
+        .snap-item:nth-child(6) { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+
+        .hide-scrollbar-demo {
+            overflow: auto;
+            height: 120px;
+            background: #0a0a1a;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .hide-scrollbar-demo::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar-demo {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .custom-scrollbar-demo {
+            overflow-y: auto;
+            height: 120px;
+            background: #0a0a1a;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .custom-scrollbar-demo::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar-demo::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar-demo::-webkit-scrollbar-thumb {
+            background: #00d9ff;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar-demo::-webkit-scrollbar-thumb:hover {
+            background: #00b8d9;
+        }
+
+        .quiz-container {
+            background: #0a0a1a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #0f3460;
+        }
+
+        .quiz-item {
+            margin-bottom: 20px;
+        }
+
+        .quiz-question {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px 14px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quiz-option:hover {
+            background: #0f3460;
+            border-color: #00d9ff;
+        }
+
+        .quiz-option .radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #00d9ff;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-option .radio::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00d9ff;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .quiz-option.selected .radio::after {
+            opacity: 1;
+        }
+
+        .quiz-option.selected {
+            background: #0f3460;
+            border-color: #00d9ff;
+        }
+
+        .quiz-result {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid #00d9ff;
+            color: #00d9ff;
+        }
+
+        .quiz-result.wrong {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid #ff5252;
+            color: #ff5252;
+        }
+
+        .check-btn {
+            margin-top: 12px;
+            padding: 10px 24px;
+            background: #00d9ff;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .check-btn:hover {
+            background: #00b8d9;
+        }
+
+        .anchor-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .anchor-link {
+            padding: 8px 16px;
+            background: #0a0a1a;
+            color: #00d9ff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid #0f3460;
+            transition: all 0.2s;
+        }
+
+        .anchor-link:hover {
+            background: #0f3460;
+            border-color: #00d9ff;
+        }
+
+        .anchor-section {
+            height: 200px;
+            padding: 20px;
+            background: #0a0a1a;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #0f3460;
+            scroll-margin-top: 20px;
+        }
+
+        .anchor-section h3 {
+            color: #00d9ff;
+            margin-bottom: 8px;
+        }
+
+        .overflow-values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .overflow-card {
+            background: #0a0a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #0f3460;
+        }
+
+        .overflow-card .card-header {
+            padding: 8px 12px;
+            background: #0f3460;
+            font-family: "Courier New", monospace;
+            font-size: 0.8rem;
+            color: #00d9ff;
+        }
+
+        .overflow-card .card-content {
+            padding: 10px;
+            height: 100px;
+            overflow: auto;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #555;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<h1>CSS Scroll & Overflow 交互式演示</h1>
+
+<nav class="tab-nav">
+    <button class="tab-btn active" data-tab="overflow-values">overflow 属性值</button>
+    <button class="tab-btn" data-tab="scroll-behavior">scroll-behavior</button>
+    <button class="tab-btn" data-tab="scroll-snap">scroll-snap</button>
+    <button class="tab-btn" data-tab="hide-scrollbar">隐藏滚动条</button>
+    <button class="tab-btn" data-tab="quiz">自测题</button>
+</nav>
+
+<!-- Tab 1: overflow 属性值 -->
+<div id="tab-overflow-values" class="tab-panel active">
+    <div class="section">
+        <div class="section-title">overflow 属性值对比</div>
+        <div class="section-desc">对比 overflow 的五个主要属性值：visible、hidden、scroll、auto、clip。注意它们的滚动能力和裁剪行为差异。</div>
+        <div class="overflow-values-grid">
+            <div class="overflow-card">
+                <div class="card-header">overflow: visible</div>
+                <div class="card-content" style="overflow: visible; height: 100px;">
+                    这是 visible 模式，内容会溢出容器边界并显示出来。滚动条不会出现。
+                </div>
+            </div>
+            <div class="overflow-card">
+                <div class="card-header">overflow: hidden</div>
+                <div class="card-content" style="overflow: hidden; height: 100px;">
+                    这是 hidden 模式，内容被裁剪，无法滚动查看溢出部分。可以用 scrollTop 滚动。
+                </div>
+            </div>
+            <div class="overflow-card">
+                <div class="card-header">overflow: scroll</div>
+                <div class="card-content" style="overflow: scroll; height: 100px;">
+                    这是 scroll 模式，始终显示滚动条，即使内容没有溢出。
+                </div>
+            </div>
+            <div class="overflow-card">
+                <div class="card-header">overflow: auto</div>
+                <div class="card-content" style="overflow: auto; height: 100px;">
+                    这是 auto 模式，仅在内容溢出时才显示滚动条，是最推荐的值。
+                </div>
+            </div>
+            <div class="overflow-card">
+                <div class="card-header">overflow: clip</div>
+                <div class="card-content" style="overflow: clip; height: 100px;">
+                    这是 clip 模式，严格裁剪溢出内容，禁止任何滚动（包括 JS scrollTop）。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">overflow-x 与 overflow-y 独立控制</div>
+        <div class="section-desc">使用 overflow-x 和 overflow-y 可以分别控制水平和垂直方向的溢出行为。</div>
+        <div class="demo-row">
+            <div class="demo-box">
+                <div class="demo-box-header">overflow-x: auto; overflow-y: hidden;</div>
+                <div class="demo-box-content" style="overflow-x: auto; overflow-y: hidden;">
+                    水平方向自动滚动，垂直方向隐藏溢出。
+                    第一行文字
+                    第二行文字
+                    第三行文字
+                    第四行文字
+                </div>
+            </div>
+            <div class="demo-box">
+                <div class="demo-box-header">overflow-x: hidden; overflow-y: auto;</div>
+                <div class="demo-box-content" style="overflow-x: hidden; overflow-y: auto;">
+                    水平方向隐藏，垂直方向自动滚动。
+                    第一行文字
+                    第二行文字
+                    第三行文字
+                    第四行文字
+                    第五行文字
+                    第六行文字
+                    第七行文字
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 2: scroll-behavior -->
+<div id="tab-scroll-behavior" class="tab-panel">
+    <div class="section">
+        <div class="section-title">scroll-behavior: 平滑滚动</div>
+        <div class="section-desc">点击锚点链接，体验普通滚动 vs 平滑滚动的区别。</div>
+        <div class="anchor-nav">
+            <a href="#section1" class="anchor-link">Section 1</a>
+            <a href="#section2" class="anchor-link">Section 2</a>
+            <a href="#section3" class="anchor-link">Section 3</a>
+        </div>
+        <div style="position: relative;">
+            <div id="section1" class="anchor-section">
+                <h3>Section 1</h3>
+                <p>这是第一个区块，距离顶部有一定距离。点击导航链接会滚动到此处。</p>
+                <p>scroll-behavior: smooth 属性让这个过程变成平滑过渡动画。</p>
+            </div>
+            <div id="section2" class="anchor-section">
+                <h3>Section 2</h3>
+                <p>这是第二个区块。注意观察滚动过程的平滑程度。</p>
+                <p>scroll-margin-top 确保内容不会被固定导航栏遮挡。</p>
+            </div>
+            <div id="section3" class="anchor-section">
+                <h3>Section 3</h3>
+                <p>这是第三个区块，平滑滚动提供更好的用户体验。</p>
+                <p>这个 demo 使用了 scroll-behavior: smooth，但没有在 html 元素上设置，所以是普通滚动。</p>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 16px; color: #888; font-size: 0.85rem;">
+            <p>当前为普通滚动模式。对比体验：在 CSS 中添加 <code style="color:#00d9ff;">html { scroll-behavior: smooth; }</code> 即可开启平滑滚动。</p>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 3: scroll-snap -->
+<div id="tab-scroll-snap" class="tab-panel">
+    <div class="section">
+        <div class="section-title">scroll-snap-type: 滚动吸附</div>
+        <div class="section-desc">横向滚动时，内容会自动吸附到最近的子元素边缘。拖动滚动条体验吸附效果。</div>
+        <div class="snap-container">
+            <div class="snap-item">Card 1</div>
+            <div class="snap-item">Card 2</div>
+            <div class="snap-item">Card 3</div>
+            <div class="snap-item">Card 4</div>
+            <div class="snap-item">Card 5</div>
+            <div class="snap-item">Card 6</div>
+        </div>
+        <div style="margin-top: 16px; font-size: 0.85rem; color: #aaa; line-height: 1.6;">
+            <p><strong>核心 CSS：</strong></p>
+            <pre style="background:#0a0a1a;padding:12px;border-radius:6px;margin-top:8px;overflow-x:auto;font-size:0.8rem;border:1px solid #0f3460;">
+.scroller {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;  /* 强制吸附 */
+}
+.item {
+  scroll-snap-align: start;      /* 吸附到起始边缘 */
+}
+            </pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">scroll-snap-align: 对齐方式</div>
+        <div class="section-desc">scroll-snap-align 控制吸附时的对齐方式：start、center、end。</div>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <div style="color: #00d9ff; font-size: 0.85rem; margin-bottom: 8px;">scroll-snap-align: start</div>
+                <div class="snap-container" style="scroll-snap-type: x mandatory;">
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: start;">Start 1</div>
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: start;">Start 2</div>
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: start;">Start 3</div>
+                </div>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <div style="color: #00d9ff; font-size: 0.85rem; margin-bottom: 8px;">scroll-snap-align: center</div>
+                <div class="snap-container" style="scroll-snap-type: x mandatory;">
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: center;">Center 1</div>
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: center;">Center 2</div>
+                    <div class="snap-item" style="flex: 0 0 150px; scroll-snap-align: center;">Center 3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 4: 隐藏滚动条 -->
+<div id="tab-hide-scrollbar" class="tab-panel">
+    <div class="section">
+        <div class="section-title">隐藏滚动条但保持滚动</div>
+        <div class="section-desc">使用 scrollbar-width (Firefox) 和 ::-webkit-scrollbar (Chrome/Safari) 隐藏滚动条。</div>
+        <div class="demo-row">
+            <div class="demo-box">
+                <div class="demo-box-header">隐藏滚动条</div>
+                <div class="hide-scrollbar-demo">
+                    <p>这是隐藏滚动条的容器。</p>
+                    <p>尝试滚动这个区域：</p>
+                    <p>内容 1 - CSS 的 overflow 属性控制元素内容溢出时的显示行为。</p>
+                    <p>内容 2 - 在 Web 开发中使用频率非常高。</p>
+                    <p>内容 3 - 配合 scrollbar-width 和 ::-webkit-scrollbar 可以隐藏滚动条。</p>
+                    <p>内容 4 - 这种技术常用于自定义滚动条样式的场景。</p>
+                    <p>内容 5 - 保持用户体验的同时美化界面。</p>
+                    <p>内容 6 - 底部内容。</p>
+                </div>
+            </div>
+            <div class="demo-box">
+                <div class="demo-box-header">自定义滚动条样式</div>
+                <div class="custom-scrollbar-demo">
+                    <p>这是自定义滚动条的容器。</p>
+                    <p>尝试滚动这个区域：</p>
+                    <p>内容 1 - 使用 ::-webkit-scrollbar 可以自定义滚动条外观。</p>
+                    <p>内容 2 - ::-webkit-scrollbar-track 是滚动条轨道背景。</p>
+                    <p>内容 3 - ::-webkit-scrollbar-thumb 是滚动条滑块。</p>
+                    <p>内容 4 - 支持悬停状态的样式定制。</p>
+                    <p>内容 5 - 这种技术在现代 Web 应用中广泛使用。</p>
+                    <p>内容 6 - 底部内容。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">跨浏览器兼容方案</div>
+        <div class="section-desc">完整的跨浏览器隐藏滚动条代码：</div>
+        <pre style="background:#0a0a1a;padding:16px;border-radius:8px;font-size:0.85rem;overflow-x:auto;border:1px solid #0f3460;line-height:1.6;">
+.hide-scrollbar {
+  overflow: auto;              /* 保持滚动 */
+  scrollbar-width: none;       /* Firefox: 隐藏滚动条 */
+  -ms-overflow-style: none;    /* IE/Edge 旧版: 隐藏滚动条 */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;               /* Chrome/Safari/Edge: 隐藏滚动条 */
+}
+
+/* 自定义滚动条 */
+.custom-scrollbar {
+  overflow-y: auto;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a2e;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #00d9ff;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00b8d9;
+}
+        </pre>
+    </div>
+</div>
+
+<!-- Tab 5: 自测题 -->
+<div id="tab-quiz" class="tab-panel">
+    <div class="section">
+        <div class="section-title">自测题</div>
+        <div class="section-desc">检验你对 overflow 和 scroll 相关知识的掌握程度。</div>
+
+        <div class="quiz-container">
+            <!-- Q1 -->
+            <div class="quiz-item" data-answer="a">
+                <div class="quiz-question">1. 哪个 overflow 属性值会始终显示滚动条，即使内容没有溢出？</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-choice="a">
+                        <span class="radio"></span>
+                        <span>A. scroll</span>
+                    </div>
+                    <div class="quiz-option" data-choice="b">
+                        <span class="radio"></span>
+                        <span>B. auto</span>
+                    </div>
+                    <div class="quiz-option" data-choice="c">
+                        <span class="radio"></span>
+                        <span>C. visible</span>
+                    </div>
+                    <div class="quiz-option" data-choice="d">
+                        <span class="radio"></span>
+                        <span>D. hidden</span>
+                    </div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="quiz-item" data-answer="d">
+                <div class="quiz-question">2. 哪个属性可以实现原生平滑滚动？</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-choice="a">
+                        <span class="radio"></span>
+                        <span>A. overflow: smooth</span>
+                    </div>
+                    <div class="quiz-option" data-choice="b">
+                        <span class="radio"></span>
+                        <span>B. scroll-type: smooth</span>
+                    </div>
+                    <div class="quiz-option" data-choice="c">
+                        <span class="radio"></span>
+                        <span>C. scroll-snap-type: smooth</span>
+                    </div>
+                    <div class="quiz-option" data-choice="d">
+                        <span class="radio"></span>
+                        <span>D. scroll-behavior: smooth</span>
+                    </div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="quiz-item" data-answer="c">
+                <div class="quiz-question">3. overflow: clip 和 overflow: hidden 的主要区别是什么？</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-choice="a">
+                        <span class="radio"></span>
+                        <span>A. clip 裁剪更精确，但 hidden 可以用 scrollTop 滚动</span>
+                    </div>
+                    <div class="quiz-option" data-choice="b">
+                        <span class="radio"></span>
+                        <span>B. 没有区别</span>
+                    </div>
+                    <div class="quiz-option" data-choice="c">
+                        <span class="radio"></span>
+                        <span>C. clip 严格禁止滚动，hidden 可以用 JS 的 scrollTop 滚动</span>
+                    </div>
+                    <div class="quiz-option" data-choice="d">
+                        <span class="radio"></span>
+                        <span>D. hidden 裁剪更精确，clip 可以用 scrollTop 滚动</span>
+                    </div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="quiz-item" data-answer="b">
+                <div class="quiz-question">4. 在 Firefox 中隐藏滚动条但不禁止滚动，应该使用哪个属性？</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-choice="a">
+                        <span class="radio"></span>
+                        <span>A. ::-webkit-scrollbar { display: none }</span>
+                    </div>
+                    <div class="quiz-option" data-choice="b">
+                        <span class="radio"></span>
+                        <span>B. scrollbar-width: none</span>
+                    </div>
+                    <div class="quiz-option" data-choice="c">
+                        <span class="radio"></span>
+                        <span>C. overflow: hidden</span>
+                    </div>
+                    <div class="quiz-option" data-choice="d">
+                        <span class="radio"></span>
+                        <span>D. scrollbar: hidden</span>
+                    </div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="quiz-item" data-answer="c">
+                <div class="quiz-question">5. 实现轮播图滚动吸附，应该使用哪个 CSS 属性组合？</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-choice="a">
+                        <span class="radio"></span>
+                        <span>A. overflow: auto; scroll-snap-align: center;</span>
+                    </div>
+                    <div class="quiz-option" data-choice="b">
+                        <span class="radio"></span>
+                        <span>B. overflow-x: auto; scroll-snap-type: y mandatory;</span>
+                    </div>
+                    <div class="quiz-option" data-choice="c">
+                        <span class="radio"></span>
+                        <span>C. overflow-x: auto; scroll-snap-type: x mandatory; scroll-snap-align: start;</span>
+                    </div>
+                    <div class="quiz-option" data-choice="d">
+                        <span class="radio"></span>
+                        <span>D. scroll-behavior: smooth; scroll-snap-type: x mandatory;</span>
+                    </div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <button class="check-btn" onclick="checkQuiz()">Check Answers</button>
+            <div id="quiz-summary" style="margin-top: 16px; font-size: 0.95rem;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    CSS Scroll & Overflow 交互式演示 | learn-css
+</div>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const panel = document.getElementById('tab-' + btn.dataset.tab);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    // Quiz logic
+    const quizData = [
+        { question: 1, answer: 'a', explanation: 'scroll 会始终显示滚动条，无论内容是否溢出。auto 仅在溢出时显示。' },
+        { question: 2, answer: 'd', explanation: 'scroll-behavior: smooth 可以让锚点滚动变为平滑过渡动画。' },
+        { question: 3, answer: 'c', explanation: 'overflow: clip 比 hidden 更严格，完全禁止任何滚动，包括 JS 的 scrollTop。' },
+        { question: 4, answer: 'b', explanation: 'scrollbar-width: none 是 Firefox 专用属性，::-webkit-scrollbar 是 WebKit 浏览器专用。' },
+        { question: 5, answer: 'c', explanation: '横向轮播需要 overflow-x: auto + scroll-snap-type: x mandatory + scroll-snap-align: start。' }
+    ];
+
+    document.querySelectorAll('.quiz-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const item = option.closest('.quiz-item');
+            item.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            item.querySelector('.quiz-result').classList.remove('show');
+        });
+    });
+
+    function checkQuiz() {
+        let correct = 0;
+        let total = quizData.length;
+
+        document.querySelectorAll('.quiz-item').forEach(item => {
+            const answer = item.dataset.answer;
+            const selected = item.querySelector('.quiz-option.selected');
+            const result = item.querySelector('.quiz-result');
+            const quiz = quizData.find(q => q.question === parseInt(item.dataset.question));
+
+            if (!selected) {
+                result.textContent = 'Please select an answer.';
+                result.className = 'quiz-result show wrong';
+                return;
+            }
+
+            const choice = selected.dataset.choice;
+            if (choice === answer) {
+                correct++;
+                result.textContent = 'Correct! ' + quiz.explanation;
+                result.className = 'quiz-result show correct';
+            } else {
+                result.textContent = 'Wrong. ' + quiz.explanation;
+                result.className = 'quiz-result show wrong';
+            }
+        });
+
+        const summary = document.getElementById('quiz-summary');
+        summary.textContent = 'Score: ' + correct + ' / ' + total;
+        summary.style.color = correct === total ? '#00d9ff' : correct >= total / 2 ? '#fee140' : '#ff5252';
+    }
+</script>
+
+</body>
+</html>

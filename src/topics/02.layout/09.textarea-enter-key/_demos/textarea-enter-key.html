@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Textarea Enter Key Interception Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fafafa;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #e0e0e0;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover {
+      background: #f5f5f5;
+    }
+    
+    .tab.active {
+      background: white;
+      color: #1976d2;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .description {
+      background: #fff3e0;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #ff9800;
+    }
+    
+    .description h3 {
+      margin: 0 0 8px 0;
+      color: #e65100;
+      font-size: 16px;
+    }
+    
+    .description p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .message-area {
+      height: 200px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    
+    .message {
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      max-width: 80%;
+      word-break: break-word;
+    }
+    
+    .message.sent {
+      background: #1976d2;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message.received {
+      background: #e0e0e0;
+      color: #333;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .input-row {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .chat-textarea {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      resize: none;
+      font-size: 14px;
+      min-height: 60px;
+      transition: border-color 0.2s;
+    }
+    
+    .chat-textarea:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    
+    .hint kbd {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-family: monospace;
+    }
+    
+    .send-btn {
+      padding: 12px 24px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .send-btn:hover {
+      background: #1565c0;
+    }
+    
+    .send-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    /* Form Demo Styles */
+    .form-demo {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      min-height: 120px;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    .form-textarea:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+    
+    .form-hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .submit-btn {
+      padding: 12px 32px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background: #43a047;
+    }
+    
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .comparison-table th {
+      background: #f5f5f5;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .badge.recommended {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .badge.optional {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+    
+    .badge.not-recommended {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    /* Flash animation */
+    @keyframes send-flash {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    
+    .message-anim {
+      animation: send-flash 0.3s ease;
+    }
+    
+    /* Log panel */
+    .log-panel {
+      background: #263238;
+      color: #aed581;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    
+    .log-entry {
+      margin-bottom: 4px;
+      opacity: 0;
+      animation: fadeIn 0.2s forwards;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    
+    .log-time {
+      color: #78909c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Textarea Enter Key Interception</h1>
+  
+  <div class="tabs">
+    <button class="tab active" data-tab="im">IM 聊天场景</button>
+    <button class="tab" data-tab="form">表单评论场景</button>
+    <button class="tab" data-tab="comparison">方案对比</button>
+  </div>
+  
+  <!-- IM Chat Scenario -->
+  <div id="im" class="tab-content active">
+    <div class="description">
+      <h3>💬 IM 聊天场景</h3>
+      <p>在即时通讯应用中，按 <kbd>Enter</kbd> 键通常用于换行，按 <kbd>Shift+Enter</kbd> 发送消息。这避免了用户误触发送。</p>
+    </div>
+    
+    <div class="chat-container">
+      <div class="message-area" id="chatMessages">
+        <div class="message received">你好！有什么可以帮助你的吗？</div>
+        <div class="message sent">我想了解一下 textarea 回车拦截的问题</div>
+        <div class="message received">没问题，这是一个常见的 UX 问题。我们来演示一下。</div>
+      </div>
+      
+      <div class="input-row">
+        <textarea 
+          id="chatInput" 
+          class="chat-textarea" 
+          placeholder="输入消息..."
+          rows="2"
+        ></textarea>
+        <button class="send-btn" id="sendBtn">发送</button>
+      </div>
+      
+      <div class="hint">
+        <kbd>Enter</kbd> = 换行 &nbsp;|&nbsp; <kbd>Shift+Enter</kbd> = 发送
+      </div>
+      
+      <div class="log-panel" id="chatLog">
+        <div class="log-entry"><span class="log-time">[系统]</span> 监听已启动</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Form Comment Scenario -->
+  <div id="form" class="tab-content">
+    <div class="description">
+      <h3>📝 表单评论场景</h3>
+      <p>在表单中，按 <kbd>Ctrl+Enter</kbd> (Windows) 或 <kbd>Cmd+Enter</kbd> (Mac) 提交评论，而不是意外触发表单提交。</p>
+    </div>
+    
+    <div class="form-demo">
+      <form id="commentForm">
+        <div class="form-group">
+          <label for="commentInput">评论内容</label>
+          <textarea 
+            id="commentInput" 
+            class="form-textarea" 
+            placeholder="输入你的评论..."
+          ></textarea>
+          <div class="form-hint">
+            <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 或 <kbd>Cmd</kbd>+<kbd>Enter</kbd> 快速提交
+          </div>
+        </div>
+        
+        <button type="submit" class="submit-btn">提交评论</button>
+      </form>
+      
+      <div class="log-panel" id="formLog">
+        <div class="log-entry"><span class="log-time">[系统]</span> 表单已初始化</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Comparison -->
+  <div id="comparison" class="tab-content">
+    <div class="description">
+      <h3>📊 方案对比</h3>
+      <p>不同场景下选择合适的 Enter 键交互方案。</p>
+    </div>
+    
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>场景</th>
+          <th>推荐方案</th>
+          <th>快捷键</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>IM 聊天</td>
+          <td><span class="badge recommended">推荐</span></td>
+          <td><kbd>Shift</kbd>+<kbd>Enter</kbd></td>
+          <td>Enter 换行，Shift+Enter 发送</td>
+        </tr>
+        <tr>
+          <td>表单评论</td>
+          <td><span class="badge recommended">推荐</span></td>
+          <td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td>
+          <td>快捷键提交，避免误触</td>
+        </tr>
+        <tr>
+          <td>代码编辑器</td>
+          <td><span class="badge recommended">推荐</span></td>
+          <td><kbd>Tab</kbd> 缩进</td>
+          <td>Enter 智能换行，Tab 缩进</td>
+        </tr>
+        <tr>
+          <td>阻止 Enter 换行</td>
+          <td><span class="badge not-recommended">不推荐</span></td>
+          <td>—</td>
+          <td>剥夺用户换行能力，体验差</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h3 style="margin-top: 24px;">关键结论</h3>
+    <ul style="line-height: 1.8;">
+      <li><strong>不要阻止所有默认行为</strong> — 用户期望 Enter 在 textarea 中可以换行</li>
+      <li><strong>根据场景选择交互</strong> — IM 用 Shift+Enter，表单用 Ctrl+Enter</li>
+      <li><strong>提供多种提交方式</strong> — 按钮 + 快捷键 + 移动端手势</li>
+      <li><strong>明确告知用户</strong> — 在占位符或提示文字中说明快捷键</li>
+    </ul>
+  </div>
+  
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+    
+    // Chat Demo
+    const chatInput = document.getElementById('chatInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatLog = document.getElementById('chatLog');
+    
+    function log(type, message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+      chatLog.appendChild(entry);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      // Add sent message
+      const sentEl = document.createElement('div');
+      sentEl.className = 'message sent message-anim';
+      sentEl.textContent = text;
+      chatMessages.appendChild(sentEl);
+      
+      log('send', `发送消息: "${text.substring(0, 20)}${text.length > 20 ? '...' : ''}"`);
+      
+      chatInput.value = '';
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      // Simulate reply
+      setTimeout(() => {
+        const replies = [
+          '收到！',
+          '好的，我明白了',
+          '这个思路不错 👍',
+          '让我想想...'
+        ];
+        const replyEl = document.createElement('div');
+        replyEl.className = 'message received';
+        replyEl.textContent = replies[Math.floor(Math.random() * replies.length)];
+        chatMessages.appendChild(replyEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 800);
+    }
+    
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        log('key', 'Shift+Enter 按下 - 发送消息');
+        sendMessage();
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        log('key', 'Enter 按下 - 插入换行');
+      }
+    });
+    
+    sendBtn.addEventListener('click', () => {
+      log('click', '点击发送按钮');
+      sendMessage();
+    });
+    
+    // Form Demo
+    const commentForm = document.getElementById('commentForm');
+    const commentInput = document.getElementById('commentInput');
+    const formLog = document.getElementById('formLog');
+    
+    function formLog(message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+      formLog.appendChild(entry);
+      formLog.scrollTop = formLog.scrollHeight;
+    }
+    
+    commentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = commentInput.value.trim();
+      if (!text) return;
+      
+      formLog(`✅ 提交评论: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
+      commentInput.value = '';
+      alert('评论提交成功！');
+    });
+    
+    commentInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        formLog('⌨️ Ctrl+Enter 按下 - 提交表单');
+        commentForm.requestSubmit();
+      }
+    });
+    
+    // Focus first textarea
+    chatInput.focus();
+  </script>
+</body>
+</html>
