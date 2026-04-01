@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll 滚动交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; margin-bottom: 12px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+
+    /* overflow demos */
+    .overflow-demo-container { display: flex; gap: 16px; flex-wrap: wrap; }
+    .overflow-box {
+      width: 180px;
+      height: 120px;
+      border: 1px solid #30363d;
+      padding: 8px;
+      font-size: 11px;
+      line-height: 1.5;
+      overflow: hidden;
+      background: #0d1117;
+      border-radius: 4px;
+    }
+    .overflow-box p { color: #8b949e; }
+    .overflow-box strong { color: #c9d1d9; display: block; margin-bottom: 4px; font-size: 12px; }
+    .scroll-hint { font-size: 11px; color: #3fb950; margin-top: 8px; }
+
+    /* smooth scroll demo */
+    .smooth-scroll-demo { display: flex; gap: 16px; height: 200px; }
+    .smooth-nav {
+      width: 140px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .smooth-nav a {
+      padding: 8px 12px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      font-size: 12px;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .smooth-nav a:hover { background: #30363d; border-color: #58a6ff; color: #58a6ff; }
+    .smooth-content {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      padding: 16px;
+      scroll-behavior: auto;
+    }
+    .smooth-content section { margin-bottom: 40px; scroll-margin-top: 16px; }
+    .smooth-content h4 { color: #f0f6fc; font-size: 14px; margin-bottom: 8px; }
+    .smooth-content p { color: #8b949e; font-size: 12px; line-height: 1.7; }
+
+    /* snap carousel */
+    .carousel-wrapper { overflow: hidden; border-radius: 8px; }
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 12px 0 16px;
+      transition: scroll-snap-type 0.2s;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+    .carousel-item {
+      flex: 0 0 80%;
+      height: 180px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      scroll-snap-align: center;
+      transition: transform 0.2s;
+      user-select: none;
+    }
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .carousel-dots .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #30363d;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .carousel-dots .dot.active {
+      background: #58a6ff;
+      transform: scale(1.3);
+    }
+    .snap-type-btns { margin-bottom: 12px; }
+
+    /* hide scrollbar */
+    .scrollbar-demo-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hide-scrollbar-box {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+      height: 140px;
+      overflow: auto;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      padding: 10px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #8b949e;
+    }
+    .hide-scrollbar-box::-webkit-scrollbar { width: 0; display: none; }
+    .hide-scrollbar-box.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+    /* sticky table */
+    .table-wrapper {
+      display: flex;
+      flex-direction: column;
+      max-height: 280px;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .table-header-wrapper { flex: 0 0 auto; }
+    .table-body-wrapper { flex: 1 1 auto; overflow-y: auto; overflow-x: auto; }
+    .demo-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+    .demo-table th, .demo-table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid #21262d; }
+    .demo-table th { background: #161b22; color: #c9d1d9; font-weight: 600; position: sticky; top: 0; z-index: 1; }
+    .demo-table td { background: #0d1117; color: #8b949e; }
+    .demo-table tbody tr:hover td { background: #161b22; }
+    .demo-table th:first-child, .demo-table td:first-child { width: 80px; }
+    .demo-table th:nth-child(2), .demo-table td:nth-child(2) { width: 100px; }
+    .demo-table th:nth-child(3), .demo-table td:nth-child(3) { width: 120px; }
+    .demo-table th:nth-child(4), .demo-table td:nth-child(4) { width: 180px; }
+
+    /* overscroll */
+    .overscroll-demo { display: flex; gap: 16px; flex-wrap: wrap; }
+    .overscroll-box {
+      flex: 1;
+      min-width: 200px;
+      height: 160px;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      overflow-y: auto;
+      padding: 10px;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .overscroll-box strong { color: #c9d1d9; display: block; margin-bottom: 6px; font-size: 12px; }
+
+    /* scrollbar style */
+    .scrollbar-style-demo {
+      height: 120px;
+      overflow-y: auto;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      padding: 10px;
+      font-size: 11px;
+      line-height: 1.7;
+      color: #8b949e;
+      scrollbar-width: thin;
+      scrollbar-color: #58a6ff #21262d;
+    }
+    .scrollbar-style-demo::-webkit-scrollbar { width: 8px; }
+    .scrollbar-style-demo::-webkit-scrollbar-track { background: #21262d; border-radius: 4px; }
+    .scrollbar-style-demo::-webkit-scrollbar-thumb { background: #58a6ff; border-radius: 4px; }
+    .scrollbar-style-demo::-webkit-scrollbar-thumb:hover { background: #79c0ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Scroll 滚动交互演示</h1>
+    <p class="subtitle">覆盖 overflow / scroll-behavior / scroll-snap / 隐藏滚动条 / 固定表头 / overscroll-behavior</p>
+
+    <!-- 1. overflow 属性 -->
+    <div class="section">
+      <h2>1. overflow 属性详解</h2>
+      <p class="desc">对比 visible / hidden / scroll / auto 四种值的行为差异。设置不同值后尝试滚动。</p>
+      <div class="controls" id="overflow-controls">
+        <button class="btn active" data-value="visible">visible</button>
+        <button class="btn" data-value="hidden">hidden</button>
+        <button class="btn" data-value="scroll">scroll</button>
+        <button class="btn" data-value="auto">auto</button>
+      </div>
+      <div class="overflow-demo-container">
+        <div class="overflow-box" id="overflow-box" style="overflow: visible;">
+          <strong>visible（默认）</strong>
+          <p>内容会溢出到容器外部显示。这是默认行为，溢出部分不会被裁剪，滚动条不出现。</p>
+          <p style="margin-top:8px;">额外文字行一：用于演示长文本的溢出效果。此行内容会超出容器边界。</p>
+          <p>额外文字行二：继续添加更多内容，观察在 visible 模式下的表现。</p>
+          <p>额外文字行三：这里是第三行溢出内容。</p>
+        </div>
+        <div class="overflow-box" style="overflow: hidden;">
+          <strong>hidden</strong>
+          <p>超出容器的部分被直接裁剪，不显示滚动条，内容不可滚动。</p>
+          <p style="margin-top:8px;">额外文字行一：虽然内容在DOM中存在，但被CSS裁剪不可见。</p>
+          <p>额外文字行二：hidden 值会阻止内容溢出显示。</p>
+        </div>
+        <div class="overflow-box" style="overflow: scroll;">
+          <strong>scroll</strong>
+          <p>始终显示滚动条（即使内容未溢出）。内容超出时允许滚动。</p>
+          <p class="scroll-hint">✓ 滚动条始终可见</p>
+        </div>
+        <div class="overflow-box" style="overflow: auto;">
+          <strong>auto</strong>
+          <p>内容溢出时才显示滚动条，未溢出时不显示。推荐日常使用。</p>
+          <p class="scroll-hint">✓ 按需显示滚动条</p>
+        </div>
+      </div>
+      <div class="code-block" id="overflow-code">/* 切换到 visible */</div>
+    </div>
+
+    <!-- 2. overflow-x / overflow-y -->
+    <div class="section">
+      <h2>2. overflow-x 与 overflow-y</h2>
+      <p class="desc">分别控制水平/垂直方向的溢出行为。适合横向溢出文本或单向滚动场景。</p>
+      <div class="controls" id="overflow-xy-controls">
+        <button class="btn active" data-x="hidden" data-y="auto">水平隐藏 / 垂直滚动</button>
+        <button class="btn" data-x="auto" data-y="hidden">水平滚动 / 垂直隐藏</button>
+        <button class="btn" data-x="auto" data-y="auto">两轴自动</button>
+        <button class="btn" data-x="scroll" data-y="scroll">两轴滚动</button>
+      </div>
+      <div class="overflow-box" id="overflow-xy-box" style="overflow-x: hidden; overflow-y: auto; white-space: nowrap; width: 200px;">
+        <strong>horizontal long text →</strong>
+        这是单行长文本，使用 overflow-x:hidden 水平裁剪，overflow-y:auto 允许垂直滚动。
+        ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
+        第二行：这是第二行内容。
+        第三行：这是第三行内容，用于演示垂直滚动。
+      </div>
+      <div class="code-block" id="overflow-xy-code">overflow-x: hidden; overflow-y: auto;</div>
+    </div>
+
+    <!-- 3. scroll-behavior -->
+    <div class="section">
+      <h2>3. scroll-behavior — 平滑滚动</h2>
+      <p class="desc">点击左侧导航，右侧内容区会平滑滚动到对应章节。对比 auto（立即跳转）与 smooth（平滑滚动）。</p>
+      <div class="controls" id="sb-controls">
+        <button class="btn active" data-value="smooth">smooth（平滑）</button>
+        <button class="btn" data-value="auto">auto（立即）</button>
+      </div>
+      <div class="smooth-scroll-demo">
+        <div class="smooth-nav">
+          <a href="#intro">简介</a>
+          <a href="#overflow-detail">overflow 详解</a>
+          <a href="#scroll-snap">scroll-snap</a>
+          <a href="#mobile-scroll">移动端滚动</a>
+          <a href="#hide-scrollbar">隐藏滚动条</a>
+          <a href="#sticky-table">固定表头</a>
+        </div>
+        <div class="smooth-content" id="smooth-content" style="scroll-behavior: smooth;">
+          <section id="intro">
+            <h4>简介</h4>
+            <p>CSS 滚动机制涵盖内容溢出处理、滚动吸附、平滑滚动动画、惯性滚动等多个维度。合理运用这些属性可以显著提升用户滚动体验。</p>
+          </section>
+          <section id="overflow-detail">
+            <h4>overflow 详解</h4>
+            <p>overflow 属性控制内容超出元素边界时的行为。visible（默认）让内容溢出显示；hidden 裁剪溢出内容；scroll 始终显示滚动条；auto 则在内容溢出时才显示滚动条。合理选择 overflow 值是构建可滚动区域的基础。</p>
+          </section>
+          <section id="scroll-snap">
+            <h4>scroll-snap</h4>
+            <p>scroll-snap-type 定义滚动吸附的方向和严格程度（mandatory 强制吸附，proximity 接近时吸附）。配合 scroll-snap-align 使用，可以让轮播图、相册等场景达到精确分页效果。scroll-snap-align 可选 start、center、end 三种对齐方式。</p>
+          </section>
+          <section id="mobile-scroll">
+            <h4>移动端滚动</h4>
+            <p>-webkit-overflow-scrolling: touch 在 iOS Safari 中启用惯性滚动（触摸拖拽后的惯性效果）。现代 iOS Safari 已默认启用该行为。overscroll-behavior 可以控制滚动到达边界时的拉扯效果（pull-to-refresh 类行为）。</p>
+          </section>
+          <section id="hide-scrollbar">
+            <h4>隐藏滚动条</h4>
+            <p>常见方法有：::-webkit-scrollbar { display: none }（WebKit）、scrollbar-width: none（Firefox）、以及通过 padding 或 margin 技巧腾出空间。隐藏滚动条后需要确保键盘可访问性（tabindex + focus 样式）。</p>
+          </section>
+          <section id="sticky-table">
+            <h4>固定表头</h4>
+            <p>固定表头的常用方案：display: block 将表头和表体分成两个独立的 table；position: sticky 让 th 固定在滚动容器的顶部。sticky 方案更简洁，但需要注意 z-index 层级和背景色覆盖问题。</p>
+          </section>
+        </div>
+      </div>
+      <div class="code-block" id="sb-code">scroll-behavior: smooth;</div>
+    </div>
+
+    <!-- 4. scroll-snap 轮播图 -->
+    <div class="section">
+      <h2>4. scroll-snap 轮播图</h2>
+      <p class="desc">水平滚动轮播图，滚动停止后自动吸附到最近的 slide。对比 mandatory（强制吸附）vs proximity（接近时吸附）。</p>
+      <div class="controls snap-type-btns" id="snap-type-controls">
+        <button class="btn active" data-value="x mandatory">x mandatory（强制）</button>
+        <button class="btn" data-value="x proximity">x proximity（接近时）</button>
+        <button class="btn" data-value="both mandatory">both mandatory（全方向）</button>
+      </div>
+      <div class="carousel-wrapper">
+        <div class="carousel-track" id="carousel-track">
+          <div class="carousel-item" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">Slide 1</div>
+          <div class="carousel-item" style="background: linear-gradient(135deg, #a371f7, #c084fc);">Slide 2</div>
+          <div class="carousel-item" style="background: linear-gradient(135deg, #3fb950, #4ade80);">Slide 3</div>
+          <div class="carousel-item" style="background: linear-gradient(135deg, #f0883e, #fb923c);">Slide 4</div>
+          <div class="carousel-item" style="background: linear-gradient(135deg, #db61a2, #f472b6);">Slide 5</div>
+        </div>
+      </div>
+      <div class="carousel-dots" id="carousel-dots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+        <span class="dot" data-index="3"></span>
+        <span class="dot" data-index="4"></span>
+      </div>
+      <div class="code-block" id="snap-code">scroll-snap-type: x mandatory;</div>
+    </div>
+
+    <!-- 5. 隐藏滚动条 -->
+    <div class="section">
+      <h2>5. 隐藏滚动条（保持滚动功能）</h2>
+      <p class="desc">对比三种隐藏滚动条的方法：WebKit 伪元素、Firefox scrollbar-width、以及 padding 技巧。</p>
+      <div class="scrollbar-demo-row">
+        <div>
+          <div class="hide-scrollbar-box no-scrollbar" id="hide-demo-1">
+            <strong>WebKit + scrollbar-width</strong>
+            使用 <code>::-webkit-scrollbar { display: none }</code> 和 <code>scrollbar-width: none</code> 隐藏滚动条。内容仍然可以滚动，试试拖拽滚动。
+            这是第一行内容，用于演示长文本的滚动效果。
+            第二行：继续添加更多内容来测试滚动功能。
+            第三行：更多内容行。
+            第四行：额外的内容行。
+            第五行：测试滚动边界。
+          </div>
+          <p class="desc" style="margin-top:6px;">方法1: 伪元素 + scrollbar-width（最常用）</p>
+        </div>
+        <div>
+          <div class="hide-scrollbar-box" id="hide-demo-2" style="padding-right: 16px; overflow-x: auto; overflow-y: auto;">
+            <strong>padding 技巧</strong>
+            通过 padding-right 腾出滚动条空间，::-webkit-scrollbar { width: 0 } 隐藏滚动条。滚动功能正常保留。
+            这是第一行内容。
+            第二行：更多内容。
+            第三行：继续添加。
+            第四行：更多内容行。
+            第五行：测试边界。
+          </div>
+          <p class="desc" style="margin-top:6px;">方法2: padding + width:0 技巧</p>
+        </div>
+      </div>
+      <div class="code-block" id="hide-code">/* WebKit */ ::-webkit-scrollbar { display: none; }
+/* Firefox */ scrollbar-width: none;</div>
+    </div>
+
+    <!-- 6. 固定表头表格 -->
+    <div class="section">
+      <h2>6. 固定表头的表格滚动方案</h2>
+      <p class="desc">使用 <code>position: sticky</code> 固定表头。滚动下方表体时，表头始终可见。</p>
+      <div class="table-wrapper">
+        <div class="table-body-wrapper">
+          <table class="demo-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>姓名</th>
+                <th>部门</th>
+                <th>邮箱</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>张三</td><td>技术部</td><td>zhangsan@example.com</td></tr>
+              <tr><td>2</td><td>李四</td><td>产品部</td><td>lisi@example.com</td></tr>
+              <tr><td>3</td><td>王五</td><td>设计部</td><td>wangwu@example.com</td></tr>
+              <tr><td>4</td><td>赵六</td><td>市场部</td><td>zhaoliu@example.com</td></tr>
+              <tr><td>5</td><td>钱七</td><td>运营部</td><td>qianqi@example.com</td></tr>
+              <tr><td>6</td><td>孙八</td><td>人事部</td><td>sunba@example.com</td></tr>
+              <tr><td>7</td><td>周九</td><td>财务部</td><td>zhoujiu@example.com</td></tr>
+              <tr><td>8</td><td>吴十</td><td>法务部</td><td>wushi@example.com</td></tr>
+              <tr><td>9</td><td>郑一</td><td>技术部</td><td>zhengyi@example.com</td></tr>
+              <tr><td>10</td><td>陈二</td><td>产品部</td><td>chener@example.com</td></tr>
+              <tr><td>11</td><td>楚三</td><td>设计部</td><td>chusan@example.com</td></tr>
+              <tr><td>12</td><td>燕四</td><td>市场部</td><td>yansi@example.com</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="code-block"/* 固定表头 - sticky 方案 */
+thead th {
+  position: sticky;
+  top: 0;
+  background: #161b22;
+  z-index: 1;
+}</div>
+    </div>
+
+    <!-- 7. overscroll-behavior -->
+    <div class="section">
+      <h2>7. overscroll-behavior 滚动边界处理</h2>
+      <p class="desc">控制滚动到达边界时的拉扯（overscroll）行为。<code>contain</code> 阻止滚动链，<code>none</code> 禁用拉扯效果。</p>
+      <div class="overscroll-demo">
+        <div class="overscroll-box" style="overscroll-behavior: auto;">
+          <strong>auto（默认）</strong>
+          在移动端，当滚动到达边界时会出现拉扯效果（rubber-band）。拉扯到一定程度后会反弹回去。
+          这是内容行1。
+          这是内容行2。
+          这是内容行3。
+          这是内容行4。
+          这是内容行5。
+          这是内容行6。
+          这是内容行7。
+        </div>
+        <div class="overscroll-box" style="overscroll-behavior: contain;">
+          <strong>contain</strong>
+          contain 值阻止滚动链向父级传播，并禁用拉扯效果。适合嵌套滚动区域（如地图中嵌入列表）。
+          这是内容行1。
+          这是内容行2。
+          这是内容行3。
+          这是内容行4。
+          这是内容行5。
+          这是内容行6。
+          这是内容行7。
+        </div>
+        <div class="overscroll-box" style="overscroll-behavior: none;">
+          <strong>none</strong>
+          完全禁用边界拉扯效果。在全屏 App-like 界面中常用，防止意外触发系统手势。
+          这是内容行1。
+          这是内容行2。
+          这是内容行3。
+          这是内容行4。
+          这是内容行5。
+          这是内容行6。
+          这是内容行7。
+        </div>
+      </div>
+      <div class="code-block">overscroll-behavior: auto | contain | none;</div>
+    </div>
+
+    <!-- 8. 自定义滚动条样式 -->
+    <div class="section">
+      <h2>8. 自定义滚动条样式</h2>
+      <p class="desc">使用 ::-webkit-scrollbar 伪元素（Chrome/Edge/Safari）和 scrollbar-width（Firefox）自定义滚动条外观。</p>
+      <div class="scrollbar-style-demo">
+        <strong style="color:#c9d1d9;">可滚动的示例内容</strong>
+        <p style="margin-top:6px;">这是自定义滚动条样式演示区域。滚动条已改为细窄的蓝色主题。</p>
+        <p>内容行1：CSS 滚动条样式支持自定义轨道（track）和滑块（thumb）的颜色、圆角、阴影等属性。</p>
+        <p>内容行2：通过 ::-webkit-scrollbar 伪元素可以精确控制滚动条的各个部分。</p>
+        <p>内容行3：scrollbar-width 属性（Firefox）在不改变视觉的情况下控制滚动条宽度。</p>
+        <p>内容行4：scrollbar-color 控制滑块和轨道的颜色。</p>
+        <p>内容行5：建议在暗色主题中使用较浅的滚动条颜色以提高可访问性。</p>
+        <p>内容行6：hover 状态可以增加交互反馈。</p>
+        <p>内容行7：滚动条宽度建议在 4px-12px 之间，太细难以点击。</p>
+        <p>内容行8：结尾行。</p>
+      </div>
+      <div class="code-block">/* Chrome/Edge/Safari */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #21262d; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #58a6ff; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #79c0ff; }
+/* Firefox */
+scrollbar-width: thin;
+scrollbar-color: #58a6ff #21262d;</div>
+    </div>
+
+    <p class="info">交互演示基于 learn-css 仓库示例风格。scroll-snap 轮播图使用纯 CSS 实现，无需 JavaScript 逻辑。</p>
+  </div>
+
+  <script>
+    // 1. overflow 切换
+    const overflowBox = document.getElementById('overflow-box');
+    document.getElementById('overflow-controls').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn');
+      if (!btn) return;
+      document.querySelectorAll('#overflow-controls .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.value;
+      overflowBox.style.overflow = val;
+      const labels = { visible: 'visible（默认，内容溢出显示）', hidden: 'hidden（裁剪溢出，不滚动）', scroll: 'scroll（始终显示滚动条）', auto: 'auto（溢出时显示滚动条）' };
+      document.getElementById('overflow-code').textContent = `overflow: ${val}; /* ${labels[val]} */`;
+    });
+
+    // 2. overflow-x / overflow-y
+    document.getElementById('overflow-xy-controls').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn');
+      if (!btn) return;
+      document.querySelectorAll('#overflow-xy-controls .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('overflow-xy-box');
+      box.style.overflowX = btn.dataset.x;
+      box.style.overflowY = btn.dataset.y;
+      document.getElementById('overflow-xy-code').textContent = `overflow-x: ${btn.dataset.x}; overflow-y: ${btn.dataset.y};`;
+    });
+
+    // 3. scroll-behavior
+    document.getElementById('sb-controls').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn');
+      if (!btn) return;
+      document.querySelectorAll('#sb-controls .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.value;
+      document.getElementById('smooth-content').style.scrollBehavior = val;
+      document.getElementById('sb-code').textContent = `scroll-behavior: ${val};`;
+    });
+
+    // 4. scroll-snap
+    const track = document.getElementById('carousel-track');
+    const dots = document.querySelectorAll('#carousel-dots .dot');
+    document.getElementById('snap-type-controls').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn');
+      if (!btn) return;
+      document.querySelectorAll('#snap-type-controls .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.value;
+      track.style.scrollSnapType = val;
+      document.getElementById('snap-code').textContent = `scroll-snap-type: ${val};`;
+    });
+
+    // dots click to scroll
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.dataset.index);
+        const item = track.querySelectorAll('.carousel-item')[idx];
+        if (item) item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      });
+    });
+
+    // track scroll -> update dots
+    track.addEventListener('scroll', () => {
+      const items = track.querySelectorAll('.carousel-item');
+      const trackRect = track.getBoundingClientRect();
+      const centerX = trackRect.left + trackRect.width / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      items.forEach((item, i) => {
+        const rect = item.getBoundingClientRect();
+        const itemCenter = rect.left + rect.width / 2;
+        const dist = Math.abs(itemCenter - centerX);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+    });
+  </script>
+</body>
+</html>
