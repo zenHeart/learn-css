@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>流体间距</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #0f0f23;
+			color: #fff;
+			min-height: 100vh;
+		}
+
+		.container {
+			max-width: 900px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			color: #00d9ff;
+			margin-bottom: 30px;
+		}
+
+		.resize-hint {
+			background: rgba(0, 217, 255, 0.1);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.demo-section {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 25px;
+		}
+
+		.demo-title {
+			color: #ffd700;
+			margin-bottom: 20px;
+		}
+
+		.spacing-demo {
+			display: flex;
+			flex-wrap: wrap;
+			gap: clamp(8px, 2vw, 24px);
+		}
+
+		.spacing-item {
+			width: clamp(60px, 15vw, 120px);
+			height: clamp(60px, 15vw, 120px);
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: clamp(12px, 2vw, 18px);
+		}
+
+		.padding-demo {
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			padding: clamp(20px, 5vw, 60px);
+			margin-bottom: 20px;
+		}
+
+		.padding-demo .label {
+			color: #888;
+			font-size: 0.85rem;
+			margin-bottom: 10px;
+		}
+
+		.margin-demo {
+			background: #2d2d44;
+			border-radius: 12px;
+			overflow: hidden;
+		}
+
+		.margin-child {
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+			margin: clamp(10px, 3vw, 40px);
+			padding: clamp(15px, 4vw, 40px);
+			border-radius: 8px;
+			text-align: center;
+		}
+
+		.gallery {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: clamp(8px, 1.5vw, 20px);
+		}
+
+		.gallery-item {
+			aspect-ratio: 1;
+			background: linear-gradient(135deg, #00d9ff 0%, #007bff 100%);
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: clamp(20px, 4vw, 40px);
+		}
+
+		.button-group {
+			display: flex;
+			gap: clamp(8px, 2vw, 16px);
+			flex-wrap: wrap;
+		}
+
+		.btn {
+			padding: clamp(8px, 2vw, 14px) clamp(16px, 3vw, 28px);
+			font-size: clamp(12px, 1.5vw, 16px);
+			border: none;
+			border-radius: clamp(4px, 1vw, 8px);
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+		}
+
+		.btn-secondary {
+			background: rgba(255, 255, 255, 0.1);
+			color: white;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+		}
+
+		.btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+		}
+
+		.info-panel {
+			background: #1a1a2e;
+			padding: 15px;
+			border-radius: 8px;
+			font-family: 'Fira Code', monospace;
+			font-size: 0.9rem;
+			margin-top: 20px;
+			overflow-x: auto;
+		}
+
+		.info-panel .property { color: #ff79c6; }
+		.info-panel .function { color: #50fa7b; }
+		.info-panel .value { color: #f1fa8c; }
+
+		.spacing-visual {
+			background: repeating-linear-gradient(
+				45deg,
+				transparent,
+				transparent 10px,
+				rgba(0, 217, 255, 0.1) 10px,
+				rgba(0, 217, 255, 0.1) 20px
+			);
+			border: 1px dashed rgba(0, 217, 255, 0.3);
+			padding: clamp(20px, 5vw, 50px);
+			margin-top: 15px;
+			border-radius: 8px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>📏 流体间距演示</h1>
+
+		<div class="resize-hint">
+			👆 调整浏览器窗口宽度，观察间距和尺寸的变化
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🔲 流体元素尺寸和间距</div>
+			
+			<div class="spacing-demo">
+				<div class="spacing-item">1</div>
+				<div class="spacing-item">2</div>
+				<div class="spacing-item">3</div>
+				<div class="spacing-item">4</div>
+				<div class="spacing-item">5</div>
+				<div class="spacing-item">6</div>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">gap</span>: <span class="function">clamp</span>(<span class="value">8px, 2vw, 24px</span>);<br>
+				<span class="property">width/height</span>: <span class="function">clamp</span>(<span class="value">60px, 15vw, 120px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🟰 流体内边距</div>
+			
+			<div class="padding-demo">
+				<div class="label">padding: clamp(20px, 5vw, 60px)</div>
+				<p>这是一个使用流体内边距的容器。在小屏幕上间距较小，在大屏幕上间距较大。</p>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">padding</span>: <span class="function">clamp</span>(<span class="value">20px, 5vw, 60px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">↔️ 流体外边距</div>
+			
+			<div class="margin-demo">
+				<div class="margin-child">
+					margin: clamp(10px, 3vw, 40px)
+				</div>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">margin</span>: <span class="function">clamp</span>(<span class="value">10px, 3vw, 40px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🖼️ 流体画廊网格</div>
+			
+			<div class="gallery">
+				<div class="gallery-item">🌸</div>
+				<div class="gallery-item">🌺</div>
+				<div class="gallery-item">🌻</div>
+				<div class="gallery-item">🌷</div>
+				<div class="gallery-item">🌹</div>
+				<div class="gallery-item">🌷</div>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">grid-gap</span>: <span class="function">clamp</span>(<span class="value">8px, 1.5vw, 20px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🔘 流体按钮</div>
+			
+			<div class="button-group">
+				<button class="btn btn-primary">主要按钮</button>
+				<button class="btn btn-secondary">次要按钮</button>
+				<button class="btn btn-primary">另一个</button>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">padding</span>: <span class="function">clamp</span>(<span class="value">8px, 2vw, 14px</span>) <span class="function">clamp</span>(<span class="value">16px, 3vw, 28px</span>);<br>
+				<span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">12px, 1.5vw, 16px</span>);<br>
+				<span class="property">border-radius</span>: <span class="function">clamp</span>(<span class="value">4px, 1vw, 8px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📐 间距可视化</div>
+			
+			<div class="spacing-visual">
+				<p>背景的斜线图案帮助您可视化当前的间距大小。</p>
+				<p>调整窗口宽度，斜线间距会平滑变化。</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
