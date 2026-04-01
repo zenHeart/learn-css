@@ -300,7 +300,8 @@ overflow-wrap: anywhere;  /* 类似 break-word，但影响 min-content 计算 */
 
 ## 9. 相关主题
 
-- [white-space 属性](../css/white-space.md)
-- [line-break 属性](../css/line-break.md)
-- [hyphens 属性](../css/hyphens.md)
+- [white-space 属性](./white-space.md)
+- [line-break 属性](./line-break.md)
+- [text-wrap 属性](./text-wrap.md)
+- [hyphens 属性](./hyphens.md)
 - [文本换行指南](https://developer.mozilla.org/en-US/docs/CSS/Guides/Text/Wrapping_breaking_text)
