@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设计转代码流程 - 交互演示</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .header p { opacity: 0.9; font-size: 0.95rem; }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab {
+      padding: 1rem 1.25rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--primary); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .content { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    h2 { font-size: 1.25rem; margin-bottom: 1rem; color: var(--gray-900); }
+    h3 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--gray-700); margin-top: 1.5rem; }
+    p { margin-bottom: 1rem; color: var(--gray-700); }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-green { background: #d1fae5; color: #065f46; }
+    .tag-yellow { background: #fef3c7; color: #92400e; }
+    .tag-red { background: #fee2e2; color: #991b1b; }
+
+    .code-block {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .code-block .comment { color: #6b7280; }
+    .code-block .string { color: #10b981; }
+    .code-block .property { color: #60a5fa; }
+    .code-block .value { color: #f59e0b; }
+
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--gray-100);
+      border-radius: 12px;
+    }
+    .flow-step {
+      background: var(--primary);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .flow-arrow {
+      color: var(--gray-400);
+      font-size: 1.2rem;
+    }
+
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .token-item {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .token-swatch {
+      width: 100%;
+      height: 48px;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+    }
+    .token-name { font-size: 0.85rem; font-weight: 600; color: var(--gray-900); }
+    .token-value { font-size: 0.75rem; color: var(--gray-500); font-family: monospace; }
+
+    .demo-box {
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-list {
+      list-style: none;
+    }
+    .checkbox-list li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .checkbox-list input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    .compare-table th, .compare-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .compare-table th {
+      background: var(--gray-100);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .compare-table td { font-size: 0.9rem; }
+
+    .theme-switcher {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .theme-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--primary); }
+    .theme-btn.active { border-color: var(--primary); background: #dbeafe; }
+
+    .preview-panel {
+      background: var(--gray-100);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    .preview-label {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #2563eb; }
+
+    .tool-card {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .tool-card h4 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .tool-card p { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎨 设计转代码流程</h1>
+  <p>Design Token 系统与设计开发协作指南</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview')">概念总览</button>
+  <button class="tab" onclick="showTab('token')">Design Token</button>
+  <button class="tab" onclick="showTab('workflow')">开发流程</button>
+  <button class="tab" onclick="showTab('theme')">主题切换</button>
+  <button class="tab" onclick="showTab('tools')">工具推荐</button>
+  <button class="tab" onclick="showTab('quiz')">自测题</button>
+</div>
+
+<div class="content">
+
+<!-- 概念总览 -->
+<div id="overview" class="panel active">
+  <h2>什么是设计转代码？</h2>
+  <div class="card">
+    <p>设计转代码（Design to Code）是将 UI 设计稿转换为可维护代码的过程，核心工具是 <strong>Design Token（设计令牌）</strong>。</p>
+    
+    <h3>整体流程</h3>
+    <div class="flow-diagram">
+      <div class="flow-step">🎨 设计稿</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🏷️ Design Token</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">⚙️ 代码变量</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🧩 组件</div>
+    </div>
+
+    <h3>核心价值</h3>
+    <ul class="checkbox-list">
+      <li><input type="checkbox" checked disabled> <strong>一致性</strong>：设计值统一管理，避免硬编码</li>
+      <li><input type="checkbox" checked disabled> <strong>可维护性</strong>：改一处全局生效</li>
+      <li><input type="checkbox" checked disabled> <strong>主题切换</strong>：轻松实现暗色/亮色模式</li>
+      <li><input type="checkbox" checked disabled> <strong>多平台</strong>：一份 Token 输出 iOS/Android/Web</li>
+      <li><input type="checkbox" checked disabled> <strong>协作</strong>：设计师和开发者使用同一语言</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Design Token 三层结构</h3>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>层级</th>
+          <th>说明</th>
+          <th>示例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-blue">Global</span></td>
+          <td>原始设计值，与品牌色板对应</td>
+          <td><code style="font-size:0.8rem">--blue-500: #3B82F6</code></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">Semantic</span></td>
+          <td>语义化命名，描述用途</td>
+          <td><code style="font-size:0.8rem">--color-primary: {blue-500}</code></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-yellow">Component</span></td>
+          <td>组件级别覆盖</td>
+          <td><code style="font-size:0.8rem">--btn-bg: {color-primary}</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Design Token -->
+<div id="token" class="panel">
+  <h2>Design Token 类型</h2>
+  
+  <div class="card">
+    <h3>颜色 Token</h3>
+    <div class="token-grid">
+      <div class="token-item">
+        <div class="token-swatch" style="background: #3B82F6;"></div>
+        <div class="token-name">Primary</div>
+        <div class="token-value">#3B82F6</div>
+      </div>
+      <div class="token-item">
+        <div class="token-swatch" style="background: #10B981;"></div>
+        <div class="token-name">Success</div>
+        <div class="token-value">#10B981</div>
+      </div>
+      <div class="token-item">
+        <div class="token-swatch" style="background: #F59E0B;"></div>
+        <div class="token-name">Warning</div>
+        <div class="token-value">#F59E0B</div>
+      </div>
+      <div class="token-item">
+        <div class="token-swatch" style="background: #EF4444;"></div>
+        <div class="token-name">Danger</div>
+        <div class="token-value">#EF4444</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>间距 Token</h3>
+    <div class="code-block">
+<span class="comment">/* 间距 Scale */</span>
+<span class="property">--spacing-xs</span>: <span class="value">4px</span>;
+<span class="property">--spacing-sm</span>: <span class="value">8px</span>;
+<span class="property">--spacing-md</span>: <span class="value">16px</span>;
+<span class="property">--spacing-lg</span>: <span class="value">24px</span>;
+<span class="property">--spacing-xl</span>: <span class="value">32px</span>;
+    </div>
+    <div class="preview-panel">
+      <div class="preview-label">效果预览</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="background:#dbeafe;padding:var(--spacing-xs,4px);font-size:0.75rem;border-radius:4px;">xs</div>
+        <div style="background:#dbeafe;padding:var(--spacing-sm,8px);font-size:0.75rem;border-radius:4px;">sm</div>
+        <div style="background:#dbeafe;padding:var(--spacing-md,16px);font-size:0.75rem;border-radius:4px;">md</div>
+        <div style="background:#dbeafe;padding:var(--spacing-lg,24px);font-size:0.75rem;border-radius:4px;">lg</div>
+        <div style="background:#dbeafe;padding:var(--spacing-xl,32px);font-size:0.75rem;border-radius:4px;">xl</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>圆角 Token</h3>
+    <div class="token-grid">
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:0px;margin:0 auto 8px;"></div>
+        <div style="font-size:0.75rem;">none: 0px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:4px;margin:0 auto 8px;"></div>
+        <div style="font-size:0.75rem;">sm: 4px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:8px;margin:0 auto 8px;"></div>
+        <div style="font-size:0.75rem;">md: 8px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:12px;margin:0 auto 8px;"></div>
+        <div style="font-size:0.75rem;">lg: 12px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);border-radius:9999px;margin:0 auto 8px;"></div>
+        <div style="font-size:0.75rem;">full: 9999px</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>阴影 Token</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+      <div style="background:white;padding:1.5rem;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+        <div style="font-weight:600;margin-bottom:0.5rem;">sm</div>
+        <code style="font-size:0.75rem;color:#6b7280;">0 1px 2px rgba(0,0,0,0.05)</code>
+      </div>
+      <div style="background:white;padding:1.5rem;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-weight:600;margin-bottom:0.5rem;">md</div>
+        <code style="font-size:0.75rem;color:#6b7280;">0 4px 6px rgba(0,0,0,0.1)</code>
+      </div>
+      <div style="background:white;padding:1.5rem;border-radius:8px;box-shadow:0 10px 15px rgba(0,0,0,0.1);">
+        <div style="font-weight:600;margin-bottom:0.5rem;">lg</div>
+        <code style="font-size:0.75rem;color:#6b7280;">0 10px 15px rgba(0,0,0,0.1)</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 开发流程 -->
+<div id="workflow" class="panel">
+  <h2>设计转代码工作流</h2>
+
+  <div class="card">
+    <h3>Step 1: 设计评审</h3>
+    <p>设计师交付设计稿后，团队评审以下内容：</p>
+    <ul class="checkbox-list">
+      <li><input type="checkbox" id="w1"> <label for="w1">设计规范是否完整（颜色/字体/间距/圆角）</label></li>
+      <li><input type="checkbox" id="w2"> <label for="w2">组件状态是否覆盖（default/hover/active/disabled）</label></li>
+      <li><input type="checkbox" id="w3"> <label for="w3">响应式断点是否明确</label></li>
+      <li><input type="checkbox" id="w4"> <label for="w4">暗色模式设计稿是否提供</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Step 2: 提取 Design Token</h3>
+    <p>从设计稿中提取设计决策，生成 Token JSON：</p>
+    <div class="code-block">
+<span class="comment">// tokens.json</span>
+{
+  <span class="property">"color"</span>: {
+    <span class="string">"primary"</span>: <span class="string">"#3B82F6"</span>,
+    <span class="string">"secondary"</span>: <span class="string">"#8B5CF6"</span>
+  },
+  <span class="property">"spacing"</span>: {
+    <span class="string">"sm"</span>: <span class="string">"8px"</span>,
+    <span class="string">"md"</span>: <span class="string">"16px"</span>,
+    <span class="string">"lg"</span>: <span class="string">"24px"</span>
+  }
+}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Step 3: 代码实现</h3>
+    <p>使用 Token 生成 CSS Variables 并应用到组件：</p>
+    <div class="code-block">
+<span class="comment">/* 定义 CSS Variables */</span>
+:<span class="property">root</span> {
+  <span class="property">--color-primary</span>: <span class="value">#3B82F6</span>;
+  <span class="property">--spacing-md</span>: <span class="value">16px</span>;
+}
+
+<span class="comment">/* 使用 Token */</span>
+<span class="property">.button</span> {
+  <span class="property">background</span>: <span class="value">var(--color-primary)</span>;
+  <span class="property">padding</span>: <span class="value">var(--spacing-md)</span>;
+}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Step 4: 设计还原检查</h3>
+    <p>使用工具对比设计稿与实现效果：</p>
+    <table class="compare-table">
+      <thead>
+        <tr><th>工具</th><th>功能</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Pixel Perfect</td><td>PS/Figma 像素级对比插件</td></tr>
+        <tr><td>Figma Inspect</td><td>查看设计属性值</td></tr>
+        <tr><td>浏览器 DevTools</td><td>实时检查 Computed Style</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 主题切换 -->
+<div id="theme" class="panel">
+  <h2>主题切换实现</h2>
+
+  <div class="card">
+    <h3>主题预览</h3>
+    <div class="theme-switcher">
+      <button class="theme-btn active" onclick="switchTheme('light')">☀️ 亮色</button>
+      <button class="theme-btn" onclick="switchTheme('dark')">🌙 暗色</button>
+    </div>
+    <div id="theme-preview" style="background:var(--theme-bg,#fff);color:var(--theme-text,#111);padding:1.5rem;border-radius:12px;transition:all 0.3s;">
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <button style="background:var(--theme-primary,#3B82F6);color:white;border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;">主要按钮</button>
+        <button style="background:var(--theme-bg-secondary,#f3f4f6);color:var(--theme-text,#111);border:1px solid var(--theme-border,#e5e7eb);padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;">次要按钮</button>
+      </div>
+      <div style="background:var(--theme-bg-secondary,#f3f4f6);padding:1rem;border-radius:8px;font-size:0.9rem;">
+        卡片内容示例 - 主题色会随切换而变化
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>CSS Variables 实现</h3>
+    <div class="code-block">
+<span class="comment">/* 亮色主题 */</span>
+:<span class="property">root</span> {
+  <span class="property">--theme-bg</span>: <span class="value">#FFFFFF</span>;
+  <span class="property">--theme-text</span>: <span class="value">#111827</span>;
+  <span class="property">--theme-primary</span>: <span class="value">#3B82F6</span>;
+}
+
+<span class="comment">/* 暗色主题 */</span>
+<span class="property">[data-theme="dark"]</span> {
+  <span class="property">--theme-bg</span>: <span class="value">#111827</span>;
+  <span class="property">--theme-text</span>: <span class="value">#F9FAFB</span>;
+  <span class="property">--theme-primary</span>: <span class="value">#60A5FA</span>;
+}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>JavaScript 切换</h3>
+    <div class="code-block">
+<span class="property">function</span> <span class="value">setTheme</span>(theme) {
+  document.documentElement.<span class="property">setAttribute</span>(<span class="string">'data-theme'</span>, theme);
+  localStorage.<span class="property">setItem</span>(<span class="string">'theme'</span>, theme);
+}
+
+<span class="comment">// 读取保存的主题</span>
+<span class="property">const</span> saved = localStorage.<span class="property">getItem</span>(<span class="string">'theme'</span>);
+<span class="property">if</span> (saved) <span class="value">setTheme</span>(saved);
+    </div>
+  </div>
+</div>
+
+<!-- 工具推荐 -->
+<div id="tools" class="panel">
+  <h2>设计转代码工具</h2>
+
+  <div class="card">
+    <h3>Design Token 管理</h3>
+    <div class="tool-card">
+      <h4>🎨 Style Dictionary</h4>
+      <p>Amazon 开源的 Token 转换工具，可将 JSON Token 转换为 CSS/SCSS/JS/iOS/Android</p>
+      <span class="tag tag-blue">设计 Token</span>
+      <span class="tag tag-green">多平台</span>
+    </div>
+    <div class="tool-card">
+      <h4>🏷️ Token Studio</h4>
+      <p>Figma 官方插件，直接从 Figma 设计稿生成 Design Token</p>
+      <span class="tag tag-blue">Figma 插件</span>
+      <span class="tag tag-yellow">设计协作</span>
+    </div>
+    <div class="tool-card">
+      <h4>📦 Theo</h4>
+      <p>Salesforce 设计的 Token 管理库，支持多种输出格式</p>
+      <span class="tag tag-blue">设计 Token</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>设计稿对比</h3>
+    <div class="tool-card">
+      <h4>🔍 Pixel Perfect</h4>
+      <p>Photoshop/Figma 插件，实现像素级设计还原检查</p>
+      <span class="tag tag-red">设计还原</span>
+    </div>
+    <div class="tool-card">
+      <h4>🎯 Figma Inspect</h4>
+      <p>Figma 内置功能，直接查看元素的 CSS 属性值</p>
+      <span class="tag tag-red">设计还原</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>组件化工具</h3>
+    <div class="tool-card">
+      <h4>📖 Storybook</h4>
+      <p>组件文档工具，隔离开发 UI 组件，记录组件的各种状态</p>
+      <span class="tag tag-green">组件开发</span>
+    </div>
+    <div class="tool-card">
+      <h4>🧩 Chromatic</h4>
+      <p>Storybook 的云服务，提供 UI 测试和版本对比</p>
+      <span class="tag tag-green">视觉回归测试</span>
+    </div>
+  </div>
+</div>
+
+<!-- 自测题 -->
+<div id="quiz" class="panel">
+  <h2>自测题</h2>
+  
+  <div class="card">
+    <h3>Q1: Design Token 的作用是什么？</h3>
+    <ul class="checkbox-list">
+      <li><input type="radio" name="q1" id="q1a"> <label for="q1a">A. 替代 CSS</label></li>
+      <li><input type="radio" name="q1" id="q1b"> <label for="q1b">B. 存储设计决策，建立设计与代码的桥梁</label></li>
+      <li><input type="radio" name="q1" id="q1c"> <label for="q1c">C. 替代设计工具</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Q2: 哪种是推荐的 Token 命名方式？</h3>
+    <ul class="checkbox-list">
+      <li><input type="radio" name="q2" id="q2a"> <label for="q2a">A. --blue-500</label></li>
+      <li><input type="radio" name="q2" id="q2b"> <label for="q2b">B. --color-text-primary（语义化）</label></li>
+      <li><input type="radio" name="q2" id="q2c"> <label for="q2c">C. --c-t-p</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Q3: Style Dictionary 的主要功能是？</h3>
+    <ul class="checkbox-list">
+      <li><input type="radio" name="q3" id="q3a"> <label for="q3a">A. 设计 UI</label></li>
+      <li><input type="radio" name="q3" id="q3b"> <label for="q3b">B. 将 Design Token 转换为多种平台代码</label></li>
+      <li><input type="radio" name="q3" id="q3c"> <label for="q3c">C. 替代 Git</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>答案</h3>
+    <button class="btn btn-primary" onclick="showAnswers()">显示答案</button>
+    <div id="answers" style="display:none;margin-top:1rem;">
+      <p><strong>Q1:</strong> B - Design Token 存储设计决策，建立设计与代码的桥梁</p>
+      <p><strong>Q2:</strong> B - 语义化命名（--color-text-primary）更易于维护和主题切换</p>
+      <p><strong>Q3:</strong> B - Style Dictionary 将 Design Token（JSON）转换为 CSS/iOS/Android 等多平台代码</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  const preview = document.getElementById('theme-preview');
+  if (theme === 'dark') {
+    preview.style.setProperty('--theme-bg', '#111827');
+    preview.style.setProperty('--theme-text', '#F9FAFB');
+    preview.style.setProperty('--theme-primary', '#60A5FA');
+    preview.style.setProperty('--theme-bg-secondary', '#1F2937');
+    preview.style.setProperty('--theme-border', '#374151');
+  } else {
+    preview.style.setProperty('--theme-bg', '#FFFFFF');
+    preview.style.setProperty('--theme-text', '#111827');
+    preview.style.setProperty('--theme-primary', '#3B82F6');
+    preview.style.setProperty('--theme-bg-secondary', '#F3F4F6');
+    preview.style.setProperty('--theme-border', '#E5E7EB');
+  }
+}
+
+function showAnswers() {
+  document.getElementById('answers').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
