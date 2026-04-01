@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 选择器转义交互演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .demo-area h3 {
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    .demo-area h4 {
+      color: #888;
+      margin: 16px 0 8px;
+      font-size: 0.95rem;
+    }
+    .test-element {
+      background: #252540;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .test-element .label {
+      background: #667eea;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .test-element.highlight {
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+    }
+    .test-element.highlight .label {
+      background: #2ecc71;
+    }
+    .test-element.error {
+      border-color: #e74c3c;
+      background: rgba(231, 76, 60, 0.1);
+    }
+    .test-element.error .label {
+      background: #e74c3c;
+    }
+    button {
+      padding: 10px 20px;
+      background: #252540;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      margin: 4px;
+    }
+    button:hover { background: #333355; border-color: #667eea; }
+    button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+    button.success {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      border: none;
+    }
+    button.danger {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      border: none;
+    }
+    .result-box {
+      background: #0f0f1a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #888;
+      min-height: 60px;
+      white-space: pre-wrap;
+    }
+    .result-box.success { color: #2ecc71; }
+    .result-box.error { color: #e74c3c; }
+    .result-box.info { color: #3498db; }
+    code {
+      background: #252540;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #667eea;
+      font-family: 'Fira Code', 'Consolas', monospace;
+    }
+    .code-block {
+      background: #0f0f1a;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      border: 1px solid #333;
+    }
+    .code-block .keyword { color: #c678dd; }
+    .code-block .string { color: #98c379; }
+    .code-block .number { color: #d19a66; }
+    .code-block .comment { color: #5c6370; }
+    .info-box {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .info-box h4 { color: #667eea; margin-bottom: 8px; }
+    .info-box p { color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+    .info-box.warning {
+      border-color: #f39c12;
+      background: rgba(243, 156, 18, 0.1);
+    }
+    .info-box.warning h4 { color: #f39c12; }
+    .info-box.tip {
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+    }
+    .info-box.tip h4 { color: #2ecc71; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+    th { color: #667eea; font-weight: 600; background: #15152a; }
+    td { color: #aaa; }
+    tr:hover td { background: #1a1a2e; }
+    .escape-table {
+      font-family: 'Fira Code', 'Consolas', monospace;
+    }
+    .escape-table code {
+      background: #0f0f1a;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .quiz-item {
+      background: #15152a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .quiz-item h4 {
+      color: #667eea;
+      margin-bottom: 12px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-option:hover {
+      border-color: #667eea;
+      background: #252540;
+    }
+    .quiz-option .option-letter {
+      background: #333;
+      color: #888;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    .quiz-option.correct {
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+    }
+    .quiz-option.correct .option-letter {
+      background: #2ecc71;
+      color: white;
+    }
+    .quiz-option.incorrect {
+      border-color: #e74c3c;
+      background: rgba(231, 76, 60, 0.1);
+    }
+    .quiz-option.incorrect .option-letter {
+      background: #e74c3c;
+      color: white;
+    }
+    .quiz-option.selected {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+    }
+    .quiz-option.selected .option-letter {
+      background: #667eea;
+      color: white;
+    }
+    .quiz-result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .quiz-result.correct {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+    .quiz-result.incorrect {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+    .best-practice-item {
+      background: #15152a;
+      border-left: 3px solid #667eea;
+      padding: 12px 16px;
+      margin: 12px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .best-practice-item.good {
+      border-left-color: #2ecc71;
+    }
+    .best-practice-item.bad {
+      border-left-color: #e74c3c;
+    }
+    .best-practice-item h5 {
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .best-practice-item.good h5 { color: #2ecc71; }
+    .best-practice-item.bad h5 { color: #e74c3c; }
+    .best-practice-item code {
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 CSS 选择器转义交互演示</h1>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="problem">问题演示</button>
+    <button class="tab-btn" data-tab="getbyid">getElementById 方案</button>
+    <button class="tab-btn" data-tab="escape">CSS 转义方案</button>
+    <button class="tab-btn" data-tab="best">最佳实践</button>
+    <button class="tab-btn" data-tab="quiz">自测题</button>
+  </div>
+
+  <!-- Tab 1: 问题演示 -->
+  <div id="tab-problem" class="tab-content active">
+    <div class="demo-area">
+      <h3>❌ 问题：querySelector 无法直接选取数字开头的 ID</h3>
+      
+      <div class="test-element" id="el-1">
+        <span class="label">#1</span>
+        <span>这是第一个测试元素，id="1"</span>
+      </div>
+      
+      <div class="test-element" id="el-2">
+        <span class="label">#2</span>
+        <span>这是第二个测试元素，id="2"</span>
+      </div>
+      
+      <div class="test-element" id="el-123">
+        <span class="label">#123</span>
+        <span>这是第三个测试元素，id="123"</span>
+      </div>
+      
+      <div style="margin-top: 16px;">
+        <button class="primary" onclick="demoWrongQuery()">尝试 querySelector("#1")</button>
+        <button onclick="resetDemo()">重置</button>
+      </div>
+      
+      <div class="result-box" id="result-problem"></div>
+    </div>
+    
+    <div class="info-box warning">
+      <h4>⚠️ 为什么报错？</h4>
+      <p><code>document.querySelector()</code> 接受的是 <strong>CSS 选择器语法字符串</strong>，而不是 HTML 属性值。</p>
+      <p>CSS 规范不允许 ID 选择器以数字开头，因此解析器抛出 <code>DOMException: '#1' is not a valid selector</code>。</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>📚 CSS 语法 vs HTML 规范</h4>
+      <table>
+        <tr><th>方面</th><th>CSS 选择器</th><th>HTML ID 属性</th></tr>
+        <tr><td>数字开头</td><td>❌ 不允许</td><td>✅ 允许</td></tr>
+        <tr><td>规范来源</td><td>W3C CSS Selectors</td><td>W3C HTML</td></tr>
+        <tr><td>使用方式</td><td>querySelector()</td><td>getElementById()</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 2: getElementById 方案 -->
+  <div id="tab-getbyid" class="tab-content">
+    <div class="demo-area">
+      <h3>✅ 方案一：getElementById（推荐）</h3>
+      <p style="color: #888; margin-bottom: 16px;">getElementById() 直接接受字符串参数，遵循 HTML 规范，不受 CSS 选择器语法限制。</p>
+      
+      <div class="test-element" id="item-1">
+        <span class="label">#item-1</span>
+        <span>id="item-1" 的元素（注意：这是数字开头但有前缀）</span>
+      </div>
+      
+      <div class="test-element" id="1">
+        <span class="label">#1</span>
+        <span>id="1" 的元素（纯数字开头）</span>
+      </div>
+      
+      <div style="margin-top: 16px;">
+        <button class="success" onclick="demoGetById()">getElementById("1")</button>
+        <button onclick="demoGetByIdItem()">getElementById("item-1")</button>
+        <button onclick="resetGetByIdDemo()">重置</button>
+      </div>
+      
+      <div class="code-block">
+<span class="comment">// 获取 id="1" 的元素</span>
+<span class="keyword">const</span> element = document.<span class="string">getElementById</span>(<span class="string">'1'</span>);
+console.log(element.textContent); <span class="comment">// "id="1" 的元素"</span>
+      </div>
+      
+      <div class="result-box" id="result-getbyid"></div>
+    </div>
+    
+    <div class="info-box tip">
+      <h4>✨ 优点</h4>
+      <p>• 语法简单，代码易读<br>
+         • 性能与 querySelector 相当<br>
+         • 不需要了解转义规则<br>
+         • 是处理数字开头 ID 的首选方案</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>💡 注意</h4>
+      <p>getElementById() 只能获取单个元素，且只能通过 ID 获取。如果需要使用复杂选择器，请参考「CSS 转义方案」。</p>
+    </div>
+  </div>
+
+  <!-- Tab 3: CSS 转义方案 -->
+  <div id="tab-escape" class="tab-content">
+    <div class="demo-area">
+      <h3>🔧 方案二：CSS 转义语法</h3>
+      <p style="color: #888; margin-bottom: 16px;">使用 CSS 转义序列，让 querySelector 能够匹配以数字开头的 ID。</p>
+      
+      <h4>转义对照表</h4>
+      <table class="escape-table">
+        <tr><th>字符</th><th>3 位转义</th><th>6 位转义</th></tr>
+        <tr><td>0</td><td><code>\30</code></td><td><code>\000030</code></td></tr>
+        <tr><td>1</td><td><code>\31</code></td><td><code>\000031</code></td></tr>
+        <tr><td>2</td><td><code>\32</code></td><td><code>\000032</code></td></tr>
+        <tr><td>3</td><td><code>\33</code></td><td><code>\000033</code></td></tr>
+        <tr><td>...</td><td>...</td><td>...</td></tr>
+        <tr><td>9</td><td><code>\39</code></td><td><code>\000039</code></td></tr>
+      </table>
+      
+      <h4>实际演示</h4>
+      <div class="test-element" id="1">
+        <span class="label">#1</span>
+        <span>id="1" 的元素</span>
+      </div>
+      
+      <div class="test-element" id="12">
+        <span class="label">#12</span>
+        <span>id="12" 的元素</span>
+      </div>
+      
+      <div class="test-element" id="123">
+        <span class="label">#123</span>
+        <span>id="123" 的元素</span>
+      </div>
+      
+      <div style="margin-top: 16px;">
+        <button onclick="demoEscape1()">querySelector('#\\31')</button>
+        <button onclick="demoEscape12()">querySelector('#\\31\\32')</button>
+        <button onclick="demoEscape123()">querySelector('#\\31\\32\\33')</button>
+        <button onclick="demoEscape6digit()">6位转义 \\000031</button>
+      </div>
+      
+      <div class="code-block" id="escape-code">
+<span class="comment">// 3位转义：数字1 → \31</span>
+document.<span class="string">querySelector</span>(<span class="string">'#\\31'</span>);
+
+<span class="comment">// 多个数字：12 → \31 \32（每个数字分别转义）</span>
+document.<span class="string">querySelector</span>(<span class="string">'#\\31\\32'</span>);
+
+<span class="comment">// 6位转义：数字1 → \000031</span>
+document.<span class="string">querySelector</span>(<span class="string">'#\\000031'</span>);
+      </div>
+      
+      <div class="result-box" id="result-escape"></div>
+    </div>
+    
+    <div class="info-box warning">
+      <h4>⚠️ 注意事项</h4>
+      <p>• JavaScript 字符串中反斜杠需要转义，所以是 <code>'#\\31'</code><br>
+         • 6位转义后通常需要空格或其他分隔符<br>
+         • 建议使用 getElementById 代替，除非必须使用 querySelector</p>
+    </div>
+  </div>
+
+  <!-- Tab 4: 最佳实践 -->
+  <div id="tab-best" class="tab-content">
+    <div class="demo-area">
+      <h3>🏆 最佳实践：避免数字开头的 ID</h3>
+      
+      <div class="best-practice-item bad">
+        <h5>❌ 不推荐：纯数字 ID</h5>
+        <code>&lt;div id="1"&gt;</code>
+        <code>&lt;div id="2"&gt;</code>
+        <code>&lt;div id="123"&gt;</code>
+        <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">问题：无法直接使用 querySelector()，需要额外处理</p>
+      </div>
+      
+      <div class="best-practice-item good">
+        <h5>✅ 推荐：使用字母前缀</h5>
+        <code>&lt;div id="row-1"&gt;</code>
+        <code>&lt;div id="row-2"&gt;</code>
+        <code>&lt;div id="user-123"&gt;</code>
+        <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">优势：语义清晰，可直接使用 querySelector()</p>
+      </div>
+      
+      <div class="best-practice-item good">
+        <h5>✅ 推荐：驼峰命名</h5>
+        <code>&lt;div id="tableRow1"&gt;</code>
+        <code>&lt;div id="productCard"&gt;</code>
+        <code>&lt;div id="mainContent"&gt;</code>
+        <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">优势：符合 JS 命名习惯，IDE 友好</p>
+      </div>
+      
+      <div class="best-practice-item good">
+        <h5>✅ 推荐：下划线分隔</h5>
+        <code>&lt;div id="header_main"&gt;</code>
+        <code>&lt;div id="sidebar_left"&gt;</code>
+        <p style="color: #888; margin-top: 8px; font-size: 0.9rem;">优势：可读性好，适合 CSS 类名风格</p>
+      </div>
+    </div>
+    
+    <div class="demo-area">
+      <h3>🛠️ 工具函数封装</h3>
+      <p style="color: #888; margin-bottom: 16px;">封装工具函数，统一处理 ID 获取逻辑：</p>
+      
+      <div class="code-block">
+<span class="comment">// 选择器工具函数</span>
+<span class="keyword">const</span> $ = {
+  <span class="comment">// 根据 ID 获取元素（支持数字开头）</span>
+  byId(id) {
+    <span class="keyword">return</span> document.<span class="string">getElementById</span>(id);
+  },
+  
+  <span class="comment">// CSS 转义 ID</span>
+  escapeId(id) {
+    <span class="keyword">return</span> id.replace(<span class="string">/[^\w-]/g</span>, char => {
+      <span class="keyword">return</span> <span class="string">'\\'</span> + char.charCodeAt(<span class="number">0</span>).toString(<span class="number">16</span>).padStart(<span class="number">4</span>, <span class="string">'0'</span>) + <span class="string">' '</span>;
+    });
+  },
+  
+  <span class="comment">// 安全的选择器查询</span>
+  safeQuery(id) {
+    <span class="keyword">if</span> (<span class="string">/^\d/</span>.test(id)) {
+      <span class="keyword">return</span> <span class="keyword">this</span>.byId(id);
+    }
+    <span class="keyword">return</span> document.<span class="string">querySelector</span>(<span class="string">'#'</span> + id);
+  }
+};
+
+<span class="comment">// 使用示例</span>
+<span class="keyword">const</span> el1 = $.byId(<span class="string">'1'</span>);           <span class="comment">// 直接获取</span>
+<span class="keyword">const</span> el2 = $.safeQuery(<span class="string">'123'</span>);     <span class="comment">// 智能判断</span>
+      </div>
+    </div>
+    
+    <div class="info-box tip">
+      <h4>💡 总结</h4>
+      <p>• 新项目：使用字母前缀命名 ID，从源头避免问题<br>
+         • 已有数字开头 ID：优先使用 getElementById()<br>
+         • 必须用 querySelector：使用 CSS 转义语法<br>
+         • 团队协作：统一 ID 命名规范</p>
+    </div>
+  </div>
+
+  <!-- Tab 5: 自测题 -->
+  <div id="tab-quiz" class="tab-content">
+    <div class="demo-area">
+      <h3>📝 自测题</h3>
+      <p style="color: #888; margin-bottom: 16px;">测试你对 CSS 选择器转义的理解程度。</p>
+      
+      <div class="quiz-container">
+        <!-- 题目 1 -->
+        <div class="quiz-item" data-quiz="1" data-answer="b">
+          <h4>第 1 题：以下哪种方式可以正确获取 id="1" 的元素？</h4>
+          <div class="quiz-options">
+            <div class="quiz-option" data-option="a">
+              <span class="option-letter">A</span>
+              <code>document.querySelector('#1')</code>
+            </div>
+            <div class="quiz-option" data-option="b">
+              <span class="option-letter">B</span>
+              <code>document.getElementById('1')</code>
+            </div>
+            <div class="quiz-option" data-option="c">
+              <span class="option-letter">C</span>
+              <code>document.querySelector('#\31')</code>
+            </div>
+            <div class="quiz-option" data-option="d">
+              <span class="option-letter">D</span>
+              <code>document.getElement('#1')</code>
+            </div>
+          </div>
+          <div class="quiz-result"></div>
+        </div>
+
+        <!-- 题目 2 -->
+        <div class="quiz-item" data-quiz="2" data-answer="c">
+          <h4>第 2 题：在 CSS 转义中，数字 "5" 的 3 位十六进制转义是什么？</h4>
+          <div class="quiz-options">
+            <div class="quiz-option" data-option="a">
+              <span class="option-letter">A</span>
+              <code>\5</code>
+            </div>
+            <div class="quiz-option" data-option="b">
+              <span class="option-letter">B</span>
+              <code>\05</code>
+            </div>
+            <div class="quiz-option" data-option="c">
+              <span class="option-letter">C</span>
+              <code>\35</code>（5 的十六进制是 0x05，补零为 35）
+            </div>
+            <div class="quiz-option" data-option="d">
+              <span class="option-letter">D</span>
+              <code>\000035</code>
+            </div>
+          </div>
+          <div class="quiz-result"></div>
+        </div>
+
+        <!-- 题目 3 -->
+        <div class="quiz-item" data-quiz="3" data-answer="a">
+          <h4>第 3 题：id="user-123" 是否可以直接使用 querySelector 获取？</h4>
+          <div class="quiz-options">
+            <div class="quiz-option" data-option="a">
+              <span class="option-letter">A</span>
+              <code>querySelector('#user-123')</code> - 可以，因为不是纯数字开头
+            </div>
+            <div class="quiz-option" data-option="b">
+              <span class="option-letter">B</span>
+              <code>querySelector('#\\user-123')</code> - 需要全部转义
+            </div>
+            <div class="quiz-option" data-option="c">
+              <span class="option-letter">C</span>
+              <code>querySelector('[id="user-123"]')</code> - 必须用属性选择器
+            </div>
+            <div class="quiz-option" data-option="d">
+              <span class="option-letter">D</span>
+              <span>getElementById("user-123") 是唯一方式</span>
+            </div>
+          </div>
+          <div class="quiz-result"></div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="primary" onclick="checkAllAnswers()">检查答案</button>
+        <button onclick="resetQuiz()">重新答题</button>
+      </div>
+      
+      <div class="result-box" id="quiz-summary" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 重置函数
+    function resetDemo() {
+      document.querySelectorAll('.test-element').forEach(el => {
+        el.classList.remove('highlight', 'error');
+      });
+      document.getElementById('result-problem').textContent = '';
+      document.getElementById('result-problem').className = 'result-box';
+    }
+
+    function resetGetByIdDemo() {
+      document.querySelectorAll('#tab-getbyid .test-element').forEach(el => {
+        el.classList.remove('highlight', 'error');
+      });
+      document.getElementById('result-getbyid').textContent = '';
+      document.getElementById('result-getbyid').className = 'result-box';
+    }
+
+    // Tab 1: 问题演示
+    function demoWrongQuery() {
+      resetDemo();
+      const resultBox = document.getElementById('result-problem');
+      try {
+        document.querySelector('#1');
+        resultBox.textContent = '意外成功！';
+        resultBox.className = 'result-box error';
+      } catch (e) {
+        resultBox.textContent = '❌ DOMException: ' + e.message;
+        resultBox.className = 'result-box error';
+        document.querySelectorAll('#tab-problem .test-element')[0].classList.add('error');
+      }
+    }
+
+    // Tab 2: getElementById
+    function demoGetById() {
+      resetGetByIdDemo();
+      const resultBox = document.getElementById('result-getbyid');
+      const element = document.getElementById('1');
+      if (element) {
+        element.classList.add('highlight');
+        resultBox.textContent = '✅ 成功获取！\n元素内容: ' + element.textContent.trim();
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 未找到元素';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    function demoGetByIdItem() {
+      resetGetByIdDemo();
+      const resultBox = document.getElementById('result-getbyid');
+      const element = document.getElementById('item-1');
+      if (element) {
+        element.classList.add('highlight');
+        resultBox.textContent = '✅ 成功获取！\n元素内容: ' + element.textContent.trim();
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 未找到元素';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    // Tab 3: CSS 转义
+    function demoEscape1() {
+      const resultBox = document.getElementById('result-escape');
+      const element = document.querySelector('#\\31');
+      if (element) {
+        element.classList.add('highlight');
+        document.querySelectorAll('#tab-escape .test-element').forEach(el => {
+          if (el.id !== '1') el.classList.remove('highlight');
+        });
+        resultBox.textContent = '✅ querySelector(\'#\\\\31\') 成功！\n获取到 id="1" 的元素';
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 查询失败';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    function demoEscape12() {
+      const resultBox = document.getElementById('result-escape');
+      const element = document.querySelector('#\\31\\32');
+      if (element) {
+        document.querySelectorAll('#tab-escape .test-element').forEach(el => {
+          el.classList.remove('highlight');
+          if (el.id === '12') el.classList.add('highlight');
+        });
+        resultBox.textContent = '✅ querySelector(\'#\\\\31\\\\32\') 成功！\n获取到 id="12" 的元素';
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 查询失败';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    function demoEscape123() {
+      const resultBox = document.getElementById('result-escape');
+      const element = document.querySelector('#\\31\\32\\33');
+      if (element) {
+        document.querySelectorAll('#tab-escape .test-element').forEach(el => {
+          el.classList.remove('highlight');
+          if (el.id === '123') el.classList.add('highlight');
+        });
+        resultBox.textContent = '✅ querySelector(\'#\\\\31\\\\32\\\\33\') 成功！\n获取到 id="123" 的元素';
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 查询失败';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    function demoEscape6digit() {
+      const resultBox = document.getElementById('result-escape');
+      const element = document.querySelector('#\\000031');
+      if (element) {
+        document.querySelectorAll('#tab-escape .test-element').forEach(el => {
+          el.classList.remove('highlight');
+          if (el.id === '1') el.classList.add('highlight');
+        });
+        resultBox.textContent = '✅ querySelector(\'#\\\\000031\') 成功！\n6位转义也能获取到 id="1" 的元素';
+        resultBox.className = 'result-box success';
+      } else {
+        resultBox.textContent = '❌ 查询失败';
+        resultBox.className = 'result-box error';
+      }
+    }
+
+    // Tab 5: 自测题
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const quizItem = this.closest('.quiz-item');
+        quizItem.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        const resultEl = quizItem.querySelector('.quiz-result');
+        resultEl.textContent = '';
+        resultEl.className = 'quiz-result';
+      });
+    });
+
+    function checkAllAnswers() {
+      let correct = 0;
+      const total = document.querySelectorAll('.quiz-item').length;
+      
+      document.querySelectorAll('.quiz-item').forEach(quizItem => {
+        const answer = quizItem.dataset.answer;
+        const selected = quizItem.querySelector('.quiz-option.selected');
+        const resultEl = quizItem.querySelector('.quiz-result');
+        
+        quizItem.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('correct', 'incorrect');
+        });
+        
+        if (selected) {
+          const selectedOption = selected.dataset.option;
+          if (selectedOption === answer) {
+            correct++;
+            selected.classList.add('correct');
+            resultEl.textContent = '正确！';
+            resultEl.className = 'quiz-result correct';
+          } else {
+            selected.classList.add('incorrect');
+            const correctOption = quizItem.querySelector(`[data-option="${answer}"]`);
+            if (correctOption) correctOption.classList.add('correct');
+            resultEl.textContent = '错误。正确答案是 ' + answer.toUpperCase() + '。';
+            resultEl.className = 'quiz-result incorrect';
+          }
+        }
+      });
+      
+      const summaryBox = document.getElementById('quiz-summary');
+      if (correct === total) {
+        summaryBox.textContent = '🎉 恭喜！全部答对！' + correct + '/' + total;
+        summaryBox.className = 'result-box success';
+      } else {
+        summaryBox.textContent = '答题结果：' + correct + '/' + total + ' 正确';
+        summaryBox.className = 'result-box info';
+      }
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('.quiz-option').forEach(o => {
+        o.classList.remove('selected', 'correct', 'incorrect');
+      });
+      document.querySelectorAll('.quiz-result').forEach(r => {
+        r.textContent = '';
+        r.className = 'quiz-result';
+      });
+      document.getElementById('quiz-summary').textContent = '';
+      document.getElementById('quiz-summary').className = 'result-box';
+    }
+  </script>
+</body>
+</html>
