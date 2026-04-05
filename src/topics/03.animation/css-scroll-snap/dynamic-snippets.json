@@ -1,0 +1,18 @@
+{
+  "Insert Playground (Auto-detected)": {
+    "prefix": "pgauto",
+    "body": [
+      "{/* @playground id=\"${1|css-scroll-snap-basic|}\" mode=\"${2|demo,exercise,test|}\" */}"
+    ],
+    "description": "Insert playground with auto-detected IDs from _demos folder: css-scroll-snap-basic",
+    "scope": "mdx"
+  },
+  "Insert Demo Playground (Auto-detected)": {
+    "prefix": "pgdemoauto",
+    "body": [
+      "{/* @playground id=\"${1|css-scroll-snap-basic|}\" mode=\"demo\" */}"
+    ],
+    "description": "Insert demo playground with auto-detected IDs: css-scroll-snap-basic",
+    "scope": "mdx"
+  }
+}
