@@ -1,0 +1,357 @@
+---
+title: "CSS color-mix() 颜色混合函数"
+category: "基础知识"
+tags:
+  - color-mix
+  - 颜色混合
+  - 颜色空间
+  - CSS颜色
+  - oklch
+description: "详解CSS color-mix() 颜色混合函数的用法，包括颜色空间选择、混合模式和各场景实战"
+keywords: "color-mix, CSS颜色, 颜色混合, 颜色空间, oklch, hsl, srgb"
+---
+
+# CSS color-mix() 颜色混合函数
+
+## 概述
+
+`color-mix()` 是 CSS Color Level 5 规范中引入的强大颜色混合函数，允许在指定颜色空间内将两种颜色按指定比例混合，生成新的颜色。它解决了长期以来 CSS 无法原生进行颜色混合的痛点，让主题色生成、状态色扩展、渐变增强等场景变得前所未有的简单。
+
+## 核心概念
+
+### 颜色空间
+
+不同的颜色空间对「混合」的理解不同，混合结果差异显著：
+
+| 颜色空间 | 特点 | 适用场景 |
+|---------|------|---------|
+| `srgb` | 最常见的屏幕色彩空间，符合直觉 | 默认推荐，大多数场景 |
+| `srgb-linear` | 线性 srgb，在物理上更准确 | 需要精确混色时 |
+| `hsl` | 按色相/饱和度/亮度描述颜色 | 保持色相一致的颜色混合 |
+| `hwb` | 按色相/白度/黑度描述颜色 | 调淡或调深颜色 |
+| `oklch` | 基于人眼感知的均匀颜色空间 | 饱和度自然的颜色混合，**推荐首选** |
+| `oklab` | 与 oklch 类似，但不包含色相角 | 需要 Lab 色彩空间的场景 |
+
+> 💡 **推荐使用 `oklch`**：相比 srgb 和 hsl，oklch 在人眼感知上更均匀，混合结果在饱和度和亮度上更加自然协调。
+
+### 混合模式
+
+`color-mix()` 默认采用**加法混合**逻辑，即两种颜色各取一定百分比直接叠加。百分比之和不必等于 100%，系统会自动归一化处理：
+
+```css
+/* 50/50 混合，等同于各取一半 */
+color-mix(in oklch, #ff0000 50%, #0000ff);
+
+/* 70/30 混合，红色占比更高 */
+color-mix(in oklch, #ff0000 70%, #0000ff 30%); /* 等于 70/30 */
+```
+
+## 语法详解
+
+```css
+color-mix(in <color-space>, <color> <percentage>, <color> <percentage>)
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `<color-space>` | 混合发生的颜色空间，如 `srgb`、`oklch`、`hsl` 等 |
+| `<color>` | 任意合法 CSS 颜色值（颜色名、hex、rgb、hsl、oklch 等） |
+| `<percentage>` | 该颜色在混合中占比，0% 表示完全不使用该颜色，100% 表示完全使用 |
+
+### 语法示例
+
+```css
+/* 基本用法 */
+color-mix(in srgb, red, blue);                    /* 1:1 混合紫红色 */
+color-mix(in oklch, oklch(70% 0.2 240), oklch(60% 0.25 120)); /* oklch 空间混合 */
+
+/* 带百分比 */
+color-mix(in srgb, #ff0000 70%, #0000ff);         /* 70% 红色 + 30% 蓝色 */
+color-mix(in hsl, hsl(200 80% 50%), hsl(20 80% 50%) 40%);     /* 60% 蓝 + 40% 橙 */
+
+/* 与透明色混合 */
+color-mix(in srgb, currentColor 50%, transparent); /* 生成半透明 currentColor */
+
+/* 嵌套使用 */
+color-mix(in oklch, color-mix(in oklch, #fff, #000 30%) 70%, #036);
+```
+
+### 百分比归一化规则
+
+百分比不需要加起来等于 100%，浏览器会自动归一化：
+
+```css
+/* 这三组效果相同 */
+color-mix(in srgb, red 50%, blue);          /* 50/50 */
+color-mix(in srgb, red 25%, blue);          /* 50/50（归一化为 25/(25+25)） */
+color-mix(in srgb, red 1, blue 99%);        /* ≈ 1/100 ≈ 纯蓝 */
+```
+
+## 实战案例
+
+### 案例一：主题色动态混合（light/dark mode）
+
+使用 `color-mix()` 可以在亮色和暗色模式下动态生成语义化的中间色彩，无需手动定义大量颜色变量。
+
+```css
+/* 定义基础品牌色 */
+:root {
+  --brand: oklch(55% 0.2 250);  /* 品牌蓝 */
+}
+
+/* 暗色模式：在品牌色中加入黑色 */
+[data-theme="dark"] {
+  --brand: color-mix(in oklch, var(--brand), #000 35%);
+}
+
+/* 亮色模式：在品牌色中加入白色 */
+[data-theme="light"] {
+  --brand: color-mix(in oklch, var(--brand), #fff 20%);
+}
+
+/* 应用到按钮 */
+.button {
+  background-color: var(--brand);
+  color: color-mix(in oklch, var(--brand) 60%, #fff); /* 自动生成对比文字色 */
+  border: 1px solid color-mix(in oklch, var(--brand), #000 20%);
+}
+```
+
+**效果**：只需定义一个 `--brand` 颜色，`color-mix()` 自动生成 hover、active、border 等派生色，保持色彩系统一致性。
+
+{/* @playground id="color-mix/theme-mixing" mode="demo" */}
+
+### 案例二：状态色生成（success/warning/error）
+
+利用 `color-mix()` 可以从一个基础色系生成完整的辅助色板：
+
+```css
+/* 定义语义化颜色变量 */
+:root {
+  --primary: oklch(55% 0.2 250);
+  --success: oklch(65% 0.18 145);
+  --warning: oklch(75% 0.18 85);
+  --danger: oklch(60% 0.25 25);
+}
+
+/* 从 primary 生成同色系状态色 */
+.status-colors {
+  --success: color-mix(in oklch, var(--primary) 40%, oklch(65% 0.18 145));
+  --warning: color-mix(in oklch, var(--primary) 40%, oklch(75% 0.18 85));
+  --danger: color-mix(in oklch, var(--primary) 40%, oklch(60% 0.25 25));
+}
+
+/* 更柔和的浅色背景 */
+.status-bg {
+  --success-bg: color-mix(in oklch, var(--success) 15%, oklch(97% 0 0));
+  --warning-bg: color-mix(in oklch, var(--warning) 15%, oklch(97% 0 0));
+  --danger-bg: color-mix(in oklch, var(--danger) 15%, oklch(97% 0 0));
+}
+
+/* 按钮样式 */
+.btn-success {
+  background-color: var(--success);
+  color: color-mix(in oklch, var(--success) 20%, #fff); /* 自动对比文字色 */
+  border-color: color-mix(in oklch, var(--success), #000 15%);
+}
+
+.alert {
+  background-color: var(--danger-bg);
+  border-left: 4px solid var(--danger);
+  color: var(--danger);
+}
+```
+
+**效果**：一套主题色通过 `color-mix()` 自动派生出成功、警告、危险等状态色板，保持色调统一。
+
+{/* @playground id="color-mix/state-colors" mode="demo" */}
+
+### 案例三：渐变增强
+
+`color-mix()` 可以让 CSS 渐变更加丰富自然，通过混合颜色创建平滑过渡：
+
+```css
+/* 基础渐变 */
+.gradient-basic {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* 使用 color-mix() 创建多段渐变 */
+.gradient-multi {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklch, #667eea 100%, #764ba2 0%),    /* 起点纯色 */
+    color-mix(in oklch, #667eea 60%, #764ba2 40%),    /* 过渡区 */
+    color-mix(in oklch, #667eea 30%, #764ba2 70%),    /* 过渡区 */
+    color-mix(in oklch, #667eea 0%, #764ba2 100%)     /* 终点纯色 */
+  );
+}
+
+/* 带透明度层叠的渐变 */
+.gradient-layered {
+  background:
+    /* 顶层：细条纹 */
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, #667eea 20%, transparent),
+      color-mix(in srgb, #667eea 20%, transparent) 10px,
+      transparent 10px,
+      transparent 20px
+    ),
+    /* 底层：主渐变 */
+    linear-gradient(
+      to bottom right,
+      color-mix(in srgb, #667eea, #764ba2 30%),
+      color-mix(in srgb, #764ba2, #667eea 30%)
+    );
+}
+
+/* 径向渐变 + 混合 */
+.gradient-radial {
+  background: radial-gradient(
+    circle at 30% 30%,
+    color-mix(in oklch, #667eea 60%, white),
+    color-mix(in oklch, #667eea 30%, #764ba2),
+    #764ba2
+  );
+}
+```
+
+**效果**：利用 `color-mix()` 可以创建更平滑、更有层次的渐变效果，避免传统渐变中颜色跳变的问题。
+
+{/* @playground id="color-mix/gradient-enhance" mode="demo" */}
+
+## 兼容性与坑点
+
+### 浏览器支持
+
+`color-mix()` 在主流浏览器中的支持情况：
+
+| 浏览器 | 支持版本 | 备注 |
+|-------|---------|------|
+| Chrome | 111+ | 完整支持 |
+| Firefox | 113+ | 完整支持 |
+| Safari | 16.2+ | 完整支持 |
+| Edge | 111+ | 与 Chrome 一致 |
+
+> **全球支持率**：截至 2024 年底，约 92% 的浏览器支持 `color-mix()`（[caniuse](https://caniuse.com/css-color-function)）。
+
+### Fallback 方案
+
+对于不支持的浏览器，使用 `@supports` 进行特性检测：
+
+```css
+/* 无 fallback 默认色 */
+.button {
+  background-color: #3b82f6; /* fallback */
+}
+
+/* 支持 color-mix 的浏览器 */
+@supports (color: color-mix(in srgb, red, blue)) {
+  .button {
+    background-color: color-mix(in oklch, #3b82f6, #000 20%);
+  }
+}
+```
+
+### 常见坑点
+
+#### 1. 百分比省略导致意外结果
+
+```css
+/* ❌ 错误：遗漏百分比，浏览器行为不一致 */
+color-mix(in srgb, red, blue 50%); /* 部分浏览器解读为 red 50%, blue 50% */
+
+/* ✅ 正确：明确指定两个百分比 */
+color-mix(in srgb, red 50%, blue 50%);
+
+/* ✅ 也正确：省略第二个颜色百分比时默认为剩余部分 */
+color-mix(in srgb, red 50%, blue); /* = 50% red, 50% blue */
+```
+
+#### 2. 颜色空间选择影响结果
+
+```css
+/* 在 srgb 空间混合 - 结果偏灰暗 */
+color-mix(in srgb, #ff0000, #00ff00); /* 褐色/灰色调 */
+
+/* 在 oklch 空间混合 - 结果更亮丽 */
+color-mix(in oklch, #ff0000, #00ff00); /* 更饱和的黄色 */
+```
+
+#### 3. 与 `currentColor` 混用时注意
+
+```css
+/* 使用 currentColor 时，确保上下文有明确颜色 */
+.icon {
+  color: #3b82f6;
+  fill: color-mix(in srgb, currentColor 70%, transparent); /* 生成 70% 透明度的品牌色 */
+}
+```
+
+#### 4. 嵌套 color-mix 计算复杂度
+
+```css
+/* 嵌套过深导致难以维护 */
+color-mix(in oklch,
+  color-mix(in oklch, #fff, #000 30%) 70%,
+  #036
+);
+
+/* ✅ 建议使用 CSS 变量提高可读性 */
+--mid-tone: color-mix(in oklch, #fff, #000 30%);
+--final: color-mix(in oklch, var(--mid-tone) 70%, #036);
+```
+
+## 最佳实践
+
+### 1. 统一使用 oklch 颜色空间
+
+```css
+/* 所有颜色用 oklch 定义，所有混合也在 oklch 空间 */
+:root {
+  --brand: oklch(55% 0.2 250);
+  --brand-light: color-mix(in oklch, var(--brand), #fff 30%);
+  --brand-dark: color-mix(in oklch, var(--brand), #000 30%);
+  --brand-subtle: color-mix(in oklch, var(--brand), #fff 85%);
+}
+```
+
+### 2. 配合 CSS 变量使用
+
+```css
+:root {
+  --primary: oklch(55% 0.2 250);
+}
+
+/* 动态生成 hover 态 */
+.card:hover {
+  --hover-bg: color-mix(in oklch, var(--primary) 10%, white);
+  background-color: var(--hover-bg);
+}
+```
+
+### 3. 渐进增强策略
+
+```css
+/* 基础样式（无需 color-mix） */
+.button { background: #3b82f6; }
+
+/* 增强样式 */
+@supports (color: color-mix(in oklch, red, blue)) {
+  .button {
+    background: color-mix(in oklch, var(--primary) 80%, #fff 20%);
+  }
+}
+```
+
+## 相关参考
+
+- [MDN: color-mix()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix())
+- [CSS Color Level 5 规范](https://www.w3.org/TR/css-color-5/#color-mix)
+- [color-mix and Relative Color - fullystacked](https://fullystacked.net/posts/color-mix-and-relative-color/)
+- [OKLCH 颜色空间详解](/topics/oklch)
+
+{/* @playground id="color-mix/color-space-compare" mode="demo" */}
