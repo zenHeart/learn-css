@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Mask 遮罩技术演示 - 文字渐变</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    h2 { font-size: 16px; margin-bottom: 12px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    .demo-item { text-align: center; }
+    .demo-box { 
+      margin: 0 auto 12px; 
+      padding: 24px;
+      font-size: 32px;
+      font-weight: bold;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100px;
+    }
+    .demo-label { font-size: 13px; color: #8b949e; margin-top: 8px; }
+    .code-snippet { 
+      font-size: 12px; 
+      color: #8b949e; 
+      margin-top: 8px; 
+      padding: 12px; 
+      background: #0d1117; 
+      border-radius: 4px;
+      text-align: left;
+      font-family: 'SF Mono', Monaco, monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #161b22; padding: 2px 6px; border-radius: 3px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; }
+
+    /* 文字渐变效果 - 传统方法 */
+    .gradient-text-1 {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    /* 文字渐变效果 - Mask 方法 */
+    .gradient-text-2 {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      -webkit-mask-mode: luminance;
+      mask-mode: luminance;
+      -webkit-text-fill-color: transparent;
+      color: #fff;
+    }
+
+    /* 多色渐变 */
+    .gradient-text-3 {
+      background: linear-gradient(
+        90deg,
+        #ff6b6b 0%,
+        #feca57 25%,
+        #48dbfb 50%,
+        #ff9ff3 75%,
+        #ff6b6b 100%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* 金属质感文字 */
+    .metal-text {
+      background: linear-gradient(
+        180deg,
+        #fff 0%,
+        #b8b8b8 30%,
+        #fff 50%,
+        #8a8a8a 70%,
+        #fff 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 光晕文字效果 */
+    .glow-text {
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      -webkit-mask-image: 
+        linear-gradient(to bottom, black 30%, transparent 70%),
+        radial-gradient(circle at 50% 50%, black 0%, transparent 50%);
+      mask-image: 
+        linear-gradient(to bottom, black 30%, transparent 70%),
+        radial-gradient(circle at 50% 50%, black 0%, transparent 50%);
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 阴影渐隐效果 */
+    .fade-shadow-text {
+      background: linear-gradient(to bottom, #fff 0%, #888 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* 彩虹文字 */
+    .rainbow-text {
+      background: linear-gradient(
+        to right,
+        #ff0000,
+        #ff7f00,
+        #ffff00,
+        #00ff00,
+        #0000ff,
+        #4b0082,
+        #9400d3
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS 文字渐变效果演示</h1>
+    
+    <div class="section">
+      <h2>传统 background-clip 方法</h2>
+      <p class="info">使用 <code>background-clip: text</code> 将渐变背景裁剪到文字区域，这是最常用的文字渐变方法。</p>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box gradient-text-1">渐变文字</div>
+          <div class="demo-label">基础渐变</div>
+          <div class="code-snippet">background: linear-gradient(...);
+background-clip: text;
+-webkit-text-fill-color: transparent;</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box gradient-text-3">流光效果</div>
+          <div class="demo-label">动画渐变</div>
+          <div class="code-snippet">background-size: 200% 100%;
+animation: shimmer 3s infinite;</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box metal-text">金属质感</div>
+          <div class="demo-label">多层渐变</div>
+          <div class="code-snippet">多层白色/灰色渐变创造金属效果</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box rainbow-text">彩虹文字</div>
+          <div class="demo-label">彩虹渐变</div>
+          <div class="code-snippet">7色光谱渐变</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Mask 方法实现文字渐变</h2>
+      <p class="info">使用 <code>mask-image</code> 实现文字渐变效果，可以更灵活地控制渐变方向和过渡效果。</p>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box gradient-text-2">Mask 渐变</div>
+          <div class="demo-label">垂直渐变遮罩</div>
+          <div class="code-snippet">background: linear-gradient(...);
+mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+mask-mode: luminance;</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box fade-shadow-text">阴影渐隐</div>
+          <div class="demo-label">底部渐隐 + 阴影</div>
+          <div class="code-snippet">渐变背景 + text-shadow 组合</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Mask vs background-clip 对比</h2>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box gradient-text-1">background-clip</div>
+          <div class="demo-label">background-clip: text</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box gradient-text-2">mask-image</div>
+          <div class="demo-label">mask-image 渐变</div>
+        </div>
+      </div>
+      <div class="info" style="margin-top: 16px;">
+        <strong>对比说明：</strong><br>
+        • <code>background-clip: text</code> - 兼容性更好，但只能裁剪到文字边界<br>
+        • <code>mask-image</code> - 更灵活，支持多层遮罩和不同的遮罩混合模式
+      </div>
+    </div>
+  </div>
+</body>
+</html>
