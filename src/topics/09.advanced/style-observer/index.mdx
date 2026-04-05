@@ -1,0 +1,432 @@
+---
+title: CSS Style Observer 样式观察器
+category: 高级特性
+tags: [css, style-observer, view-transitions, mutation-observer, typed-om]
+description: 详细介绍 CSS Style Observer 样式观察器的概念、使用场景、API 使用方法与示例。
+keywords: CSS Style Observer, CSS View Transitions, MutationObserver, 样式观察器, CSS动画
+---
+
+通过本章理解
+
+1. CSS Style Observer 的核心概念与原理
+2. CSS View Transitions API 的使用方法
+3. 如何使用 MutationObserver 观察样式变化
+4. 与传统方案的区别及适用场景
+
+## 概述
+
+CSS Style Observer（样式观察器）是一组用于监听和响应 CSS 样式变化的 Web API。主要包括：
+
+- **CSS View Transitions API** — 观察 DOM 状态变化并创建流畅的视觉过渡效果
+- **MutationObserver** — 观察 DOM 属性变化（包括 `style` 属性）
+- **CSS Typed OM** — 以类型化对象的方式读取和操作 CSS 值
+
+这些 API 共同构成了现代 CSS 样式观察的技术体系，使得开发者可以：
+
+- 响应样式变化执行自定义逻辑
+- 创建流畅的页面过渡动画
+- 实现 CSS 驱动的交互效果
+
+## CSS View Transitions API
+
+CSS View Transitions API 是观察样式变化的核心 API，它允许你在 DOM 状态改变时创建流畅的视觉过渡效果。
+
+### 基本概念
+
+View Transitions API 的核心思想是：**DOM 变化是瞬时的，但视觉过渡是渐进的**。
+
+传统的 DOM 更新模式：
+```
+DOM 变化 → 立即重新渲染（用户看到跳跃）
+```
+
+View Transitions 模式：
+```
+DOM 变化 → 捕获旧状态 → 捕获新状态 → 动画过渡
+```
+
+### 基础用法
+
+#### 触发同文档视图过渡
+
+```javascript
+// 检查浏览器支持
+if (!document.startViewTransition) {
+  updateTheDOMSomehow();
+  return;
+}
+
+// 创建视图过渡
+document.startViewTransition(() => {
+  updateTheDOMSomehow();
+});
+```
+
+#### 完整示例
+
+```javascript
+function spaNavigate(data) {
+  // 浏览器兼容性检查
+  if (!document.startViewTransition) {
+    updateTheDOMSomehow(data);
+    return;
+  }
+
+  // 启动视图过渡
+  document.startViewTransition(() => updateTheDOMSomehow(data));
+}
+```
+
+### 生命周期
+
+View Transition 经历以下阶段：
+
+1. **捕获旧状态** — 获取当前 DOM 的视觉快照
+2. **调用更新回调** — 执行 DOM 变更
+3. **捕获新状态** — 获取更新后的视觉快照
+4. **创建过渡伪元素** — 生成 `::view-transition-*` 伪元素树
+5. **执行动画** — 使用 CSS 动画过渡
+6. **完成** — 清理过渡状态
+
+### 伪元素结构
+
+过渡期间，浏览器会生成如下伪元素树：
+
+```
+::view-transition
+├─ ::view-transition-group(name)
+│ └─ ::view-transition-image-pair(name)
+│   ├─ ::view-transition-old(name)
+│   └─ ::view-transition-new(name)
+└─ ...other groups...
+```
+
+### 自定义过渡样式
+
+#### 禁用默认交叉淡入淡出
+
+```css
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+```
+
+#### 自定义动画时长
+
+```css
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 5s;
+}
+```
+
+#### 滑入滑出效果
+
+```css
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes slide-from-right {
+  from { transform: translateX(30px); }
+}
+
+@keyframes slide-to-left {
+  to { transform: translateX(-30px); }
+}
+
+::view-transition-old(root) {
+  animation: 90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+             300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+}
+
+::view-transition-new(root) {
+  animation: 210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+             300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+}
+```
+
+### view-transition-name 属性
+
+使用 `view-transition-name` 为元素指定独立的过渡名称：
+
+```css
+.header {
+  view-transition-name: header;
+}
+
+.product-image {
+  view-transition-name: product-image;
+}
+```
+
+这样可以为不同元素设置独立的过渡动画，互不干扰。
+
+### 跨文档视图过渡
+
+在 CSS 中启用跨文档过渡：
+
+```css
+@view-transition {
+  navigation: auto;
+}
+```
+
+跨文档过渡会在同源导航时自动触发，无需 JavaScript 调用。
+
+## MutationObserver 观察样式变化
+
+MutationObserver API 可以观察 DOM 属性的变化，包括 `style` 属性。
+
+### 基本用法
+
+```javascript
+// 创建观察者
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+      console.log('样式已更改');
+      console.log('旧值:', mutation.oldValue);
+      console.log('新值:', mutation.target.style.cssText);
+    }
+  });
+});
+
+// 配置观察选项
+const config = {
+  attributes: true,
+  attributeOldValue: true,
+  attributeFilter: ['style'] // 只观察 style 属性
+};
+
+// 开始观察
+observer.observe(targetElement, config);
+
+// 停止观察
+observer.disconnect();
+```
+
+### 观察子元素样式变化
+
+```javascript
+const observer = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    if (mutation.type === 'attributes') {
+      console.log(`元素 ${mutation.target.tagName} 的样式已更改`);
+    }
+  }
+});
+
+const config = {
+  attributes: true,
+  attributeOldValue: true,
+  subtree: true, // 观察所有后代元素
+  attributeFilter: ['style']
+};
+
+observer.observe(document.body, config);
+```
+
+### MutationObserver vs View Transitions
+
+| 特性 | MutationObserver | View Transitions API |
+|------|------------------|----------------------|
+| **触发方式** | 被动观察 | 主动创建 |
+| **主要用途** | 检测 DOM/样式变化 | 创建视觉过渡 |
+| **动画支持** | 需手动实现 | 内置 CSS 动画支持 |
+| **性能影响** | 批量处理，低开销 | 需要截图，有一定开销 |
+| **浏览器支持** | 广泛支持 | Chrome 111+, 逐步支持 |
+| **使用场景** | 响应式逻辑、调试 | 页面过渡、交互动画 |
+
+## CSS Typed OM
+
+CSS Typed OM 提供了类型化的 CSS 值操作接口，是样式观察的重要补充。
+
+### computedStyleMap()
+
+获取元素的完整计算样式：
+
+```javascript
+const element = document.querySelector('.box');
+const styleMap = element.computedStyleMap();
+
+// 获取特定属性
+const width = styleMap.get('width');
+console.log(width); // CSSUnitValue { value: 100, unit: 'px' }
+
+// 遍历所有属性
+for (const [property, value] of styleMap) {
+  console.log(`${property}: ${value}`);
+}
+```
+
+### 获取自定义属性
+
+```javascript
+const root = document.documentElement;
+const styleMap = root.computedStyleMap();
+
+const customProp = styleMap.get('--theme-color');
+console.log(customProp); // CSSUnparsedValue
+```
+
+### 解析 CSS 值
+
+```javascript
+// 解析带单位的值
+const parsed = CSSUnitValue.parse('12.5em');
+console.log(parsed.value); // 12.5
+console.log(parsed.unit);  // 'em'
+```
+
+## 实战案例
+
+### 案例 1：列表项添加动画
+
+实现列表添加新项目时的平滑过渡效果：
+
+```javascript
+function addItem(content) {
+  if (!document.startViewTransition) {
+    // 降级处理
+    createItem(content);
+    return;
+  }
+
+  document.startViewTransition(() => {
+    createItem(content);
+  });
+}
+
+function createItem(content) {
+  const li = document.createElement('li');
+  li.textContent = content;
+  document.querySelector('ul').appendChild(li);
+}
+```
+
+对应的 CSS：
+
+```css
+ul {
+  view-transition-name: item-list;
+}
+
+li {
+  view-transition-name: list-item;
+}
+```
+
+### 案例 2：主题切换动画
+
+```javascript
+function toggleTheme() {
+  if (!document.startViewTransition) {
+    document.documentElement.classList.toggle('dark');
+    return;
+  }
+
+  document.startViewTransition(() => {
+    document.documentElement.classList.toggle('dark');
+  });
+}
+```
+
+```css
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+}
+
+.dark {
+  background: #1a1a1a;
+  color: #fff;
+}
+```
+
+### 案例 3：图片点击放大
+
+```javascript
+function openLightbox(imageSrc) {
+  if (!document.startViewTransition) {
+    showLightbox(imageSrc);
+    return;
+  }
+
+  const img = document.querySelector(`img[src="${imageSrc}"]`);
+  img.style.viewTransitionName = 'expanded-image';
+
+  document.startViewTransition(() => {
+    showLightbox(imageSrc);
+  });
+}
+```
+
+### 案例 4：实时样式监控面板
+
+```javascript
+class StyleInspector {
+  constructor(element) {
+    this.element = element;
+    this.observer = new MutationObserver(this.onMutation.bind(this));
+  }
+
+  start() {
+    this.observer.observe(this.element, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['style']
+    });
+  }
+
+  stop() {
+    this.observer.disconnect();
+  }
+
+  onMutation(mutations) {
+    mutations.forEach((m) => {
+      this.log(`样式变化: ${m.oldValue} → ${m.target.style.cssText}`);
+    });
+  }
+
+  log(message) {
+    console.log(`[StyleInspector] ${message}`);
+  }
+}
+
+// 使用
+const inspector = new StyleInspector(document.querySelector('.target'));
+inspector.start();
+```
+
+## 浏览器兼容性
+
+| API | Chrome | Firefox | Safari |
+|-----|--------|---------|--------|
+| View Transitions | 111+ | ✗ | 18+ |
+| MutationObserver | ✓ | ✓ | ✓ |
+| CSS Typed OM | 66+ | ✗ | 16.4+ |
+
+**注意**：View Transitions API 在 Firefox 中尚未完全支持，使用时需要进行特性检测。
+
+## 最佳实践
+
+1. **始终提供降级方案** — 使用 `if (!document.startViewTransition)` 检查支持
+2. **避免在过渡中执行重量级操作** — 过渡期间渲染会被暂停
+3. **使用 `view-transition-name` 优化性能** — 只过渡必要元素
+4. **MutationObserver 使用后断开** — 避免内存泄漏
+5. **批量 DOM 操作** — 减少观察触发次数
+
+## 知识点
+
+1. CSS Style Observer 是一组 API 的统称
+2. View Transitions API 是观察 DOM 变化的现代方案
+3. MutationObserver 适合观察属性级别的变化
+4. CSS Typed OM 提供了类型化的样式操作接口
+5. 选择合适的 API 需要考虑浏览器支持和具体场景
