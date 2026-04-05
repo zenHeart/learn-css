@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS light-dark() 函数演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* 声明支持 light 和 dark 配色方案 */
+      color-scheme: light dark;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      /* light-dark() 直接返回对应颜色值 */
+      background-color: light-dark(#ffffff, #0f0f0f);
+      color: light-dark(#1a1a1a, #f0f0f0);
+      line-height: 1.6;
+      padding: 24px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: light-dark(#111111, #f5f5f5);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: light-dark(#666666, #999999);
+      margin-bottom: 32px;
+    }
+
+    .support-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      background-color: light-dark(#e8f5e9, #1b5e20);
+      color: light-dark(#2e7d32, #a5d6a7);
+    }
+    .support-badge.partial {
+      background-color: light-dark(#fff3e0, #e65100);
+      color: light-dark(#f57c00, #ffcc80);
+    }
+
+    .section {
+      background-color: light-dark(#f8f8f8, #1a1a1a);
+      border: 1px solid light-dark(#e0e0e0, #333333);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid light-dark(#e0e0e0, #333333);
+      color: light-dark(#1a1a1a, #e0e0e0);
+    }
+
+    /* 卡片组件 */
+    .card {
+      background-color: light-dark(white, #1e1e1e);
+      border: 1px solid light-dark(#e1e1e1, #333333);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 16px;
+      box-shadow: light-dark(0 2px 8px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.4));
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: light-dark(0 4px 16px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.6));
+      transform: translateY(-2px);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: light-dark(#1a1a1a, #f0f0f0);
+    }
+
+    .card-text {
+      font-size: 14px;
+      color: light-dark(#555555, #aaaaaa);
+    }
+
+    /* 按钮组件 */
+    .button {
+      display: inline-block;
+      background-color: light-dark(#0066ff, #4d9fff);
+      color: light-dark(white, #000000);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-right: 12px;
+      margin-bottom: 12px;
+    }
+
+    .button:hover {
+      background-color: light-dark(#0052cc, #80bfff);
+      transform: translateY(-1px);
+    }
+
+    .button.secondary {
+      background-color: light-dark(transparent, transparent);
+      color: light-dark(#0066ff, #4d9fff);
+      border: 1px solid light-dark(#0066ff, #4d9fff);
+    }
+
+    .button.secondary:hover {
+      background-color: light-dark(#f0f7ff, #0d2137);
+    }
+
+    /* 链接 */
+    a {
+      color: light-dark(#0066cc, #66b3ff);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* 输入框 */
+    .input-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      max-width: 400px;
+      background-color: light-dark(white, #1a1a1a);
+      border: 1px solid light-dark(#ccc, #444);
+      color: light-dark(#000, #e0e0e0);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: light-dark(#0066ff, #4d9fff);
+      box-shadow: 0 0 0 3px light-dark(rgba(0,102,255,0.1), rgba(77,159,255,0.2));
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: light-dark(#999, #666);
+    }
+
+    /* 代码块 */
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      background-color: light-dark(#f0f0f0, #2d2d2d);
+      color: light-dark(#d63384, #f0a0d0);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre {
+      background-color: light-dark(#f5f5f5, #1e1e1e);
+      border: 1px solid light-dark(#ddd, #444);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: light-dark(#333333, #c9d1d9);
+    }
+
+    /* 颜色对比展示 */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .color-swatch {
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid light-dark(#e0e0e0, #333);
+    }
+
+    /* 主题切换按钮 */
+    .theme-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .theme-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid light-dark(#ccc, #444);
+      background-color: light-dark(white, #1a1a1a);
+      color: light-dark(#333, #e0e0e0);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-btn:hover {
+      border-color: light-dark(#0066ff, #4d9fff);
+      color: light-dark(#0066ff, #4d9fff);
+    }
+
+    .theme-btn.active {
+      background-color: light-dark(#0066ff, #4d9fff);
+      color: light-dark(white, #000);
+      border-color: light-dark(#0066ff, #4d9fff);
+    }
+
+    .info-text {
+      font-size: 13px;
+      color: light-dark(#666, #999);
+      margin-top: 8px;
+    }
+
+    /* 支持度提示 */
+    .browser-support {
+      font-size: 12px;
+      color: light-dark(#666, #999);
+      margin-top: 4px;
+    }
+
+    .highlight-support { color: light-dark(#2e7d32, #81c784); }
+    .highlight-partial { color: light-dark(#f57c00, #ffb74d); }
+    .highlight-unsupport { color: light-dark(#c62828, #e57373); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS <code>light-dark()</code> 函数演示</h1>
+    <p class="subtitle">根据配色方案自动切换亮色/暗色值的 CSS 颜色函数</p>
+
+    <div class="support-badge partial">部分支持</div>
+    <p class="browser-support">
+      <span class="highlight-support">Safari 17.5+</span> · 
+      <span class="highlight-support">Chrome 123+</span> · 
+      <span class="highlight-support">Edge 123+</span> · 
+      <span class="highlight-unsupport">Firefox (不支持)</span>
+    </p>
+
+    <!-- 主题切换控制 -->
+    <div class="section">
+      <h2>配色方案切换</h2>
+      <p class="info-text">点击按钮切换当前配色方案，观察下方元素的颜色变化：</p>
+      <div class="theme-controls" style="margin-top: 16px;">
+        <button class="theme-btn" onclick="setColorScheme('light')">☀️ 亮色模式</button>
+        <button class="theme-btn" onclick="setColorScheme('dark')">🌙 暗色模式</button>
+        <button class="theme-btn" onclick="setColorScheme('auto')">🔄 跟随系统</button>
+      </div>
+    </div>
+
+    <!-- 卡片组件 -->
+    <div class="section">
+      <h2>卡片组件</h2>
+      <div class="card">
+        <div class="card-title">默认卡片</div>
+        <div class="card-text">这是一张使用 <code>light-dark()</code> 的卡片组件，支持亮色和暗色主题自动切换。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">卡片标题</div>
+        <div class="card-text">悬停时阴影会变深，边框颜色也会随主题变化。</div>
+      </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="section">
+      <h2>按钮组件</h2>
+      <button class="button">主要按钮</button>
+      <button class="button secondary">次要按钮</button>
+      <p class="info-text">主按钮和次要按钮的边框、背景、文字颜色都会随主题切换。</p>
+    </div>
+
+    <!-- 表单 -->
+    <div class="section">
+      <h2>表单控件</h2>
+      <div class="input-demo">
+        <input type="text" placeholder="输入框 placeholder 文字">
+        <input type="email" placeholder="email@example.com">
+        <textarea rows="3" placeholder="多行文本输入框..."></textarea>
+      </div>
+      <p class="info-text">输入框的背景、边框、placeholder 颜色都会随主题切换，聚焦时边框高亮。</p>
+    </div>
+
+    <!-- 颜色对比 -->
+    <div class="section">
+      <h2>颜色对比</h2>
+      <p class="info-text">以下展示了亮色和暗色模式下的颜色差异：</p>
+      <div class="color-grid" style="margin-top: 16px;">
+        <div class="color-swatch" style="background-color: light-dark(#ffffff, #0f0f0f); color: light-dark(#000, #fff);">
+          背景色<br>
+          <code>light-dark(#fff, #0f0f0f)</code>
+        </div>
+        <div class="color-swatch" style="background-color: light-dark(#f8f8f8, #1a1a1a); color: light-dark(#000, #fff);">
+          卡片背景<br>
+          <code>light-dark(#f8f8f8, #1a1a1a)</code>
+        </div>
+        <div class="color-swatch" style="background-color: light-dark(#0066ff, #4d9fff); color: light-dark(#fff, #000);">
+          主色调<br>
+          <code>light-dark(#0066ff, #4d9fff)</code>
+        </div>
+        <div class="color-swatch" style="background-color: light-dark(#f0f0f0, #2d2d2d); color: light-dark(#d63384, #f0a0d0);">
+          代码背景<br>
+          <code>light-dark(#f0f0f0, #2d2d2d)</code>
+        </div>
+        <div class="color-swatch" style="background-color: light-dark(#e1e1e1, #333333); color: light-dark(#333, #e0e0e0);">
+          边框色<br>
+          <code>light-dark(#e1e1e1, #333)</code>
+        </div>
+        <div class="color-swatch" style="background-color: light-dark(#1a1a1a, #f0f0f0); color: light-dark(#fff, #000);">
+          文字色<br>
+          <code>light-dark(#1a1a1a, #f0f0f0)</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>核心代码示例</h2>
+      <pre><code>/* 1. 声明支持 light 和 dark 配色方案 */
+:root {
+  color-scheme: light dark;
+}
+
+/* 2. 使用 light-dark() 直接切换颜色值 */
+body {
+  background-color: light-dark(#ffffff, #0f0f0f);
+  color: light-dark(#1a1a1a, #f0f0f0);
+}
+
+/* 3. 应用到阴影（暗色模式需要更淡的阴影） */
+.card {
+  box-shadow: light-dark(
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.4)
+  );
+}</code></pre>
+    </div>
+
+    <!-- 特性检测 -->
+    <div class="section">
+      <h2>浏览器支持检测</h2>
+      <p class="info-text" id="support-result">检测中...</p>
+    </div>
+  </div>
+
+  <script>
+    function setColorScheme(scheme) {
+      if (scheme === 'auto') {
+        document.documentElement.style.colorScheme = 'auto';
+      } else {
+        document.documentElement.style.colorScheme = scheme;
+      }
+      
+      // 更新按钮状态
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      const btns = document.querySelectorAll('.theme-btn');
+      if (scheme === 'light') btns[0].classList.add('active');
+      if (scheme === 'dark') btns[1].classList.add('active');
+      if (scheme === 'auto') btns[2].classList.add('active');
+    }
+
+    // 初始化
+    setColorScheme('auto');
+
+    // 特性检测
+    const supports = CSS.supports('color', 'light-dark(#fff, #000)');
+    const result = document.getElementById('support-result');
+    if (supports) {
+      result.innerHTML = '✅ 你的浏览器支持 <code>light-dark()</code> 函数，可以正常体验演示效果。';
+      result.style.color = '#2e7d32';
+    } else {
+      result.innerHTML = '❌ 你的浏览器不支持 <code>light-dark()</code> 函数。请使用 Safari 17.5+ 或 Chrome 123+ 体验。';
+      result.style.color = '#c62828';
+    }
+  </script>
+</body>
+</html>
