@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox 基础示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+
+    h2 {
+      margin: 30px 0 15px;
+      color: #333;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin: 15px 0 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      background: #e8f4ff;
+      border: 2px dashed #4a90d9;
+      border-radius: 8px;
+      min-height: 100px;
+      padding: 15px;
+      display: flex;
+    }
+
+    .item {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 8px;
+      margin: 5px;
+    }
+
+    /* flex-direction 示例 */
+    .row-reverse { flex-direction: row-reverse; }
+    .column { flex-direction: column; }
+    .column-reverse { flex-direction: column-reverse; }
+
+    /* justify-content 示例 */
+    .flex-end { justify-content: flex-end; }
+    .center { justify-content: center; }
+    .space-between { justify-content: space-between; }
+    .space-around { justify-content: space-around; }
+    .space-evenly { justify-content: space-evenly; }
+
+    /* align-items 示例 */
+    .align-flex-start { align-items: flex-start; }
+    .align-flex-end { align-items: flex-end; }
+    .align-center { align-items: center; }
+    .align-baseline { align-items: baseline; }
+    .baseline-item { padding: 10px 0; }
+
+    /* flex-wrap 示例 */
+    .wrap-container {
+      flex-wrap: wrap;
+    }
+    .wrap-container .item {
+      width: 150px;
+    }
+
+    /* align-content 示例 */
+    .content-container {
+      flex-wrap: wrap;
+      height: 200px;
+    }
+    .content-container .item {
+      width: 150px;
+    }
+    .align-content-start { align-content: flex-start; }
+    .align-content-end { align-content: flex-end; }
+    .align-content-center { align-content: center; }
+    .align-content-between { align-content: space-between; }
+    .align-content-around { align-content: space-around; }
+  </style>
+</head>
+<body>
+  <h1>Flexbox 基础示例</h1>
+
+  <!-- flex-direction -->
+  <div class="section">
+    <h2>flex-direction: 主轴方向</h2>
+    
+    <h3>row (默认)</h3>
+    <div class="container">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>row-reverse</h3>
+    <div class="container row-reverse">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>column</h3>
+    <div class="container column">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>column-reverse</h3>
+    <div class="container column-reverse">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+  </div>
+
+  <!-- justify-content -->
+  <div class="section">
+    <h2>justify-content: 主轴对齐</h2>
+
+    <h3>flex-start (默认)</h3>
+    <div class="container">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>flex-end</h3>
+    <div class="container flex-end">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>center</h3>
+    <div class="container center">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>space-between</h3>
+    <div class="container space-between">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>space-around</h3>
+    <div class="container space-around">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>space-evenly</h3>
+    <div class="container space-evenly">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+  </div>
+
+  <!-- align-items -->
+  <div class="section">
+    <h2>align-items: 交叉轴对齐</h2>
+
+    <h3>stretch (默认)</h3>
+    <div class="container" style="height: 120px;">
+      <div class="item" style="height: auto;">1</div>
+      <div class="item" style="height: auto;">2</div>
+      <div class="item" style="height: auto;">3</div>
+    </div>
+
+    <h3>flex-start</h3>
+    <div class="container align-flex-start" style="height: 120px;">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>flex-end</h3>
+    <div class="container align-flex-end" style="height: 120px;">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>center</h3>
+    <div class="container align-center" style="height: 120px;">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+    </div>
+
+    <h3>baseline</h3>
+    <div class="container align-baseline" style="height: 120px;">
+      <div class="item baseline-item">1</div>
+      <div class="item">2</div>
+      <div class="item" style="font-size: 24px;">3</div>
+    </div>
+  </div>
+
+  <!-- flex-wrap -->
+  <div class="section">
+    <h2>flex-wrap: 换行</h2>
+
+    <h3>nowrap (默认)</h3>
+    <div class="container" style="width: 300px;">
+      <div class="item" style="width: 100px;">1</div>
+      <div class="item" style="width: 100px;">2</div>
+      <div class="item" style="width: 100px;">3</div>
+      <div class="item" style="width: 100px;">4</div>
+    </div>
+
+    <h3>wrap</h3>
+    <div class="container wrap-container" style="width: 300px;">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+
+    <h3>wrap-reverse</h3>
+    <div class="container" style="width: 300px; flex-wrap: wrap-reverse;">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+  </div>
+
+  <!-- align-content -->
+  <div class="section">
+    <h2>align-content: 多行对齐 (需 flex-wrap: wrap)</h2>
+
+    <h3>flex-start</h3>
+    <div class="container content-container align-content-start">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+
+    <h3>flex-end</h3>
+    <div class="container content-container align-content-end">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+
+    <h3>center</h3>
+    <div class="container content-container align-content-center">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+
+    <h3>space-between</h3>
+    <div class="container content-container align-content-between">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+
+    <h3>space-around</h3>
+    <div class="container content-container align-content-around">
+      <div class="item">1</div>
+      <div class="item">2</div>
+      <div class="item">3</div>
+      <div class="item">4</div>
+      <div class="item">5</div>
+      <div class="item">6</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+---
+title: CSS text-box-trim 文本修剪
+category: 文本排版
+tags: [css, text-box-trim, typography, leading]
+description: 详细介绍 CSS text-box-trim 属性，用于控制文本框上下空白的修剪。
+keywords: text-box-trim, text-box-edge, half-leading, 文本修剪, CSS 排版
+---
+
+通过本章理解
+
+1. text-box-trim 属性的概念和用法
+2. text-box-edge 如何配合使用
+3. 与 line-height 的配合关系
+4. 实战案例：按钮垂直居中、多行文本裁剪、图文对齐
+
+## 概念
+
+`text-box-trim` 是 CSS 新属性，允许开发者控制文本框上下的半行距（half-leading）空间。每个字体都会产生不同量的半行距空间，这会影响元素的高度。在过去，这种空间是无法精确控制的。
+
+从 Chrome 133 开始，`text-box-trim` 正式支持，允许开发者"修剪"掉文本框上下多余的空间。
+
+## 语法
+
+### 长属性
+
+```css
+text-box-trim: trim-start | trim-end | trim-both | none;
+text-box-edge: cap | ex | text | leading + alphabetic | text;
+```
+
+### 短属性
+
+```css
+/* 修剪两端，以大写字母为基准 */
+text-box: trim-both cap alphabetic;
+
+/* 修剪两端，以小写 x 字母为基准 */
+text-box: trim-both ex alphabetic;
+```
+
+### trim-start / trim-end / trim-both / none
+
+- `trim-start`：修剪文本框起始侧（上方）的半行距
+- `trim-end`：修剪文本框结束侧（下方）的半行距
+- `trim-both`：同时修剪上下两侧
+- `none`：不修剪（默认）
+
+### text-box-edge 值
+
+- `cap`：以大写字母顶部为基准
+- `ex`：以小写字母 x 顶部为基准
+- `alphabetic`：以字母基线为基准
+- `text`：以文本边缘为基准
+- `leading`：行间距边缘
+
+## 与 line-height 的配合
+
+`text-box-trim` 不会替代 `line-height`，而是与它协同工作：
+
+- `line-height` 控制行间距
+- `text-box-trim` 修剪文本框边缘的半行距空间
+
+```css
+/* 传统方式：手动调整 padding 补偿半行距 */
+button {
+  padding-block: 5px; /* 手动减少上下 padding */
+  padding-inline: 10px;
+}
+
+/* 使用 text-box-trim：自动修剪半行距 */
+button {
+  text-box: trim-both cap alphabetic;
+  padding: 10px; /* 现在上下 padding 相等了 */
+}
+```
+
+## 实战案例
+
+### 按钮垂直居中
+
+使用 `text-box-trim` 可以让按钮的内边距真正"相等"：
+
+```css
+button {
+  text-box: trim-both cap alphabetic;
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+}
+```
+
+[演示：按钮垂直居中](../demos/text-box-trim/button-centering.html)
+
+### 多行文本裁剪
+
+多行文本每行都会有半行距空间，修剪后可以让文本框更紧凑：
+
+```css
+.multiline-text {
+  text-box: trim-both cap alphabetic;
+  line-height: 1.5;
+}
+```
+
+[演示：多行文本裁剪](../demos/text-box-trim/multiline-trim.html)
+
+### 图文垂直对齐
+
+当图片与文本并排时，文本的半行距会导致图片高度不匹配。使用 `text-box-trim` 可以精确对齐：
+
+```css
+.container {
+  display: flex;
+  align-items: baseline; /* 使用基线对齐 */
+}
+
+.text {
+  text-box: trim-both cap alphabetic;
+}
+```
+
+[演示：图文对齐](../demos/text-box-trim/image-text-alignment.html)
+
+## 浏览器兼容性
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| text-box-trim | 133+ | ❌ | 18.2+ | 133+ |
+| text-box-edge | 133+ | ❌ | 18.2+ | 133+ |
+
+> ⚠️ 目前主流浏览器支持情况有限，在生产环境中使用请注意渐进增强。
+
+## 更多资源
+
+- [Chrome 官方博客](https://developer.chrome.com/blog/css-text-box-trim)
+- [CSS Tricks 教程](https://css-tricks.com/two-css-properties-for-trimming-text-box-whitespace/)
+- [CSSWG 规范](https://drafts.csswg.org/css-inline-3/#text-edges)
+- [Figma 垂直修剪设计参考](https://help.figma.com/hc/en-us/articles/360039956634-Explore-text-properties#h_01H96FW9Z3W7J7Z2HEN8V17BZT)
