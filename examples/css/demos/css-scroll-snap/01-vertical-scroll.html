@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll Snap — 垂直滚动列表</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 700px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #0d1117; border-radius: 4px; overflow: hidden; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+
+    /* ========== 滚动容器核心样式 ========== */
+    .snap-list {
+      height: 320px;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+    }
+
+    .snap-list::-webkit-scrollbar { width: 6px; }
+    .snap-list::-webkit-scrollbar-track { background: #161b22; }
+    .snap-list::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+    .list-item {
+      height: 100px;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      cursor: default;
+      user-select: none;
+      transition: filter 0.2s;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover { filter: brightness(1.1); }
+
+    /* 不同对齐方式演示 */
+    .snap-list.align-center { scroll-snap-type: y proximity; }
+    .snap-list.align-center .list-item { scroll-snap-align: center; }
+
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+
+    /* 颜色梯度 */
+    .item-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .item-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .item-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .item-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .item-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+    .item-6 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+    .item-7 { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+    .item-8 { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>垂直滚动列表 Snap 演示</h1>
+    <p class="subtitle">scroll-snap-type: y + scroll-snap-align: start | 滚动下方的列表，观察吸附行为</p>
+
+    <div class="section">
+      <h2>scroll-snap-type 严格度对比</h2>
+      <div class="controls" id="controls">
+        <button class="btn active" data-type="mandatory">mandatory（强制吸附）</button>
+        <button class="btn" data-type="proximity">proximity（接近时吸附）</button>
+        <button class="btn" data-type="none">none（无吸附）</button>
+      </div>
+      <div class="demo-area">
+        <div class="snap-list" id="snapList">
+          <div class="list-item item-1">🎵 音乐推荐 · 第 1 项</div>
+          <div class="list-item item-2">🎮 游戏资讯 · 第 2 项</div>
+          <div class="list-item item-3">📚 读书笔记 · 第 3 项</div>
+          <div class="list-item item-4">🎬 影视点评 · 第 4 项</div>
+          <div class="list-item item-5">🍜 美食探店 · 第 5 项</div>
+          <div class="list-item item-6">✈️ 旅行攻略 · 第 6 项</div>
+          <div class="list-item item-7">💻 科技评测 · 第 7 项</div>
+          <div class="list-item item-8">🎨 设计灵感 · 第 8 项</div>
+        </div>
+      </div>
+      <div class="code-block" id="codeDisplay">scroll-snap-type: y mandatory;</div>
+      <p class="desc">
+        <span class="tag">mandatory</span>：滚动停止后强制吸附到最近的 snap point，行为可预期 |
+        <span class="tag">proximity</span>：仅当停止位置接近 snap point 时才吸附，行为更柔和 |
+        <span class="tag">none</span>：禁用滚动吸附
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>scroll-snap-align 对齐方式</h2>
+      <div class="controls">
+        <button class="btn active" id="align-start">start（顶部对齐）</button>
+        <button class="btn" id="align-center">center（居中对齐）</button>
+        <button class="btn" id="align-end">end（底部对齐）</button>
+      </div>
+      <div class="demo-area">
+        <div class="snap-list" id="alignList" style="height: 200px;">
+          <div class="list-item item-1" style="height: 100px;">🎵 音乐推荐</div>
+          <div class="list-item item-3" style="height: 140px;">📚 读书笔记（高度更大）</div>
+          <div class="list-item item-4" style="height: 80px;">🎬 影视点评</div>
+          <div class="list-item item-5" style="height: 120px;">🍜 美食探店</div>
+          <div class="list-item item-7" style="height: 90px;">💻 科技评测</div>
+        </div>
+      </div>
+      <p class="desc">
+        <span class="tag">start</span>：子元素顶部对齐容器顶部（默认）|
+        <span class="tag">center</span>：子元素中心对齐容器中心 |
+        <span class="tag">end</span>：子元素底部对齐容器底部
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>核心代码</h2>
+      <div class="code-block">/* 容器：定义滚动轴向和吸附模式 */
+.snap-list {
+  height: 320px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
+
+/* 子元素：定义吸附对齐点 */
+.list-item {
+  height: 100px;
+  scroll-snap-align: start;  /* 元素顶部对齐容器顶部 */
+}</div>
+      <p class="desc">容器需要明确的高度（或通过内容撑开），并设置 `overflow` 使其可滚动。子元素通过 `scroll-snap-align` 声明对齐方式。</p>
+    </div>
+
+    <p class="info">CSS Scroll Snap 支持所有现代浏览器。示例基于 learn-css 仓库风格。</p>
+  </div>
+
+  <script>
+    const snapList = document.getElementById('snapList');
+    const alignList = document.getElementById('alignList');
+    const codeDisplay = document.getElementById('codeDisplay');
+
+    // 严格度切换
+    document.getElementById('controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      const type = e.target.dataset.type;
+      snapList.style.scrollSnapType = type === 'none' ? 'none' : `y ${type}`;
+      codeDisplay.textContent = `scroll-snap-type: y ${type};`;
+    });
+
+    // 对齐方式切换
+    document.getElementById('align-start').addEventListener('click', function() {
+      document.querySelectorAll('#alignList ~ .controls .btn, .section:nth-child(3) .btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      alignList.querySelectorAll('.list-item').forEach(el => el.style.scrollSnapAlign = 'start');
+    });
+    document.getElementById('align-center').addEventListener('click', function() {
+      this.classList.add('active');
+      alignList.querySelectorAll('.list-item').forEach(el => el.style.scrollSnapAlign = 'center');
+    });
+    document.getElementById('align-end').addEventListener('click', function() {
+      this.classList.add('active');
+      alignList.querySelectorAll('.list-item').forEach(el => el.style.scrollSnapAlign = 'end');
+    });
+
+    // 点击切换对齐
+    document.querySelectorAll('.section:nth-child(3) .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.section:nth-child(3) .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
