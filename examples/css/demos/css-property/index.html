@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @property 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 tauto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 140px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .box { width: 80px; height: 80px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .bar-wrap { width: 100%; max-width: 400px; }
+    .bar { height: 8px; background: #1a1a1a; border-radius: 4px; overflow: hidden; position: relative; }
+    .bar-inner { height: 100%; border-radius: 4px; transition: width 0.05s linear; }
+    .progress-bar { width: var(--progress, 25%); }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    .tag.red { background: #f8514933; color: #f85149; }
+
+    /* === 核心：@property 注册 === */
+    @property --size {
+      syntax: '<length>';
+      inherits: false;
+      initial-value: 80px;
+    }
+
+    @property --rotation {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+
+    @property --progress {
+      syntax: '<percentage>';
+      inherits: false;
+      initial-value: 25%;
+    }
+
+    @property --color-start {
+      syntax: '<color>';
+      inherits: false;
+      initial-value: #3498db;
+    }
+
+    @property --color-end {
+      syntax: '<color>';
+      inherits: false;
+      initial-value: #e74c3c;
+    }
+
+    @property --bg-color {
+      syntax: '<color>';
+      inherits: false;
+      initial-value: #a371f7;
+    }
+
+    @property --scale {
+      syntax: '<number>';
+      inherits: false;
+      initial-value: 1;
+    }
+
+    /* 演示用样式 */
+    .size-box {
+      width: var(--size);
+      height: var(--size);
+      background: var(--bg-color, #a371f7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      transition: --size 0.5s ease, --bg-color 0.5s ease;
+    }
+
+    .rotation-box {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #3fb950, #58a6ff);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .gradient-box {
+      width: 120px;
+      height: 80px;
+      border-radius: 8px;
+      background: linear-gradient(45deg, var(--color-start), var(--color-end));
+      transition: --color-start 1s ease, --color-end 1s ease;
+      flex-shrink: 0;
+    }
+
+    .scale-box {
+      width: 60px;
+      height: 60px;
+      background: #f0883e;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* 动画 */
+    @keyframes sizePulse {
+      0% { --size: 60px; --bg-color: #3498db; }
+      50% { --size: 120px; --bg-color: #e74c3c; }
+      100% { --size: 60px; --bg-color: #3498db; }
+    }
+
+    @keyframes rotateAnim {
+      0% { --rotation: 0deg; }
+      100% { --rotation: 360deg; }
+    }
+
+    @keyframes progressAnim {
+      0% { --progress: 0%; }
+      50% { --progress: 80%; }
+      100% { --progress: 0%; }
+    }
+
+    @keyframes colorShift {
+      0% { --color-start: #3498db; --color-end: #e74c3c; }
+      50% { --color-start: #9b59b6; --color-end: #f39c12; }
+      100% { --color-start: #3498db; --color-end: #e74c3c; }
+    }
+
+    @keyframes scaleAnim {
+      0% { --scale: 1; }
+      50% { --scale: 1.6; }
+      100% { --scale: 1; }
+    }
+
+    .size-box.animating {
+      animation: sizePulse 2.5s ease-in-out infinite;
+    }
+
+    .rotation-box.animating {
+      animation: rotateAnim 2s linear infinite;
+    }
+
+    .gradient-box.animating {
+      animation: colorShift 3s ease infinite;
+    }
+
+    .scale-box.animating {
+      animation: scaleAnim 1.5s ease-in-out infinite;
+    }
+
+    /* 使用注册属性作为实际值 */
+    .size-box.using-var {
+      width: var(--size);
+      height: var(--size);
+    }
+
+    .rotation-box.using-var {
+      transform: rotate(var(--rotation));
+    }
+
+    .scale-box.using-var {
+      transform: scale(var(--scale));
+    }
+
+    /* 无注册 vs 有注册对比 */
+    .unregistered-box {
+      width: var(--unreg-size, 80px);
+      height: var(--unreg-size, 80px);
+      background: #30363d;
+      border-radius: 8px;
+      border: 1px dashed #f85149;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f85149;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .registered-box {
+      width: var(--reg-size);
+      height: var(--reg-size);
+      background: #3fb950;
+      border-radius: 8px;
+      border: 1px solid #3fb950;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    @property --unreg-size {
+      syntax: '<length>';
+      inherits: false;
+      initial-value: 80px;
+    }
+
+    @property --reg-size {
+      syntax: '<length>';
+      inherits: false;
+      initial-value: 80px;
+    }
+
+    @keyframes unregAnim {
+      0% { --unreg-size: 60px; }
+      100% { --unreg-size: 140px; }
+    }
+
+    @keyframes regAnim {
+      0% { --reg-size: 60px; }
+      100% { --reg-size: 140px; }
+    }
+
+    .unregistered-box.animating {
+      animation: unregAnim 1.5s ease-in-out infinite;
+    }
+
+    .registered-box.animating {
+      animation: regAnim 1.5s ease-in-out infinite;
+    }
+
+    /* 进度条动态样式 */
+    .progress-inner {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #00d230, #58a6ff);
+      width: var(--progress, 25%);
+      transition: width 0.1s linear;
+    }
+
+    .progress-bar.animating .progress-inner {
+      animation: progressAnim 2.5s ease infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS @property 交互演示</h1>
+    <p class="subtitle">基于 learn-css 仓库 · Houdini Properties & Values API</p>
+
+    <!-- @property 基础注册 -->
+    <div class="section">
+      <h2>1. @property 基础注册</h2>
+      <p class="desc">
+        <span class="tag">syntax</span>定义类型 ·
+        <span class="tag">inherits</span>控制继承 ·
+        <span class="tag">initial-value</span>设置默认值
+      </p>
+      <div class="code-block">@property --size {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 80px;
+}</div>
+    </div>
+
+    <!-- 对比：未注册 vs 已注册 -->
+    <div class="section">
+      <h2>2. 关键对比：未注册 vs 已注册自定义属性的动画</h2>
+      <p class="desc">
+        <span class="tag red">未注册</span>的自定义属性无法做关键帧动画（浏览器不知其类型） ·
+        <span class="tag green">已注册</span>的属性可以平滑过渡
+      </p>
+      <div class="controls" id="compare-controls">
+        <button class="btn" data-action="start-compare">播放对比动画</button>
+        <button class="btn" data-action="stop-compare">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="unregistered-box" id="unreg-box">未注册<br>无法动画</div>
+        <div class="registered-box" id="reg-box">已注册<br>平滑过渡</div>
+      </div>
+      <div class="code-block">/* 未注册：动画无效，因为浏览器不知道 --size 是什么类型 */
+.unregistered-box {
+  width: var(--unreg-size);
+  animation: unregAnim 1.5s ease-in-out infinite;
+}
+
+/* 已注册：明确 syntax: '<length>'，动画正常工作 */
+.registered-box {
+  width: var(--reg-size); /* 使用注册属性 */
+  animation: regAnim 1.5s ease-in-out infinite;
+}</div>
+    </div>
+
+    <!-- 尺寸 + 颜色联合动画 -->
+    <div class="section">
+      <h2>3. 尺寸 + 颜色联合动画</h2>
+      <p class="desc">
+        <span class="tag green">--size</span> 控制宽高 ·
+        <span class="tag">--bg-color</span> 控制背景色，两者同步动画
+      </p>
+      <div class="controls" id="size-controls">
+        <button class="btn active" data-action="play-size">播放动画</button>
+        <button class="btn" data-action="stop-size">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="size-box" id="size-box">size + color</div>
+      </div>
+      <div class="code-block">@property --size { syntax: '<length>'; inherits: false; initial-value: 80px; }
+@property --bg-color { syntax: '<color>'; inherits: false; initial-value: #a371f7; }
+
+.size-box { width: var(--size); height: var(--size); background: var(--bg-color); }
+
+@keyframes sizePulse {
+  0%   { --size: 60px; --bg-color: #3498db; }
+  50%  { --size: 120px; --bg-color: #e74c3c; }
+  100% { --size: 60px; --bg-color: #3498db; }
+}</div>
+    </div>
+
+    <!-- 角度旋转动画 -->
+    <div class="section">
+      <h2>4. 角度旋转动画（--rotation）</h2>
+      <p class="desc">
+        <span class="tag">--rotation</span> 类型为 <code>&lt;angle&gt;</code>，支持 <code>0deg → 360deg</code> 旋转
+      </p>
+      <div class="controls" id="rotate-controls">
+        <button class="btn active" data-action="play-rotate">播放动画</button>
+        <button class="btn" data-action="stop-rotate">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="rotation-box" id="rot-box">旋转</div>
+      </div>
+      <div class="code-block">@property --rotation { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+.rotation-box { transform: rotate(var(--rotation)); }
+
+@keyframes rotateAnim {
+  to { --rotation: 360deg; }
+}</div>
+    </div>
+
+    <!-- 进度条动画 -->
+    <div class="section">
+      <h2>5. 进度条动画（--progress）</h2>
+      <p class="desc">
+        <span class="tag">--progress</span> 类型为 <code>&lt;percentage&gt;</code>，驱动 <code>linear-gradient</code> 颜色停止点
+      </p>
+      <div class="controls" id="progress-controls">
+        <button class="btn active" data-action="play-progress">播放动画</button>
+        <button class="btn" data-action="stop-progress">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="bar-wrap">
+          <div class="bar progress-bar" id="prog-bar">
+            <div class="progress-inner"></div>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">@property --progress { syntax: '<percentage>'; inherits: false; initial-value: 25%; }
+
+.bar { background: linear-gradient(to right, #00d230 var(--progress), #1a1a1a var(--progress)); }
+
+@keyframes progressAnim {
+  0%   { --progress: 0%; }
+  50%  { --progress: 80%; }
+  100% { --progress: 0%; }
+}</div>
+    </div>
+
+    <!-- 渐变色动画 -->
+    <div class="section">
+      <h2>6. 渐变色动画（--color-start / --color-end）</h2>
+      <p class="desc">
+        两个 <span class="tag">--color-start</span> <span class="tag">--color-end</span> 颜色属性同步变化
+      </p>
+      <div class="controls" id="gradient-controls">
+        <button class="btn active" data-action="play-gradient">播放动画</button>
+        <button class="btn" data-action="stop-gradient">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="gradient-box" id="grad-box"></div>
+      </div>
+      <div class="code-block">@property --color-start { syntax: '<color>'; inherits: false; initial-value: #3498db; }
+@property --color-end { syntax: '<color>'; inherits: false; initial-value: #e74c3c; }
+
+.gradient-box { background: linear-gradient(45deg, var(--color-start), var(--color-end)); }
+
+@keyframes colorShift {
+  0%   { --color-start: #3498db; --color-end: #e74c3c; }
+  50%  { --color-start: #9b59b6; --color-end: #f39c12; }
+  100% { --color-start: #3498db; --color-end: #e74c3c; }
+}</div>
+    </div>
+
+    <!-- scale 缩放动画 -->
+    <div class="section">
+      <h2>7. scale 缩放动画（--scale）</h2>
+      <p class="desc">
+        <span class="tag">--scale</span> 类型为 <code>&lt;number&gt;</code>，控制 <code>scale()</code> 变换
+      </p>
+      <div class="controls" id="scale-controls">
+        <button class="btn active" data-action="play-scale">播放动画</button>
+        <button class="btn" data-action="stop-scale">停止</button>
+      </div>
+      <div class="demo-area">
+        <div class="scale-box" id="scale-box">scale</div>
+      </div>
+      <div class="code-block">@property --scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+
+.scale-box { transform: scale(var(--scale)); }
+
+@keyframes scaleAnim {
+  0%   { --scale: 1; }
+  50%  { --scale: 1.6; }
+  100% { --scale: 1; }
+}</div>
+    </div>
+
+    <p class="info">CSS @property 支持所有现代浏览器（Chrome 85+、Firefox 128+、Safari 16.4+）。演示基于 learn-css 仓库示例风格。</p>
+  </div>
+
+  <script>
+    // 通用：播放/停止动画
+    function toggleAnim(el, play) {
+      el.style.animation = play ? '' : 'none';
+      if (!play) {
+        el.style.transform = '';
+        el.style.width = '';
+        el.style.height = '';
+        el.style.background = '';
+        // 强制重绘
+        el.getBoundingClientRect();
+      }
+    }
+
+    // 对比组
+    const unregBox = document.getElementById('unreg-box');
+    const regBox = document.getElementById('reg-box');
+    document.querySelectorAll('#compare-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#compare-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const action = btn.dataset.action;
+        if (action === 'start-compare') {
+          unregBox.classList.add('animating');
+          regBox.classList.add('animating');
+          unregBox.style.animation = 'unregAnim 1.5s ease-in-out infinite';
+          regBox.style.animation = 'regAnim 1.5s ease-in-out infinite';
+        } else {
+          unregBox.classList.remove('animating');
+          regBox.classList.remove('animating');
+          unregBox.style.animation = 'none';
+          regBox.style.animation = 'none';
+        }
+      });
+    });
+
+    // size + color
+    const sizeBox = document.getElementById('size-box');
+    document.querySelectorAll('#size-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#size-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.action === 'play-size') {
+          sizeBox.classList.add('animating');
+        } else {
+          sizeBox.classList.remove('animating');
+        }
+      });
+    });
+
+    // rotation
+    const rotBox = document.getElementById('rot-box');
+    document.querySelectorAll('#rotate-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#rotate-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.action === 'play-rotate') {
+          rotBox.classList.add('animating');
+        } else {
+          rotBox.classList.remove('animating');
+        }
+      });
+    });
+
+    // progress
+    const progBar = document.getElementById('prog-bar');
+    document.querySelectorAll('#progress-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#progress-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.action === 'play-progress') {
+          progBar.classList.add('animating');
+        } else {
+          progBar.classList.remove('animating');
+        }
+      });
+    });
+
+    // gradient
+    const gradBox = document.getElementById('grad-box');
+    document.querySelectorAll('#gradient-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#gradient-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.action === 'play-gradient') {
+          gradBox.classList.add('animating');
+        } else {
+          gradBox.classList.remove('animating');
+        }
+      });
+    });
+
+    // scale
+    const scaleBox = document.getElementById('scale-box');
+    document.querySelectorAll('#scale-controls .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#scale-controls .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.dataset.action === 'play-scale') {
+          scaleBox.classList.add('animating');
+        } else {
+          scaleBox.classList.remove('animating');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
