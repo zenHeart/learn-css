@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS contrast-color() 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #6e7681; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 80px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .box { background: #21262d; border: 1px solid #30363d; border-radius: 4px; padding: 12px; color: #c9d1d9; font-size: 14px; }
+    .demo-label { font-size: 13px; color: #6e7681; min-width: 120px; }
+    .info { font-size: 12px; color: #6e7681; margin-top: 12px; }
+    .warning { font-size: 12px; color: #d29922; margin-top: 8px; padding: 8px; background: #d299220d; border-radius: 4px; }
+    .success { font-size: 12px; color: #3fb950; margin-top: 8px; padding: 8px; background: #3fb9501a; border-radius: 4px; }
+    .error { font-size: 12px; color: #f85149; margin-top: 8px; padding: 8px; background: #f851491a; border-radius: 4px; }
+
+    /* 演示卡片样式 */
+    .color-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    .color-swatch {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      border: 2px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .color-name { font-size: 12px; color: #8b949e; text-align: center; }
+
+    /* 背景选择器 */
+    .bg-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .bg-btn {
+      padding: 8px 16px;
+      border: 2px solid #30363d;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+      color: #c9d1d9;
+    }
+    .bg-btn:hover { border-color: #58a6ff; }
+    .bg-btn.active { border-color: #58a6ff; background: #58a6ff22; }
+
+    /* 结果展示区 */
+    .result-area { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+    .result-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .result-color { width: 100px; height: 60px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #30363d; }
+    .result-label { font-size: 11px; color: #6e7681; }
+
+    /* 代码块 */
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+
+    /* 对比度指示器 */
+    .contrast-ratio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .contrast-ratio.high { background: #3fb95022; color: #3fb950; }
+    .contrast-ratio.medium { background: #d2992222; color: #d29922; }
+    .contrast-ratio.low { background: #f8514922; color: #f85149; }
+
+    /* 对比度等级说明 */
+    .wcag-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .wcag-table th, .wcag-table td { padding: 8px 12px; border: 1px solid #30363d; text-align: left; font-size: 13px; }
+    .wcag-table th { background: #21262d; color: #f0f6fc; }
+    .wcag-table td { color: #c9d1d9; }
+
+    /* 按钮样式 */
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS contrast-color() 交互演示</h1>
+    <p class="subtitle">根据背景色自动选择高对比度前景色（需浏览器支持，目前无浏览器实现）</p>
+
+    <!-- 说明区域 -->
+    <div class="section">
+      <h2>⚠️ 浏览器支持状态</h2>
+      <p class="info">contrast-color() 是 CSS Color Level 5 的实验性功能，目前没有任何主流浏览器支持。以下演示使用 JavaScript 模拟函数行为，CSS 代码仅为语法示例。</p>
+      <div class="code-block">/* CSS 语法（目前浏览器不支持） */
+color: contrast-color(blue, white, black);  /* 期望返回 white */</div>
+    </div>
+
+    <!-- 对比度计算原理 -->
+    <div class="section">
+      <h2>对比度计算原理（WCAG 2.1）</h2>
+      <p class="info">对比度比值 = (L1 + 0.05) / (L2 + 0.05)，其中 L1 是较亮颜色的相对亮度，L2 是较暗颜色的相对亮度。</p>
+
+      <table class="wcag-table">
+        <thead>
+          <tr>
+            <th>对比度等级</th>
+            <th>AA 级要求</th>
+            <th>AAA 级要求</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>普通文本</td>
+            <td>≥ 4.5:1</td>
+            <td>≥ 7:1</td>
+          </tr>
+          <tr>
+            <td>大文本 (18px+)</td>
+            <td>≥ 3:1</td>
+            <td>≥ 4.5:1</td>
+          </tr>
+          <tr>
+            <td>UI 组件和图形</td>
+            <td>≥ 3:1</td>
+            <td>≥ 3:1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 交互演示 -->
+    <div class="section">
+      <h2>交互演示：自动选择高对比度颜色</h2>
+      <p class="info">点击不同背景色，查看 contrast-color() 会选择哪个前景色（模拟）</p>
+
+      <!-- 背景选择 -->
+      <div class="bg-selector" id="bgSelector">
+        <button class="bg-btn" data-bg="#000000" style="background:#000000;color:#fff;">黑色</button>
+        <button class="bg-btn" data-bg="#ffffff" style="background:#fff;color:#000;">白色</button>
+        <button class="bg-btn" data-bg="#1890ff" style="background:#1890ff;color:#fff;">蓝色</button>
+        <button class="bg-btn" data-bg="#52c41a" style="background:#52c41a;color:#fff;">绿色</button>
+        <button class="bg-btn" data-bg="#ff4d4f" style="background:#ff4d4f;color:#fff;">红色</button>
+        <button class="bg-btn" data-bg="#722ed1" style="background:#722ed1;color:#fff;">紫色</button>
+        <button class="bg-btn" data-bg="#faad14" style="background:#faad14;color:#000;">黄色</button>
+        <button class="bg-btn active" data-bg="#f0f0f0" style="background:#f0f0f0;color:#000;">浅灰</button>
+      </div>
+
+      <!-- 结果展示 -->
+      <div class="result-area" id="resultArea">
+        <div class="result-item">
+          <div class="result-color" id="resultWhite" style="background:#ffffff;">白色</div>
+          <span class="result-label">白色</span>
+          <span class="contrast-ratio" id="ratioWhite"></span>
+        </div>
+        <div class="result-item">
+          <div class="result-color" id="resultBlack" style="background:#ffffff;">黑色</div>
+          <span class="result-label">黑色</span>
+          <span class="contrast-ratio" id="ratioBlack"></span>
+        </div>
+        <div class="result-item">
+          <div class="result-color" id="resultChosen" style="background:#1890ff;">选中</div>
+          <span class="result-label">contrast-color()</span>
+          <span class="contrast-ratio" id="ratioChosen"></span>
+        </div>
+      </div>
+
+      <div class="code-block" id="cssCode">color: contrast-color(#f0f0f0, white, black);</div>
+    </div>
+
+    <!-- 实际应用示例 -->
+    <div class="section">
+      <h2>实际应用场景</h2>
+
+      <h3>1. 按钮文字自动适配</h3>
+      <div class="demo-area">
+        <div class="color-card" style="background:#1890ff;" id="card1">
+          <div class="color-swatch" id="btnText1" style="background:#fff;color:#1890ff;">按钮文字</div>
+          <span class="color-name">#1890ff 背景</span>
+          <span id="chosen1" style="font-size:11px;color:#8b949e;">选中白色文字</span>
+        </div>
+        <div class="color-card" style="background:#1a1a1a;" id="card2">
+          <div class="color-swatch" id="btnText2" style="background:#fff;color:#1a1a1a;">按钮文字</div>
+          <span class="color-name">#1a1a1a 背景</span>
+          <span id="chosen2" style="font-size:11px;color:#8b949e;">选中白色文字</span>
+        </div>
+        <div class="color-card" style="background:#faad14;" id="card3">
+          <div class="color-swatch" id="btnText3" style="background:#000;color:#faad14;">按钮文字</div>
+          <span class="color-name">#faad14 背景</span>
+          <span id="chosen3" style="font-size:11px;color:#8b949e;">选中黑色文字</span>
+        </div>
+      </div>
+      <div class="code-block">.button {
+  background-color: var(--brand-color);
+  color: contrast-color(var(--brand-color), #fff, #000);
+}</div>
+
+      <h3>2. 卡片标题文字</h3>
+      <div class="demo-area">
+        <div style="padding:16px;background:#e8f0ff;border-radius:8px;margin-right:16px;">
+          <p style="color:#1a1a1a;font-size:16px;font-weight:bold;">卡片标题文字</p>
+          <p style="color:#4a5568;font-size:14px;margin-top:8px;">浅蓝色背景配深色文字</p>
+          <span style="font-size:11px;color:#3fb950;">✓ 对比度 12.6:1 (AAA)</span>
+        </div>
+        <div style="padding:16px;background:#1a1a1a;border-radius:8px;">
+          <p style="color:#ffffff;font-size:16px;font-weight:bold;">卡片标题文字</p>
+          <p style="color:#a0aec0;font-size:14px;margin-top:8px;">深色背景配浅色文字</p>
+          <span style="font-size:11px;color:#3fb950;">✓ 对比度 16.1:1 (AAA)</span>
+        </div>
+      </div>
+
+      <h3>3. 用户头像边框</h3>
+      <div class="demo-area">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#ff6b6b,#feca57);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">头像</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:14px;color:#fff;">用户名</span>
+            <span style="font-size:12px;color:#a0aec0;">渐变边框上的文字</span>
+            <span style="font-size:11px;color:#3fb950;">✓ 对比度充足</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>CSS 代码示例</h2>
+      <div class="code-block">/* 基本用法 */
+color: contrast-color(blue, white, black);
+
+/* 使用 CSS 变量 */
+:root {
+  --bg: #f5f5f5;
+  --text: contrast-color(var(--bg), #1a1a1a, #ffffff);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* 暗黑模式 */
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --text: contrast-color(var(--bg), #ffffff, #000000);
+}
+
+/* 三个颜色选项 */
+.label {
+  color: contrast-color(
+    var(--label-bg),
+    #fff,
+    #000,
+    #f0f0f0  /* 如果白和黑对比度都不够，可选第三个 */
+  );
+}</div>
+    </div>
+
+    <div class="warning">
+      ⚠️ contrast-color() 目前无浏览器支持。以上演示使用 JavaScript 模拟函数行为。当浏览器支持后，请移除 JavaScript 模拟代码。
+    </div>
+  </div>
+
+  <script>
+    // 计算相对亮度 (Relative Luminance)
+    function relativeLuminance(r, g, b) {
+      const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+
+    // 计算对比度
+    function contrastRatio(color1, color2) {
+      const l1 = relativeLuminance(color1[0], color1[1], color1[2]);
+      const l2 = relativeLuminance(color2[0], color2[1], color2[2]);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    // hex 转 rgb
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ] : [0, 0, 0];
+    }
+
+    // 获取 contrast-color 函数的结果（模拟）
+    function contrastColor(bgHex, ...colors) {
+      const bgRgb = hexToRgb(bgHex);
+      let best = colors[0];
+      let bestRatio = 0;
+      for (const color of colors) {
+        const ratio = contrastRatio(bgRgb, hexToRgb(color));
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = color;
+        }
+      }
+      return { color: best, ratio: bestRatio };
+    }
+
+    // 获取对比度等级
+    function getContrastLevel(ratio) {
+      if (ratio >= 7) return { label: `${ratio.toFixed(1)}:1 AAA`, class: 'high' };
+      if (ratio >= 4.5) return { label: `${ratio.toFixed(1)}:1 AA`, class: 'medium' };
+      if (ratio >= 3) return { label: `${ratio.toFixed(1)}:1 AA Large`, class: 'medium' };
+      return { label: `${ratio.toFixed(1)}:1 失败`, class: 'low' };
+    }
+
+    // 更新结果展示
+    function updateResults(bgHex) {
+      const white = '#ffffff';
+      const black = '#000000';
+
+      const whiteRatio = contrastRatio(hexToRgb(bgHex), hexToRgb(white));
+      const blackRatio = contrastRatio(hexToRgb(bgHex), hexToRgb(black));
+      const result = contrastColor(bgHex, white, black);
+
+      // 更新结果卡片
+      const resultWhite = document.getElementById('resultWhite');
+      const resultBlack = document.getElementById('resultBlack');
+      const resultChosen = document.getElementById('resultChosen');
+
+      resultWhite.style.backgroundColor = bgHex;
+      resultWhite.style.color = white;
+      resultWhite.textContent = white;
+
+      resultBlack.style.backgroundColor = bgHex;
+      resultBlack.style.color = black;
+      resultBlack.textContent = black;
+
+      resultChosen.style.backgroundColor = bgHex;
+      resultChosen.style.color = result.color;
+      resultChosen.textContent = result.color === white ? '白色 ✓' : '黑色 ✓';
+
+      // 更新对比度指示器
+      updateRatioIndicator('ratioWhite', whiteRatio);
+      updateRatioIndicator('ratioBlack', blackRatio);
+      updateRatioIndicator('ratioChosen', result.ratio);
+
+      // 更新代码示例
+      document.getElementById('cssCode').textContent =
+        `color: contrast-color(${bgHex}, white, black); /* 返回 ${result.color} */`;
+
+      // 更新按钮文字卡片
+      updateButtonCards(bgHex);
+    }
+
+    function updateRatioIndicator(id, ratio) {
+      const el = document.getElementById(id);
+      const level = getContrastLevel(ratio);
+      el.textContent = level.label;
+      el.className = `contrast-ratio ${level.class}`;
+    }
+
+    function updateButtonCards(bgHex) {
+      const result = contrastColor(bgHex, '#ffffff', '#000000');
+
+      // 卡片1
+      const card1 = document.getElementById('card1');
+      const btnText1 = document.getElementById('btnText1');
+      const chosen1 = document.getElementById('chosen1');
+      card1.style.backgroundColor = '#1890ff';
+      btnText1.style.backgroundColor = result.color;
+      btnText1.style.color = '#1890ff';
+      chosen1.textContent = `选中 ${result.color === '#ffffff' ? '白色' : '黑色'} 文字`;
+
+      // 卡片2
+      const card2 = document.getElementById('card2');
+      const btnText2 = document.getElementById('btnText2');
+      const chosen2 = document.getElementById('chosen2');
+      card2.style.backgroundColor = '#1a1a1a';
+      const result2 = contrastColor('#1a1a1a', '#ffffff', '#000000');
+      btnText2.style.backgroundColor = result2.color;
+      btnText2.style.color = '#1a1a1a';
+      chosen2.textContent = `选中 ${result2.color === '#ffffff' ? '白色' : '黑色'} 文字`;
+
+      // 卡片3
+      const card3 = document.getElementById('card3');
+      const btnText3 = document.getElementById('btnText3');
+      const chosen3 = document.getElementById('chosen3');
+      card3.style.backgroundColor = '#faad14';
+      const result3 = contrastColor('#faad14', '#ffffff', '#000000');
+      btnText3.style.backgroundColor = result3.color;
+      btnText3.style.color = '#faad14';
+      chosen3.textContent = `选中 ${result3.color === '#ffffff' ? '白色' : '黑色'} 文字`;
+    }
+
+    // 绑定事件
+    document.querySelectorAll('.bg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateResults(btn.dataset.bg);
+      });
+    });
+
+    // 初始化
+    updateResults('#f0f0f0');
+  </script>
+</body>
+</html>
