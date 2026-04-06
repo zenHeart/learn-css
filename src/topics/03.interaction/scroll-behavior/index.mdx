@@ -1,0 +1,217 @@
+---
+title: "CSS scroll-behavior 滚动平滑控制"
+category: "交互"
+tags:
+  - CSS
+  - scroll-behavior
+  - 平滑滚动
+  - 滚动
+description: "详解CSS scroll-behavior属性实现平滑滚动的方法"
+keywords: "scroll-behavior, 平滑滚动, smooth scroll, CSS交互"
+---
+
+# CSS scroll-behavior 滚动平滑控制
+
+## 概述
+
+`scroll-behavior` 属性用于控制滚动行为，可以实现点击锚点链接时的平滑滚动效果。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+```css
+html {
+  scroll-behavior: auto; /* 默认，立即跳转 */
+  scroll-behavior: smooth; /* 平滑滚动 */
+}
+```
+
+{/* @playground id="smooth-demo" mode="demo" */}
+
+## 属性值
+
+### 1. auto
+
+浏览器默认的滚动行为（立即跳转）：
+
+```css
+.scroll-auto {
+  scroll-behavior: auto;
+}
+```
+
+### 2. smooth
+
+使用平滑滚动动画：
+
+```css
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+```
+
+## 使用场景
+
+### 1. 全局平滑滚动
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+```
+
+### 2. 单个容器平滑滚动
+
+```css
+.scroll-container {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+}
+```
+
+### 3. 锚点导航
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+
+.nav-link {
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #007bff;
+}
+```
+
+```html
+<nav>
+  <a href="#section1">第一部分</a>
+  <a href="#section2">第二部分</a>
+  <a href="#section3">第三部分</a>
+</nav>
+
+<section id="section1">第一部分内容</section>
+<section id="section2">第二部分内容</section>
+<section id="section3">第三部分内容</section>
+```
+
+## JavaScript 滚动
+
+配合 JavaScript 实现更复杂的滚动效果：
+
+```javascript
+// 平滑滚动到元素
+element.scrollIntoView({
+  behavior: 'smooth'
+});
+
+// 滚动到指定位置
+window.scrollTo({
+  top: 0,
+  behavior: 'smooth'
+});
+
+// 滚动特定元素
+element.scrollIntoViewIfNeeded({
+  behavior: 'smooth'
+});
+```
+
+## 实际应用
+
+### 1. 返回顶部按钮
+
+```css
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: #007bff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+}
+```
+
+```javascript
+const backToTop = document.querySelector('.back-to-top');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    backToTop.classList.add('visible');
+  } else {
+    backToTop.classList.remove('visible');
+  }
+});
+
+backToTop.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+```
+
+### 2. 页面章节导航
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+
+section {
+  min-height: 100vh;
+  padding: 20px;
+}
+```
+
+### 3. 无限滚动加载
+
+```css
+.feed-container {
+  scroll-behavior: auto; /* 快速滚动，无需平滑 */
+}
+```
+
+## 浏览器兼容性
+
+`scroll-behavior` 属性兼容性良好：
+
+- Chrome 61+
+- Firefox 36+
+- Safari 15.4+
+- Edge 79+
+
+## 性能注意事项
+
+1. **尊重用户偏好**：如果用户开启了「减少动画」偏好，应禁用平滑滚动
+2. **性能影响**：平滑滚动会增加浏览器渲染负担
+3. **SEO 考虑**：搜索引擎可以解析锚点跳转
+
+## 使用 @media 规则
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+```
+
+## 参考资料
+
+- [scroll-behavior - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior)
+- [scrollIntoView - MDN](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView)
