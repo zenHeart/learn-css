@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Design Token 设计令牌 - 实战演示</title>
+  <style>
+    :root {
+      --color-primary: #3b82f6;
+      --color-primary-hover: #2563eb;
+      --color-surface: #f9fafb;
+      --color-bg: #ffffff;
+      --color-text: #111827;
+      --color-text-secondary: #6b7280;
+      --color-border: #e5e7eb;
+      --radius-lg: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-md);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: #eff6ff;
+      color: #1e40af;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      width: fit-content;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🎨 Design Token 实战演示</h1>
+      <p>通过可运行的 HTML 示例学习 Design Token 的三层架构与实践应用</p>
+    </div>
+
+    <div class="grid">
+      <a href="01-color-tokens.html" class="card">
+        <div class="card-icon">🎨</div>
+        <h2>颜色令牌三层结构</h2>
+        <p>演示 Option → Decision → Component Token 的完整引用链，理解颜色令牌的分层设计。</p>
+        <span class="card-badge">基础入门</span>
+      </a>
+
+      <a href="02-theme-switching.html" class="card">
+        <div class="card-icon">🌓</div>
+        <h2>亮色/暗色主题切换</h2>
+        <p>基于 Design Token 实现主题切换，修改根元素属性即可全局换肤。</p>
+        <span class="card-badge">实战案例</span>
+      </a>
+
+      <a href="03-z-index-tokens.html" class="card">
+        <div class="card-icon">📊</div>
+        <h2>Z-Index 层级令牌</h2>
+        <p>解决 z-index 魔法数字问题，使用语义化令牌管理堆叠上下文。</p>
+        <span class="card-badge">进阶技巧</span>
+      </a>
+
+      <a href="04-component-tokens.html" class="card">
+        <div class="card-icon">🎛️</div>
+        <h2>组件令牌系统</h2>
+        <p>构建 Button、Input、Card 等组件的令牌体系，实现设计系统组件化。</p>
+        <span class="card-badge">高级应用</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>基于 Martin Fowler <a href="https://martinfowler.com/articles/design-token-based-ui-architecture.html" target="_blank">Design Token 文章</a> 实践</p>
+      <p style="margin-top: 0.5rem;">Learn CSS - 设计令牌指南</p>
+    </div>
+  </div>
+</body>
+</html>
