@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 垂直排版兼容性处理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "SimSun", serif;
+      background: #1a1a2e;
+      min-height: 100vh;
+      padding: 2rem;
+      color: #e0e0e0;
+      line-height: 1.8;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 2.5rem;
+      font-size: 0.9rem;
+    }
+
+    .demo-area {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-section h2 {
+      color: #ffd700;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      padding-left: 0.8rem;
+      border-left: 3px solid #ffd700;
+      font-weight: normal;
+    }
+
+    .demo-section > p {
+      color: #aaa;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* 浏览器徽章 */
+    .browser-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+
+    .badge-chrome { background: #4ecdc4; color: #1a1a2e; }
+    .badge-firefox { background: #ff6b6b; color: #fff; }
+    .badge-safari { background: #74b9ff; color: #1a1a2e; }
+    .badge-edge { background: #a29bfe; color: #1a1a2e; }
+    .badge-ie { background: #fdcb6e; color: #1a1a2e; }
+
+    /* 正常工作的演示框 */
+    .working-demo {
+      background: rgba(78, 205, 196, 0.1);
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .working-demo .demo-label {
+      color: #4ecdc4;
+      font-size: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* 问题的演示框 */
+    .issue-demo {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .issue-demo .demo-label {
+      color: #ff6b6b;
+      font-size: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* 解决方案的演示框 */
+    .solution-demo {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .solution-demo .demo-label {
+      color: #ffd700;
+      font-size: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* 竖排文字通用样式 */
+    .vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
+
+    /* 基础竖排 */
+    .basic-vertical {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 6px;
+      min-height: 180px;
+      font-size: 1rem;
+      line-height: 2.5;
+    }
+
+    /* IE 兼容写法 */
+    .ie-compatible {
+      -ms-writing-mode: tb-rl;     /* IE 的垂直从右到左 */
+      writing-mode: vertical-rl;   /* 标准语法 */
+      text-orientation: upright;
+      -webkit-text-orientation: upright;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 6px;
+      min-height: 180px;
+      font-size: 1rem;
+      line-height: 2.5;
+    }
+
+    /* Safari 兼容写法 */
+    .safari-compatible {
+      writing-mode: vertical-rl;
+      -webkit-text-orientation: upright;  /* Safari 前缀 */
+      text-orientation: upright;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 6px;
+      min-height: 180px;
+      font-size: 1rem;
+      line-height: 2.5;
+    }
+
+    /* ===== 问题1：IE 使用旧语法 ===== */
+    .ie-syntax-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .syntax-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+
+    .syntax-card h3 {
+      color: #ffd700;
+      font-size: 0.95rem;
+      margin-bottom: 0.8rem;
+      font-weight: normal;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.8rem 1rem;
+      border-radius: 6px;
+      font-family: "Consolas", "Monaco", monospace;
+      font-size: 0.8rem;
+      color: #98d8c8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .code-block .comment {
+      color: #666;
+    }
+
+    .code-block .property {
+      color: #ff9f43;
+    }
+
+    .code-block .value {
+      color: #4ecdc4;
+    }
+
+    /* ===== 问题2：Safari text-orientation ===== */
+    .safari-issue-box {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .safari-issue-box > div {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    /* ===== 问题3：滚动方向 ===== */
+    .scroll-demo-container {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .scroll-box {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      height: 200px;
+      width: 120px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 2.5;
+    }
+
+    .scroll-box::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scroll-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 215, 0, 0.5);
+      border-radius: 3px;
+    }
+
+    /* ===== 完整的兼容代码示例 ===== */
+    .complete-compatible {
+      -ms-writing-mode: tb-rl;
+      -webkit-writing-mode: vertical-rl;
+      -moz-writing-mode: vertical-rl;
+      writing-mode: vertical-rl;
+      -webkit-text-orientation: upright;
+      -moz-text-orientation: upright;
+      text-orientation: upright;
+    }
+
+    /* 浏览器支持表格 */
+    .support-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .support-table th,
+    .support-table td {
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .support-table th {
+      background: rgba(255, 215, 0, 0.1);
+      color: #ffd700;
+      font-weight: normal;
+    }
+
+    .support-table td:first-child {
+      font-weight: 600;
+    }
+
+    .support-yes {
+      color: #4ecdc4;
+    }
+
+    .support-partial {
+      color: #fdcb6e;
+    }
+
+    .support-no {
+      color: #ff6b6b;
+    }
+
+    /* 注意事项列表 */
+    .note-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .note-list li {
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      border-left: 3px solid #ffd700;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .note-list li::before {
+      content: '💡 ';
+      margin-right: 0.5rem;
+    }
+
+    /* 综合示例 */
+    .comprehensive-demo {
+      background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(162, 155, 254, 0.1));
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    .comprehensive-demo h3 {
+      color: #fff;
+      margin-bottom: 1rem;
+      font-weight: normal;
+    }
+
+    .comprehensive-demo .demo-box {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      border-radius: 8px;
+      min-height: 200px;
+      font-size: 1.1rem;
+      line-height: 2.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔧 CSS 垂直排版兼容性处理</h1>
+  <p class="subtitle">解决不同浏览器和旧版本浏览器的兼容性问题</p>
+
+  <div class="demo-area">
+
+    <!-- 浏览器支持概览 -->
+    <div class="demo-section">
+      <h2>📊 浏览器支持概览</h2>
+      <p>现代浏览器对 writing-mode 和 text-orientation 的支持已经非常完善，但旧版本浏览器仍需要特殊处理。</p>
+      <table class="support-table">
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>Chrome</th>
+            <th>Firefox</th>
+            <th>Safari</th>
+            <th>Edge</th>
+            <th>IE 11</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>writing-mode: vertical-rl</td>
+            <td class="support-yes">✅ 49+</td>
+            <td class="support-yes">✅ 41+</td>
+            <td class="support-yes">✅ 10.1+</td>
+            <td class="support-yes">✅ 79+</td>
+            <td class="support-partial">⚠️ -ms-前缀</td>
+          </tr>
+          <tr>
+            <td>writing-mode: vertical-lr</td>
+            <td class="support-yes">✅ 49+</td>
+            <td class="support-yes">✅ 41+</td>
+            <td class="support-yes">✅ 10.1+</td>
+            <td class="support-yes">✅ 79+</td>
+            <td class="support-partial">⚠️ -ms-前缀</td>
+          </tr>
+          <tr>
+            <td>text-orientation: upright</td>
+            <td class="support-yes">✅ 48+</td>
+            <td class="support-yes">✅ 41+</td>
+            <td class="support-partial">⚠️ 10.1+</td>
+            <td class="support-yes">✅ 79+</td>
+            <td class="support-no">❌ 不支持</td>
+          </tr>
+          <tr>
+            <td>text-orientation: sideways</td>
+            <td class="support-partial">⚠️ 部分</td>
+            <td class="support-partial">⚠️ 44+</td>
+            <td class="support-yes">✅ 10.1+</td>
+            <td class="support-partial">⚠️ 部分</td>
+            <td class="support-no">❌ 不支持</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- IE 兼容性问题 -->
+    <div class="demo-section">
+      <h2>🖥️ 问题一：IE 浏览器的旧语法 <span class="browser-badge badge-ie">IE 11</span></h2>
+      <p>IE 浏览器使用私有的 -ms- 前缀语法，与现代浏览器标准语法不同。</p>
+
+      <div class="ie-syntax-grid">
+        <div class="syntax-card">
+          <h3>IE 语法 → 标准语法对照</h3>
+          <div class="code-block">
+<span class="comment">/* IE 11 写法 */</span>
+.<span class="property">writing-mode</span>: <span class="value">tb-rl</span>;     <span class="comment">/* 相当于 vertical-rl */</span>
+
+<span class="comment">/* 现代浏览器写法 */</span>
+.<span class="property">writing-mode</span>: <span class="value">vertical-rl</span>;
+          </div>
+        </div>
+        <div class="syntax-card">
+          <h3>完整 IE 兼容写法</h3>
+          <div class="code-block">
+.<span class="property">vertical-text</span> {
+  <span class="property">-ms-writing-mode</span>: <span class="value">tb-rl</span>;
+  <span class="property">-webkit-writing-mode</span>: <span class="value">vertical-rl</span>;
+  <span class="property">-moz-writing-mode</span>: <span class="value">vertical-rl</span>;
+  <span class="property">writing-mode</span>: <span class="value">vertical-rl</span>;
+  <span class="property">text-orientation</span>: <span class="value">upright</span>;
+}
+          </div>
+        </div>
+      </div>
+
+      <div class="working-demo" style="margin-top: 1rem;">
+        <div class="demo-label">✅ 兼容写法演示（同时支持 IE 和现代浏览器）</div>
+        <div class="ie-compatible">
+          <p>床前明月光</p>
+          <p>疑是地上霜</p>
+          <p>举头望明月</p>
+          <p>低头思故乡</p>
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top: 1rem;">
+<span class="comment">/* IE writing-mode 取值对照表 */</span>
+tb-rl    → vertical-rl   <span class="comment">/* 垂直从右到左 */</span>
+tb-lr    → vertical-lr   <span class="comment">/* 垂直从左到右 */</span>
+lr-tb    → horizontal-tb  <span class="comment">/* 水平从左到右（默认） */</span>
+      </div>
+    </div>
+
+    <!-- Safari 兼容性问题 -->
+    <div class="demo-section">
+      <h2>📱 问题二：iOS Safari 的 text-orientation <span class="browser-badge badge-safari">Safari</span></h2>
+      <p>iOS Safari 早期版本需要使用 -webkit- 前缀，且在某些情况下表现不同。</p>
+
+      <div class="safari-issue-box">
+        <div>
+          <div class="issue-demo">
+            <div class="demo-label">⚠️ 没有前缀（iOS 10 以下可能失效）</div>
+            <div class="basic-vertical" style="-webkit-text-orientation: unset;">
+              <p>静夜思</p>
+              <p>CSS 3</p>
+              <p>ABC 123</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="solution-demo">
+            <div class="demo-label">✅ 使用 -webkit- 前缀（推荐写法）</div>
+            <div class="safari-compatible">
+              <p>静夜思</p>
+              <p>CSS 3</p>
+              <p>ABC 123</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top: 1rem;">
+<span class="comment">/* Safari/iOS 兼容写法 */</span>
+.<span class="property">vertical-text</span> {
+  <span class="property">-webkit-text-orientation</span>: <span class="value">upright</span>;  <span class="comment">/* Safari 前缀 */</span>
+  <span class="property">text-orientation</span>: <span class="value">upright</span>;           <span class="comment">/* 标准语法 */</span>
+}
+      </div>
+    </div>
+
+    <!-- 滚动方向问题 -->
+    <div class="demo-section">
+      <h2>⬇️ 问题三：垂直模式下的滚动方向</h2>
+      <p>在垂直书写模式下，滚动方向可能与用户预期相反，需要注意用户体验设计。</p>
+
+      <div class="scroll-demo-container">
+        <div>
+          <div class="working-demo">
+            <div class="demo-label">垂直模式滚动演示（向下滚动）</div>
+            <div class="scroll-box">
+              <p>第一章</p>
+              <p>春眠不觉晓</p>
+              <p>处处闻啼鸟</p>
+              <p>夜来风雨声</p>
+              <p>花落知多少</p>
+              <p>第二章</p>
+              <p>空山不见人</p>
+              <p>但闻人语响</p>
+              <p>返景入深林</p>
+              <p>复照青苔上</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="solution-demo">
+            <div class="demo-label">💡 提示：垂直滚动意味着向右滚动</div>
+            <div style="color: #888; font-size: 0.85rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 6px;">
+              <p>在 <code>vertical-rl</code> 模式下：</p>
+              <p>• 阅读方向是从右到左</p>
+              <p>• 向右滚动 = 向下滚动</p>
+              <p>• 滚动条位置：左侧或右侧</p>
+              <p style="margin-top: 0.8rem;">确保滚动条可见，方便用户理解。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 双向文本问题 -->
+    <div class="demo-section">
+      <h2>🔄 问题四：双向文本（RTL 语言混排）</h2>
+      <p>当垂直排版中混入阿拉伯文、希伯来文等从右到左的语言时，需要控制文本方向。</p>
+
+      <div class="ie-syntax-grid">
+        <div class="syntax-card">
+          <h3>使用 dir 属性</h3>
+          <div class="code-block">
+<span class="comment">/* HTML 中使用 dir 属性 */</span>
+&lt;<span class="property">p</span> <span class="value">dir="rtl"</span>&gt;مرحبا&lt;/<span class="property">p</span>&gt;
+&lt;<span class="property">p</span> <span class="value">dir="ltr"</span>&gt;Hello&lt;/<span class="property">p</span>&gt;
+          </div>
+        </div>
+        <div class="syntax-card">
+          <h3>使用 bdi 元素</h3>
+          <div class="code-block">
+<span class="comment">/* bdi 隔离双向文本 */</span>
+&lt;<span class="property">p</span>&gt;
+  你好 &lt;<span class="property">bdi</span>&gt;مرحبا&lt;/<span class="property">bdi</span>&gt; 世界
+&lt;/<span class="property">p</span>&gt;
+          </div>
+        </div>
+      </div>
+
+      <div class="working-demo" style="margin-top: 1rem;">
+        <div class="demo-label">✅ 双向文本处理示例</div>
+        <div class="basic-vertical" style="height: auto; min-height: 100px; padding: 1rem;">
+          <p>中文测试</p>
+          <p dir="rtl">مرحبا (阿拉伯文)</p>
+          <p>Hello World</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 完整兼容代码 -->
+    <div class="demo-section">
+      <h2>📋 完整兼容代码模板</h2>
+      <p>综合所有兼容性处理的最佳实践代码：</p>
+
+      <div class="code-block">
+<span class="comment">/* ===========================================</span>
+<span class="comment">   CSS 垂直排版 - 完整兼容代码</span>
+<span class="comment">   =========================================== */</span>
+
+<span class="comment">/* 基础竖排类 */</span>
+.vertical-text {
+  <span class="comment">/* IE 11 */</span>
+  -ms-writing-mode: tb-rl;
+  
+  <span class="comment">/* 现代浏览器 */</span>
+  -webkit-writing-mode: vertical-rl;
+  -moz-writing-mode: vertical-rl;
+  writing-mode: vertical-rl;
+  
+  <span class="comment">/* Safari/iOS */</span>
+  -webkit-text-orientation: upright;
+  -moz-text-orientation: upright;
+  text-orientation: upright;
+  
+  <span class="comment">/* 可选：允许双向文本 */</span>
+  unicode-bidi: isolate;
+}
+
+<span class="comment">/* 纯中文竖排（推荐） */</span>
+.vertical-chinese {
+  .vertical-text;
+  text-orientation: upright;
+}
+
+<span class="comment">/* 中英混排竖排 */</span>
+.vertical-mixed {
+  .vertical-text;
+  text-orientation: mixed;
+}
+      </div>
+    </div>
+
+    <!-- 注意事项 -->
+    <div class="demo-section">
+      <h2>⚠️ 重要注意事项</h2>
+      <ul class="note-list">
+        <li>IE 11 已经基本淘汰，除非有特殊需求，否则可以忽略 -ms- 前缀</li>
+        <li>iOS Safari 14+ 对 text-orientation 的支持已经完善，但仍建议保留 -webkit- 前缀</li>
+        <li>使用 vertical-rl 时，滚动条默认在左侧；vertical-lr 时，滚动条在右侧</li>
+        <li>打印时垂直文字可能出现问题，建议在 @media print 中切换为 horizontal-tb</li>
+        <li>Firefox 对 -moz-writing-mode 的支持已废弃，仅需标准写法</li>
+        <li>大量垂直文字布局可能影响渲染性能，可使用 will-change: contents 优化</li>
+      </ul>
+    </div>
+
+    <!-- 综合演示 -->
+    <div class="demo-section">
+      <h2>🎯 综合演示：完整兼容的竖排文字</h2>
+      <div class="comprehensive-demo">
+        <h3>💻 兼容所有主流浏览器的竖排文字展示</h3>
+        <div class="demo-box">
+          <p>床前明月光</p>
+          <p>疑是地上霜</p>
+          <p>举头望明月</p>
+          <p>低头思故乡</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
