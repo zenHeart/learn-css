@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS animation-timeline view() 演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #f59e0b;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --card-1: linear-gradient(135deg, #667eea, #764ba2);
+      --card-2: linear-gradient(135deg, #f093fb, #f5576c);
+      --card-3: linear-gradient(135deg, #4facfe, #00f2fe);
+      --card-4: linear-gradient(135deg, #43e97b, #38f9d7);
+      --card-5: linear-gradient(135deg, #fa709a, #fee140);
+      --card-6: linear-gradient(135deg, #a18cd1, #fbc2eb);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    /* ── Container ──────────────────────────────────────── */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ── Section Intro ───────────────────────────────────── */
+    .intro {
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .intro h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--primary-dark);
+    }
+
+    .intro p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--primary-dark);
+    }
+
+    /* ── Demo Section ────────────────────────────────────── */
+    .demo-section {
+      margin-bottom: 4rem;
+    }
+
+    .demo-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary);
+      display: inline-block;
+    }
+
+    .demo-section p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Cards Container ────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      border-radius: 12px;
+      padding: 1.5rem;
+      color: white;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .card p {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .card-1 { background: var(--card-1); }
+    .card-2 { background: var(--card-2); }
+    .card-3 { background: var(--card-3); }
+    .card-4 { background: var(--card-4); }
+    .card-5 { background: var(--card-5); }
+    .card-6 { background: var(--card-6); }
+
+    /* ── Scroll Spacer ───────────────────────────────────── */
+    .scroll-spacer {
+      height: 40vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      margin: 2rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .scroll-spacer span {
+      font-size: 1.5rem;
+    }
+
+    /* ── Animation: Fade In + Slide ──────────────────────── */
+    .card.fade-slide {
+      animation: fade-slide linear both;
+      animation-timeline: view();
+    }
+
+    @keyframes fade-slide {
+      from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card:nth-child(1) { animation-range: entry 0% contain 35%; }
+    .card:nth-child(2) { animation-range: entry 8% contain 43%; }
+    .card:nth-child(3) { animation-range: entry 16% contain 51%; }
+    .card:nth-child(4) { animation-range: entry 24% contain 59%; }
+    .card:nth-child(5) { animation-range: entry 32% contain 67%; }
+    .card:nth-child(6) { animation-range: entry 40% contain 75%; }
+
+    /* ── Animation: Rotate In ─────────────────────────────── */
+    .card.rotate-in {
+      animation: rotate-in linear both;
+      animation-timeline: view();
+    }
+
+    @keyframes rotate-in {
+      from {
+        opacity: 0;
+        transform: perspective(800px) rotateX(-30deg) translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: perspective(800px) rotateX(0) translateY(0);
+      }
+    }
+
+    .card.rotate-in:nth-child(1) { animation-range: entry 0% contain 40%; }
+    .card.rotate-in:nth-child(2) { animation-range: entry 10% contain 50%; }
+    .card.rotate-in:nth-child(3) { animation-range: entry 20% contain 60%; }
+    .card.rotate-in:nth-child(4) { animation-range: entry 30% contain 70%; }
+    .card.rotate-in:nth-child(5) { animation-range: entry 40% contain 80%; }
+    .card.rotate-in:nth-child(6) { animation-range: entry 50% contain 90%; }
+
+    /* ── Animation: Scale Pop ────────────────────────────── */
+    .card.scale-pop {
+      animation: scale-pop linear both;
+      animation-timeline: view();
+    }
+
+    @keyframes scale-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.7);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .card.scale-pop:nth-child(1) { animation-range: entry 0% contain 30%; }
+    .card.scale-pop:nth-child(2) { animation-range: entry 12% contain 42%; }
+    .card.scale-pop:nth-child(3) { animation-range: entry 24% contain 54%; }
+    .card.scale-pop:nth-child(4) { animation-range: entry 36% contain 66%; }
+    .card.scale-pop:nth-child(5) { animation-range: entry 48% contain 78%; }
+    .card.scale-pop:nth-child(6) { animation-range: entry 60% contain 90%; }
+
+    /* ── Progress Bar Demo ──────────────────────────────── */
+    .progress-demo {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 4px;
+      transform-origin: left center;
+      
+      animation: fill-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes fill-progress {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    .progress-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Code Block ──────────────────────────────────────── */
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    pre .comment { color: #64748b; }
+    pre .prop { color: #7dd3fc; }
+    pre .value { color: #86efac; }
+    pre .func { color: #fbbf24; }
+
+    /* ── Feature Notice ──────────────────────────────────── */
+    #feature-notice {
+      display: none;
+      position: sticky;
+      top: 12px;
+      z-index: 99;
+      background: #fef3c7;
+      border: 1px solid var(--accent);
+      color: #92400e;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    #feature-notice.visible { display: block; }
+
+    /* ── End Message ─────────────────────────────────────── */
+    .end-section {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-muted);
+    }
+
+    .end-section span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .end-section p {
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>animation-timeline: view()</h1>
+    <p>CSS 原生滚动驱动动画 — 元素进入视口时触发动画</p>
+  </header>
+
+  <!-- Feature Notice -->
+  <div class="container">
+    <div id="feature-notice">
+      ⚠️ 滚动驱动动画需要 Chrome 115+ 或 Firefox 123+。
+      Safari 技术预览版部分支持。
+    </div>
+
+    <!-- Progress Bar Demo -->
+    <div class="intro" style="margin-top: 2rem;">
+      <h2>页面滚动进度条</h2>
+      <p>页面顶部的进度条会随着滚动自动填充，这是通过 <code>animation-timeline: scroll()</code> 实现的。</p>
+    </div>
+
+    <div class="progress-demo">
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="progress-label">滚动页面查看进度 ↑</div>
+    </div>
+
+    <pre><span class="comment">/* 使用 scroll() 绑定到根元素滚动 */</span>
+<span class="prop">animation</span>: <span class="value">fill-progress linear both</span>;
+<span class="prop">animation-timeline</span>: <span class="value">scroll(root block)</span>;
+
+<span class="prop">@keyframes</span> fill-progress {
+  from { <span class="prop">transform</span>: <span class="value">scaleX(0)</span>; }
+  to   { <span class="prop">transform</span>: <span class="value">scaleX(1)</span>; }
+}</pre>
+
+    <!-- ── Demo 1: Fade + Slide ─────────────────────────── -->
+    <div class="demo-section">
+      <div class="scroll-spacer">
+        <span>↓</span>
+        向下滚动查看动画
+      </div>
+
+      <h3>动画 1: 淡入 + 上滑</h3>
+      <p>使用 <code>animation-range</code> 实现卡片交错的入场动画。当卡片进入视口时触发。</p>
+
+      <div class="cards-grid">
+        <div class="card card-1 fade-slide">
+          <h4>设计</h4>
+          <p>Beautiful interfaces</p>
+        </div>
+        <div class="card card-2 fade-slide">
+          <h4>动效</h4>
+          <p>Delightful animations</p>
+        </div>
+        <div class="card card-3 fade-slide">
+          <h4>性能</h4>
+          <p>Lightning-fast</p>
+        </div>
+        <div class="card card-4 fade-slide">
+          <h4>可访问性</h4>
+          <p>Built for everyone</p>
+        </div>
+        <div class="card card-5 fade-slide">
+          <h4>响应式</h4>
+          <p>Adapts to any screen</p>
+        </div>
+        <div class="card card-6 fade-slide">
+          <h4>创新</h4>
+          <p>Pushing boundaries</p>
+        </div>
+      </div>
+
+      <pre><span class="comment">/* view() 根据元素可见性进度驱动动画 */</span>
+<span class="prop">animation</span>: <span class="value">fade-slide linear both</span>;
+<span class="prop">animation-timeline</span>: <span class="value">view()</span>;
+
+<span class="comment">/* 交错：每个卡片延迟 8% 触发 */</span>
+<span class="prop">animation-range</span>: <span class="value">entry 0% contain 35%</span>;   <span class="comment">/* 第1张 */</span>
+<span class="prop">animation-range</span>: <span class="value">entry 8% contain 43%</span>;   <span class="comment">/* 第2张 */</span>
+
+<span class="prop">@keyframes</span> fade-slide {
+  from {
+    <span class="prop">opacity</span>: <span class="value">0</span>;
+    <span class="prop">transform</span>: <span class="value">translateY(50px) scale(0.95)</span>;
+  }
+  to {
+    <span class="prop">opacity</span>: <span class="value">1</span>;
+    <span class="prop">transform</span>: <span class="value">translateY(0) scale(1)</span>;
+  }
+}</pre>
+    </div>
+
+    <!-- ── Demo 2: Rotate In ────────────────────────────── -->
+    <div class="demo-section">
+      <div class="scroll-spacer">
+        <span>↓</span>
+        继续滚动
+      </div>
+
+      <h3>动画 2: 3D 旋转入场</h3>
+      <p>使用 <code>perspective</code> 和 <code>rotateX</code> 创建 3D 旋转效果。</p>
+
+      <div class="cards-grid">
+        <div class="card card-1 rotate-in">
+          <h4>创意</h4>
+          <p>Imagination at work</p>
+        </div>
+        <div class="card card-2 rotate-in">
+          <h4>精准</h4>
+          <p>Pixel perfect</p>
+        </div>
+        <div class="card card-3 rotate-in">
+          <h4>速度</h4>
+          <p>Time is money</p>
+        </div>
+        <div class="card card-4 rotate-in">
+          <h4>协作</h4>
+          <p>Together we build</p>
+        </div>
+        <div class="card card-5 rotate-in">
+          <h4>迭代</h4>
+          <p>Always improving</p>
+        </div>
+        <div class="card card-6 rotate-in">
+          <h4>突破</h4>
+          <p>Beyond limits</p>
+        </div>
+      </div>
+
+      <pre><span class="prop">@keyframes</span> rotate-in {
+  from {
+    <span class="prop">opacity</span>: <span class="value">0</span>;
+    <span class="prop">transform</span>: <span class="value">perspective(800px) rotateX(-30deg) translateY(30px)</span>;
+  }
+  to {
+    <span class="prop">opacity</span>: <span class="value">1</span>;
+    <span class="prop">transform</span>: <span class="value">perspective(800px) rotateX(0) translateY(0)</span>;
+  }
+}</pre>
+    </div>
+
+    <!-- ── Demo 3: Scale Pop ────────────────────────────── -->
+    <div class="demo-section">
+      <div class="scroll-spacer">
+        <span>↓</span>
+        最后一批卡片
+      </div>
+
+      <h3>动画 3: 缩放入场</h3>
+      <p>简单的缩放动画，适合强调元素的重要性。</p>
+
+      <div class="cards-grid">
+        <div class="card card-1 scale-pop">
+          <h4>开始</h4>
+          <p>Begin here</p>
+        </div>
+        <div class="card card-2 scale-pop">
+          <h4>探索</h4>
+          <p>Discover more</p>
+        </div>
+        <div class="card card-3 scale-pop">
+          <h4>成长</h4>
+          <p>Grow daily</p>
+        </div>
+        <div class="card card-4 scale-pop">
+          <h4>连接</h4>
+          <p>Make links</p>
+        </div>
+        <div class="card card-5 scale-pop">
+          <h4>分享</h4>
+          <p>Spread joy</p>
+        </div>
+        <div class="card card-6 scale-pop">
+          <h4>完成</h4>
+          <p>Mission done</p>
+        </div>
+      </div>
+
+      <pre><span class="prop">@keyframes</span> scale-pop {
+  from {
+    <span class="prop">opacity</span>: <span class="value">0</span>;
+    <span class="prop">transform</span>: <span class="value">scale(0.7)</span>;
+  }
+  to {
+    <span class="prop">opacity</span>: <span class="value">1</span>;
+    <span class="prop">transform</span>: <span class="value">scale(1)</span>;
+  }
+}</pre>
+    </div>
+
+    <!-- End Section -->
+    <div class="end-section">
+      <span>🎉</span>
+      <p>你已滚动到页面底部！</p>
+      <p style="margin-top: 0.5rem; font-size: 0.85rem;">所有动画均使用纯 CSS <code>animation-timeline: view()</code> 实现，无需 JavaScript。</p>
+    </div>
+  </div>
+
+  <script>
+    // Detect support and show notice if feature is unavailable
+    if (!CSS.supports('animation-timeline', 'view()')) {
+      document.getElementById('feature-notice').classList.add('visible');
+    }
+  </script>
+
+</body>
+</html>
