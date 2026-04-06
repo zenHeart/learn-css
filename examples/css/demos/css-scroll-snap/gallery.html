@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll Snap - 水平图片画廊</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+
+    .code-hint {
+      background: #f0f0f0;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #555;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .gallery-container {
+      width: 100%;
+      padding: 20px 0;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .gallery {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 0 calc(50% - 140px); /* 实现视觉居中 */
+      scroll-padding: 50%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .gallery::-webkit-scrollbar {
+      display: none;
+    }
+
+    .card {
+      flex: 0 0 280px;
+      scroll-snap-align: center;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .card-image {
+      width: 100%;
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .card-image::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.1));
+    }
+
+    .img-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .img-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .img-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .img-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .img-5 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+    .img-6 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+    .img-7 { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
+    .img-8 { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .tip {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #e8f4fd;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #3178c6;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Scroll Snap - 水平图片画廊</h1>
+  <p class="subtitle">scroll-snap-type: x mandatory + scroll-padding: 50% + scroll-snap-align: center</p>
+
+  <div class="code-hint">
+    .gallery {<br>
+    &nbsp;&nbsp;scroll-snap-type: x mandatory;<br>
+    &nbsp;&nbsp;scroll-padding: 50%;<br>
+    }<br>
+    .card { scroll-snap-align: center; }
+  </div>
+
+  <div class="gallery-container">
+    <div class="gallery" id="gallery">
+      <div class="card">
+        <div class="card-image img-1"></div>
+        <div class="card-body">
+          <div class="card-title">暮光之城</div>
+          <div class="card-desc">紫色渐变的梦幻</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-2"></div>
+        <div class="card-body">
+          <div class="card-title">粉红泡泡</div>
+          <div class="card-desc">浪漫粉色的气息</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-3"></div>
+        <div class="card-body">
+          <div class="card-title">蓝天白云</div>
+          <div class="card-desc">清澈透明的天空</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-4"></div>
+        <div class="card-body">
+          <div class="card-title">绿野仙踪</div>
+          <div class="card-desc">清新自然的绿色</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-5"></div>
+        <div class="card-body">
+          <div class="card-title">日落沙滩</div>
+          <div class="card-desc">温暖的橙色余晖</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-6"></div>
+        <div class="card-body">
+          <div class="card-title">冰川蓝调</div>
+          <div class="card-desc">冷峻优雅的蓝</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-7"></div>
+        <div class="card-body">
+          <div class="card-title">樱花时节</div>
+          <div class="card-desc">粉紫相间的浪漫</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image img-8"></div>
+        <div class="card-body">
+          <div class="card-title">极光之旅</div>
+          <div class="card-desc">神秘的光影变幻</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    💡 提示：每个卡片宽度固定为 280px，配合 <code>scroll-padding: 50%</code> 实现视觉居中吸附。左右滑动时，松开后卡片会自动吸附到视口中央。
+  </div>
+</body>
+</html>

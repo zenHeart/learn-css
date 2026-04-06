@@ -1,0 +1,123 @@
+<h3>移动端全屏轮播图</h3>
+<p>左右滑动切换幻灯片，每个 slide 占满一屏（100vw）。容器设置 <code>scroll-snap-type: x mandatory</code>，每个 slide 设置 <code>scroll-snap-align: start</code>。</p>
+
+<div class="carousel">
+  <div class="carousel__slide slide-1">
+    <span>Slide 1</span>
+  </div>
+  <div class="carousel__slide slide-2">
+    <span>Slide 2</span>
+  </div>
+  <div class="carousel__slide slide-3">
+    <span>Slide 3</span>
+  </div>
+  <div class="carousel__slide slide-4">
+    <span>Slide 4</span>
+  </div>
+</div>
+
+<div class="dots">
+  <span class="dot active"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+</div>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .carousel {
+    display: flex;
+    width: 100%;
+    height: 200px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* 隐藏滚动条但保留滚动功能 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    border-radius: 8px;
+  }
+
+  .carousel::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .carousel__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+  }
+
+  .slide-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .slide-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .slide-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .slide-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+  .carousel__slide span {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    transition: background 0.3s;
+  }
+
+  .dot.active {
+    background: #667eea;
+  }
+
+  /* 指示器联动 */
+  .carousel.addEventListener('scroll', () => {
+    const slides = document.querySelectorAll('.carousel__slide');
+    const carousel = document.querySelector('.carousel');
+    const slideWidth = carousel.offsetWidth;
+    const index = Math.round(carousel.scrollLeft / slideWidth);
+    document.querySelectorAll('.dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  });
+</style>
+
+<script>
+  const carousel = document.querySelector('.carousel');
+  const dots = document.querySelectorAll('.dot');
+
+  carousel.addEventListener('scroll', () => {
+    const slideWidth = carousel.offsetWidth;
+    const index = Math.round(carousel.scrollLeft / slideWidth);
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  });
+</script>
