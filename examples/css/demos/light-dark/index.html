@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS light-dark() 暗色模式切换函数演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* 必须声明 color-scheme 才能使用 light-dark() */
+      color-scheme: light dark;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: light-dark(#ffffff, #121212);
+      color: light-dark(#1a1a1a, #f0f0f0);
+      padding: 24px;
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 { text-align: center; margin-bottom: 32px; color: light-dark(#1a1a1a, #f0f0f0); }
+    h2 { margin: 32px 0 16px; color: light-dark(#1a1a1a, #f0f0f0); border-bottom: 2px solid light-dark(#e0e0e0, #333); padding-bottom: 8px; }
+    h3 { margin: 24px 0 12px; color: light-dark(#333, #ccc); }
+
+    .demo-section {
+      background-color: light-dark(#f8f9fa, #1e1e1e);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid light-dark(#e0e0e0, #333);
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    p { margin: 8px 0; }
+
+    /* ============================================
+       演示 1：基础颜色切换
+       ============================================ */
+    .color-swatches {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .swatch {
+      padding: 16px 24px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      border: 1px solid light-dark(#ddd, #444);
+      min-width: 120px;
+      transition: all 0.3s;
+    }
+
+    .swatch-text { background: light-dark(#fff, #222); }
+    .swatch-bg { background: light-dark(#333, #ddd); color: light-dark(#fff, #333); }
+    .swatch-mixed { background: light-dark(#e3f2fd, #1a237e); color: light-dark(#1565c0, #90caf9); }
+    .swatch-accent { background: light-dark(#f8f9fa, #263238); color: light-dark(#495057, #90caf9); }
+
+    /* ============================================
+       演示 2：卡片组件
+       ============================================ */
+    .card {
+      background-color: light-dark(#ffffff, #2d2d2d);
+      border: 1px solid light-dark(#e0e0e0, #444);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: light-dark(0 2px 8px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.4));
+      transition: all 0.3s;
+    }
+
+    .card__title {
+      font-size: 18px;
+      font-weight: bold;
+      color: light-dark(#1a1a1a, #f0f0f0);
+      margin-bottom: 8px;
+    }
+
+    .card__desc {
+      color: light-dark(#666, #aaa);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card__badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background-color: light-dark(#e3f2fd, #1e3a5f);
+      color: light-dark(#1565c0, #90caf9);
+      transition: all 0.3s;
+    }
+
+    /* ============================================
+       演示 3：代码块
+       ============================================ */
+    .code-block {
+      background-color: light-dark(#f8f9fa, #1e1e1e);
+      color: light-dark(#212529, #d4d4d4);
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      border: 1px solid light-dark(#e0e0e0, #333);
+      transition: all 0.3s;
+    }
+
+    .code-keyword { color: light-dark(#d73a49, #f97583); }
+    .code-func { color: light-dark(#6f42c1, #b392f0); }
+    .code-string { color: light-dark(#032f62, #9ecbff); }
+    .code-comment { color: light-dark(#6a737d, #8b949e); }
+
+    /* ============================================
+       演示 4：按钮
+       ============================================ */
+    .btn-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background-color: light-dark(#007bff, #4d9fff);
+      color: light-dark(#fff, #121212);
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-secondary {
+      background-color: light-dark(#6c757d, #6c757d);
+      color: light-dark(#fff, #fff);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: light-dark(#007bff, #4d9fff);
+      border-color: light-dark(#007bff, #4d9fff);
+    }
+    .btn-outline:hover { background-color: light-dark(#007bff, #4d9fff); color: light-dark(#fff, #121212); }
+
+    /* ============================================
+       演示 5：局部主题强制
+       ============================================ */
+    .force-light {
+      color-scheme: light;
+      background-color: #fff;
+      border: 2px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+
+    .force-dark {
+      color-scheme: dark;
+      background-color: #1e1e1e;
+      border: 2px solid #444;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 8px 0;
+      color: #f0f0f0;
+    }
+
+    .theme-override-text {
+      color: light-dark(red, orange);
+      font-weight: bold;
+    }
+
+    /* ============================================
+       演示 6：边框和阴影
+       ============================================ */
+    .shadow-demo {
+      background-color: light-dark(#ffffff, #2d2d2d);
+      border: 1px solid light-dark(#e0e0e0, #444);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: light-dark(
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        0 4px 16px rgba(0, 0, 0, 0.5)
+      );
+      transition: all 0.3s;
+    }
+
+    /* ============================================
+       演示 7：表单元素
+       ============================================ */
+    .form-demo {
+      max-width: 400px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: light-dark(#333, #ccc);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid light-dark(#ccc, #555);
+      border-radius: 6px;
+      background-color: light-dark(#fff, #2d2d2d);
+      color: light-dark(#1a1a1a, #f0f0f0);
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: light-dark(#007bff, #4d9fff);
+      box-shadow: 0 0 0 3px light-dark(rgba(0,123,255,0.25), rgba(77,159,255,0.25));
+    }
+
+    /* ============================================
+       通用样式
+       ============================================ */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .badge-green { background: light-dark(#4caf50, #388e3c); color: #fff; }
+    .badge-blue { background: light-dark(#2196f3, #1976d2); color: #fff; }
+    .badge-orange { background: light-dark(#ff9800, #f57c00); color: #fff; }
+
+    .note {
+      background-color: light-dark(#fff3cd, #3d3d00);
+      border-left: 4px solid light-dark(#ffc107, #ffc107);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 14px;
+      color: light-dark(#856404, #fff3cd);
+    }
+
+    .info-box {
+      background-color: light-dark(#e7f3ff, #001f3f);
+      border: 1px solid light-dark(#b3d9ff, #004080);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    /* ============================================
+       主题切换器（调试用）
+       ============================================ */
+    .theme-switcher {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background-color: light-dark(#fff, #2d2d2d);
+      border: 1px solid light-dark(#ccc, #555);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      box-shadow: light-dark(0 2px 8px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.4));
+      z-index: 100;
+    }
+
+    .theme-switcher p {
+      margin: 0 0 8px 0;
+      font-weight: 500;
+      color: light-dark(#333, #ccc);
+    }
+
+    .theme-switcher button {
+      margin: 4px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid light-dark(#ccc, #555);
+      background-color: light-dark(#f8f9fa, #3d3d3d);
+      color: light-dark(#333, #ddd);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .theme-switcher button:hover {
+      background-color: light-dark(#e9ecef, #555);
+    }
+
+    .theme-switcher button.active {
+      background-color: light-dark(#007bff, #4d9fff);
+      color: #fff;
+      border-color: light-dark(#007bff, #4d9fff);
+    }
+  </style>
+</head>
+<body>
+  <!-- 主题切换器 -->
+  <div class="theme-switcher">
+    <p>调试：强制主题</p>
+    <button onclick="setColorScheme('light dark')">自动</button>
+    <button onclick="setColorScheme('light')">浅色</button>
+    <button onclick="setColorScheme('dark')">深色</button>
+  </div>
+
+  <h1>CSS <code>light-dark()</code> 暗色模式切换函数</h1>
+
+  <!-- 演示 1：基础颜色切换 -->
+  <div class="demo-section">
+    <h2>1. 基础颜色切换 <span class="badge badge-green">核心功能</span></h2>
+    <p>直接使用 <code>light-dark(light-value, dark-value)</code> 在两种颜色间切换，无需媒体查询。</p>
+    <div class="color-swatches">
+      <div class="swatch swatch-text">亮色文本<br><small>#fff on #333</small></div>
+      <div class="swatch swatch-bg">暗色背景<br><small>#333 on #ddd</small></div>
+      <div class="swatch swatch-mixed">混合色<br><small>蓝调主题</small></div>
+      <div class="swatch swatch-accent">强调色<br><small>代码风格</small></div>
+    </div>
+    <div class="code-block">
+<span class="code-keyword">body</span> {
+  <span class="code-func">color</span>: <span class="code-func">light-dark</span>(<span class="code-string">#1a1a1a</span>, <span class="code-string">#f0f0f0</span>);
+  <span class="code-func">background-color</span>: <span class="code-func">light-dark</span>(<span class="code-string">#ffffff</span>, <span class="code-string">#121212</span>);
+}
+    </div>
+  </div>
+
+  <!-- 演示 2：卡片组件 -->
+  <div class="demo-section">
+    <h2>2. 卡片组件 <span class="badge badge-blue">实际应用</span></h2>
+    <p>在组件中使用 <code>light-dark()</code>，阴影和边框颜色也会自动适配。</p>
+    <div class="demo-grid">
+      <div class="card">
+        <div class="card__title">功能卡片</div>
+        <div class="card__desc">卡片描述文字，使用 light-dark() 自动适配主题</div>
+        <span class="card__badge">标签</span>
+      </div>
+      <div class="card">
+        <div class="card__title">另一个卡片</div>
+        <div class="card__desc">试试切换系统主题或点击右上角按钮</div>
+        <span class="card__badge">示例</span>
+      </div>
+      <div class="card">
+        <div class="card__title">卡片三</div>
+        <div class="card__desc">边框和阴影也会根据主题变化</div>
+        <span class="card__badge">阴影</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 演示 3：代码块 -->
+  <div class="demo-section">
+    <h2>3. 代码高亮 <span class="badge badge-blue">代码块</span></h2>
+    <p><code>light-dark()</code> 可用于代码语法高亮，确保在暗色主题下也有良好可读性。</p>
+    <div class="code-block">
+<span class="code-comment">/* 亮色主题下关键词是红色 */</span>
+<span class="code-keyword">@media</span> (<span class="code-func">prefers-color-scheme</span>: <span class="code-string">dark</span>) {
+  <span class="code-comment">/* 暗色主题下关键词是粉色 */</span>
+  <span class="code-keyword">.code-keyword</span> { <span class="code-func">color</span>: <span class="code-string">#f97583</span>; }
+}
+    </div>
+  </div>
+
+  <!-- 演示 4：按钮 -->
+  <div class="demo-section">
+    <h2>4. 按钮样式</h2>
+    <p>不同类型的按钮在明暗主题下的表现。</p>
+    <div class="btn-container">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-secondary">次要按钮</button>
+      <button class="btn btn-outline">描边按钮</button>
+    </div>
+    <div class="code-block" style="margin-top:16px;">
+<span class="code-func">background-color</span>: <span class="code-func">light-dark</span>(<span class="code-string">#007bff</span>, <span class="code-string">#4d9fff</span>);
+<span class="code-func">color</span>: <span class="code-func">light-dark</span>(<span class="code-string">#fff</span>, <span class="code-string">#121212</span>);
+    </div>
+  </div>
+
+  <!-- 演示 5：局部主题强制 -->
+  <div class="demo-section">
+    <h2>5. 局部主题强制 <span class="badge badge-orange">进阶用法</span></h2>
+    <p>通过设置 <code>color-scheme: light</code> 或 <code>color-scheme: dark</code>，可以强制某个区域使用特定主题，覆盖用户偏好。</p>
+    <div class="force-light">
+      <strong>强制浅色区域</strong>
+      <p>此区域始终显示浅色主题，即使系统是暗色模式。</p>
+      <span class="theme-override-text">红色文字（浅色下）/ 橙色文字（深色下）</span>
+    </div>
+    <div class="force-dark">
+      <strong>强制深色区域</strong>
+      <p>此区域始终显示深色主题，即使系统是浅色模式。</p>
+      <span class="theme-override-text">红色文字（浅色下）/ 橙色文字（深色下）</span>
+    </div>
+    <div class="info-box">
+      <strong>工作原理：</strong>父元素的 <code>color-scheme</code> 会影响子元素中 <code>light-dark()</code> 的返回值。
+    </div>
+  </div>
+
+  <!-- 演示 6：边框和阴影 -->
+  <div class="demo-section">
+    <h2>6. 边框和阴影适配</h2>
+    <p><code>light-dark()</code> 可以用在任何接受颜色的 CSS 属性上。</p>
+    <div class="shadow-demo">
+      <h3 style="margin-top:0; color:light-dark(#1a1a1a, #f0f0f0);">带阴影的卡片</h3>
+      <p style="color:light-dark(#666, #aaa);">这个卡片的阴影在浅色主题下较淡，在深色主题下较深，符合真实世界的光照感知。</p>
+    </div>
+    <div class="code-block" style="margin-top:16px;">
+<span class="code-func">box-shadow</span>: <span class="code-func">light-dark</span>(
+  <span class="code-string">0 4px 16px rgba(0, 0, 0, 0.1)</span>,
+  <span class="code-string">0 4px 16px rgba(0, 0, 0, 0.5)</span>
+);
+    </div>
+  </div>
+
+  <!-- 演示 7：表单元素 -->
+  <div class="demo-section">
+    <h2>7. 表单元素</h2>
+    <p>输入框、标签等表单元素也能优雅地适配主题。</p>
+    <div class="form-demo">
+      <div class="form-group">
+        <label class="form-label">用户名</label>
+        <input type="text" class="form-input" placeholder="输入用户名">
+      </div>
+      <div class="form-group">
+        <label class="form-label">邮箱</label>
+        <input type="email" class="form-input" placeholder="输入邮箱">
+      </div>
+      <button class="btn btn-primary" style="width:100%;">提交</button>
+    </div>
+  </div>
+
+  <!-- 工作原理说明 -->
+  <div class="demo-section">
+    <h2>8. 与 prefers-color-scheme 对比</h2>
+    <p>传统方式需要写多行媒体查询，而 <code>light-dark()</code> 一行搞定。</p>
+    <div class="code-block">
+<span class="code-comment">/* 传统方式：需要 @media 块 */</span>
+<span class="code-keyword">@media</span> (<span class="code-func">prefers-color-scheme</span>: <span class="code-string">light</span>) {
+  <span class="code-keyword">body</span> { <span class="code-func">background</span>: <span class="code-string">#fff</span>; }
+}
+<span class="code-keyword">@media</span> (<span class="code-func">prefers-color-scheme</span>: <span class="code-string">dark</span>) {
+  <span class="code-keyword">body</span> { <span class="code-func">background</span>: <span class="code-string">#121212</span>; }
+}
+
+<span class="code-comment">/* light-dark() 方式：单行表达 */</span>
+<span class="code-keyword">body</span> { <span class="code-func">background</span>: <span class="code-func">light-dark</span>(<span class="code-string">#fff</span>, <span class="code-string">#121212</span>); }
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>兼容性提示：</strong><code>light-dark()</code> 从 2024 年 5 月起获得 Baseline 支持。
+    如需支持旧版浏览器，请使用 <code>@media (prefers-color-scheme)</code> 作为降级方案。
+  </div>
+
+  <script>
+    function setColorScheme(scheme) {
+      document.documentElement.style.colorScheme = scheme;
+      // 更新按钮状态
+      document.querySelectorAll('.theme-switcher button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent === (
+          scheme === 'light dark' ? '自动' :
+          scheme === 'light' ? '浅色' : '深色'
+        )) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // 初始化按钮状态
+    setColorScheme('light dark');
+  </script>
+</body>
+</html>
