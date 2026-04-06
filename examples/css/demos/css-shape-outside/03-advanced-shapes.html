@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shape-outside 案例三：高级用法</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .demo-section {
+      max-width: 900px;
+      margin: 0 auto 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+      color: #a8dadc;
+      font-weight: 400;
+    }
+
+    /* 双图对称环绕 */
+    .wrap-container {
+      display: flow-root;
+    }
+
+    .left-circle {
+      float: left;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      shape-outside: circle(50% at 50% 50%);
+      shape-margin: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .right-circle {
+      float: right;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      shape-outside: circle(50% at 50% 50%);
+      shape-margin: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 复杂多边形 - 心形近似 */
+    .heart-shape {
+      float: left;
+      width: 180px;
+      height: 160px;
+      shape-outside: polygon(
+        50% 5%, 58% 15%, 65% 8%, 75% 18%, 82% 15%,
+        90% 28%, 88% 40%, 80% 52%, 50% 80%,
+        20% 52%, 12% 40%, 10% 28%,
+        18% 15%, 25% 18%, 35% 8%, 42% 15%
+      );
+      shape-margin: 20px;
+    }
+
+    /* 纯色心形背景 */
+    .heart-bg {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      clip-path: polygon(
+        50% 5%, 58% 15%, 65% 8%, 75% 18%, 82% 15%,
+        90% 28%, 88% 40%, 80% 52%, 50% 80%,
+        20% 52%, 12% 40%, 10% 28%,
+        18% 15%, 25% 18%, 35% 8%, 42% 15%
+      );
+    }
+
+    .text-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: justify;
+    }
+
+    .text-content p {
+      margin-bottom: 15px;
+    }
+
+    /* 带 shape-margin 对比 */
+    .compare-container {
+      display: flow-root;
+      margin-bottom: 30px;
+    }
+
+    .small-circle {
+      float: left;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+      shape-outside: circle(50%);
+    }
+
+    .small-circle-margin {
+      float: right;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      shape-outside: circle(50%);
+      shape-margin: 30px;
+    }
+
+    .code-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .label {
+      display: inline-block;
+      background: rgba(167, 139, 250, 0.3);
+      color: #e0e7ff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>shape-outside 案例三：高级用法</h1>
+
+  <div class="demo-section">
+    <span class="label">对比展示</span>
+    <h2>shape-margin 间距对比</h2>
+    <div class="compare-container">
+      <div class="small-circle"></div>
+      <div class="text-content">
+        <p>无 shape-margin：文字紧贴着圆形边缘流动。圆形排版效果本身已经比矩形柔和很多，但文字与图片之间没有额外的呼吸空间。</p>
+        <p>在某些场景下，紧贴的设计可以最大化利用空间，适合内容密集型的页面。</p>
+      </div>
+    </div>
+    <div class="compare-container">
+      <div class="small-circle-margin"></div>
+      <div class="text-content">
+        <p>有 shape-margin: 30px：文字与圆形之间保持 30px 的间距。这个间距让排版更加透气，也给了文字呼吸的空间。</p>
+        <p>shape-margin 会在 shape-outside 定义的形状外围增加指定的空白距离。</p>
+        <p>适合标题区域、重点内容展示等需要强调留白的场景。</p>
+      </div>
+    </div>
+    <div class="code-box">/* 无间距 */
+.shape-no-margin {
+  shape-outside: circle(50%);
+}
+
+/* 有间距 */
+.shape-with-margin {
+  shape-outside: circle(50%);
+  shape-margin: 30px;
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">对称排版</span>
+    <h2>双图对称环绕</h2>
+    <div class="wrap-container">
+      <img
+        class="left-circle"
+        src="https://picsum.photos/seed/left1/240/240"
+        alt="左侧圆形"
+      >
+      <img
+        class="right-circle"
+        src="https://picsum.photos/seed/right1/240/240"
+        alt="右侧圆形"
+      >
+      <div class="text-content">
+        <p>左右两侧各放置一个圆形头像，中间区域让文字自由流动。这是一种经典的双栏对称排版方式。</p>
+        <p>文字从顶部开始，先绕过左侧圆形，流到中间后绕过右侧圆形，最后在底部汇合。</p>
+        <p>这种排版常见于访谈类文章、人物介绍页面。两侧的图片形成视觉锚点，中间的文字内容流畅自然。</p>
+        <p>配合不同的 shape-outside 值（圆形、椭圆、多边形），可以创造出丰富多样的对称排版效果。</p>
+      </div>
+    </div>
+    <div class="code-box">.left-circle {
+  float: left;
+  shape-outside: circle(50% at 50% 50%);
+  shape-margin: 20px;
+}
+
+.right-circle {
+  float: right;
+  shape-outside: circle(50% at 50% 50%);
+  shape-margin: 20px;
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">复杂形状</span>
+    <h2>心形文字环绕</h2>
+    <div class="wrap-container">
+      <div class="heart-shape">
+        <div class="heart-bg"></div>
+      </div>
+      <div class="text-content">
+        <p>使用多边形可以创建任意复杂形状的文字环绕效果。心形是一种广受欢迎的图形，常用于爱情、浪漫主题的页面。</p>
+        <p>定义心形需要 16 个顶点，按照逆时针或顺时针方向依次连接。顶点数越多，心形越精细。</p>
+        <p>实际应用中，心形常用 <code>clip-path</code> 配合渐变背景或图片来呈现，文字则通过 <code>shape-outside</code> 围绕心形流动。</p>
+        <p>这种效果适合情人节专题、婚礼请柬、个人博客等浪漫主题网站。</p>
+        <p>注意：polygon 顶点数越多，浏览器计算量越大，如需高性能可考虑简化为更少顶点的近似心形。</p>
+      </div>
+    </div>
+    <div class="code-box">.heart-shape {
+  shape-outside: polygon(
+    50% 5%, 58% 15%, 65% 8%, 75% 18%, 82% 15%,
+    90% 28%, 88% 40%, 80% 52%, 50% 80%,
+    20% 52%, 12% 40%, 10% 28%,
+    18% 15%, 25% 18%, 35% 8%, 42% 15%
+  );
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">图片形状</span>
+    <h2>使用图片定义形状</h2>
+    <div class="wrap-container">
+      <div style="float: left; width: 200px; height: 150px; background: linear-gradient(135deg, #667eea, #764ba2); shape-outside: ellipse(35% 35% at 35% 55%) margin-box; shape-margin: 25px; border-radius: 50%;"></div>
+      <div class="text-content">
+        <p>使用 <code>url()</code> 函数可以引用图片的 Alpha 通道来定义形状。通过 <code>shape-image-threshold</code> 控制透明度阈值。</p>
+        <p>只有透明度超过阈值的像素才会形成文字排除区域。例如 <code>shape-image-threshold: 0.5</code> 表示透明度超过 50% 的区域才形成形状。</p>
+        <p>这种技术适合使用特殊形状的品牌图形，如公司 Logo、云朵、不规则徽章等。文字会围绕这些复杂形状精确流动。</p>
+        <p>配合 Shape Path Editor 等浏览器 DevTools 插件，可以实时预览和调整形状效果。</p>
+      </div>
+    </div>
+    <div class="code-box">/* 使用图片定义形状 */
+.shape-from-image {
+  shape-outside: url('cloud-shape.png');
+  shape-image-threshold: 0.5; /* 透明度 > 50% 形成形状 */
+  shape-margin: 25px;
+}</div>
+  </div>
+</body>
+</html>

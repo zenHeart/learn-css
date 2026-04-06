@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shape-outside 案例一：圆形头像文字环绕</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .demo-section {
+      max-width: 900px;
+      margin: 0 auto 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+      color: #a8dadc;
+      font-weight: 400;
+    }
+
+    /* 圆形头像 */
+    .avatar {
+      float: left;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      shape-outside: circle(50% at 50% 50%);
+      shape-margin: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .text-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: justify;
+    }
+
+    .text-content p {
+      margin-bottom: 15px;
+    }
+
+    /* 偏心圆 */
+    .avatar-offset {
+      float: left;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      shape-outside: circle(50% at 30% 50%);
+      shape-margin: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 椭圆头像 */
+    .avatar-ellipse {
+      float: left;
+      width: 180px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      shape-outside: ellipse(50% 50% at 50% 50%);
+      shape-margin: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .code-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .label {
+      display: inline-block;
+      background: rgba(167, 139, 250, 0.3);
+      color: #e0e7ff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>shape-outside 案例一：圆形头像文字环绕</h1>
+
+  <div class="demo-section">
+    <span class="label">基础用法</span>
+    <h2>圆形头像 + 文字环绕</h2>
+    <img
+      class="avatar"
+      src="https://picsum.photos/seed/avatar1/300/300"
+      alt="圆形头像"
+    >
+    <div class="text-content">
+      <p>这是一个常见的排版场景：用户头像为圆形，文章正文围绕头像流动。使用 <code>shape-outside: circle(50%)</code> 可以轻松实现这一效果。</p>
+      <p>文字会自然地绕过圆形头像，在其右侧和下方流动，而不是像普通浮动元素那样形成一个矩形排除区域。这使得整个排版更加自然、美观。</p>
+      <p>配合 <code>shape-margin</code> 可以增加文字与图片之间的间距，避免文字紧贴着圆形边缘。通过调整 <code>shape-margin</code> 的值，可以控制文字与图片的贴合程度。</p>
+    </div>
+    <div class="code-box">.avatar {
+  float: left;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  shape-outside: circle(50% at 50% 50%);
+  shape-margin: 20px;
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">偏心圆</span>
+    <h2>偏心圆形头像</h2>
+    <img
+      class="avatar-offset"
+      src="https://picsum.photos/seed/avatar2/300/300"
+      alt="偏心圆形头像"
+    >
+    <div class="text-content">
+      <p>通过调整圆心位置，可以创建偏心圆效果。<code>circle(50% at 30% 50%)</code> 将圆心设置在左侧 30% 的位置。</p>
+      <p>这种效果常用于引导文字流向，使图片在页面中占据更多视觉空间，同时文字仍然围绕圆形流动。</p>
+      <p>偏心圆在杂志排版中很常见，可以让图片"伸出"到页面边缘，而文字则巧妙地填充剩余空间。</p>
+    </div>
+    <div class="code-box">.avatar-offset {
+  shape-outside: circle(50% at 30% 50%);
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">椭圆形状</span>
+    <h2>椭圆头像</h2>
+    <img
+      class="avatar-ellipse"
+      src="https://picsum.photos/seed/avatar3/400/300"
+      alt="椭圆头像"
+    >
+    <div class="text-content">
+      <p>使用 <code>ellipse()</code> 可以创建椭圆形状。<code>ellipse(50% 50%)</code> 会创建一个填满整个元素的椭圆。</p>
+      <p>椭圆形状常用于宽银幕图片或全景图片的环绕排版。</p>
+      <p>椭圆的两个半径可以独立控制：第一个参数是 X 轴半径，第二个是 Y 轴半径。</p>
+    </div>
+    <div class="code-box">.avatar-ellipse {
+  width: 180px;
+  height: 120px;
+  shape-outside: ellipse(50% 50% at 50% 50%);
+}</div>
+  </div>
+</body>
+</html>
