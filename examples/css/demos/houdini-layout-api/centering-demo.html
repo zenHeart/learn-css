@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Layout API — 居中布局演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { border: 12px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+
+    /* Fallback visual for centering (no worklet) */
+    .centering-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 400px;
+      height: 300px;
+      border: 2px dashed #30363d;
+      border-radius: 8px;
+      position: relative;
+    }
+    .child-box {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Worklet would use these */
+    .worklet-container {
+      width: 400px;
+      height: 300px;
+      border: 2px dashed #58a6ff;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Layout API — 居中布局</h1>
+    <p class="subtitle">通过 registerLayout 注册居中布局算法，用 JS 完全控制子元素定位</p>
+
+    <div class="warning">
+      ⚠️ Layout API 需要在 Chrome/Edge 中开启实验性功能：<code>chrome://flags/#enable-experimental-web-platform-features</code>
+    </div>
+
+    <div class="section">
+      <h2>Worklet 实现</h2>
+      <div class="code-block">class CenteringLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const availableBlockSize = constraints.fixedBlockSize - edges.block;
+    const childFragments = [];
+
+    for (const child of children) {
+      const fragment = await child.layoutNextFragment({
+        availableInlineSize,
+        availableBlockSize
+      });
+
+      // 居中放置
+      fragment.inlineOffset = edges.inlineStart +
+        (availableInlineSize - fragment.inlineSize) / 2;
+      fragment.blockOffset = edges.blockStart +
+        (availableBlockSize - fragment.blockSize) / 2;
+
+      childFragments.push(fragment);
+    }
+
+    return { autoBlockSize: availableBlockSize, childFragments };
+  }
+}
+registerLayout('centering', CenteringLayout);</div>
+    </div>
+
+    <div class="section">
+      <h2>效果演示（Fallback — Flexbox 模拟）</h2>
+      <p style="font-size:13px;color:#8b949e;margin-bottom:12px;">
+        启用 Layout API 后，CSS 中使用 <code>display: layout(centering)</code> 即可实现相同效果
+      </p>
+      <div class="demo-area">
+        <div class="centering-container">
+          <div class="child-box">内容</div>
+        </div>
+      </div>
+      <div class="code-block">/* CSS 使用 */
+.center-container {
+  display: layout(centering);  /* 代替 flex 实现居中 */
+  width: 400px;
+  height: 300px;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>关键参数说明</h2>
+      <div class="info">
+        <strong>constraints.fixedInlineSize</strong>：容器宽度（类似 width）<br>
+        <strong>edges.inline</strong>：左右 padding + border + scrollbar 之和<br>
+        <strong>fragment.inlineOffset</strong>：子元素的 x 坐标<br>
+        <strong>fragment.blockOffset</strong>：子元素的 y 坐标
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Worklet 加载 -->
+  <script>
+    if ('layoutWorklet' in CSS) {
+      CSS.layoutWorklet.addModule('worklets/centering-layout.js').then(() => {
+        const container = document.createElement('div');
+        container.style.display = 'layout(centering)';
+        container.className = 'worklet-container';
+        const child = document.createElement('div');
+        child.className = 'child-box';
+        child.textContent = 'Worklet';
+        container.appendChild(child);
+        // 替换 fallback 演示
+        document.querySelector('.demo-area').appendChild(container);
+      }).catch(e => console.warn('Layout worklet failed:', e));
+    }
+  </script>
+</body>
+</html>
