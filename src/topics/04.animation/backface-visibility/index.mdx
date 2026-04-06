@@ -1,0 +1,196 @@
+# CSS backface-visibility
+
+## Overview
+
+The `backface-visibility` property determines whether the back face of an element is visible when turned toward the user. This property is essential for creating 3D card flip effects and other transformations where you need to control the visibility of an element's reverse side.
+
+## Values
+
+| Value | Description |
+|-------|-------------|
+| `visible` | Default. The back face is visible, showing a mirrored version of the front |
+| `hidden` | The back face is hidden, preventing it from being shown when rotated |
+
+## How It Works with 3D Transforms
+
+When you apply a 3D transform (like `rotateY(180deg)`) to an element, the element technically has two faces:
+
+- **Front face**: What you see initially
+- **Back face**: What would be visible if you rotated the element 180° on its axis
+
+By default (`visible`), the back face shows a mirror image of the front. Setting `backface-visibility: hidden` makes the back face transparent, allowing whatever is behind the element to show through.
+
+```css
+.card {
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+```
+
+## Common Use Case: Card Flip Animation
+
+The most common use case is creating flip cards with distinct front and back faces:
+
+```css
+.card-container {
+  perspective: 1000px;
+}
+
+.card-face {
+  backface-visibility: hidden;
+}
+
+.card-front {
+  /* Front face styling */
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  /* Back face styling */
+}
+```
+
+### Complete Example
+
+```html
+<div class="card-container">
+  <div class="card">
+    <div class="card-front">Front</div>
+    <div class="card-back">Back</div>
+  </div>
+</div>
+```
+
+```css
+.card-container {
+  width: 200px;
+  height: 260px;
+  perspective: 1000px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  transform: rotateY(180deg);
+}
+```
+
+## visibility: hidden vs backface-visibility: hidden
+
+These two properties seem similar but behave differently:
+
+| Property | Effect |
+|----------|--------|
+| `visibility: hidden` | Element is not rendered, takes up no space, removed from accessibility tree |
+| `backface-visibility: hidden` | Back face is hidden during 3D transforms; element still renders normally |
+
+```css
+/* This element is completely invisible and non-interactive */
+.invisible {
+  visibility: hidden;
+}
+
+/* This element's back face is hidden during transforms */
+.no-backface {
+  backface-visibility: hidden;
+}
+```
+
+**Key difference**: `visibility: hidden` affects the entire element at all times, while `backface-visibility` only affects the back face during 3D transformations.
+
+## When to Use It vs opacity
+
+Both can be used to hide elements, but they serve different purposes:
+
+| Scenario | Property | Reason |
+|----------|----------|--------|
+| 3D card flip | `backface-visibility: hidden` | Specifically designed for hiding the back of transformed elements |
+| Simple fade effects | `opacity` | Better performance, GPU-accelerated |
+| Hiding while preserving layout | `visibility: hidden` | Element takes up space but is invisible |
+| Accessibility (screen readers) | `visibility: hidden` | Removes from accessibility tree |
+
+### Performance Considerations
+
+- `backface-visibility: hidden` enables hardware acceleration in some browsers
+- `opacity` transitions are GPU-accelerated and very smooth
+- `visibility` changes can cause layout recalculations
+
+```css
+/* Prefer opacity for simple fades */
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.fade-in:hover {
+  opacity: 1;
+}
+
+/* Use backface-visibility for 3D flips */
+.flip-card {
+  transform: rotateY(0);
+  backface-visibility: hidden;
+}
+.flip-card.flipped {
+  transform: rotateY(180deg);
+}
+```
+
+## Browser Compatibility
+
+`backface-visibility` is supported in all modern browsers:
+
+| Browser | Version | Date |
+|---------|---------|------|
+| Chrome | 36+ | July 2015 |
+| Firefox | 16+ | October 2012 |
+| Safari | 9+ | September 2015 |
+| Edge | 12+ | July 2015 |
+| Opera | 23+ | August 2014 |
+
+### Prefixes
+
+For older browser versions, you may need vendor prefixes:
+
+```css
+.card {
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+```
+
+## Reference
+
+- [MDN: backface-visibility](https://developer.mozilla.org/en-US/docs/Web/CSS/backface-visibility)
+- [CSS Transforms Module Level 1](https://www.w3.org/TR/css-transforms-1/)
