@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS letter-spacing 响应式调整</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 24px; color: #f0f6fc; }
+    h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .demo-area {
+      background: #21262d;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+
+    .text-sample {
+      color: #e6edf3;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .control-btn {
+      padding: 6px 14px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active {
+      background: #388bfd33;
+      border-color: #58a6ff;
+      color: #58a6ff;
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      color: #79c0ff;
+      margin-top: 12px;
+      white-space: pre;
+    }
+
+    .info {
+      font-size: 12px;
+      color: #8b949e;
+      margin-top: 8px;
+      padding: 12px;
+      background: #0d1117;
+      border-radius: 4px;
+      line-height: 1.6;
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: #21262d;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .stat span { color: #58a6ff; font-weight: 600; }
+
+    .range-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .range-control label {
+      font-size: 12px;
+      color: #8b949e;
+      min-width: 80px;
+    }
+
+    .range-control input[type="range"] {
+      flex: 1;
+      accent-color: #58a6ff;
+    }
+
+    .range-control .value {
+      font-size: 12px;
+      color: #58a6ff;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .comparison-table th {
+      color: #8b949e;
+      font-weight: normal;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .comparison-table td { color: #c9d1d9; }
+    .comparison-table td span { color: #58a6ff; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS letter-spacing 响应式调整</h1>
+
+    <div class="section">
+      <h2>响应式 letter-spacing 原理</h2>
+      <p class="info" style="margin-bottom:16px;">
+        随着字体大小增加，字符间距自动收紧。使用 <strong>calc((1em - 1rem) / -10)</strong> 建立字号与间距的关联，<strong>clamp()</strong> 限定范围。
+      </p>
+      <div class="range-control">
+        <label>字号大小</label>
+        <input type="range" id="fontSizeSlider" min="12" max="72" value="16">
+        <span class="value" id="fontSizeValue">16px</span>
+      </div>
+      <div class="stats">
+        <div class="stat">字号: <span id="statFontSize">16</span>px</div>
+        <div class="stat">当前 letter-spacing: <span id="statLS">0em</span></div>
+        <div class="stat">效果: <span id="statEffect">正常间距</span></div>
+      </div>
+      <div class="demo-area">
+        <div class="text-sample" id="sampleText" style="font-size: 16px; letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);">
+          响应式 letter-spacing 示例文字
+        </div>
+      </div>
+      <div class="code-block" id="codeBlock">font-size: 16px;
+letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);</div>
+    </div>
+
+    <div class="section">
+      <h2>对比：固定间距 vs 响应式</h2>
+      <div class="controls">
+        <button class="control-btn active" data-mode="responsive">响应式</button>
+        <button class="control-btn" data-mode="fixed-tight">固定 -0.05em</button>
+        <button class="control-btn" data-mode="fixed-normal">固定 0em</button>
+      </div>
+      <div class="demo-area">
+        <div class="text-sample" id="compareText1" style="font-size: 12px;">
+          12px 字号对比
+        </div>
+        <div class="text-sample" id="compareText2" style="font-size: 24px;">
+          24px 字号对比
+        </div>
+        <div class="text-sample" id="compareText3" style="font-size: 48px;">
+          48px 字号对比
+        </div>
+      </div>
+      <div class="info" id="compareInfo">当前模式：响应式 — 字号越大，间距越紧</div>
+    </div>
+
+    <div class="section">
+      <h2>不同字号下的计算值</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>字号</th>
+            <th>计算公式</th>
+            <th>letter-spacing</th>
+            <th>效果</th>
+          </tr>
+        </thead>
+        <tbody id="calcTable">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>实际应用</h2>
+      <div class="controls" style="margin-bottom:12px;">
+        <button class="control-btn active" data-scope="all">全局 *</button>
+        <button class="control-btn" data-scope="headings">仅 h1-h3</button>
+        <button class="control-btn" data-scope="progress">progress() 函数</button>
+      </div>
+      <div class="demo-area" id="appDemo">
+        <p style="font-size:14px; margin-bottom:8px;">这是一段正文，14px</p>
+        <h1 id="appH1" style="font-size:48px; margin-bottom:8px;">大标题 48px</h1>
+        <h2 id="appH2" style="font-size:32px; margin-bottom:8px;">中等标题 32px</h2>
+        <h3 id="appH3" style="font-size:20px;">小标题 20px</h3>
+      </div>
+      <div class="code-block" id="appCode">* {
+  letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);
+}</div>
+    </div>
+  </div>
+
+  <script>
+    const responsive = (fontSize) => {
+      const rootSize = 16;
+      const diff = (fontSize - rootSize) / -10;
+      return Math.max(-0.05, Math.min(0, diff / 100));
+    };
+
+    const formatEm = (val) => {
+      if (val === 0) return '0em';
+      return val.toFixed(3) + 'em';
+    };
+
+    // Font size slider
+    const slider = document.getElementById('fontSizeSlider');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    const statFontSize = document.getElementById('statFontSize');
+    const statLS = document.getElementById('statLS');
+    const statEffect = document.getElementById('statEffect');
+    const sampleText = document.getElementById('sampleText');
+    const codeBlock = document.getElementById('codeBlock');
+
+    function updateSlider() {
+      const size = parseInt(slider.value);
+      fontSizeValue.textContent = size + 'px';
+      statFontSize.textContent = size;
+      sampleText.style.fontSize = size + 'px';
+
+      const ls = responsive(size);
+      statLS.textContent = formatEm(ls);
+
+      if (ls >= 0) statEffect.textContent = '正常间距';
+      else if (ls <= -0.05) statEffect.textContent = '最大收紧';
+      else statEffect.textContent = '轻微收紧';
+
+      codeBlock.textContent = `font-size: ${size}px;
+letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);
+/* 实际计算值: ${formatEm(ls)} */`;
+    }
+
+    slider.addEventListener('input', updateSlider);
+
+    // Comparison buttons
+    let compareMode = 'responsive';
+    const compareTexts = [
+      { el: document.getElementById('compareText1'), size: 12 },
+      { el: document.getElementById('compareText2'), size: 24 },
+      { el: document.getElementById('compareText3'), size: 48 }
+    ];
+
+    const lsMap = {
+      'responsive': () => responsive(t.size),
+      'fixed-tight': () => -0.05,
+      'fixed-normal': () => 0
+    };
+
+    const infoMap = {
+      'responsive': '当前模式：响应式 — 字号越大，间距越紧',
+      'fixed-tight': '当前模式：固定 -0.05em — 所有字号统一收紧',
+      'fixed-normal': '当前模式：固定 0em — 不做任何调整'
+    };
+
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        compareMode = btn.dataset.mode;
+        updateComparison();
+      });
+    });
+
+    function updateComparison() {
+      compareTexts.forEach(({ el, size }) => {
+        el.style.letterSpacing = formatEm(lsMap[compareMode]({ size })));
+      });
+      document.getElementById('compareInfo').textContent = infoMap[compareMode];
+    }
+
+    updateComparison();
+
+    // Calculation table
+    const tableBody = document.getElementById('calcTable');
+    const sizes = [12, 14, 16, 20, 24, 32, 48, 64, 72];
+    sizes.forEach(size => {
+      const diff = size - 16;
+      const raw = diff / -10 / 100;
+      const ls = Math.max(-0.05, Math.min(0, raw));
+      const effect = ls >= 0 ? '正常' : ls <= -0.05 ? '最大收紧' : '轻微收紧';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span>${size}px</span></td>
+        <td>(${size} - 16) / -1000</td>
+        <td><span>${formatEm(ls)}</span></td>
+        <td>${effect}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    // Application demo
+    const appRules = {
+      all: `* {
+  letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);
+}`,
+      headings: `h1, h2, h3 {
+  letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);
+}`,
+      progress: `* {
+  letter-spacing: calc(
+    progress(1em, 18px, 48px) * -0.05em
+  );
+  /* Chrome 115+ 实验性支持 */
+}`
+    };
+
+    let appScope = 'all';
+
+    document.querySelectorAll('[data-scope]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        appScope = btn.dataset.scope;
+        applyAppDemo();
+      });
+    });
+
+    function applyAppDemo() {
+      const els = {
+        p: { el: document.querySelector('#appDemo p'), size: 14 },
+        h1: { el: document.getElementById('appH1'), size: 48 },
+        h2: { el: document.getElementById('appH2'), size: 32 },
+        h3: { el: document.getElementById('appH3'), size: 20 }
+      };
+
+      Object.values(els).forEach(({ el, size }) => {
+        if (appScope === 'all') {
+          const ls = responsive(size);
+          el.style.letterSpacing = formatEm(ls);
+        } else if (appScope === 'headings') {
+          const ls = responsive(size);
+          el.style.letterSpacing = formatEm(ls);
+        } else if (appScope === 'progress') {
+          const ratio = Math.max(0, Math.min(1, (size - 18) / (48 - 18)));
+          el.style.letterSpacing = formatEm(-0.05 * ratio);
+        }
+      });
+
+      document.getElementById('appCode').textContent = appRules[appScope];
+    }
+
+    applyAppDemo();
+    updateSlider();
+  </script>
+</body>
+</html>

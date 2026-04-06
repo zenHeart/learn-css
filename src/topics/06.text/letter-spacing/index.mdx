@@ -1,0 +1,169 @@
+---
+title: CSS letter-spacing 响应式调整
+category: 文本与字体
+tags: [letter-spacing, clamp, calc, responsive, typography]
+description: 介绍如何使用 calc() 和 clamp() 实现响应式 letter-spacing，让字符间距随字体大小自动调整。
+keywords: letter-spacing, clamp, calc, 响应式, 字体间距, 排版, CSS
+---
+
+# CSS letter-spacing 响应式调整
+
+在大字号标题和小字号正文之间，固定的 letter-spacing 往往难以同时满足两者的阅读需求。响应式 letter-spacing 通过 CSS 的 `calc()` 和 `clamp()` 函数，让字符间距随字体大小自动调整。
+
+## 技术原理
+
+### 核心公式
+
+```css
+* {
+  letter-spacing: clamp(
+    -0.05em,                  /* 最小值：紧凑 */
+    calc((1em - 1rem) / -10), /* 动态计算值 */
+    0em                       /* 最大值：不收紧 */
+  );
+}
+```
+
+### 原理解析
+
+**1. `1em - 1rem`：字体大小增量**
+
+- `1em` 代表当前元素的字体大小
+- `1rem` 代表根元素（html）的字体大小
+- 两者相减，得到「当前字体比默认大多少」
+
+**2. `/ -10`：反向并减速**
+
+- 除以负数实现方向反转（字体越大，letter-spacing 越紧）
+- `-10` 控制变化速率，值越大变化越平缓
+
+**3. `clamp(min, val, max)`：限定范围**
+
+- 最小值 `-0.05em`：最多收紧 5% 的字体大小
+- 最大值 `0em`：不再收紧，保持自然间距
+
+### 效果示意
+
+| 字体大小 | letter-spacing（计算值） | 效果 |
+|---------|----------------------|------|
+| 12px    | 0em                  | 正常间距 |
+| 16px    | 0em                  | 正常间距 |
+| 24px    | -0.008em             | 轻微收紧 |
+| 48px    | -0.032em             | 明显收紧 |
+| 72px    | -0.05em（已达下限）   | 最大收紧 |
+
+## 与 font-size 的关系
+
+letter-spacing 的单位 `em` 是相对于**当前元素**的 font-size 计算的。这意味着：
+
+```css
+/* 绝对单位 px：不会随字体变化 */
+h1 { letter-spacing: 2px; }    /* 任何字号都是 2px */
+
+/* 相对单位 em：随当前字体大小缩放 */
+h1 { letter-spacing: 0.05em; } /* 72px 字体 = 3.6px 间距，16px 字体 = 0.8px 间距 */
+```
+
+响应式方案的关键在于：**用 `1em - 1rem` 建立字号与间距的关联**，使得字号越大，间距越紧。
+
+### 为什么不用媒体查询？
+
+传统做法是分断点切换固定值：
+
+```css
+/* 体验不连贯，断层感明显 */
+@media (min-width: 768px) {
+  h1 { letter-spacing: -0.02em; }
+}
+@media (min-width: 1200px) {
+  h1 { letter-spacing: -0.05em; }
+}
+```
+
+响应式方案用 clamp() 实现平滑过渡，无需断点。
+
+## 实际应用场景
+
+### 1. 全站统一响应式规则
+
+```css
+/* 全局生效，每个元素独立计算 */
+* {
+  letter-spacing: clamp(
+    -0.05em,
+    calc((1em - 1rem) / -10),
+    0em
+  );
+}
+```
+
+### 2. 仅对标题生效
+
+```css
+/* 更保守，仅对大号字体收紧 */
+h1, h2, h3 {
+  letter-spacing: clamp(
+    -0.03em,
+    calc((1em - 1rem) / -8),
+    0em
+  );
+}
+```
+
+### 3. 使用 progress() 函数（实验性）
+
+Chrome 115+ 支持 `progress()` 函数，逻辑更直观：
+
+```css
+* {
+  letter-spacing: calc(
+    progress(1em, 18px, 48px) * -0.05em
+  );
+}
+/*
+  18px 以下：0em
+  48px 以上：-0.05em
+  中间线性过渡
+*/
+```
+
+### 4. 精细调参示例
+
+```css
+:root {
+  --ls-min: -0.03em;   /* 最小间距 */
+  --ls-max: 0em;       /* 最大间距 */
+  --ls-rate: -12;      /* 变化速率 */
+}
+
+.heading {
+  letter-spacing: clamp(
+    var(--ls-min),
+    calc((1em - 1rem) / var(--ls-rate)),
+    var(--ls-max)
+  );
+}
+```
+
+## 注意事项
+
+1. **不要滥用**：letter-spacing 的改动可能破坏字体的原始字距（kerning），除非有明确的品牌或设计需求，否则建议仅对大型标题使用此技巧。
+
+2. **单位必须带 `em`**：clamp 的第三参数需要带单位，即使值为 0 也应写成 `0em`。
+
+3. **结合 `:where()` 降低优先级**：如果需要让后续规则更容易覆盖：
+
+   ```css
+   :where(*) {
+     letter-spacing: clamp(-0.05em, calc((1em - 1rem) / -10), 0em);
+   }
+   ```
+
+4. **测试不同语言**：非拉丁文字（中文、日文）的字符宽度和间距感知不同，响应式效果可能不符合预期。
+
+## 参考
+
+- [Responsive Letter Spacing – Cloud Four](https://cloudfour.com/thinks/responsive-letter-spacing/)
+- [MDN: letter-spacing](https://developer.mozilla.org/zh-CN/docs/Web/CSS/letter-spacing)
+- [MDN: clamp()](https://developer.mozilla.org/zh-CN/docs/Web/CSS/clamp)
+- [Can I use: progress() function](https://caniuse.com/wf-progress-function)
