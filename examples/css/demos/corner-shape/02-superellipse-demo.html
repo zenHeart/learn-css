@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS corner-shape superellipse() 函数</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .demo-area {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .controls {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px;
+      min-width: 300px;
+    }
+
+    .control-group {
+      margin-bottom: 24px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #333;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    }
+
+    .value-display {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #667eea;
+      margin-top: 8px;
+      font-family: monospace;
+    }
+
+    .preview-box {
+      width: 250px;
+      height: 250px;
+      border: 8px solid #667eea;
+      border-radius: 60px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4));
+      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+      transition: corner-shape 0.1s ease;
+    }
+
+    .shape-info {
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .shape-info h3 {
+      margin-bottom: 12px;
+      color: #667eea;
+    }
+
+    .shape-info p {
+      color: #888;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .keyword-equivalent {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #7ee787;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS corner-shape superellipse() 函数</h1>
+  <p class="subtitle">通过 K 值自定义角的曲率强度</p>
+
+  <div class="container">
+    <div class="demo-area">
+      <div class="controls">
+        <div class="control-group">
+          <label>superellipse K 值（-5 ~ 5）</label>
+          <input type="range" id="kSlider" min="-5" max="5" step="0.1" value="1">
+          <div class="value-display" id="kValue">superellipse(1)</div>
+        </div>
+
+        <div class="control-group">
+          <label>border-radius（0 ~ 100px）</label>
+          <input type="range" id="radiusSlider" min="0" max="100" step="1" value="60">
+          <div class="value-display" id="radiusValue">60px</div>
+        </div>
+      </div>
+
+      <div class="preview-box" id="previewBox"></div>
+    </div>
+
+    <div class="shape-info">
+      <h3>K 值说明</h3>
+      <p>
+        K = 1：标准圆角（等同于 <span class="keyword-equivalent">round</span>）<br>
+        K > 1：更接近矩形，值越大越像正方形（2 约等于 <span class="keyword-equivalent">squircle</span>）<br>
+        K = 0：斜面效果（等同于 <span class="keyword-equivalent">bevel</span>）<br>
+        K < 0：内凹形状，值越小凹得越深<br>
+        K = -1：勺形效果（等同于 <span class="keyword-equivalent">scoop</span>）<br>
+        K → -∞：凹口效果（等同于 <span class="keyword-equivalent">notch</span>）<br>
+        K → +∞：正方形（等同于 <span class="keyword-equivalent">square</span>）
+      </p>
+    </div>
+
+    <p class="info">需要 Chrome 139+ 版本才能看到效果</p>
+  </div>
+
+  <script>
+    const kSlider = document.getElementById('kSlider');
+    const radiusSlider = document.getElementById('radiusSlider');
+    const kValue = document.getElementById('kValue');
+    const radiusValue = document.getElementById('radiusValue');
+    const previewBox = document.getElementById('previewBox');
+
+    function updatePreview() {
+      const k = parseFloat(kSlider.value);
+      const radius = parseInt(radiusSlider.value);
+
+      // 显示 K 值
+      if (k === parseInt(k)) {
+        kValue.textContent = `superellipse(${k})`;
+      } else {
+        kValue.textContent = `superellipse(${k.toFixed(1)})`;
+      }
+
+      radiusValue.textContent = `${radius}px`;
+
+      // 更新预览框
+      previewBox.style.borderRadius = `${radius}px`;
+      previewBox.style.cornerShape = `superellipse(${k})`;
+    }
+
+    kSlider.addEventListener('input', updatePreview);
+    radiusSlider.addEventListener('input', updatePreview);
+
+    // 初始化
+    updatePreview();
+  </script>
+</body>
+</html>

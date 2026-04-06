@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS corner-shape 实战案例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 40px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 卡片网格 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    /* 基础卡片样式 */
+    .card {
+      border-radius: 24px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h3 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    .card p {
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* 案例1: 现代卡片 - scoop 效果 */
+    .card-scoop {
+      corner-shape: scoop;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+
+    .card-scoop h3 {
+      color: #fff;
+    }
+
+    .card-scoop p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* 案例2: 玻璃态卡片 - squircle 效果 */
+    .card-glass {
+      corner-shape: squircle;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .card-glass h3 {
+      color: #667eea;
+    }
+
+    /* 案例3: 深色卡片 - notch 效果 */
+    .card-notch {
+      corner-shape: notch;
+      background: linear-gradient(180deg, #2d2d44 0%, #1a1a2e 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .card-notch h3 {
+      color: #667eea;
+    }
+
+    /* 案例4: 混合角形状 */
+    .card-mixed {
+      border-radius: 30px;
+      corner-top-left-shape: scoop;
+      corner-top-right-shape: round;
+      corner-bottom-left-shape: round;
+      corner-bottom-right-shape: notch;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+      border: 2px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .card-mixed h3 {
+      color: #667eea;
+    }
+
+    /* 对话气泡示例 */
+    .bubble-section {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+
+    .bubble-section h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    .bubble-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .bubble {
+      padding: 16px 24px;
+      border-radius: 20px;
+      max-width: 80%;
+      line-height: 1.5;
+    }
+
+    .bubble-left {
+      align-self: flex-start;
+      border-radius: 20px 20px 20px 4px;
+      background: #444;
+      color: #fff;
+    }
+
+    .bubble-right {
+      align-self: flex-end;
+      border-radius: 20px 20px 4px 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+
+    /* 按钮示例 */
+    .buttons-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .buttons-section h2 {
+      margin-bottom: 30px;
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #fff;
+    }
+
+    .btn-round {
+      corner-shape: round;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .btn-scoop {
+      corner-shape: scoop;
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    .btn-squircle {
+      corner-shape: squircle;
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    }
+
+    .btn-bevel {
+      corner-shape: bevel;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      color: #333;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 30px auto;
+      max-width: 600px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.85rem;
+      color: #7ee787;
+      overflow-x: auto;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS corner-shape 实战案例</h1>
+  <p class="subtitle">现代 UI 设计中的实际应用场景</p>
+
+  <div class="container">
+    <!-- 卡片案例 -->
+    <div class="cards-grid">
+      <div class="card card-scoop">
+        <h3>💿 Scoop 卡片</h3>
+        <p>使用 scoop 效果创建的独特卡片，内凹的边角带来现代感十足的设计风格，适合特色卡片展示。</p>
+      </div>
+
+      <div class="card card-glass">
+        <h3>🔮 玻璃态卡片</h3>
+        <p>配合 backdrop-filter 实现的玻璃态效果，squircle 提供平滑的边缘过渡，整体更加柔和自然。</p>
+      </div>
+
+      <div class="card card-notch">
+        <h3>🔲 Notch 卡片</h3>
+        <p>使用 notch 创造的凹口效果，可以用于显示特殊标记或徽章，为卡片增添独特的视觉层次。</p>
+      </div>
+
+      <div class="card card-mixed">
+        <h3>🎨 混合角形状</h3>
+        <p>四个角分别设置不同的形状，创造出不对称的视觉效果，可用于创建特殊指向或装饰效果。</p>
+      </div>
+    </div>
+
+    <!-- 对话气泡 -->
+    <div class="bubble-section">
+      <h2>💬 对话气泡</h2>
+      <div class="bubble-container">
+        <div class="bubble bubble-left">
+          你好！请问 corner-shape 怎么使用？
+        </div>
+        <div class="bubble bubble-right">
+          需要配合 border-radius 一起使用！
+        </div>
+        <div class="bubble bubble-left">
+          原来如此，太酷了！
+        </div>
+      </div>
+      <div class="code-block">
+        .bubble-left { border-radius: 20px 20px 20px 4px; }<br>
+        .bubble-right { border-radius: 20px 20px 4px 20px; }
+      </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="buttons-section">
+      <h2>🔘 按钮样式</h2>
+      <div class="button-container">
+        <button class="btn btn-round">Round 按钮</button>
+        <button class="btn btn-scoop">Scoop 按钮</button>
+        <button class="btn btn-squircle">Squircle 按钮</button>
+        <button class="btn btn-bevel">Bevel 按钮</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="info">需要 Chrome 139+ 版本才能看到效果</p>
+</body>
+</html>
