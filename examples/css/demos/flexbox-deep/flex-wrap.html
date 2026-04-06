@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox flex-wrap 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 120px; display: flex; gap: 8px; }
+    .demo-item { width: 100px; height: 60px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 14px; flex-shrink: 1; }
+    .demo-item.small { background: linear-gradient(135deg, #3fb950, #238636); }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .compare-box { background: #21262d; border-radius: 6px; padding: 12px; }
+    .compare-box h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 flex-wrap 换行控制</h1>
+
+    <div class="section">
+      <h2>flex-wrap 三种模式</h2>
+      <div class="controls">
+        <button class="control-btn active" data-wrap="nowrap">nowrap (默认)</button>
+        <button class="control-btn" data-wrap="wrap">wrap</button>
+        <button class="control-btn" data-wrap="wrap-reverse">wrap-reverse</button>
+      </div>
+      <div class="demo-area" id="demo" style="flex-wrap: nowrap; width: 400px;">
+        <div class="demo-item">item1</div>
+        <div class="demo-item">item2</div>
+        <div class="demo-item">item3</div>
+        <div class="demo-item">item4</div>
+        <div class="demo-item">item5</div>
+        <div class="demo-item">item6</div>
+      </div>
+      <div class="code-block">flex-wrap: nowrap;</div>
+      <div class="info">💡 <strong>nowrap</strong>：不换行，items 会被压缩以适应单行<br>
+      <strong>wrap</strong>：多行，换行方向与交叉轴一致<br>
+      <strong>wrap-reverse</strong>：多行，换行方向与交叉轴相反</div>
+    </div>
+
+    <div class="section">
+      <h2>换行 vs 不换行对比</h2>
+      <div class="comparison">
+        <div class="compare-box">
+          <h4>flex-wrap: nowrap（默认）</h4>
+          <div style="background:#0d1117; border-radius:6px; padding:12px; display:flex; flex-wrap:nowrap; width:300px; gap:8px;">
+            <div style="width:80px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:1;">80px</div>
+            <div style="width:80px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:1;">80px</div>
+            <div style="width:80px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:1;">80px</div>
+            <div style="width:80px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:1;">80px</div>
+            <div style="width:80px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:1;">80px</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">⚠️ 5×80px = 400px，超出容器宽度，items 被压缩</div>
+        </div>
+        <div class="compare-box">
+          <h4>flex-wrap: wrap</h4>
+          <div style="background:#0d1117; border-radius:6px; padding:12px; display:flex; flex-wrap:wrap; width:300px; gap:8px;">
+            <div style="width:80px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">80px</div>
+            <div style="width:80px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">80px</div>
+            <div style="width:80px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">80px</div>
+            <div style="width:80px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">80px</div>
+            <div style="width:80px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">80px</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">✅ 5×80px = 400px，第三行溢出后自动换行，保持原始尺寸</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>flex-flow 简写</h2>
+      <div class="info">flex-flow 是 flex-direction 和 flex-wrap 的简写：<br><br>
+      <code style="color:#79c0ff;">.container { flex-flow: &lt;flex-direction&gt; &lt;flex-wrap&gt;; }</code><br><br>
+      示例：<br>
+      <code style="color:#79c0ff;">flex-flow: row wrap;</code> = flex-direction: row + flex-wrap: wrap<br>
+      <code style="color:#79c0ff;">flex-flow: column nowrap;</code> = flex-direction: column + flex-wrap: nowrap</div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const wrap = btn.dataset.wrap;
+        document.getElementById('demo').style.flexWrap = wrap;
+        document.querySelector('.code-block').textContent = `flex-wrap: ${wrap};`;
+      });
+    });
+  </script>
+</body>
+</html>
