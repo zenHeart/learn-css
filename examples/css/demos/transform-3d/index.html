@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 3D Transform 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 180px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; position: relative; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-bottom: 12px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+
+    /* --- rotate3d Demo --- */
+    .rotate-demo-scene { perspective: 500px; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+    .rotate-demo-box { width: 120px; height: 120px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; transition: transform 0.3s; }
+
+    /* --- 2D vs 3D comparison --- */
+    .compare-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
+    .compare-item { background: #0d1117; border-radius: 4px; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+    .compare-item h4 { font-size: 14px; color: #f0f6fc; margin-bottom: 12px; }
+    .compare-item p { font-size: 12px; color: #8b949e; margin-top: 8px; text-align: center; }
+    .compare-box { width: 80px; height: 80px; background: #a371f7; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+
+    /* --- 3D Cube --- */
+    .cube-scene { perspective: 600px; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+    .cube-wrapper { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; animation: cubeRotate 8s linear infinite; }
+    .cube-face { position: absolute; width: 100px; height: 100px; border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; backface-visibility: visible; }
+    .cube-face.front  { background: rgba(59, 130, 246, 0.7); transform: translateZ(50px); }
+    .cube-face.back   { background: rgba(139, 92, 246, 0.7); transform: rotateY(180deg) translateZ(50px); }
+    .cube-face.left   { background: rgba(16, 185, 129, 0.7); transform: rotateY(-90deg) translateZ(50px); }
+    .cube-face.right  { background: rgba(245, 158, 11, 0.7); transform: rotateY(90deg) translateZ(50px); }
+    .cube-face.top    { background: rgba(239, 68, 68, 0.7); transform: rotateX(90deg) translateZ(50px); }
+    .cube-face.bottom { background: rgba(236, 72, 153, 0.7); transform: rotateX(-90deg) translateZ(50px); }
+    @keyframes cubeRotate {
+      0%   { transform: rotateX(0deg) rotateY(0deg); }
+      100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    /* --- 3D Card Flip --- */
+    .card-scene { perspective: 1000px; width: 160px; height: 220px; cursor: pointer; }
+    .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; }
+    .card-scene:hover .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back { position: absolute; width: 100%; height: 100%; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; backface-visibility: hidden; color: white; }
+    .card-front { background: linear-gradient(135deg, #3b82f6, #8b5cf6); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); }
+    .card-back { background: linear-gradient(135deg, #8b5cf6, #ec4899); transform: rotateY(180deg); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .card-sub { font-size: 11px; opacity: 0.8; }
+    .card-hint { font-size: 11px; color: #6e7681; margin-top: 8px; text-align: center; }
+
+    /* --- Axis Sliders --- */
+    .slider-group { display: grid; grid-template-columns: 80px 1fr 50px; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .slider-label { font-size: 12px; color: #8b949e; }
+    input[type="range"] { width: 100%; background: #30363d; height: 4px; border-radius: 2px; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
+    .slider-value { font-size: 12px; color: #58a6ff; text-align: right; font-family: monospace; }
+    .slider-row { margin-bottom: 6px; }
+    .slider-row label { font-size: 12px; color: #8b949e; display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>CSS 3D Transform 交互演示</h1>
+  <p class="subtitle">涵盖 rotate3d、scale3d、translate3d、perspective 及常用 3D 效果</p>
+
+  <!-- rotate3d 可调轴向演示 -->
+  <div class="section">
+    <h2>rotate3d — 绕任意轴旋转</h2>
+    <p class="desc">调整 x、y、z 三个轴的分量，观察元素如何绕任意方向向量旋转。angle 决定旋转角度。</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+      <div>
+        <div class="slider-row">
+          <label>X 轴分量: <span id="xVal">1</span></label>
+          <input type="range" id="xAxis" min="-2" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-row">
+          <label>Y 轴分量: <span id="yVal">0</span></label>
+          <input type="range" id="yAxis" min="-2" max="2" step="0.1" value="0">
+        </div>
+        <div class="slider-row">
+          <label>Z 轴分量: <span id="zVal">0</span></label>
+          <input type="range" id="zAxis" min="-2" max="2" step="0.1" value="0">
+        </div>
+        <div class="slider-row">
+          <label>角度: <span id="angleVal">45</span>deg</label>
+          <input type="range" id="angle" min="0" max="360" step="1" value="45">
+        </div>
+        <div style="margin-top: 12px;">
+          <button class="btn" onclick="resetRotate()">重置</button>
+          <button class="btn" id="autoRotateBtn" onclick="toggleAuto()">自动旋转</button>
+        </div>
+        <div class="code-block" id="codeOut">transform: rotate3d(1, 0, 0, 45deg);</div>
+      </div>
+      <div class="demo-area" style="flex-direction: column; align-items: center; justify-content: center;">
+        <div class="rotate-demo-scene">
+          <div class="rotate-demo-box" id="rotateBox">旋转元素</div>
+        </div>
+        <p class="desc" style="margin-top:8px;">拖动滑块调整旋转轴和角度</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2D vs 3D 对比 -->
+  <div class="section">
+    <h2>2D vs 3D Transform 对比</h2>
+    <p class="desc">相同的 rotate 值在 2D（rotate）和 3D（rotateY）下的视觉效果差异。注意 2D rotate 仅在平面内旋转，3D rotateY 产生纵深感。</p>
+    <div class="demo-area">
+      <div class="compare-wrapper">
+        <div class="compare-item">
+          <h4><span class="tag">2D</span> rotate(45deg)</h4>
+          <div class="compare-box" id="compare2d">2D</div>
+          <p>元素在 xOy 平面内顺时针旋转 45°，没有纵深变化</p>
+        </div>
+        <div class="compare-item">
+          <h4><span class="tag green">3D</span> rotateY(45deg)</h4>
+          <div style="perspective: 400px;">
+            <div class="compare-box" id="compare3d">3D</div>
+          </div>
+          <p>绕 Y 轴旋转，元素产生纵深感，右半部看起来更近</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+      <button class="btn" onclick="setAngle(0)">0°</button>
+      <button class="btn" onclick="setAngle(45)">45°</button>
+      <button class="btn active" onclick="setAngle(60)">60°</button>
+      <button class="btn" onclick="setAngle(90)">90°</button>
+      <button class="btn" onclick="setAngle(180)">180°</button>
+    </div>
+  </div>
+
+  <!-- 3D 立方体 -->
+  <div class="section">
+    <h2>3D 立方体</h2>
+    <p class="desc">使用 transform-style: preserve-3d + 六个面的精确定位 + rotateX/rotateY 构建的自动旋转立方体。</p>
+    <div class="demo-area">
+      <div class="cube-scene">
+        <div class="cube-wrapper" id="cubeWrap">
+          <div class="cube-face front">前</div>
+          <div class="cube-face back">后</div>
+          <div class="cube-face left">左</div>
+          <div class="cube-face right">右</div>
+          <div class="cube-face top">上</div>
+          <div class="cube-face bottom">下</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+      <button class="btn" onclick="setCubeSpeed(0)">暂停</button>
+      <button class="btn" onclick="setCubeSpeed(4)">慢速</button>
+      <button class="btn active" onclick="setCubeSpeed(8)">中速</button>
+      <button class="btn" onclick="setCubeSpeed(16)">快速</button>
+    </div>
+  </div>
+
+  <!-- 3D 卡片翻转 -->
+  <div class="section">
+    <h2>3D 卡片翻转（hover 触发）</h2>
+    <p class="desc">hover 时 rotateY(180deg) 配合 backface-visibility: hidden 实现正反面切换。</p>
+    <div class="demo-area">
+      <div class="card-scene">
+        <div class="card-inner">
+          <div class="card-front">
+            <div class="card-title">前端工程师</div>
+            <div class="card-sub">React / Vue / Node</div>
+          </div>
+          <div class="card-back">
+            <div class="card-title">5 年+</div>
+            <div class="card-sub">全栈开发经验</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="card-hint">👆 鼠标悬停在卡片上查看翻转效果</p>
+  </div>
+
+  <!-- perspective 深度对比 -->
+  <div class="section">
+    <h2>perspective 深度对比</h2>
+    <p class="desc">相同的 rotateX(60deg)，在不同 perspective 值下的视觉效果。perspective 越小，透视越强烈（广角感）。</p>
+    <div class="demo-area" style="flex-direction: column; gap: 24px;">
+      <div style="display: flex; gap: 32px; flex-wrap: wrap; justify-content: center;">
+        <div style="text-align: center;">
+          <p style="font-size:12px; color:#8b949e; margin-bottom: 8px;">perspective: 200px</p>
+          <div style="perspective: 200px;">
+            <div class="compare-box" style="transform: rotateX(60deg); background:#3b82f6;">&nbsp;</div>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <p style="font-size:12px; color:#8b949e; margin-bottom: 8px;">perspective: 500px</p>
+          <div style="perspective: 500px;">
+            <div class="compare-box" style="transform: rotateX(60deg); background:#3b82f6;">&nbsp;</div>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <p style="font-size:12px; color:#8b949e; margin-bottom: 8px;">perspective: 1000px</p>
+          <div style="perspective: 1000px;">
+            <div class="compare-box" style="transform: rotateX(60deg); background:#3b82f6;">&nbsp;</div>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <p style="font-size:12px; color:#8b949e; margin-bottom: 8px;">无 perspective</p>
+          <div>
+            <div class="compare-box" style="transform: rotateX(60deg); background:#3b82f6; opacity: 0.5;">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- translateZ 效果 -->
+  <div class="section">
+    <h2>translateZ — 纵深移动</h2>
+    <p class="desc">translateZ 正值使元素远离观察者（放大），负值使其靠近（缩小）。需配合 perspective 使用才可见效果。</p>
+    <div class="demo-area">
+      <div style="display:flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: translateZ(-80px); background:#3b82f6; margin-bottom:4px;">-80px</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">远离（缩小）</p>
+        </div>
+        <div style="text-align: center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: translateZ(0); background:#3b82f6; margin-bottom:4px;">0</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">原始位置</p>
+        </div>
+        <div style="text-align: center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: translateZ(80px); background:#3b82f6; margin-bottom:4px;">+80px</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">靠近（放大）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- scale3d -->
+  <div class="section">
+    <h2>scale3d — 3D 缩放</h2>
+    <p class="desc">scale3d(sx, sy, sz) 同时在三个轴向上缩放。scaleZ 需要元素有厚度或在 3D 上下文中才明显。</p>
+    <div class="demo-area">
+      <div style="display:flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center;">
+        <div style="text-align:center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: scale3d(1.5, 1, 1); background:#a371f7; margin-bottom:4px;">sx=1.5</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">x 方向放大</p>
+        </div>
+        <div style="text-align:center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: scale3d(1, 0.6, 1); background:#a371f7; margin-bottom:4px;">sy=0.6</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">y 方向压缩</p>
+        </div>
+        <div style="text-align:center;">
+          <div style="perspective: 400px;">
+            <div class="compare-box" style="transform: scale3d(1, 1, 2); background:#a371f7; margin-bottom:4px;">sz=2</div>
+          </div>
+          <p style="font-size:11px; color:#8b949e;">z 方向放大（厚度）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // --- rotate3d sliders ---
+  const xAxis = document.getElementById('xAxis');
+  const yAxis = document.getElementById('yAxis');
+  const zAxis = document.getElementById('zAxis');
+  const angleEl = document.getElementById('angle');
+  const rotateBox = document.getElementById('rotateBox');
+  const codeOut = document.getElementById('codeOut');
+
+  let autoRotating = false;
+  let autoAngle = 0;
+  let autoTimer = null;
+
+  function updateRotate() {
+    const x = parseFloat(xAxis.value);
+    const y = parseFloat(yAxis.value);
+    const z = parseFloat(zAxis.value);
+    const a = parseFloat(angleEl.value);
+    document.getElementById('xVal').textContent = x.toFixed(1);
+    document.getElementById('yVal').textContent = y.toFixed(1);
+    document.getElementById('zVal').textContent = z.toFixed(1);
+    document.getElementById('angleVal').textContent = Math.round(a);
+    rotateBox.style.transform = `rotate3d(${x}, ${y}, ${z}, ${a}deg)`;
+    codeOut.textContent = `transform: rotate3d(${x.toFixed(1)}, ${y.toFixed(1)}, ${z.toFixed(1)}, ${Math.round(a)}deg);`;
+  }
+
+  xAxis.addEventListener('input', updateRotate);
+  yAxis.addEventListener('input', updateRotate);
+  zAxis.addEventListener('input', updateRotate);
+  angleEl.addEventListener('input', updateRotate);
+
+  function resetRotate() {
+    xAxis.value = 1; yAxis.value = 0; zAxis.value = 0; angleEl.value = 45;
+    updateRotate();
+  }
+
+  function toggleAuto() {
+    autoRotating = !autoRotating;
+    document.getElementById('autoRotateBtn').textContent = autoRotating ? '停止' : '自动旋转';
+    document.getElementById('autoRotateBtn').classList.toggle('active', autoRotating);
+    if (autoRotating) {
+      (function tick() {
+        autoAngle = (autoAngle + 1) % 360;
+        angleEl.value = autoAngle;
+        document.getElementById('angleVal').textContent = autoAngle;
+        rotateBox.style.transform = `rotate3d(${parseFloat(xAxis.value)}, ${parseFloat(yAxis.value)}, ${parseFloat(zAxis.value)}, ${autoAngle}deg)`;
+        codeOut.textContent = `transform: rotate3d(${parseFloat(xAxis.value).toFixed(1)}, ${parseFloat(yAxis.value).toFixed(1)}, ${parseFloat(zAxis.value).toFixed(1)}, ${autoAngle}deg);`;
+        autoTimer = setTimeout(tick, 20);
+      })();
+    } else {
+      clearTimeout(autoTimer);
+    }
+  }
+
+  // --- 2D vs 3D comparison ---
+  const compare2d = document.getElementById('compare2d');
+  const compare3d = document.getElementById('compare3d');
+
+  function setAngle(deg) {
+    compare2d.style.transform = `rotate(${deg}deg)`;
+    compare3d.style.transform = `rotateY(${deg}deg)`;
+    document.querySelectorAll('.section:nth-child(2) .btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // Default 60deg
+  setAngle(60);
+
+  // --- Cube speed ---
+  const cubeWrap = document.getElementById('cubeWrap');
+  let cubeDuration = 8;
+  let cubeTimer = null;
+  let cubeAngle = 0;
+
+  cubeWrap.style.animation = 'none';
+
+  function setCubeSpeed(speed) {
+    cubeDuration = speed === 0 ? 0 : 20 / speed;
+    cubeAngle = 0;
+    document.querySelectorAll('.section:nth-child(3) .btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (cubeTimer) clearInterval(cubeTimer);
+    if (speed === 0) return;
+
+    (function tick() {
+      cubeAngle = (cubeAngle + 1) % 360;
+      cubeWrap.style.transform = `rotateX(${cubeAngle * 0.5}deg) rotateY(${cubeAngle}deg)`;
+    })();
+    cubeTimer = setInterval(() => {
+      cubeAngle = (cubeAngle + 1) % 360;
+      cubeWrap.style.transform = `rotateX(${cubeAngle * 0.5}deg) rotateY(${cubeAngle}deg)`;
+    }, cubeDuration * 50);
+  }
+
+  // Init cube rotation
+  cubeWrap.style.transform = 'rotateX(-20deg) rotateY(-30deg)';
+</script>
+</body>
+</html>
