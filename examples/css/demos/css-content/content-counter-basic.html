@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 基本计数器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    ol { list-style: none; }
+    .article-list { counter-reset: chapter; }
+    .article-list li { counter-increment: chapter; padding: 8px 0; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 10px; }
+    .article-list li::before { content: "第 " counter(chapter) " 章"; color: #58a6ff; min-width: 80px; font-size: 13px; }
+    .article-list li:last-child { border-bottom: none; }
+    .steps { counter-reset: step; }
+    .steps li { counter-increment: step; padding: 6px 0; }
+    .steps li::before { content: counter(step); background: #238636; color: white; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 10px; font-weight: bold; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 基本计数器</h1>
+
+    <div class="section">
+      <h2>文章章节编号</h2>
+      <div class="demo-box">
+        <ol class="article-list">
+          <li>CSS 基础入门</li>
+          <li>选择器详解</li>
+          <li>盒模型原理</li>
+          <li>Flexbox 布局</li>
+          <li>CSS Grid 布局</li>
+        </ol>
+      </div>
+      <div class="code-block">ol { counter-reset: chapter; }
+li { counter-increment: chapter; }
+li::before {
+  content: "第 " counter(chapter) " 章";
+  color: #58a6ff;
+}</div>
+      <p class="desc">使用 counter() 输出计数器值，自动编号文章章节</p>
+    </div>
+
+    <div class="section">
+      <h2>步骤指示器</h2>
+      <div class="demo-box">
+        <ol class="steps" style="list-style:none;">
+          <li>注册账号</li>
+          <li>完成实名认证</li>
+          <li>充值金额</li>
+          <li>开始交易</li>
+        </ol>
+      </div>
+      <div class="code-block">ol { counter-reset: step; }
+li { counter-increment: step; }
+li::before {
+  content: counter(step);
+  background: #238636;
+  color: white;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}</div>
+      <p class="desc">配合圆形背景制作步骤指示器</p>
+    </div>
+  </div>
+</body>
+</html>

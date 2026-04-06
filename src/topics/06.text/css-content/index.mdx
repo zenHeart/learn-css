@@ -1,0 +1,317 @@
+---
+title: "CSS content 属性"
+category: "文本"
+tags:
+  - content
+  - 伪元素
+  - ::before
+  - ::after
+  - attr
+  - counter
+description: "详解 CSS content 属性的各种用法，包括文本、图片、计数器、字符串拼接等"
+keywords: "CSS content, content 属性, ::before, ::after, attr(), counter(), 图片, 计数器"
+---
+
+# CSS content 属性
+
+`content` 属性是 CSS 中最强大的属性之一，它与 `::before` 和 `::after` 伪元素配合，可以完成文本、图片、计数器、图标注入等多种功能。本篇文章将全面解析 `content` 属性的用法和实战技巧。
+
+## 快速预览
+
+下面是一个综合示例，展示了 `content` 属性的常见用法：
+
+{/* @playground id="css-content-overview" mode="demo" */}
+
+## 基本概念
+
+`content` 属性主要与 `::before` 和 `::after` 伪元素配合使用：
+
+- `::before` — 在元素内容之前插入内容
+- `::after` — 在元素内容之后插入内容
+
+```css
+.element::before {
+  content: "前缀";
+}
+
+.element::after {
+  content: "后缀";
+}
+```
+
+> ⚠️ **注意**：伪元素需要设置 `content` 属性才会渲染，即使 `content: ""` 也可以。
+
+## 语法详解
+
+```css
+/* 关键词 */
+content: normal;
+content: none;
+
+/* 文本字符串 */
+content: "固定文本";
+content: "前缀" "后缀";
+
+/* 图片 */
+content: url("image.png");
+content: linear-gradient(blue, red);
+
+/* 计数器 */
+content: counter(counter-name);
+content: counters(counter-name, ".");
+
+/* 属性值 */
+content: attr(data-label);
+
+/* 引号 */
+content: open-quote;
+content: close-quote;
+content: no-open-quote;
+content: no-close-quote;
+
+/* 混合使用 */
+content: "序号 " counter(index) "：";
+content: url("icon.png") " 标签文本";
+```
+
+## 文本内容
+
+最基础的用法是插入纯文本：
+
+```css
+.required::after {
+  content: " *";
+  color: red;
+}
+```
+
+{/* @playground id="content-text" mode="demo" */}
+
+## 图片内容
+
+使用 `url()` 函数可以插入图片：
+
+```css
+.pin::before {
+  content: url("pin.png");
+}
+```
+
+{/* @playground id="content-image" mode="demo" */}
+
+### 图片与文本组合
+
+可以同时插入图片和文本：
+
+```css
+.location::before {
+  content: url("pin.png") " 当前位置：";
+}
+```
+
+> 💡 **提示**：在 Chrome 浏览器中，`content` 属性还支持 `linear-gradient()` 渐变，但其他浏览器支持较差。
+
+## 计数器
+
+计数器是 `content` 属性最强大的功能之一。详情请参考 [CSS 计数器专题](/topics/01.basics/10.counter)。
+
+### 基本计数器
+
+```css
+ol {
+  counter-reset: item;  /* 声明计数器 */
+}
+
+li {
+  counter-increment: item;  /* 递增计数器 */
+}
+
+li::before {
+  content: counter(item);  /* 输出计数器值 */
+}
+```
+
+{/* @playground id="content-counter-basic" mode="demo" */}
+
+### 嵌套计数器（counters）
+
+`counters()` 函数支持嵌套计数器：
+
+```css
+ol {
+  counter-reset: section;
+  list-style: none;
+}
+
+li {
+  counter-increment: section;
+}
+
+li::before {
+  content: counters(section, ".") " ";
+}
+```
+
+{/* @playground id="content-counter-nested" mode="demo" */}
+
+## attr() 函数
+
+`attr()` 函数可以读取 HTML 属性的值：
+
+```css
+[data-label]::before {
+  content: attr(data-label) ": ";
+}
+```
+
+### 打印样式中的 URL 显示
+
+这是 `attr()` 最实用的场景之一——在打印样式中显示链接目标：
+
+```css
+@media print {
+  a[href^="http://"]::after,
+  a[href^="https://"]::after {
+    content: " (" attr(href) ")";
+  }
+}
+```
+
+{/* @playground id="content-attr" mode="demo" */}
+
+## 引号处理
+
+CSS 提供了四个引号相关的关键词：
+
+| 关键词 | 作用 |
+|--------|------|
+| `open-quote` | 插入左引号 |
+| `close-quote` | 插入右引号 |
+| `no-open-quote` | 不插入内容，但增加引号嵌套层级 |
+| `no-close-quote` | 不插入内容，但减少引号嵌套层级 |
+
+### 自动引号嵌套
+
+```css
+blockquote {
+  quotes: "«" "»" "‹" "›";
+}
+
+blockquote::before {
+  content: open-quote;
+}
+
+blockquote::after {
+  content: close-quote;
+}
+```
+
+{/* @playground id="content-quotes" mode="demo" */}
+
+不同语言有不同的引号习惯：
+
+```css
+/* 法语 */
+blockquote[lang="fr"] {
+  quotes: "«" "»" "‹" "›";
+}
+```
+
+## 替代文本（无障碍）
+
+`content` 属性支持为图片添加替代文本，使用 `/` 分隔：
+
+```css
+.hot::before {
+  content: url("fire.png") / "热门";
+}
+```
+
+> ⚠️ **浏览器支持**：目前只有 Chrome 浏览器支持替代文本，其他浏览器会忽略包含替代文本的伪元素。
+
+## 实战案例
+
+### 案例一：面包屑导航
+
+{/* @playground id="content-breadcrumb" mode="demo" */}
+
+### 案例二：浮动元素清除
+
+使用 `::after` 伪元素清除浮动：
+
+```css
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+```
+
+{/* @playground id="content-clearfix" mode="demo" */}
+
+### 案例三：自定义列表编号
+
+{/* @playground id="content-list-style" mode="demo" */}
+
+### 案例四：图标注入
+
+通过 `content` 注入 SVG 图标（Base64 编码）：
+
+```css
+.icon-arrow::after {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M4 2l4 4-4 4'/%3E%3C/svg%3E");
+}
+```
+
+{/* @playground id="content-icon-inject" mode="demo" */}
+
+### 案例五：文件类型标识
+
+在下载链接后显示文件类型和大小：
+
+```css
+a[href$=".pdf"]::after {
+  content: " (PDF)";
+  color: red;
+}
+
+a[href$=".zip"]::after {
+  content: " (ZIP)";
+  color: green;
+}
+```
+
+{/* @playground id="content-file-type" mode="demo" */}
+
+### 案例六：表单必填标记
+
+{/* @playground id="content-required" mode="demo" */}
+
+## 浏览器支持
+
+| 功能 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| 文本内容 | ✅ | ✅ | ✅ | ✅ |
+| 图片 url() | ✅ | ✅ | ✅ | ✅ |
+| 渐变 content | ✅ | ❌ | ❌ | ❌ |
+| 计数器 | ✅ | ✅ | ✅ | ✅ |
+| attr() | ✅ | ✅ | ✅ | ✅ |
+| 引号关键词 | ✅ | ✅ | ✅ | ✅ |
+| 替代文本 | ✅ | ❌ | ❌ | ❌ |
+
+## 注意事项
+
+1. **content 只用于伪元素**：虽然可以在普通元素上使用 `content`，但效果有限，主要用于替换内容。
+
+2. **屏幕阅读器可访问性**：通过 `content` 添加的内容对屏幕阅读器不可见（除非使用替代文本）。对于重要的文本内容，应该放在 HTML 中。
+
+3. **打印样式**：在打印场景中，`content` 配合 `attr()` 可以显示 URL 等信息，提升打印物的可用性。
+
+4. **多语言站点**：如果站点有多语言版本，使用 `content` 添加文本内容会带来翻译困难，应优先考虑使用 HTML 结构。
+
+## 扩展阅读
+
+- [MDN: content](https://developer.mozilla.org/en-US/docs/Web/CSS/content)
+- [Here's what I didn't know about content](https://www.matuzo.at/blog/heres-what-i-didnt-know-about-content/) — Manuel Matuzović
+- [CSS 计数器详解](/topics/01.basics/10.counter)
+- [伪元素详解](/topics/01.basics/12.pseudo-elements.mdx)
