@@ -1,0 +1,348 @@
+# CSS `scroll-behavior` 属性
+
+`scroll-behavior` 是 CSS 属性，用于控制滚动时的动画行为，决定浏览器执行滚动操作时是否平滑过渡。
+
+## 语法
+
+```css
+scroll-behavior: auto | smooth | instant
+```
+
+## 属性值详解
+
+### `auto`（默认值）
+
+浏览器的默认滚动行为。通常是"即时跳转"，没有过渡动画。
+
+```css
+html {
+  scroll-behavior: auto;
+}
+```
+
+### `smooth`
+
+启用平滑滚动，浏览器会使用动画将滚动位置过渡到目标位置。过渡时间和缓动函数由浏览器决定。
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+/* 常用于：单页应用锚点导航、回到顶部按钮、页面内跳转 */
+```
+
+### `instant`
+
+立即跳转到目标位置，无任何过渡效果。与 `auto` 的区别在于，`instant` 是明确指定即时滚动，而 `auto` 由浏览器决定。
+
+```css
+html {
+  scroll-behavior: instant;
+}
+/* 常用于：需要快速响应的场景、键盘导航辅助 */
+```
+
+## 使用场景
+
+### 1. 全局平滑滚动
+
+将平滑滚动应用于整个页面，所有锚点跳转都会使用平滑动画：
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+
+/* 所有内部链接都会平滑滚动 */
+<a href="#section-2">跳转到第二章</a>
+```
+
+### 2. 单元素平滑滚动
+
+`scroll-behavior` 也可以应用于可滚动容器，控制该容器内的滚动行为：
+
+```css
+.scrollable-container {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+}
+```
+
+### 3. 平滑滚动与锚点
+
+```html
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  nav {
+    position: fixed;
+    top: 0;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+  }
+  
+  nav a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+  }
+  
+  section {
+    height: 100vh;
+    padding: 60px 20px;
+  }
+</style>
+
+<nav>
+  <a href="#intro">简介</a>
+  <a href="#features">特性</a>
+  <a href="#pricing">价格</a>
+  <a href="#contact">联系</a>
+</nav>
+
+<section id="intro">简介内容...</section>
+<section id="features">特性内容...</section>
+<section id="pricing">价格内容...</section>
+<section id="contact">联系内容...</section>
+```
+
+### 4. 平滑滚动偏移量
+
+平滑滚动时，可能需要考虑固定导航栏的偏移量：
+
+```css
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* 滚动偏移量，配合固定导航栏使用 */
+}
+
+.fixed-nav {
+  position: fixed;
+  top: 0;
+  height: 80px;
+}
+```
+
+## 文档级 vs 元素级 `scroll-behavior`
+
+`scroll-behavior` 可以应用于 `html` 元素（文档级别）或可滚动容器（元素级别），两者行为略有不同：
+
+### 文档级滚动
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+```
+
+- 影响整个页面的滚动
+- 所有锚点链接、内部跳转都使用平滑滚动
+- `scroll-behavior: auto` 在某些旧版浏览器中可能表现不同
+
+### 元素级滚动
+
+```css
+.scrollable-list {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+}
+```
+
+- 只影响该容器的内部滚动
+- 容器内的锚点跳转、程序化滚动都会平滑动画
+- 不影响页面其他区域的滚动行为
+
+### 混合使用
+
+```css
+/* 全局使用即时滚动 */
+html {
+  scroll-behavior: auto;
+}
+
+/* 特定容器使用平滑滚动 */
+.sidebar {
+  scroll-behavior: smooth;
+}
+
+/* 另一个容器使用即时滚动 */
+.log-container {
+  scroll-behavior: instant;
+}
+```
+
+## `scroll-behavior` vs JavaScript `scrollIntoView()`
+
+### CSS `scroll-behavior`
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+```
+
+| 特性 | 说明 |
+|------|------|
+| **控制方式** | CSS 属性声明 |
+| **作用域** | 影响所有触发的滚动（链接、锚点、JS 触发） |
+| **灵活性** | 无法自定义动画时长、缓动函数 |
+| **性能** | 浏览器原生实现，性能较好 |
+| **兼容性** | 现代浏览器支持 |
+
+### JavaScript `scrollIntoView()`
+
+```javascript
+element.scrollIntoView({
+  behavior: 'smooth',
+  block: 'start',
+  inline: 'nearest'
+});
+```
+
+| 特性 | 说明 |
+|------|------|
+| **控制方式** | JavaScript API 调用 |
+| **作用域** | 仅影响这次调用 |
+| **灵活性** | 可通过参数自定义行为 |
+| **性能** | 涉及 JS 调用，略逊于纯 CSS |
+| **兼容性** | 更广泛的浏览器支持 |
+
+### 对比示例
+
+```html
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  .container {
+    scroll-behavior: smooth;
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+  }
+</style>
+
+<script>
+  // CSS scroll-behavior 会影响这个调用
+  document.querySelector('a[href="#target"]').click();
+  
+  // JS scrollIntoView 也有平滑选项
+  document.getElementById('js-target').scrollIntoView({
+    behavior: 'smooth',
+    block: 'center'
+  });
+  
+  // 强制即时滚动（忽略 scroll-behavior）
+  document.getElementById('instant-target').scrollIntoView({
+    behavior: 'instant'  // 或 'auto'
+  });
+</script>
+```
+
+### 优先级
+
+当同时使用 CSS `scroll-behavior` 和 JS `scrollIntoView()` 时：
+
+1. JS `scrollIntoView({ behavior: 'smooth' })` 会覆盖 CSS 设置
+2. JS `scrollIntoView({ behavior: 'instant' })` 或 `{ behavior: 'auto' }` 会遵循 CSS 设置
+3. 如果没有显式指定 `behavior`，JS 会继承 CSS 的设置
+
+## 浏览器兼容性
+
+| 属性值 | Chrome | Firefox | Safari | Edge |
+|--------|--------|---------|--------|------|
+| `auto` | ✅ 1+ | ✅ 1+ | ✅ 1+ | ✅ 1+ |
+| `smooth` | ✅ 61+ | ✅ 36+ | ✅ 15.4+ | ✅ 79+ |
+| `instant` | ✅ 1+ | ✅ 1+ | ✅ 1+ | ✅ 1+ |
+
+> ⚠️ `smooth` 值在较旧版本的浏览器中不被支持。如需兼容旧版浏览器，请使用 JavaScript `scrollIntoView()` 作为 polyfill。
+
+### 兼容性策略
+
+```css
+/* 现代浏览器使用平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 不支持 smooth 的浏览器回退到 auto */
+@supports not (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+```
+
+## 实践建议
+
+### 1. 单页应用（SPA）
+
+```css
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px; /* 固定导航栏高度 */
+}
+```
+
+### 2. 混合滚动体验
+
+```css
+/* 主内容区平滑滚动 */
+main {
+  scroll-behavior: smooth;
+}
+
+/* 日志/代码区即时滚动 */
+.log-output {
+  scroll-behavior: instant;
+}
+```
+
+### 3. 性能考虑
+
+```css
+/* 减少平滑滚动的性能开销 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 在性能敏感区域使用即时滚动 */
+.high-performance-zone {
+  scroll-behavior: auto; /* 强制即时滚动 */
+}
+```
+
+### 4. 无障碍访问
+
+平滑滚动可能对依赖键盘导航的用户造成困扰。建议：
+
+```css
+/* 尊重用户减少动画的偏好 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+```
+
+## `scroll-behavior` 与其他滚动属性
+
+| 属性 | 作用 |
+|------|------|
+| `scroll-behavior` | 控制滚动动画方式（平滑/即时） |
+| `scroll-padding` | 滚动定位时的内边距偏移 |
+| `scroll-margin` | 滚动目标元素的外边距 |
+| `overflow` | 控制元素是否可滚动 |
+| `scroll-snap-*` | 控制滚动捕捉行为 |
+
+## 示例
+
+<interactive-demo />
+
+## 参考链接
+
+- [MDN - scroll-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior)
+- [CSSWG Draft - scroll-behavior](https://drafts.csswg.org/css-scrollsnap/)
