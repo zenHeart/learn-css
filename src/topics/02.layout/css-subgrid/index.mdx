@@ -1,0 +1,204 @@
+---
+title: CSS Subgrid 嵌套网格对齐
+category: 布局基础
+tags: [grid, subgrid, layout]
+description: 讲解 CSS Subgrid 嵌套网格对齐的核心概念、语法和应用场景。
+keywords: CSS Subgrid, 嵌套网格, grid-template-columns, grid-template-rows, subgrid 对齐
+---
+
+Subgrid 是 CSS Grid Layout Module Level 2 引入的强大特性，它允许嵌套的网格容器继承父网格的轨道定义，实现嵌套元素与父网格的完美对齐。通过本章学习达到以下目标
+
+- 理解 subgrid 的核心概念和解决的问题
+- 掌握 subgrid 的语法和使用场景
+- 能够用 subgrid 实现复杂的嵌套布局
+
+## 解决的问题
+
+当我们在网格中嵌套网格时，普通的嵌套网格是完全独立的。这意味着：
+
+- 子网格的轨道大小与父网格无关
+- 嵌套层级的元素无法与外层网格对齐
+- 多列卡片布局中，各卡片内部内容无法对齐
+
+Subgrid 解决了这些问题。当子网格设置 `grid-template-columns: subgrid` 或 `grid-template-rows: subgrid` 时，子网格将使用父网格的轨道定义，实现完美对齐。
+
+## 语法详解
+
+Subgrid 通过 `grid-template-columns` 或 `grid-template-rows` 属性使用，值就是 `subgrid` 关键字。
+
+```css
+/* 只继承列轨道 */
+grid-template-columns: subgrid;
+
+/* 只继承行轨道 */
+grid-template-rows: subgrid;
+
+/* 同时继承行列轨道 */
+grid-template-columns: subgrid;
+grid-template-rows: subgrid;
+
+/* 简写形式 */
+grid-template: subgrid / subgrid;
+```
+
+### 核心规则
+
+1. **跨父轨道**：子网格必须跨越父网格的多个轨道才能使用 subgrid
+2. **轨道继承**：subgrid 继承父网格对应轨道的尺寸
+3. **线编号重置**：subgrid 内部的线编号从 1 开始，与父网格独立
+4. **Gap 继承**：父网格的 gap 会传递给子网格，但可以被覆盖
+5. **命名线传递**：父网格的命名线会传递给 subgrid
+
+## 与父网格对齐
+
+Subgrid 最大的价值在于让嵌套层级的元素能够与父网格对齐。以下是典型应用场景。
+
+### 场景一：列对齐
+
+卡片列表中，每个卡片内部的内容（如标题、图片、描述）需要跨卡片对齐。
+
+{/* @playground id="subgrid-columns" mode="demo" */}
+
+### 场景二：行对齐
+
+表格或表单中，多行元素需要对齐到同一个网格轨道。
+
+{/* @playground id="subgrid-rows" mode="demo" */}
+
+### 场景三：双向对齐
+
+子网格同时继承行列轨道，实现完整对齐。
+
+{/* @playground id="subgrid-both" mode="demo" */}
+
+### Gap 继承与覆盖
+
+父网格的 gap 会自动传递给 subgrid，但可以在子网格中覆盖。
+
+{/* @playground id="subgrid-gap" mode="demo" */}
+
+### 命名线传递
+
+父网格的命名线会自动传递给 subgrid，子网格可以直接使用这些命名线定位元素。
+
+{/* @playground id="subgrid-named-lines" mode="demo" */}
+
+## 实战案例
+
+### 案例一：多列卡片布局
+
+多列卡片列表中，每个卡片高度不一，但卡片内部的内容（标题、图片、操作按钮）需要跨卡片对齐。Subgrid 让这变得简单：
+
+{/* @playground id="subgrid-cards" mode="demo" */}
+
+### 案例二：表单布局
+
+表单的标签和输入框需要完美对齐，Subgrid 让这变得优雅：
+
+{/* @playground id="subgrid-form" mode="demo" */}
+
+### 案例三：复杂网格嵌套
+
+多层嵌套的网格结构中，使用 subgrid 保持对齐一致性：
+
+{/* @playground id="subgrid-nested" mode="demo" */}
+
+## 注意事项
+
+### 隐式网格在 subgrid 维度被禁用
+
+当某个维度设置为 subgrid 时，该维度不会自动创建隐式轨道来容纳超出的元素。如果子元素数量超过可用轨道，元素会溢出到父轨道的最后一个位置。
+
+```css
+/* 如果 subgrid 行没有足够轨道，超出的元素会溢出 */
+.item {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid; /* 不会创建隐式行 */
+}
+```
+
+如果需要自动创建隐式轨道，只在需要的维度使用 subgrid：
+
+```css
+.item {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-auto-rows: minmax(100px, auto); /* 行使用普通嵌套 */
+}
+```
+
+### 线编号重置
+
+Subgrid 内部的线编号从 1 开始重新计算，不继承父网格的编号。这意味着组件可以独立编写，然后在任何位置被放置使用。
+
+```css
+/* 父网格 */
+.parent {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* 子网格（跨 3 列） */
+.child {
+  grid-column: 2 / 5;
+  display: grid;
+  grid-template-columns: subgrid; /* 3 列轨道，与父对齐 */
+}
+
+/* 子网格内部元素使用 1-based 编号 */
+.grandchild {
+  grid-column: 1 / 3; /* 子网格的第 1-2 列 */
+}
+```
+
+## 浏览器支持
+
+Subgrid 已获得主流浏览器支持：
+
+- Chrome 117+
+- Firefox 71+
+- Safari 16+
+- Edge 117+
+
+对于不支持的浏览器，可以使用 feature query 检测：
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+@supports (grid-template-columns: subgrid) {
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .card {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: auto 1fr auto;
+    /* subgrid 特定样式 */
+  }
+}
+```
+
+## 知识点
+
+- **Subgrid 核心概念**：子网格通过 `grid-template-columns: subgrid` 或 `grid-template-rows: subgrid` 继承父网格轨道定义【事实性】
+- **对齐能力**：Subgrid 使嵌套层级元素能够与父网格轨道对齐，解决了传统嵌套网格无法对齐的问题【概念性】
+- **跨父轨道要求**：子网格必须跨越父网格的多个轨道才能使用 subgrid【规则性】
+- **线编号重置**：Subgrid 内部线编号从 1 开始，与父网格独立，支持组件化【概念性】
+- **Gap 继承**：父网格 gap 自动传递给 subgrid，可被覆盖【规则性】
+- **命名线传递**：父网格命名线自动传递给 subgrid，可直接使用【规则性】
+- **隐式网格限制**：在 subgrid 维度上不会自动创建隐式轨道，超出元素会溢出【概念性】
+- **浏览器支持**：现代浏览器已全面支持，Safari 16+ 开始支持【事实性】
+
+## 参考资料
+
+- [MDN CSS Subgrid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/Subgrid)
+- [CSS Grid Layout Module Level 2](https://drafts.csswg.org/css-grid/#subgrids)
+- [gridbyexample.com](https://gridbyexample.com/examples/)
