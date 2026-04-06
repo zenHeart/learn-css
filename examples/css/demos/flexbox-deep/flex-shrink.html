@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox flex-shrink 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 100px; display: flex; gap: 8px; width: 400px; }
+    .demo-item { background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 12px; flex-shrink: 1; flex-grow: 0; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .warning { border-left: 3px solid #f78166; padding-left: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>flex-shrink 缩小比例</h1>
+
+    <div class="section">
+      <h2>flex-shrink 对比</h2>
+      <p style="font-size:13px;color:#8b949e;margin-bottom:16px;">容器宽度 400px，三个 item 各 150px -> 总宽度 450px，溢出 50px</p>
+      <div class="controls">
+        <button class="control-btn active" data-mode="equal">等比缩小 (1:1:1)</button>
+        <button class="control-btn" data-mode="diff">差异缩小 (1:2:3)</button>
+        <button class="control-btn" data-mode="zero">不允许缩小 (0:0:0)</button>
+      </div>
+      <div class="demo-area" id="demo">
+        <div class="demo-item" id="item1" style="flex-basis:150px;flex-shrink:1;">150px</div>
+        <div class="demo-item" id="item2" style="flex-basis:150px;flex-shrink:1;">150px</div>
+        <div class="demo-item" id="item3" style="flex-basis:150px;flex-shrink:1;">150px</div>
+      </div>
+      <div class="code-block" id="codeBlock">flex-shrink: 1 1 1;</div>
+      <div class="label" id="sizeLabel">每个 item 实际宽度：~133px</div>
+    </div>
+
+    <div class="section">
+      <h2>为什么不溢出？</h2>
+      <div class="info warning">
+        <strong>flex-shrink: 0 的陷阱</strong><br><br>
+        如果设置 flex-shrink: 0，items 不会缩小，会导致溢出！
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:16px;display:flex;flex-shrink:0;gap:8px;width:400px;margin-top:12px;">
+        <div style="flex-basis:150px;flex-shrink:0;height:60px;background:linear-gradient(135deg,#f78166,#da3633);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">150px</div>
+        <div style="flex-basis:150px;flex-shrink:0;height:60px;background:linear-gradient(135deg,#f78166,#da3633);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">150px</div>
+        <div style="flex-basis:150px;flex-shrink:0;height:60px;background:linear-gradient(135deg,#f78166,#da3633);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">150px</div>
+      </div>
+      <div class="info warning" style="margin-top:8px;">三个 150px = 450px > 400px 容器，溢出 50px！</div>
+    </div>
+
+    <div class="section">
+      <h2>缩小计算公式</h2>
+      <div class="info">
+        <strong>简化计算：</strong><br><br>
+        溢出量 x (shrink x basis) / Sum(shrink x basis)<br><br>
+        <strong>示例（容器 400px，三个 150px items）：</strong><br>
+        溢出量 = 450 - 400 = 50px<br>
+        权重和 = 1x150 + 1x150 + 1x150 = 450<br>
+        每个 item 收缩 = 50 x (1x150/450) = 16.67px<br>
+        最终宽度 = 150 - 16.67 ~ 133px
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modes = {
+      equal: { shrink: [1, 1, 1], label: '每个 item 实际宽度：~133px', code: 'flex-shrink: 1 1 1;' },
+      diff: { shrink: [1, 2, 3], label: 'item1 ~140px, item2 ~130px, item3 ~120px', code: 'flex-shrink: 1 2 3; (item3 收缩最多)' },
+      zero: { shrink: [0, 0, 0], label: '不允许缩小 -> 溢出！', code: 'flex-shrink: 0 0 0; (不缩小)' }
+    };
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = modes[btn.dataset.mode];
+        const items = document.querySelectorAll('.demo-item');
+        items.forEach((item, i) => {
+          item.style.flexShrink = mode.shrink[i];
+        });
+        document.getElementById('codeBlock').textContent = mode.code;
+        document.getElementById('sizeLabel').textContent = mode.label;
+      });
+    });
+  </script>
+</body>
+</html>
