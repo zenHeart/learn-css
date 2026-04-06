@@ -1,0 +1,366 @@
+---
+title: "CSS @container 容器查询"
+category: "响应式布局"
+tags:
+  - 容器查询
+  - 响应式
+  - @container
+  - container-type
+  - 组件响应式
+description: "详解 CSS 容器查询（Container Queries），实现基于父容器尺寸的组件级响应式设计"
+keywords: "CSS, 容器查询, @container, container-type, container-name, 响应式, 组件响应式"
+---
+
+# CSS @container 容器查询
+
+**基于父容器尺寸的组件级响应式设计**
+
+---
+
+## 概述
+
+容器查询（Container Queries）是 CSS 响应式布局的重大飞跃。与媒体查询（@media）基于视口（viewport）尺寸不同，容器查询允许组件根据其**父容器**的尺寸来决定如何渲染，实现真正的组件化响应式设计。
+
+### 容器查询 vs 媒体查询
+
+| 特性 | 媒体查询 | 容器查询 |
+|------|----------|----------|
+| 查询依据 | 视口（浏览器窗口） | 父容器尺寸 |
+| 适用场景 | 页面整体布局 | 组件自适应 |
+| 可维护性 | 组件与布局耦合 | 组件独立自治 |
+| 浏览器支持 | 所有现代浏览器 | Chrome 105+, Safari 16+, Firefox 110+ |
+
+### 基本语法
+
+```css
+/* 1. 定义容器 */
+.card-wrapper {
+  container-type: inline-size;
+  /* 或使用简写 */
+  container: card-container / inline-size;
+}
+
+/* 2. 使用容器查询 */
+@container (width > 700px) {
+  .card-title {
+    font-size: 2em;
+  }
+}
+```
+
+---
+
+## 定义容器
+
+### container-type
+
+声明一个元素为查询容器：
+
+```css
+.card-wrapper {
+  container-type: inline-size; /* 查询内联方向尺寸 */
+  /* 或 */
+  container-type: size;        /* 查询内联和块方向尺寸 */
+  /* 或 */
+  container-type: normal;      /* 仅用于容器样式查询 */
+}
+```
+
+| 值 | 说明 |
+|----|------|
+| `inline-size` | 基于内联轴（width）查询，最常用 |
+| `size` | 基于内联轴和块轴（width + height）查询 |
+| `normal` | 非查询容器，但可用于容器样式查询 |
+
+### container-name（命名容器）
+
+```css
+.sidebar {
+  container-type: inline-size;
+  container-name: sidebar; /* 命名 */
+}
+
+/* 目标特定容器 */
+@container sidebar (width > 400px) {
+  .sidebar-widget {
+    display: flex;
+  }
+}
+```
+
+### container 简写
+
+```css
+/* 语法：container: <name> / <type> */
+.card-wrapper {
+  container: card / inline-size;
+}
+```
+
+---
+
+## @container 查询语法
+
+### 尺寸查询
+
+```css
+/* 宽度查询 */
+@container (width > 700px) {
+  .card { flex-direction: row; }
+}
+
+/* 高度查询 */
+@container (height > 300px) {
+  .card-image { height: 200px; }
+}
+
+/* 范围查询 */
+@container (300px <= width <= 700px) {
+  .card-title { font-size: 1.2em; }
+}
+```
+
+### 命名容器查询
+
+```css
+/* 默认查询最近容器 */
+@container (width > 500px) { ... }
+
+/* 查询特定命名容器 */
+@container card (width > 500px) { ... }
+
+/* 查询多个条件 */
+@container (width > 300px) and (height > 200px) { ... }
+```
+
+### 逻辑组合
+
+```css
+/* 与 */
+@container (width > 400px) and (aspect-ratio > 1) { ... }
+
+/* 或 */
+@container (width > 700px) or (height > 500px) { ... }
+
+/* 非 */
+@container not (width < 300px) { ... }
+```
+
+---
+
+## 容器查询长度单位
+
+容器查询提供了一套相对于查询容器尺寸的长度单位：
+
+| 单位 | 说明 |
+|------|------|
+| `cqw` | 容器宽度的 1% |
+| `cqh` | 容器高度的 1% |
+| `cqi` | 容器内联尺寸的 1% |
+| `cqb` | 容器块级尺寸的 1% |
+| `cqmin` | `cqi` 和 `cqb` 中的较小值 |
+| `cqmax` | `cqi` 和 `cqb` 中的较大值 |
+
+### 使用示例
+
+```css
+.card-title {
+  /* 标题字号随容器宽度缩放 */
+  font-size: max(1.5em, 1.23em + 2cqi);
+}
+
+.card-image {
+  /* 图片高度为容器宽度的 50% */
+  height: 50cqw;
+}
+```
+
+---
+
+## 实战案例
+
+### 案例一：卡片组件自适应
+
+```css
+/* 定义容器 */
+.card-wrapper {
+  container-type: inline-size;
+  container-name: card;
+}
+
+/* 默认样式（小容器） */
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 1em;
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+/* 中等容器 */
+@container card (width > 400px) {
+  .card {
+    flex-direction: row;
+    gap: 16px;
+  }
+  .card-image {
+    width: 40%;
+  }
+}
+
+/* 大容器 */
+@container card (width > 700px) {
+  .card-title {
+    font-size: 2em;
+  }
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+```
+
+### 案例二：侧边栏组件
+
+```css
+.sidebar {
+  container-type: inline-size;
+  container-name: sidebar;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+/* 侧边栏展开模式 */
+@container sidebar (width > 300px) {
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .nav-item {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+  }
+}
+```
+
+### 案例三：图片画廊
+
+```css
+.gallery {
+  container-type: inline-size;
+}
+
+.gallery-item {
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 单列 */
+@container (width < 300px) {
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 双列 */
+@container (300px <= width < 600px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* 多列 */
+@container (width >= 600px) {
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+```
+
+---
+
+## 浏览器兼容性
+
+| 浏览器 | 支持版本 |
+|--------|----------|
+| Chrome | ✅ 105+ |
+| Edge | ✅ 105+ |
+| Safari | ✅ 16+ |
+| Firefox | ✅ 110+ |
+| iOS Safari | ✅ 16+ |
+
+### 回退方案
+
+```css
+/* 有浏览器支持时使用容器查询 */
+@supports (container-type: inline-size) {
+  .card-wrapper {
+    container-type: inline-size;
+  }
+  /* 容器查询样式 */
+}
+
+/* 浏览器不支持时使用媒体查询作为近似回退 */
+@media (min-width: 700px) {
+  .card {
+    flex-direction: row;
+  }
+}
+```
+
+---
+
+## 常见问题
+
+### 1. 容器查询不生效
+
+确保祖先元素定义了 `container-type`：
+
+```css
+/* 错误：没有定义容器 */
+@container (width > 500px) { ... } /* 不生效 */
+
+/* 正确：先定义容器 */
+.outer { container-type: inline-size; }
+@container (width > 500px) { ... } /* 生效 */
+```
+
+### 2. 容器查询与滚动条
+
+容器尺寸计算**包含滚动条**，在精确布局时需要注意。
+
+### 3. 性能考虑
+
+- 避免在大量嵌套容器上使用 `container-type: size`
+- 优先使用 `inline-size`（仅查询宽度，更高效）
+
+---
+
+## 总结
+
+容器查询是 CSS 响应式设计的重大进步，它让组件能够真正独立于页面布局进行响应式适配。通过 `container-type` 和 `@container`，我们可以实现：
+
+- 组件在不同父容器中自动适应
+- 更灵活的组件复用
+- 更清晰的关注点分离
+
+浏览器支持已覆盖所有主流浏览器，可以安全地用于生产环境。
