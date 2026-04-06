@@ -1,0 +1,63 @@
+<h1>半透明变体</h1>
+<p>使用相对颜色快速生成不同透明度的遮罩</p>
+<style>
+  :root {
+    --overlay-base: oklch(40% 0.15 240);
+  }
+  
+  .overlay-demo {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    padding: 20px;
+    background: #1a1a2e;
+    border-radius: 8px;
+  }
+  
+  .overlay-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .overlay-swatch {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #fff;
+  }
+  
+  .overlay-100 { background: var(--overlay-base); }
+  .overlay-80 { background: oklch(from var(--overlay-base) l c h / 80%); }
+  .overlay-50 { background: oklch(from var(--overlay-base) l c h / 50%); }
+  .overlay-30 { background: oklch(from var(--overlay-base) l c h / 30%); }
+  .overlay-10 { background: oklch(from var(--overlay-base) l c h / 10%); }
+</style>
+
+<div class="overlay-demo">
+  <div class="overlay-item">
+    <div class="overlay-swatch overlay-100">100%</div>
+    <span style="color:#ccc;font-size:11px;">100%</span>
+  </div>
+  <div class="overlay-item">
+    <div class="overlay-swatch overlay-80">80%</div>
+    <span style="color:#ccc;font-size:11px;">80%</span>
+  </div>
+  <div class="overlay-item">
+    <div class="overlay-swatch overlay-50">50%</div>
+    <span style="color:#ccc;font-size:11px;">50%</span>
+  </div>
+  <div class="overlay-item">
+    <div class="overlay-swatch overlay-30">30%</div>
+    <span style="color:#ccc;font-size:11px;">30%</span>
+  </div>
+  <div class="overlay-item">
+    <div class="overlay-swatch overlay-10">10%</div>
+    <span style="color:#ccc;font-size:11px;">10%</span>
+  </div>
+</div>

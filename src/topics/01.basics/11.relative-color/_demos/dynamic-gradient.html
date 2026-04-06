@@ -1,0 +1,89 @@
+<h1>动态渐变</h1>
+<p>基于单一颜色生成渐变色</p>
+<style>
+  .gradient-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .gradient-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .gradient-swatch {
+    width: 140px;
+    height: 70px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  
+  .gradient-label {
+    font-size: 10px;
+    color: #8b949e;
+    text-align: center;
+  }
+  
+  /* 垂直渐变：上方亮 → 下方暗 */
+  .grad-vertical {
+    background: linear-gradient(
+      to bottom, 
+      oklch(70% 0.2 250), 
+      oklch(from oklch(70% 0.2 250) calc(L - 0.35) c h)
+    );
+  }
+  
+  /* 135° 对角渐变 + 色相偏移 */
+  .grad-diagonal {
+    background: linear-gradient(
+      135deg, 
+      oklch(65% 0.2 200), 
+      oklch(from oklch(65% 0.2 200) L calc(c * 1.5) calc(h + 60))
+    );
+  }
+  
+  /* 三色渐变 */
+  .grad-tri {
+    background: linear-gradient(
+      to right,
+      oklch(60% 0.15 300),
+      oklch(from oklch(60% 0.15 300) L calc(c * 0.5) calc(h + 90)) 50%,
+      oklch(from oklch(60% 0.15 300) L c calc(h + 180))
+    );
+  }
+  
+  /* 径向渐变 */
+  .grad-radial {
+    background: radial-gradient(
+      circle at 30% 30%,
+      oklch(75% 0.15 220),
+      oklch(from oklch(75% 0.15 220) calc(L - 0.25) c h)
+    );
+  }
+</style>
+
+<div class="gradient-grid">
+  <div class="gradient-item">
+    <div class="gradient-swatch grad-vertical">垂直渐变</div>
+    <div class="gradient-label">L + h 不变</div>
+  </div>
+  <div class="gradient-item">
+    <div class="gradient-swatch grad-diagonal">对角渐变</div>
+    <div class="gradient-label">c*1.5 h+60</div>
+  </div>
+  <div class="gradient-item">
+    <div class="gradient-swatch grad-tri">三色渐变</div>
+    <div class="gradient-label">h 偏移</div>
+  </div>
+  <div class="gradient-item">
+    <div class="gradient-swatch grad-radial">径向渐变</div>
+    <div class="gradient-label">L-0.25</div>
+  </div>
+</div>

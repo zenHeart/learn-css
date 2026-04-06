@@ -1,0 +1,60 @@
+<h1>协调阴影</h1>
+<p>阴影颜色与组件颜色协调一致</p>
+<style>
+  .card-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .card {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  /* 蓝色卡片 - 阴影基于自身颜色 */
+  .card-blue {
+    background: oklch(70% 0.12 250);
+    box-shadow: 
+      0 4px 16px oklch(from oklch(70% 0.12 250) calc(L - 0.25) c h / 40%),
+      0 8px 32px oklch(from oklch(70% 0.12 250) calc(L - 0.35) c h / 25%);
+  }
+  
+  /* 绿色卡片 */
+  .card-green {
+    background: oklch(65% 0.18 180);
+    box-shadow: 
+      0 4px 16px oklch(from oklch(65% 0.18 180) calc(L - 0.25) c h / 40%),
+      0 8px 32px oklch(from oklch(65% 0.18 180) calc(L - 0.35) c h / 25%);
+  }
+  
+  /* 橙色卡片 */
+  .card-orange {
+    background: oklch(65% 0.18 50);
+    box-shadow: 
+      0 4px 16px oklch(from oklch(65% 0.18 50) calc(L - 0.25) c h / 40%),
+      0 8px 32px oklch(from oklch(65% 0.18 50) calc(L - 0.35) c h / 25%);
+  }
+  
+  /* 紫色卡片 */
+  .card-purple {
+    background: oklch(65% 0.2 300);
+    box-shadow: 
+      0 4px 16px oklch(from oklch(65% 0.2 300) calc(L - 0.25) c h / 40%),
+      0 8px 32px oklch(from oklch(65% 0.2 300) calc(L - 0.35) c h / 25%);
+  }
+</style>
+
+<div class="card-grid">
+  <div class="card card-blue">Blue</div>
+  <div class="card card-green">Green</div>
+  <div class="card card-orange">Orange</div>
+  <div class="card card-purple">Purple</div>
+</div>
