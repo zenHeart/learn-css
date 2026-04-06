@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKLCH 基础用法</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
+    .color-swatch { border-radius: 8px; padding: 16px; text-align: center; font-size: 12px; font-family: monospace; transition: transform 0.2s; }
+    .color-swatch:hover { transform: scale(1.05); }
+    .lightness-demo { display: flex; gap: 8px; margin-top: 12px; }
+    .lightness-swatch { flex: 1; height: 80px; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; padding: 8px; font-size: 11px; font-family: monospace; }
+    .hue-demo { display: flex; gap: 8px; margin-top: 12px; }
+    .hue-swatch { flex: 1; height: 80px; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; padding: 8px; font-size: 11px; font-family: monospace; }
+    .chroma-demo { display: flex; gap: 8px; margin-top: 12px; }
+    .chroma-swatch { flex: 1; height: 80px; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; padding: 8px; font-size: 11px; font-family: monospace; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OKLCH 基础用法</h1>
+
+    <div class="section">
+      <h2>OKLCH 三要素：L（亮度）、C（色度）、H（色相）</h2>
+      <p class="info">OKLCH 基于人眼视觉感知模型设计，数值变化带来均匀的视觉变化。</p>
+
+      <h3 style="font-size:14px; margin: 16px 0 8px; color:#f0f6fc;">亮度渐变（L 值变化，C/H 固定）</h3>
+      <div class="lightness-demo">
+        <div class="lightness-swatch" style="background: oklch(97% 0.12 250); color: #000;">L=97%</div>
+        <div class="lightness-swatch" style="background: oklch(80% 0.12 250); color: #000;">L=80%</div>
+        <div class="lightness-swatch" style="background: oklch(65% 0.12 250); color: #000;">L=65%</div>
+        <div class="lightness-swatch" style="background: oklch(50% 0.12 250); color: #fff;">L=50%</div>
+        <div class="lightness-swatch" style="background: oklch(35% 0.12 250); color: #fff;">L=35%</div>
+        <div class="lightness-swatch" style="background: oklch(20% 0.12 250); color: #fff;">L=20%</div>
+        <div class="lightness-swatch" style="background: oklch(10% 0.12 250); color: #fff;">L=10%</div>
+      </div>
+      <div class="code-block">oklch(97% 0.12 250) → oklch(10% 0.12 250)</div>
+
+      <h3 style="font-size:14px; margin: 16px 0 8px; color:#f0f6fc;">色相渐变（H 值变化，L/C 固定）</h3>
+      <div class="hue-demo">
+        <div class="hue-swatch" style="background: oklch(60% 0.18 0); color: #000;">0° 红</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 45); color: #000;">45°</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 90); color: #000;">90° 黄</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 135); color: #000;">135°</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 180); color: #000;">180° 青</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 225); color: #fff;">225°</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 270); color: #fff;">270° 蓝</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 315); color: #000;">315°</div>
+        <div class="hue-swatch" style="background: oklch(60% 0.18 360); color: #000;">360° 红</div>
+      </div>
+      <div class="code-block">oklch(60% 0.18 0) → oklch(60% 0.18 360)</div>
+
+      <h3 style="font-size:14px; margin: 16px 0 8px; color:#f0f6fc;">色度渐变（C 值变化，L/H 固定）</h3>
+      <div class="chroma-demo">
+        <div class="chroma-swatch" style="background: oklch(60% 0.02 240); color: #000;">C=0.02</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.06 240); color: #000;">C=0.06</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.10 240); color: #000;">C=0.10</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.14 240); color: #000;">C=0.14</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.18 240); color: #000;">C=0.18</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.22 240); color: #000;">C=0.22</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.26 240); color: #fff;">C=0.26</div>
+        <div class="chroma-swatch" style="background: oklch(60% 0.30 240); color: #fff;">C=0.30</div>
+      </div>
+      <div class="code-block">oklch(60% 0.02 240) → oklch(60% 0.30 240)</div>
+    </div>
+
+    <div class="section">
+      <h2>常见颜色参考值</h2>
+      <div class="color-grid">
+        <div class="color-swatch" style="background: oklch(55% 0.22 25); color: #fff;">红 oklch(55% 0.22 25)</div>
+        <div class="color-swatch" style="background: oklch(70% 0.19 55); color: #000;">橙 oklch(70% 0.19 55)</div>
+        <div class="color-swatch" style="background: oklch(80% 0.18 85); color: #000;">黄 oklch(80% 0.18 85)</div>
+        <div class="color-swatch" style="background: oklch(60% 0.18 145); color: #000;">绿 oklch(60% 0.18 145)</div>
+        <div class="color-swatch" style="background: oklch(60% 0.18 200); color: #000;">青 oklch(60% 0.18 200)</div>
+        <div class="color-swatch" style="background: oklch(55% 0.22 265); color: #fff;">蓝 oklch(55% 0.22 265)</div>
+        <div class="color-swatch" style="background: oklch(55% 0.20 320); color: #fff;">紫 oklch(55% 0.20 320)</div>
+        <div class="color-swatch" style="background: oklch(65% 0.20 350); color: #000;">粉 oklch(65% 0.20 350)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>黑白灰中性色</h2>
+      <div class="color-grid">
+        <div class="color-swatch" style="background: oklch(100% 0 0); color: #000;">白 oklch(100% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(95% 0 0); color: #000;">95% oklch(95% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(85% 0 0); color: #000;">85% oklch(85% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(70% 0 0); color: #000;">70% oklch(70% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(55% 0 0); color: #fff;">55% oklch(55% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(40% 0 0); color: #fff;">40% oklch(40% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(25% 0 0); color: #fff;">25% oklch(25% 0 0)</div>
+        <div class="color-swatch" style="background: oklch(0% 0 0); color: #fff;">黑 oklch(0% 0 0)</div>
+      </div>
+      <p class="info" style="margin-top:12px;">中性色通过 C=0（无色度）实现，L 值从 100%（白）到 0%（黑）均匀变化。</p>
+    </div>
+  </div>
+</body>
+</html>

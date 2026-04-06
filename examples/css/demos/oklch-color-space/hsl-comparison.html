@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKLCH vs HSL 对比</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #c9d1d9; margin: 16px 0 8px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compare-box { background: #21262d; border-radius: 6px; padding: 12px; }
+    .compare-box h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .compare-box .tag { font-size: 10px; padding: 2px 6px; border-radius: 3px; }
+    .tag-oklch { background: #238636; color: #fff; }
+    .tag-hsl { background: #f78166; color: #fff; }
+    .tag-rgb { background: #f0883e; color: #fff; }
+
+    /* 颜色条 */
+    .color-row { display: flex; margin-bottom: 8px; }
+    .color-row .label { width: 60px; font-size: 11px; color: #8b949e; display: flex; align-items: center; }
+    .color-row .bars { flex: 1; display: flex; gap: 4px; }
+    .color-row .bar { flex: 1; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: monospace; }
+
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .problem-box { background: rgba(248, 81, 73, 0.1); border: 1px solid #f85149; border-radius: 4px; padding: 12px; margin-top: 12px; }
+    .problem-box h4 { color: #f85149; font-size: 12px; margin-bottom: 8px; }
+    .problem-box p { color: #f0883e; font-size: 12px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OKLCH vs HSL vs RGB 对比</h1>
+
+    <div class="section">
+      <h2>亮度感知对比</h2>
+      <p class="info">
+        HSL 的 L 值与 RGB 一样基于简单算术平均，与人眼实际感知不完全匹配。<br>
+        OKLCH 的 L 值基于视觉感知模型，更准确反映人眼对明暗的判断。
+      </p>
+
+      <h3>纯色亮度对比（相同 L 值）</h3>
+      <div class="comparison-grid">
+        <div class="compare-box">
+          <h4>HSL <span class="tag tag-hsl">有问题</span></h4>
+          <div class="color-row">
+            <div class="label">红 H=0</div>
+            <div class="bars"><div class="bar" style="background: hsl(0 100% 50%); color: #fff;">L=50%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">黄 H=60</div>
+            <div class="bars"><div class="bar" style="background: hsl(60 100% 50%); color: #000;">L=50%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">绿 H=120</div>
+            <div class="bars"><div class="bar" style="background: hsl(120 100% 50%); color: #000;">L=50%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">蓝 H=240</div>
+            <div class="bars"><div class="bar" style="background: hsl(240 100% 50%); color: #fff;">L=50%</div></div>
+          </div>
+          <div class="problem-box">
+            <h4>问题</h4>
+            <p>虽然 L 都是 50%，但蓝色看起来比黄色暗得多。HSL 的 L 无法准确反映视觉亮度。</p>
+          </div>
+        </div>
+        <div class="compare-box">
+          <h4>OKLCH <span class="tag tag-oklch">正确</span></h4>
+          <div class="color-row">
+            <div class="label">红 H=25</div>
+            <div class="bars"><div class="bar" style="background: oklch(55% 0.22 25); color: #fff;">L=55%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">黄 H=85</div>
+            <div class="bars"><div class="bar" style="background: oklch(80% 0.18 85); color: #000;">L=80%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">绿 H=145</div>
+            <div class="bars"><div class="bar" style="background: oklch(60% 0.18 145); color: #000;">L=60%</div></div>
+          </div>
+          <div class="color-row">
+            <div class="label">蓝 H=265</div>
+            <div class="bars"><div class="bar" style="background: oklch(45% 0.22 265); color: #fff;">L=45%</div></div>
+          </div>
+          <div class="info" style="background:#23863620; border-color:#238636;">
+            ✅ 每个颜色的 L 值都经过调整，使其在视觉上亮度一致。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>灰度陷阱</h2>
+      <p class="info">
+        HSL 在色相间插值时，颜色容易经过低饱和度的灰色区域，造成"褪色"效果。
+      </p>
+
+      <h3>红 → 蓝 渐变插值</h3>
+      <div class="comparison-grid">
+        <div class="compare-box">
+          <h4>HSL <span class="tag tag-hsl">灰度陷阱</span></h4>
+          <div style="background: linear-gradient(to right, hsl(0 100% 50%), hsl(30 70% 45%), hsl(60 50% 45%), hsl(90 40% 45%), hsl(120 35% 42%), hsl(150 30% 40%), hsl(180 28% 40%), hsl(210 30% 40%), hsl(240 40% 42%); height: 60px; border-radius: 4px;"></div>
+          <div class="code-block">hsl(0 100% 50%) → ... → hsl(240 100% 50%)</div>
+          <p style="color:#f0883e; font-size:11px; margin-top:8px;">中间色明显发灰，饱和度下降</p>
+        </div>
+        <div class="compare-box">
+          <h4>OKLCH <span class="tag tag-oklch">平滑</span></h4>
+          <div style="background: linear-gradient(to right, oklch(55% 0.22 25), oklch(55% 0.22 70), oklch(55% 0.22 115), oklch(55% 0.22 160), oklch(55% 0.22 205), oklch(55% 0.22 250), oklch(45% 0.22 295), oklch(45% 0.22 340), oklch(45% 0.22 25)); height: 60px; border-radius: 4px;"></div>
+          <div class="code-block">oklch(55% 0.22 25) → oklch(45% 0.22 265)</div>
+          <p style="color:#3fb950; font-size:11px; margin-top:8px;">色彩饱和度保持一致，过渡平滑</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>色阶构建对比</h2>
+      <p class="info">
+        使用 HSL 构建色阶时，通常需要同时调整 H、S、L 三个值才能保持视觉一致性。<br>
+        OKLCH 只需要调整 L 值即可，因为 C 和 H 是固定的。
+      </p>
+
+      <h3>蓝色阶（L 值变化）</h3>
+      <div class="comparison-grid">
+        <div class="compare-box">
+          <h4>HSL <span class="tag tag-hsl">需要调 S</span></h4>
+          <div style="display:flex; gap:4px; height:40px;">
+            <div style="flex:1; background:hsl(240 100% 95%); border-radius:4px;" title="hsl(240 100% 95%)"></div>
+            <div style="flex:1; background:hsl(240 80% 88%); border-radius:4px;" title="hsl(240 80% 88%)"></div>
+            <div style="flex:1; background:hsl(240 65% 75%); border-radius:4px;" title="hsl(240 65% 75%)"></div>
+            <div style="flex:1; background:hsl(240 55% 60%); border-radius:4px;" title="hsl(240 55% 60%)"></div>
+            <div style="flex:1; background:hsl(240 50% 50%); border-radius:4px;" title="hsl(240 50% 50%)"></div>
+            <div style="flex:1; background:hsl(240 45% 40%); border-radius:4px;" title="hsl(240 45% 40%)"></div>
+            <div style="flex:1; background:hsl(240 40% 30%); border-radius:4px;" title="hsl(240 40% 30%)"></div>
+          </div>
+          <div class="code-block" style="font-size:10px;">hsl(240 100% 95%)<br>hsl(240 80% 88%)<br>...</div>
+        </div>
+        <div class="compare-box">
+          <h4>OKLCH <span class="tag tag-oklch">只需调 L</span></h4>
+          <div style="display:flex; gap:4px; height:40px;">
+            <div style="flex:1; background:oklch(97% 0.02 250); border-radius:4px;" title="oklch(97% 0.02 250)"></div>
+            <div style="flex:1; background:oklch(93% 0.04 250); border-radius:4px;" title="oklch(93% 0.04 250)"></div>
+            <div style="flex:1; background:oklch(85% 0.08 250); border-radius:4px;" title="oklch(85% 0.08 250)"></div>
+            <div style="flex:1; background:oklch(75% 0.12 250); border-radius:4px;" title="oklch(75% 0.12 250)"></div>
+            <div style="flex:1; background:oklch(65% 0.16 250); border-radius:4px;" title="oklch(65% 0.16 250)"></div>
+            <div style="flex:1; background:oklch(55% 0.20 250); border-radius:4px;" title="oklch(55% 0.20 250)"></div>
+            <div style="flex:1; background:oklch(45% 0.18 250); border-radius:4px;" title="oklch(45% 0.18 250)"></div>
+          </div>
+          <div class="code-block" style="font-size:10px;">oklch(97% 0.02 250)<br>oklch(93% 0.04 250)<br>...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>总结对比表</h2>
+      <table style="width:100%; border-collapse: collapse; font-size:12px;">
+        <thead>
+          <tr style="border-bottom: 1px solid #30363d;">
+            <th style="text-align:left; padding:8px; color:#f0f6fc;">特性</th>
+            <th style="text-align:center; padding:8px; color:#f0f6fc;">RGB</th>
+            <th style="text-align:center; padding:8px; color:#f0f6fc;">HSL</th>
+            <th style="text-align:center; padding:8px; color:#f0f6fc;">OKLCH</th>
+          </tr>
+        </thead>
+        <tbody style="color:#c9d1d9;">
+          <tr style="border-bottom: 1px solid #21262d;">
+            <td style="padding:8px;">可读性</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#c9d1d9;">⚠️</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #21262d;">
+            <td style="padding:8px;">感知均匀</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #21262d;">
+            <td style="padding:8px;">亮度准确</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #21262d;">
+            <td style="padding:8px;">颜色插值</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #21262d;">
+            <td style="padding:8px;">饱和度控制</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#c9d1d9;">⚠️</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;">设计 Token</td>
+            <td style="text-align:center; color:#f0883e;">❌</td>
+            <td style="text-align:center; color:#c9d1d9;">⚠️</td>
+            <td style="text-align:center; color:#3fb950;">✅</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

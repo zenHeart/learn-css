@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKLCH 颜色插值对比</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #c9d1d9; margin: 12px 0 8px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .gradient-bar { height: 80px; border-radius: 8px; margin-top: 12px; }
+    .gradient-rgb { background: linear-gradient(to right, rgb(255 0 0), rgb(0 0 255)); }
+    .gradient-hsl { background: linear-gradient(to right, hsl(0 100% 50%), hsl(240 100% 50%)); }
+    .gradient-oklch { background: linear-gradient(to right, oklch(55% 0.25 25), oklch(45% 0.25 265)); }
+    .color-strip { display: flex; height: 40px; border-radius: 4px; overflow: hidden; margin-top: 12px; }
+    .color-strip > div { flex: 1; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .compare-item { background: #21262d; border-radius: 6px; padding: 12px; }
+    .compare-item h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+    .compare-item .gradient { height: 60px; border-radius: 4px; margin-bottom: 8px; }
+    .warning-text { color: #f78166; font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OKLCH 颜色插值对比</h1>
+
+    <div class="section">
+      <h2>核心问题：RGB/HSL 插值的缺陷</h2>
+      <p class="info">
+        在 RGB 和 HSL 颜色空间中，数值的变化与人眼感知不完全对应。<br>
+        这导致颜色插值（渐变、动画）时会出现不自然的中间色。
+      </p>
+
+      <div class="comparison-grid">
+        <div class="compare-item">
+          <h4>RGB 插值（❌ 不推荐）</h4>
+          <div class="gradient gradient-rgb"></div>
+          <div class="code-block" style="margin:0; font-size:11px;">linear-gradient(to right,<br>&nbsp;&nbsp;rgb(255 0 0), rgb(0 0 255))</div>
+          <p class="warning-text">⚠️ 中间色经过紫色调，路径不可预测</p>
+        </div>
+        <div class="compare-item">
+          <h4>HSL 插值（⚠️ 有问题）</h4>
+          <div class="gradient gradient-hsl"></div>
+          <div class="code-block" style="margin:0; font-size:11px;">linear-gradient(to right,<br>&nbsp;&nbsp;hsl(0 100% 50%), hsl(240 100% 50%))</div>
+          <p class="warning-text">⚠️ 中间色变得灰暗（灰度陷阱）</p>
+        </div>
+      </div>
+
+      <div class="compare-item" style="margin-top:16px; max-width:420px;">
+        <h4>OKLCH 插值（✅ 推荐）</h4>
+        <div class="gradient gradient-oklch"></div>
+        <div class="code-block" style="margin:0; font-size:11px;">linear-gradient(to right,<br>&nbsp;&nbsp;oklch(55% 0.25 25), oklch(45% 0.25 265))</div>
+        <p class="info" style="margin-top:8px;">✅ 路径平滑，色彩饱满，视觉一致</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>灰度陷阱（HSL Gray Hole）</h2>
+      <p class="info">
+        HSL 插值时，颜色容易经过低饱和度的灰色区域，造成"褪色"效果。<br>
+        这是因为 HSL 的 S（饱和度）不是基于感知均匀的模型。
+      </p>
+
+      <h3>红 → 绿 插值对比</h3>
+      <div class="color-strip">
+        <div style="background: hsl(0 100% 50%);"></div>
+        <div style="background: hsl(40 80% 45%);"></div>
+        <div style="background: hsl(80 60% 45%);"></div>
+        <div style="background: hsl(120 50% 45%);"></div>
+      </div>
+      <p style="font-size:11px; color:#8b949e; margin-top:4px;">HSL：中间色明显变暗变灰</p>
+
+      <div class="color-strip" style="margin-top:8px;">
+        <div style="background: oklch(55% 0.22 145);"></div>
+        <div style="background: oklch(58% 0.20 130);"></div>
+        <div style="background: oklch(60% 0.18 115);"></div>
+        <div style="background: oklch(62% 0.16 100);"></div>
+        <div style="background: oklch(64% 0.14 85);"></div>
+        <div style="background: oklch(66% 0.12 70);"></div>
+        <div style="background: oklch(68% 0.10 55);"></div>
+        <div style="background: oklch(70% 0.08 40);"></div>
+        <div style="background: oklch(72% 0.06 25);"></div>
+        <div style="background: oklch(55% 0.22 25);"></div>
+      </div>
+      <p style="font-size:11px; color:#8b949e; margin-top:4px;">OKLCH：色彩饱满过渡均匀</p>
+    </div>
+
+    <div class="section">
+      <h2>动画中的颜色过渡</h2>
+      <p class="info">
+        OKLCH 的感知均匀性让它成为 CSS 动画中颜色过渡的最佳选择。<br>
+        无论是 hue 旋转、色阶切换还是主题动画，都应该使用 OKLCH。
+      </p>
+
+      <h3>Hue 旋转动画对比</h3>
+      <div class="color-strip">
+        <div style="background: oklch(60% 0.20 0); animation: hue-rotate 4s linear infinite;"></div>
+      </div>
+      <p style="font-size:11px; color:#8b949e; margin-top:4px;">OKLCH：色相平滑旋转（0° → 360°）</p>
+
+      <style>
+        @keyframes hue-rotate {
+          from { background: oklch(60% 0.20 0); }
+          50% { background: oklch(60% 0.20 180); }
+          to { background: oklch(60% 0.20 360); }
+        }
+      </style>
+
+      <h3 style="margin-top:16px;">饱和度脉动</h3>
+      <div class="color-strip">
+        <div style="background: oklch(55% 0.25 265); animation: chroma-pulse 2s ease-in-out infinite;"></div>
+      </div>
+      <p style="font-size:11px; color:#8b949e; margin-top:4px;">OKLCH：C 值 0.1 → 0.3 脉动，饱和度变化均匀</p>
+
+      <style>
+        @keyframes chroma-pulse {
+          0%, 100% { background: oklch(55% 0.10 265); }
+          50% { background: oklch(55% 0.30 265); }
+        }
+      </style>
+    </div>
+
+    <div class="section">
+      <h2>彩虹渐变</h2>
+      <div style="background: linear-gradient(to right, oklch(60% 0.22 0), oklch(60% 0.22 60), oklch(60% 0.22 120), oklch(60% 0.22 180), oklch(60% 0.22 240), oklch(60% 0.22 300), oklch(60% 0.22 360)); height: 80px; border-radius: 8px; margin-top: 12px;"></div>
+      <div class="code-block">background: linear-gradient(to right,<br>&nbsp;&nbsp;oklch(60% 0.22 0),   /* 红 0° */<br>&nbsp;&nbsp;oklch(60% 0.22 60),   /* 黄 60° */<br>&nbsp;&nbsp;oklch(60% 0.22 120),  /* 绿 120° */<br>&nbsp;&nbsp;oklch(60% 0.22 180),  /* 青 180° */<br>&nbsp;&nbsp;oklch(60% 0.22 240),  /* 蓝 240° */<br>&nbsp;&nbsp;oklch(60% 0.22 300),  /* 品红 300° */<br>&nbsp;&nbsp;oklch(60% 0.22 360)); /* 红 360° */</div>
+    </div>
+  </div>
+</body>
+</html>

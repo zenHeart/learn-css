@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKLCH 设计 Token 策略</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; transition: background 0.3s, color 0.3s; }
+    :root {
+      /* 品牌色 Token */
+      --brand-hue: 240;
+      --brand-chroma: 0.22;
+      --brand-lightness-base: 0.55;
+
+      /* 语义化颜色 */
+      --bg: oklch(98% 0.01 240);
+      --bg-secondary: oklch(94% 0.02 240);
+      --text: oklch(20% 0.02 240);
+      --text-secondary: oklch(50% 0.02 240);
+      --border: oklch(85% 0.02 240);
+
+      /* 主题色 */
+      --primary: oklch(var(--brand-lightness-base) var(--brand-chroma) var(--brand-hue));
+      --primary-hover: oklch(48% var(--brand-chroma) var(--brand-hue));
+      --primary-light: oklch(93% calc(var(--brand-chroma) * 0.3) var(--brand-hue));
+
+      /* 功能色 */
+      --success: oklch(60% 0.18 145);
+      --warning: oklch(75% 0.18 85);
+      --danger: oklch(55% 0.22 25);
+    }
+
+    [data-theme="dark"] {
+      --bg: oklch(18% 0.02 240);
+      --bg-secondary: oklch(22% 0.02 240);
+      --text: oklch(90% 0.01 240);
+      --text-secondary: oklch(70% 0.01 240);
+      --border: oklch(35% 0.02 240);
+      --primary-hover: oklch(65% calc(var(--brand-chroma) * 0.8) var(--brand-hue));
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: var(--text); }
+    h2 { font-size: 16px; color: var(--text); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 14px; color: var(--text); margin: 12px 0 8px; }
+    .section { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .info { font-size: 12px; color: var(--text-secondary); margin-top: 8px; padding: 12px; background: var(--bg); border-radius: 4px; line-height: 1.6; }
+
+    /* 按钮 */
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* 色阶 */
+    .color-scale { display: flex; gap: 4px; margin-top: 12px; }
+    .color-scale > div { flex: 1; height: 48px; border-radius: 4px; display: flex; align-items: flex-end; justify-content: center; padding: 4px; font-size: 10px; font-family: monospace; color: #000; }
+
+    /* 主题切换 */
+    .theme-toggle { position: fixed; top: 24px; right: 24px; }
+    .btn-toggle { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-toggle:hover { background: var(--border); }
+
+    /* 卡片 */
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 12px; }
+    .card h3 { margin-top: 0; }
+    .card p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="theme-toggle">
+    <button class="btn-toggle" onclick="toggleTheme()">🌙 切换主题</button>
+  </div>
+
+  <div class="container">
+    <h1>OKLCH 设计 Token 策略</h1>
+
+    <div class="section">
+      <h2>策略 1：色相饱和度分离</h2>
+      <p class="info">
+        将 H（色相）和 C（饱和度）作为基础变量，通过调整单一变量实现整体色调变化。<br>
+        当前品牌色相：<strong id="brand-hue-display">240°</strong>
+      </p>
+
+      <h3>固定色相，改变亮度构建色阶</h3>
+      <div class="color-scale" id="lightness-scale"></div>
+      <div class="code-block" style="font-size:11px; margin-top:8px;">
+        oklch(var(--L) var(--brand-chroma) var(--brand-hue))
+      </div>
+
+      <h3>固定亮度和色相，改变色度（饱和度）</h3>
+      <div class="color-scale">
+        <div style="background: oklch(55% 0.02 240);"></div>
+        <div style="background: oklch(55% 0.06 240);"></div>
+        <div style="background: oklch(55% 0.10 240);"></div>
+        <div style="background: oklch(55% 0.14 240);"></div>
+        <div style="background: oklch(55% 0.18 240);"></div>
+        <div style="background: oklch(55% 0.22 240);"></div>
+        <div style="background: oklch(55% 0.26 240);"></div>
+        <div style="background: oklch(55% 0.30 240);"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>策略 2：语义化 Token</h2>
+      <p class="info">
+        从基础色构建语义化 token（primary、success、danger 等），使设计系统层级清晰。
+      </p>
+
+      <h3>功能色按钮</h3>
+      <div class="btn-group">
+        <button class="btn btn-primary">主要按钮</button>
+        <button class="btn btn-success">成功</button>
+        <button class="btn btn-warning">警告</button>
+        <button class="btn btn-danger">危险</button>
+      </div>
+
+      <h3 style="margin-top:20px;">语义化背景与文字</h3>
+      <div class="card">
+        <h3>卡片标题</h3>
+        <p>这是一张使用语义化 token 的卡片，背景色、文字色都通过 CSS 变量引用。</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>策略 3：暗色模式适配</h2>
+      <p class="info">
+        OKLCH 的感知均匀性让暗色模式转换更可控。<br>
+        注意暗色模式下通常需要降低 C 值，避免过于鲜艳。
+      </p>
+
+      <div class="btn-group">
+        <button class="btn btn-primary">主要按钮</button>
+        <button class="btn btn-success">成功</button>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>卡片 1</h3>
+          <p>暗色模式下，饱和度适当降低，避免视觉疲劳。</p>
+        </div>
+        <div class="card">
+          <h3>卡片 2</h3>
+          <p>背景色使用低色度值，保持中性不偏色。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>完整 Token 示例</h2>
+      <div class="code-block" style="white-space: pre-wrap; font-size: 11px;">
+:root {
+  /* 品牌变量 */
+  --brand-hue: 240;
+  --brand-chroma: 0.22;
+  --brand-lightness-base: 0.55;
+
+  /* 语义化 token */
+  --color-primary: oklch(var(--brand-lightness-base) var(--brand-chroma) var(--brand-hue));
+  --color-primary-hover: oklch(48% var(--brand-chroma) var(--brand-hue));
+  --color-success: oklch(60% 0.18 145);
+  --color-warning: oklch(75% 0.18 85);
+  --color-danger: oklch(55% 0.22 25);
+
+  /* 中性色 */
+  --gray-50: oklch(98% 0.01 var(--brand-hue));
+  --gray-100: oklch(95% 0.01 var(--brand-hue));
+  --gray-200: oklch(85% 0.02 var(--brand-hue));
+  --gray-300: oklch(70% 0.02 var(--brand-hue));
+  --gray-400: oklch(55% 0.02 var(--brand-hue));
+  --gray-500: oklch(45% 0.02 var(--brand-hue));
+  --gray-600: oklch(35% 0.02 var(--brand-hue));
+  --gray-700: oklch(25% 0.02 var(--brand-hue));
+  --gray-800: oklch(18% 0.02 var(--brand-hue));
+  --gray-900: oklch(12% 0.01 var(--brand-hue));
+}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 渲染亮度色阶
+    const lightnessScale = document.getElementById('lightness-scale');
+    const lightnesses = [97, 93, 87, 80, 70, 60, 50, 42, 35, 28, 20];
+    lightnesses.forEach(l => {
+      const div = document.createElement('div');
+      div.style.background = `oklch(${l}% 0.22 240)`;
+      div.textContent = l === 97 ? '97' : (l < 50 ? Math.round(l) : Math.round(l));
+      div.style.color = l < 60 ? '#fff' : '#000';
+      lightnessScale.appendChild(div);
+    });
+
+    // 主题切换
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? '' : 'dark');
+    }
+  </script>
+</body>
+</html>

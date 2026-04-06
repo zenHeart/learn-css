@@ -1,0 +1,268 @@
+---
+title: "CSS OKLCH 颜色空间详解"
+category: "基础知识"
+tags:
+  - OKLCH
+  - 颜色空间
+  - 色彩管理
+  - CSS颜色
+description: "深入理解 OKLCH 颜色空间：perceptual uniformity、人类可读的 Lightness 设计，以及相比 RGB/HSL 的优势"
+keywords: "OKLCH, CSS颜色, LCH, Lab, 感知均匀, 颜色空间, oklch(), oklab"
+---
+
+# CSS OKLCH 颜色空间详解
+
+## 什么是 OKLCH？
+
+OKLCH（Optical Lightness、Chroma、Hue）是基于 OKLab 颜色空间的一种极坐标表示法，由 Björn Ottosson 提出，被认为是目前 CSS 中最符合人类视觉感知的颜色表示方式。
+
+OKLCH 包含三个参数：
+
+- **L（Lightness）**：亮度，范围 0-1（或 0%-100%），表示颜色的明暗程度
+- **C（Chroma）**：色度，范围约 0-0.4+，表示颜色的饱和程度
+- **H（Hue）**：色相，范围 0-360（度），表示颜色的基本色调
+
+```css
+/* OKLCH 颜色示例 */
+:root {
+  --primary: oklch(50% 0.15 240);  /* 蓝色 */
+  --success: oklch(60% 0.18 145);  /* 绿色 */
+  --warning: oklch(75% 0.18 85);   /* 黄色 */
+  --danger: oklch(55% 0.22 25);    /* 红色 */
+}
+```
+
+## OKLCH 的核心优势
+
+### 1. 感知均匀性（Perceptual Uniformity）
+
+OKLCH 最大的优势在于其**感知均匀性**。在 OKLCH 中，数值的变化对应人眼感知上均匀变化。
+
+这意味着：
+
+- **L 从 0.5 → 0.6 的变化**，在视觉上与 **L 从 0.8 → 0.9 的变化**感知上是一致的
+- **C 值加倍**，饱和度的视觉感受也大约加倍
+- **H 值线性变化**，色相的过渡是平滑自然的
+
+这与 RGB/HSL 形成了鲜明对比——在 RGB 中，同样的数值变化可能带来截然不同的视觉差异。
+
+### 2. 人类可读的 Lightness
+
+OKLCH 的 L 值是真正的**亮度感知值**，比 HSL 中的 L 更准确：
+
+- **HSL 的 L**：基于 RGB 分量的简单算术平均，与人眼实际感知不完全匹配
+- **OKLCH 的 L**：基于视觉感知模型，更符合人眼对明暗的判断
+
+例如，在 HSL 中纯红色的 L 值为 50%，纯蓝色的 L 值也是 50%，但实际上我们会觉得蓝色更暗。
+
+```css
+/* HSL 的问题：L 值相等，但视觉亮度差异明显 */
+.hs-red { background: hsl(0 100% 50%); }
+.hs-blue { background: hsl(240 100% 50%); }
+
+/* OKLCH：L 值真正反映视觉亮度 */
+.ok-red { background: oklch(55% 0.25 25); }
+.ok-blue { background: oklch(45% 0.25 265); }
+```
+
+### 3. 饱和度控制更直观
+
+在 OKLCH 中，**C 值直接代表饱和度**：
+
+- C = 0 表示中性灰（无彩色）
+- C 值越大，颜色越鲜艳
+- C 值上限取决于 L 和 H 的组合（色彩空间边界）
+
+这意味着你可以安全地调整 C 值来控制饱和度，而不用担心出现意外的颜色变化。
+
+## OKLCH vs RGB vs HSL
+
+| 特性 | RGB | HSL | OKLCH |
+|------|-----|-----|-------|
+| **可读性** | 难以直观理解 | 相对直观 | 直观 |
+| **感知均匀性** | ❌ 否 | ❌ 否 | ✅ 是 |
+| **饱和度控制** | ❌ 不直观 | ⚠️ 受限 | ✅ 直观 |
+| **亮度感知** | ❌ 不准确 | ⚠️ 不准确 | ✅ 准确 |
+| **颜色插值** | ❌ 可能过饱和/灰暗 | ❌ 中间调偏移 | ✅ 自然平滑 |
+| **色相一致性** | ❌ 否 | ✅ 基本是 | ✅ 是 |
+| **设计 token** | ⚠️ 不适合 | ⚠️ 不理想 | ✅ 最佳选择 |
+
+### 颜色插值对比
+
+OKLCH 最明显的优势体现在**颜色插值**（动画、渐变）中：
+
+```css
+/* RGB 插值：颜色路径不可预测，可能经过不期望的中间色 */
+.rgb-gradient {
+  background: linear-gradient(to right, rgb(255 0 0), rgb(0 0 255));
+}
+
+/* HSL 插值：中间色可能变得灰暗（灰度陷阱） */
+.hsl-gradient {
+  background: linear-gradient(to right, hsl(0 100% 50%), hsl(240 100% 50%));
+}
+
+/* OKLCH 插值：路径平滑，色彩饱满 */
+.oklch-gradient {
+  background: linear-gradient(to right, oklch(55% 0.25 25), oklch(45% 0.25 265));
+}
+```
+
+{/* @playground id="color-interpolation" mode="demo" */}
+
+## 浏览器支持
+
+OKLCH 在现代浏览器中已获得良好支持：
+
+| 浏览器 | 支持版本 |
+|--------|----------|
+| Chrome | 111+ |
+| Firefox | 113+ |
+| Safari | 16.2+ |
+| Edge | 111+ |
+
+```css
+/* 使用 @supports 进行渐进增强 */
+.button {
+  background: oklch(50% 0.2 240);  /* 现代浏览器 */
+}
+
+@supports not (color: oklch(0 0 0)) {
+  .button {
+    background: hsl(240 100% 50%); /* 降级方案 */
+  }
+}
+```
+
+## 设计 Token 策略
+
+OKLCH 是构建**设计系统颜色 token** 的理想选择。
+
+### 1. 语义化颜色系统
+
+```css
+:root {
+  /* 基础色板 - OKLCH 定义，色彩准确 */
+  --blue-50: oklch(97% 0.02 250);
+  --blue-100: oklch(93% 0.05 250);
+  --blue-200: oklch(87% 0.10 250);
+  --blue-300: oklch(80% 0.15 250);
+  --blue-400: oklch(70% 0.20 250);
+  --blue-500: oklch(55% 0.25 250);
+  --blue-600: oklch(48% 0.25 250);
+  --blue-700: oklch(42% 0.23 250);
+  --blue-800: oklch(36% 0.20 250);
+  --blue-900: oklch(30% 0.16 250);
+
+  /* 语义化 token */
+  --color-primary: var(--blue-500);
+  --color-primary-hover: var(--blue-600);
+  --color-text-primary: var(--blue-900);
+  --color-bg: var(--blue-50);
+}
+```
+
+{/* @playground id="semantic-tokens" mode="demo" */}
+
+### 2. 色相饱和度分离
+
+OKLCH 让你可以独立控制色相和饱和度：
+
+```css
+:root {
+  /* 固定 L 和 C，只改变 H */
+  --brand-hue: 240;
+  --brand-chroma: 0.22;
+  --brand-lightness: 0.55;
+
+  --brand-50: oklch(97% var(--brand-chroma) var(--brand-hue));
+  --brand-100: oklch(93% var(--brand-chroma) var(--brand-hue));
+  --brand-500: oklch(var(--brand-lightness) var(--brand-chroma) var(--brand-hue));
+  --brand-900: oklch(32% var(--brand-chroma) var(--brand-hue));
+}
+```
+
+这样，通过修改 `--brand-hue`，可以轻松切换整个品牌的色调。
+
+### 3. 响应式与无障碍
+
+OKLCH 的感知均匀性让无障碍对比度计算更可靠：
+
+```css
+:root {
+  /* OKLCH 让 L 值差直接对应对比度感知 */
+  --text-dark: oklch(20% 0.05 240);
+  --text-light: oklch(95% 0.02 240);
+}
+
+/* 高对比度组合 */
+.contrast-pass {
+  color: var(--text-light);
+  background: var(--text-dark);
+}
+```
+
+### 4. 暗色模式适配
+
+```css
+:root {
+  --surface: oklch(98% 0.01 240);
+  --surface-dark: oklch(20% 0.02 240);
+}
+
+[data-theme="dark"] {
+  --surface: var(--surface-dark);
+}
+
+/* 注意：暗色模式下通常需要降低 C 值避免过于鲜艳 */
+[data-theme="dark"] {
+  --brand-500: oklch(55% 0.15 240);  /* 降低饱和度 */
+}
+```
+
+## 转换工具与资源
+
+### 与其他颜色空间转换
+
+```css
+/* Chrome DevTools 支持直接查看和转换 OKLCH */
+/* 在 DevTools Color Picker 中选择 OKLCH 格式 */
+```
+
+### 常用参考值
+
+```css
+/* 纯白 */
+--white: oklch(100% 0 0);
+
+/* 纯黑 */
+--black: oklch(0% 0 0);
+
+/* 中性灰（亮度 50%） */
+--gray-500: oklch(50% 0 0);
+
+/* 常见颜色的 OKLCH 参考值 */
+--red: oklch(55% 0.22 25);
+--orange: oklch(70% 0.19 55);
+--yellow: oklch(80% 0.18 85);
+--green: oklch(60% 0.18 145);
+--cyan: oklch(60% 0.18 200);
+--blue: oklch(55% 0.22 265);
+--purple: oklch(55% 0.20 320);
+--pink: oklch(65% 0.20 350);
+```
+
+## 最佳实践
+
+1. **优先使用 OKLCH**：在新项目中，将 OKLCH 作为主要颜色定义方式
+2. **保持 C 值适中**：C 值超过 0.25 时颜色会非常鲜艳，根据需要调整
+3. **利用 L 值构建色阶**：色阶变化主要通过 L 值实现，保持 H 和 C 一致性
+4. **注意色彩边界**：不同 L/H 组合下 C 的最大值不同，超出范围会被截断
+5. **渐进增强**：使用 `@supports` 为不支持的浏览器提供 HSL 降级方案
+
+## 参考资料
+
+- [A Guide to OKLCH in CSS](https://keekjgrant.com/posts/2023/04/its-time-to-learn-oklch-color/)
+- [OKLab Color Space - Björn Ottosson](https://bottosson.github.io/posts/oklab/)
+- [CSS Color Module Level 4 - W3C](https://www.w3.org/TR/css-color-4/)
+- [Color.js](https://colorjs.io/) - 颜色操作与转换工具
