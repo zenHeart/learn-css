@@ -1,0 +1,153 @@
+---
+title: "CSS perspective 与 preserve-3d"
+category: "动画"
+tags:
+  - CSS
+  - perspective
+  - preserve-3d
+  - 3D透视
+  - CSS 3D
+description: "详解CSS perspective属性和preserve-3d实现3D透视效果"
+keywords: "perspective, preserve-3d, 3D透视, CSS 3D效果"
+---
+
+# CSS perspective 与 preserve-3d
+
+## 概述
+
+`perspective` 属性定义透视距离，创造 3D 视觉效果。`transform-style: preserve-3d` 则用于保留子元素的 3D 空间。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## perspective 属性
+
+### 语法
+
+```css
+.scene {
+  perspective: 500px;
+  /* 值越小，透视效果越强，3D 感越明显 */
+}
+```
+
+### 值
+
+| 值 | 说明 |
+|---|------|
+| `none` | 不应用透视（默认） |
+| `<length>` | 透视距离，如 500px、1000px |
+
+{/* @playground id="perspective-demo" mode="demo" */}
+
+## transform-style: preserve-3d
+
+用于保留子元素的 3D 空间，使子元素可以相对于父元素进行 3D 变换：
+
+```css
+.parent {
+  transform-style: preserve-3d;
+}
+```
+
+## 两者的区别
+
+| 属性 | 作用对象 | 说明 |
+|------|---------|------|
+| `perspective` | 舞台/容器 | 定义透视点，观察 3D 场景的角度 |
+| `transform-style: preserve-3d` | 子元素 | 保留子元素的 3D 坐标系统 |
+
+## 使用场景
+
+### 1. 3D 卡片效果
+
+```css
+.card-container {
+  perspective: 1000px;
+}
+
+.card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.card:hover {
+  transform: rotateY(180deg);
+}
+```
+
+### 2. 3D 画廊
+
+```css
+.gallery {
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+.photo {
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+}
+
+.photo:hover {
+  transform: translateZ(50px) rotateX(-10deg);
+}
+```
+
+### 3. 3D 按钮效果
+
+```css
+.button-container {
+  perspective: 500px;
+}
+
+.button {
+  transform-style: preserve-3d;
+  transition: transform 0.2s;
+}
+
+.button:hover {
+  transform: rotateX(-15deg) translateY(-5px);
+}
+```
+
+## perspective-origin 属性
+
+定义透视原点：
+
+```css
+.scene {
+  perspective: 500px;
+  perspective-origin: center center; /* 默认：中心 */
+  /* 或使用具体位置 */
+  perspective-origin: top right;
+  perspective-origin: 75% 25%;
+}
+```
+
+## 浏览器兼容性
+
+`perspective` 和 `transform-style` 兼容性良好：
+
+- Chrome 36+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 性能优化
+
+1. **适度使用**：过多的 3D 元素会影响性能
+2. **使用 will-change**：
+
+```css
+.animated-3d {
+  will-change: transform;
+}
+```
+
+3. **避免触发重排**：只对 transform 和 opacity 进行动画
+
+## 参考资料
+
+- [perspective - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective)
+- [transform-style - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style)
+- [CSS Transforms - CSS-Tricks](https://css-tricks.com/almanac/properties/p/perspective/)
