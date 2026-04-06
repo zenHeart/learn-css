@@ -27,6 +27,11 @@
     .slider { flex: 1; -webkit-appearance: none; height: 6px; background: #30363d; border-radius: 3px; outline: none; }
     .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
     .slider-value { min-width: 50px; text-align: center; font-size: 12px; color: #79c0ff; }
+<<<<<<< Updated upstream
+=======
+    .color-strip { display: flex; width: 100%; height: 60px; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    .color-strip-item { display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+>>>>>>> Stashed changes
   </style>
 </head>
 <body>
@@ -34,6 +39,10 @@
     <h1>CSS color-mix() 颜色混合函数</h1>
     <p class="subtitle">CSS Color Level 5 规范 | 交互演示</p>
 
+<<<<<<< Updated upstream
+=======
+    <!-- 基础用法 -->
+>>>>>>> Stashed changes
     <div class="section">
       <h2>基础用法 — 50% 混合</h2>
       <div class="demo-area">
@@ -41,10 +50,19 @@
         <div class="color-box large" id="mixed" style="background: rgb(128, 0, 128);">Mixed</div>
         <div class="color-box" style="background: red;">Red</div>
       </div>
+<<<<<<< Updated upstream
       <div class="code-block">color-mix(in srgb, blue 50%, red);</div>
       <p class="desc"><span class="tag">srgb</span> 是默认颜色空间。50% 表示两种颜色各占一半。</p>
     </div>
 
+=======
+      <div class="code-block">/* 50% 混合，默认使用 srgb 颜色空间 */
+color-mix(in srgb, blue 50%, red);</div>
+      <p class="desc"><span class="tag">srgb</span> 是默认颜色空间，也是最常用的。50% 表示两种颜色各占一半。</p>
+    </div>
+
+    <!-- 混合比例调整 -->
+>>>>>>> Stashed changes
     <div class="section">
       <h2>混合比例调整</h2>
       <div class="slider-container">
@@ -58,8 +76,15 @@
         <div class="color-box" style="background: red;">Red</div>
       </div>
       <div class="code-block" id="ratio-code">color-mix(in srgb, blue 30%, red);</div>
+<<<<<<< Updated upstream
     </div>
 
+=======
+      <p class="desc">拖动滑块调整蓝色和红色的混合比例。</p>
+    </div>
+
+    <!-- 不同颜色空间 -->
+>>>>>>> Stashed changes
     <div class="section">
       <h2>不同颜色空间对比</h2>
       <div class="controls" id="colorspace-controls">
@@ -69,12 +94,22 @@
         <button class="btn" data-space="lab">lab</button>
       </div>
       <div class="demo-area" style="justify-content: center;">
+<<<<<<< Updated upstream
         <div class="color-box large" id="space-result" style="background: rgb(128, 68, 0);">50/50</div>
       </div>
       <div class="code-block" id="space-code">color-mix(in srgb, #0000ff 50%, #ff8800);</div>
       <p class="desc"><span class="tag">oklch</span> 和 <span class="tag">lab</span> 提供更符合人眼感知的混合效果。</p>
     </div>
 
+=======
+        <div class="color-box" id="space-result" style="background: rgb(128, 68, 0);">50/50</div>
+      </div>
+      <div class="code-block" id="space-code">color-mix(in srgb, #0000ff 50%, #ff8800);</div>
+      <p class="desc"><span class="tag">srgb</span> 最常用但混合可能不自然。<span class="tag">oklch</span> 和 <span class="tag">lab</span> 提供更符合人眼感知的混合效果。</p>
+    </div>
+
+    <!-- 主题色生成 -->
+>>>>>>> Stashed changes
     <div class="section">
       <h2>实际应用：主题色变体生成</h2>
       <div class="demo-area">
@@ -82,7 +117,13 @@
         <div class="color-box" id="theme-lighter" style="background: rgb(204, 229, 255); color: #333;">Lighter</div>
         <div class="color-box" id="theme-darker" style="background: rgb(0, 62, 153);">Darker</div>
       </div>
+<<<<<<< Updated upstream
       <div class="code-block">--primary-lighter: color-mix(in srgb, var(--primary) 20%, white);
+=======
+      <div class="code-block">/* 基于主题色生成浅色和深色变体 */
+--primary: #007bff;
+--primary-lighter: color-mix(in srgb, var(--primary) 20%, white);
+>>>>>>> Stashed changes
 --primary-darker: color-mix(in srgb, var(--primary) 70%, black);</div>
       <div class="controls" style="margin-top: 12px;">
         <button class="btn" id="theme-blue">蓝色</button>
@@ -91,9 +132,17 @@
       </div>
     </div>
 
+<<<<<<< Updated upstream
     <div class="section">
       <h2>浏览器兼容性</h2>
       <div class="info">
+=======
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="info">
+        <p><strong>支持版本：</strong></p>
+>>>>>>> Stashed changes
         <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
           <li>Chrome 111+ ✓</li>
           <li>Firefox 113+ ✓</li>
@@ -105,9 +154,17 @@
   </div>
 
   <script>
+<<<<<<< Updated upstream
     const mixed = document.getElementById('mixed');
     mixed.style.background = 'color-mix(in srgb, blue 50%, red)';
 
+=======
+    // 基础混合示例
+    const mixed = document.getElementById('mixed');
+    mixed.style.background = 'color-mix(in srgb, blue 50%, red)';
+
+    // 比例滑块
+>>>>>>> Stashed changes
     const slider = document.getElementById('ratio-slider');
     const bluePercent = document.getElementById('blue-percent');
     const redPercent = document.getElementById('red-percent');
@@ -123,6 +180,10 @@
       ratioCode.textContent = `color-mix(in srgb, blue ${blue}%, red);`;
     });
 
+<<<<<<< Updated upstream
+=======
+    // 颜色空间切换
+>>>>>>> Stashed changes
     const colorspaceBtns = document.querySelectorAll('#colorspace-controls .btn');
     const spaceResult = document.getElementById('space-result');
     const spaceCode = document.getElementById('space-code');
@@ -137,6 +198,10 @@
       });
     });
 
+<<<<<<< Updated upstream
+=======
+    // 主题色切换
+>>>>>>> Stashed changes
     const themes = {
       blue: { primary: '#007bff', lighter: 'rgb(204, 229, 255)', darker: 'rgb(0, 62, 153)' },
       green: { primary: '#22c55e', lighter: 'rgb(198, 236, 209)', darker: 'rgb(13, 71, 38)' },
