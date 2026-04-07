@@ -1,0 +1,76 @@
+---
+title: CSS line-clamp 多行文本截断
+category: CSS 文本
+tags: [css, line-clamp, text-overflow, truncation, 多行截断, 文本溢出]
+description: 详细介绍 CSS line-clamp 属性如何实现多行文本截断，包括兼容性和使用场景。
+keywords: line-clamp, text-overflow, -webkit-line-clamp, 多行截断, 文本省略, CSS 技巧
+---
+
+`line-clamp` 属性（通常以 `-webkit-line-clamp` 形式使用）可以限制块容器中的文本行数，适合实现"阅读更多"类的多行截断效果。
+
+## 基本概念
+
+`line-clamp` 用于限制多行文本显示，常用于新闻列表、商品卡片等场景，避免长文本破坏布局。
+
+## 语法
+
+```css
+/* 使用 -webkit-line-clamp（需要结合其他属性） */
+display: -webkit-box;
+-webkit-line-clamp: 3;
+-webkit-box-orient: vertical;
+overflow: hidden;
+```
+
+## 完整示例
+
+```css
+.clamp-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;        /* 最多显示3行 */
+  -webkit-box-orient: vertical;  /* 盒子方向设为垂直 */
+  overflow: hidden;              /* 溢出隐藏 */
+  word-break: break-word;        /* 单词断行 */
+}
+```
+
+## 使用场景
+
+### 新闻标题截断
+
+```css
+.news-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+```
+
+### 商品描述截断
+
+```css
+.product-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+## 浏览器支持
+
+- `-webkit-line-clamp` 在 Chrome、Safari、Opera 等 WebKit 内核浏览器中支持
+- Firefox 不支持该属性
+- 建议结合 `overflow: hidden` 使用
+
+## 交互式演示
+
+{/* @playground id="css-line-clamp" mode="demo" */}
+
+## 总结
+
+- 使用 `-webkit-line-clamp` 实现多行截断
+- 需要配合 `display: -webkit-box` 和 `-webkit-box-orient: vertical`
+- 适合标题、描述等需要限制行数的场景
