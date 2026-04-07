@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS hyphens 自动断字演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    .demo-section p {
+      color: #666;
+      font-size: 0.95em;
+    }
+
+    /* hyphens 示例 */
+    .hyphens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .hyphens-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    .hyphens-card h3 {
+      margin: 0 0 10px 0;
+      color: #1f2937;
+      font-size: 1rem;
+    }
+
+    .hyphens-value {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #dbeafe;
+      color: #1e40af;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: monospace;
+      margin-bottom: 15px;
+    }
+
+    .hyphens-sample {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      font-size: 15px;
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    /* 不同 hyphens 取值 */
+    .sample-none {
+      hyphens: none;
+    }
+
+    .sample-manual {
+      hyphens: manual;
+    }
+
+    .sample-auto {
+      hyphens: auto;
+    }
+
+    /* 代码展示 */
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+      margin-top: 15px;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .css-example {
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+    }
+
+    .css-example code {
+      color: #1f2937;
+    }
+
+    /* 信息提示 */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .info-box strong {
+      color: #1e40af;
+    }
+
+    /* 控制面板 */
+    .control-panel {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .control-panel h3 {
+      margin-top: 0;
+      color: #60a5fa;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #9ca3af;
+    }
+
+    .control-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: none;
+      background: #374151;
+      color: #f9fafb;
+      font-size: 0.95em;
+    }
+
+    /* 对比表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+
+    /* 文章排版示例 */
+    .article-demo {
+      background: #fefefe;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .article-demo h3 {
+      margin-top: 0;
+      color: #1f2937;
+    }
+
+    .article-demo p {
+      text-align: justify;
+      line-height: 1.8;
+      color: #4b5563;
+    }
+
+    /* 手动断字标记 */
+    .manual-hyphen-demo {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* 语言选择器 */
+    .lang-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .lang-btn {
+      padding: 8px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .lang-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    /* 预览框 */
+    .preview-box {
+      padding: 20px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      min-height: 150px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS hyphens 自动断字演示</h1>
+
+  <div class="info-box">
+    <strong>💡 hyphens 简介</strong>
+    <p style="margin: 10px 0 0 0;">
+      <code>hyphens</code> 属性控制文本在换行时如何添加连字符（hyphen），可以让文本排版更加美观自然，避免行尾出现大空白。
+    </p>
+  </div>
+
+  <div class="demo-section">
+    <h2>hyphens 基本原理</h2>
+    <p><code>hyphens</code> 属性有三个取值：</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>值</th>
+          <th>行为</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>none</code></td>
+          <td>不添加连字符</td>
+          <td>不希望断字</td>
+        </tr>
+        <tr>
+          <td><code>manual</code></td>
+          <td>只在标记位置断字</td>
+          <td>精确控制断字位置</td>
+        </tr>
+        <tr>
+          <td><code>auto</code></td>
+          <td>浏览器自动断字</td>
+          <td>多语言内容</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="css-example">
+      <pre><code>hyphens: auto;
+
+/* 需要配合 lang 属性指定语言 */
+html[lang="en"] {
+  hyphens: auto;
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>三种取值对比</h2>
+    <p>将浏览器窗口缩窄以查看不同取值的效果：</p>
+
+    <div class="hyphens-grid">
+      <div class="hyphens-card">
+        <div class="hyphens-value">hyphens: none</div>
+        <p>不断字，单词完整保留在一行，可能导致行尾大空白。</p>
+        <div class="hyphens-sample sample-none" lang="en">
+          The Hyphenation algorithm is used to automatically insert hyphens into words so that they wrap across multiple lines. This is essential for high-quality typography.
+        </div>
+        <div class="css-example">
+          <pre><code>hyphens: none;</code></pre>
+        </div>
+      </div>
+
+      <div class="hyphens-card">
+        <div class="hyphens-value">hyphens: manual</div>
+        <p>只在开发者标记的位置断字，使用软连字符 &shy; 或硬连字符 -。</p>
+        <div class="hyphens-sample sample-manual" lang="en">
+          The Hyphen&amp;shy;ation algo&amp;shy;rithm is used to auto&amp;shy;mat&amp;shy;ically insert hyphens. This is essen&amp;shy;tial for high-quality typog&amp;shy;raphy.
+        </div>
+        <div class="css-example">
+          <pre><code>hyphens: manual;
+/* 软连字符 &shy; 在 HTML 中标记 */</code></pre>
+        </div>
+      </div>
+
+      <div class="hyphens-card">
+        <div class="hyphens-value">hyphens: auto</div>
+        <p>浏览器根据词典自动断字，效果最自然。</p>
+        <div class="hyphens-sample sample-auto" lang="en">
+          The Hyphenation algorithm is used to automatically insert hyphens into words so that they wrap across multiple lines. This is essential for high-quality typography.
+        </div>
+        <div class="css-example">
+          <pre><code>hyphens: auto;</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>中文断字示例</h2>
+    <p>中文使用 <code>&shy;</code> 标记断字位置：</p>
+
+    <div class="hyphens-grid">
+      <div class="hyphens-card">
+        <div class="hyphens-value">中文无断字</div>
+        <div class="hyphens-sample sample-none" lang="zh">
+          这是一段中文文本，用于演示断字效果。在狭小的空间内展示长文本时，断字功能可以帮助排版更加美观。
+        </div>
+      </div>
+
+      <div class="hyphens-card">
+        <div class="hyphens-value">中文手动断字</div>
+        <div class="hyphens-sample sample-manual" lang="zh">
+          这是一段中&amp;shy;文文本，用&amp;shy;于演&amp;shy;示断字效果。在&amp;shy;狭小&amp;shy;的&amp;shy;空&amp;shy;间内&amp;shy;展&amp;shy;示长文本&amp;shy;时，断&amp;shy;字功能&amp;shy;可以帮助排版&amp;shy;更&amp;shy;加美观。
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: 15px;">
+      <strong>💡 中文断字说明</strong>
+      <p style="margin: 10px 0 0 0;">
+        浏览器默认不提供中文词典，因此中文断字需要使用 <code>&shy;</code> 手动标记断字位置。
+      </p>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>交互式预览</h2>
+
+    <div class="control-panel">
+      <h3>选择断字模式</h3>
+      <div class="control-group">
+        <select id="hyphensSelect">
+          <option value="none">hyphens: none</option>
+          <option value="manual">hyphens: manual</option>
+          <option value="auto" selected>hyphens: auto</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <select id="langSelect">
+          <option value="en" selected>English</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preview-box" id="previewBox" style="hyphens: auto;" lang="en">
+      The Hyphenation algorithm is used to automatically insert hyphens into words so that they wrap across multiple lines. This algorithm is essential for high-quality typography in justified text layouts. It uses a dictionary of hyphenation points to determine where breaks can occur.
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>软连字符与硬连字符</h2>
+
+    <div class="hyphens-grid">
+      <div class="hyphens-card">
+        <h3>软连字符 (SHY)</h3>
+        <p>只在需要断行时显示，用于在 HTML 中标记可断字位置：</p>
+        <div class="manual-hyphen-demo">
+          super&amp;shy;califragilistic&amp;shy;expialidocious
+        </div>
+        <div class="css-example">
+          <pre><code>&lt;!-- HTML 中使用 --&gt;
+super&amp;shy;califragilistic
+
+或使用 Unicode：
+super&#xAD;califragilistic</code></pre>
+        </div>
+      </div>
+
+      <div class="hyphens-card">
+        <h3>硬连字符</h3>
+        <p>始终显示在文本中：</p>
+        <div class="manual-hyphen-demo">
+          32-bit architecture, mother-in-law, well-known fact
+        </div>
+        <div class="css-example">
+          <pre><code>&lt;!-- 普通连字符始终显示 --&gt;
+mother-in-law
+well-known
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>实际应用场景</h2>
+
+    <h3>文章排版</h3>
+    <div class="article-demo" style="hyphens: auto;" lang="en">
+      <h3>Typography and Hyphenation</h3>
+      <p>
+        Good typography is essential for readability and overall user experience. The proper use of hyphenation helps maintain consistent line lengths and prevents awkward gaps at the end of lines. When implementing hyphenation on the web, the CSS hyphens property provides fine-grained control over how words are broken across lines. Modern browsers support automatic hyphenation based on language dictionaries, which can significantly improve the visual quality of text layouts.
+      </p>
+    </div>
+    <div class="css-example" style="margin-top: 15px;">
+      <pre><code>article {
+  hyphens: auto;
+  text-align: justify;
+  line-height: 1.8;
+}</code></pre>
+    </div>
+
+    <h3>多语言网站</h3>
+    <div class="article-demo" style="hyphens: auto;" lang="de">
+      <h3>Typografie und Silbentrennung</h3>
+      <p>
+        Gute Typografie ist für die Lesbarkeit und das Gesamterlebnis unerlässlich. Die korrekte Verwendung von Silbentrennung hilft, gleichmäßige Zeilenlängen beizubehalten und unschöne Lücken am Zeilenende zu vermeiden.
+      </p>
+    </div>
+    <div class="css-example" style="margin-top: 15px;">
+      <pre><code>:lang(de) {
+  hyphens: auto;
+}
+
+:lang(fr) {
+  hyphens: auto;
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>浏览器兼容性</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>浏览器</th>
+          <th>支持情况</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chrome</td>
+          <td><span style="color: green;">✓ 支持</span></td>
+          <td>55+ 完全支持</td>
+        </tr>
+        <tr>
+          <td>Safari</td>
+          <td><span style="color: green;">✓ 支持</span></td>
+          <td>需要 webkit 前缀</td>
+        </tr>
+        <tr>
+          <td>Firefox</td>
+          <td><span style="color: green;">✓ 支持</span></td>
+          <td>6+ 完全支持</td>
+        </tr>
+        <tr>
+          <td>Edge</td>
+          <td><span style="color: green;">✓ 支持</span></td>
+          <td>79+ 完全支持</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="css-example" style="margin-top: 15px;">
+      <pre><code>/* 完整兼容写法 */
+.hyphenate {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+}</code></pre>
+    </div>
+  </div>
+
+  <script>
+    // 交互式控制
+    const hyphensSelect = document.getElementById('hyphensSelect');
+    const langSelect = document.getElementById('langSelect');
+    const previewBox = document.getElementById('previewBox');
+
+    if (hyphensSelect && previewBox) {
+      hyphensSelect.addEventListener('change', function() {
+        const value = this.value;
+        previewBox.style.hyphens = value;
+        previewBox.style.webkitHyphens = value;
+        previewBox.style MozHyphens = value;
+        previewBox.style.msHyphens = value;
+      });
+    }
+
+    if (langSelect && previewBox) {
+      langSelect.addEventListener('change', function() {
+        const lang = this.value;
+        previewBox.lang = lang;
+      });
+    }
+
+    console.log('hyphens 演示已加载');
+  </script>
+</body>
+</html>
