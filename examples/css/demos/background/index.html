@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS background 属性详解 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 16px; min-height: 140px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .demo-box { width: 120px; height: 120px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); flex-shrink: 0; }
+    .demo-box.large { width: 200px; height: 150px; }
+    .demo-box.wide { width: 100%; height: 120px; max-width: 400px; }
+    
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    
+    /* 背景图示例 */
+    .bg-checkerboard { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ddd'/%3E%3C/svg%3E"); }
+    .bg-stripes { background-image: repeating-linear-gradient(45deg, #ddd 0, #ddd 5px, #fff 5px, #fff 10px); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS background 属性详解</h1>
+    <p class="subtitle">交互演示 | 覆盖 background-color, background-image, background-repeat, background-position, background-size 等</p>
+
+    <!-- 基础用法 -->
+    <div class="section" id="basic-usage">
+      <h2>基础用法</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setBasicBg(this, 'color')">纯色背景</button>
+        <button class="btn" onclick="setBasicBg(this, 'image')">图片背景</button>
+        <button class="btn" onclick="setBasicBg(this, 'gradient')">渐变背景</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box" id="basic-box" style="background-color: #667eea;">Box</div>
+      </div>
+      <div class="code-block" id="basic-code">background-color: #667eea;</div>
+      <p class="desc">点击按钮切换不同的背景设置方式</p>
+    </div>
+
+    <!-- 颜色示例 -->
+    <div class="section" id="color-examples">
+      <h2>background-color 颜色示例</h2>
+      <div class="controls">
+        <button class="btn" onclick="setColor(this, '#ff6b6b')">红色 #ff6b6b</button>
+        <button class="btn" onclick="setColor(this, '#4ecdc4')">青色 #4ecdc4</button>
+        <button class="btn" onclick="setColor(this, '#ffe66d')">黄色 #ffe66d</button>
+        <button class="btn" onclick="setColor(this, 'rgba(102,126,234,0.5)')">半透明</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box" id="color-box" style="background-color: #ff6b6b;">Box</div>
+      </div>
+      <div class="code-block" id="color-code">background-color: #ff6b6b;</div>
+    </div>
+
+    <!-- 线性渐变 -->
+    <div class="section" id="linear-gradient">
+      <h2>linear-gradient 线性渐变</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setLinear(this, 'to bottom, #667eea, #764ba2')">从上到下</button>
+        <button class="btn" onclick="setLinear(this, 'to right, #667eea, #764ba2')">从左到右</button>
+        <button class="btn" onclick="setLinear(this, '135deg, #667eea, #764ba2')">对角线 135deg</button>
+        <button class="btn" onclick="setLinear(this, 'to bottom, #f093fb 0%, #f5576c 100%')">多节点</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box large" id="linear-box" style="background-image: linear-gradient(to bottom, #667eea, #764ba2);">渐变背景</div>
+      </div>
+      <div class="code-block" id="linear-code">background-image: linear-gradient(to bottom, #667eea, #764ba2);</div>
+    </div>
+
+    <!-- 径向渐变 -->
+    <div class="section" id="radial-gradient">
+      <h2>radial-gradient 径向渐变</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setRadial(this, 'circle, #667eea, #764ba2')">圆形</button>
+        <button class="btn" onclick="setRadial(this, 'ellipse, #667eea, #764ba2')">椭圆</button>
+        <button class="btn" onclick="setRadial(this, 'circle at 30% 30%, #667eea, #764ba2')">偏心圆</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box large" id="radial-box" style="background-image: radial-gradient(circle, #667eea, #764ba2);">径向渐变</div>
+      </div>
+      <div class="code-block" id="radial-code">background-image: radial-gradient(circle, #667eea, #764ba2);</div>
+    </div>
+
+    <!-- 圆锥渐变 -->
+    <div class="section" id="conic-gradient">
+      <h2>conic-gradient 圆锥渐变</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setConic(this, 'from 0deg at 50% 50%, red, yellow, green, blue, red')">彩虹色</button>
+        <button class="btn" onclick="setConic(this, 'from 90deg at 50% 50%, #667eea, #764ba2, #f093fb, #667eea')">紫粉色系</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box large" id="conic-box" style="background-image: conic-gradient(from 0deg at 50% 50%, red, yellow, green, blue, red);">圆锥渐变</div>
+      </div>
+      <div class="code-block" id="conic-code">background-image: conic-gradient(from 0deg at 50% 50%, red, yellow, green, blue, red);</div>
+    </div>
+
+    <!-- 重复渐变 -->
+    <div class="section" id="repeating-gradients">
+      <h2>repeating-gradient 重复渐变</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setRepeating(this, 'linear')">重复线性</button>
+        <button class="btn" onclick="setRepeating(this, 'radial')">重复径向</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box wide" id="repeating-box" style="background-image: repeating-linear-gradient(45deg, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px);">重复条纹</div>
+      </div>
+      <div class="code-block" id="repeating-code">background-image: repeating-linear-gradient(45deg, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px);</div>
+    </div>
+
+    <!-- background-repeat -->
+    <div class="section" id="background-repeat">
+      <h2>background-repeat 重复方式</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setRepeat(this, 'repeat')">repeat</button>
+        <button class="btn" onclick="setRepeat(this, 'repeat-x')">repeat-x</button>
+        <button class="btn" onclick="setRepeat(this, 'repeat-y')">repeat-y</button>
+        <button class="btn" onclick="setRepeat(this, 'no-repeat')">no-repeat</button>
+        <button class="btn" onclick="setRepeat(this, 'space')">space</button>
+        <button class="btn" onclick="setRepeat(this, 'round')">round</button>
+      </div>
+      <div class="demo-area" style="padding: 0; overflow: hidden;">
+        <div class="demo-box wide" id="repeat-box" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27%3E%3Crect width=%2720%27 height=%2720%27 fill=%27%23333%27/%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%275%27 fill=%27%23667eea%27/%3E%3C/svg%3E'); background-repeat: repeat; background-size: auto; border-radius: 0;">重复背景</div>
+      </div>
+      <div class="code-block" id="repeat-code">background-repeat: repeat;</div>
+    </div>
+
+    <!-- background-position -->
+    <div class="section" id="background-position">
+      <h2>background-position 位置</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setPosition(this, 'center center')">center</button>
+        <button class="btn" onclick="setPosition(this, 'top center')">top</button>
+        <button class="btn" onclick="setPosition(this, 'bottom center')">bottom</button>
+        <button class="btn" onclick="setPosition(this, 'center left')">left</button>
+        <button class="btn" onclick="setPosition(this, 'center right')">right</button>
+        <button class="btn" onclick="setPosition(this, '10px 20px')">10px 20px</button>
+      </div>
+      <div class="demo-area" style="padding: 0; overflow: hidden; justify-content: stretch;">
+        <div id="position-box" style="width: 100%; max-width: 400px; height: 150px; border-radius: 8px; background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2730%27 height=%2730%27%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%2712%27 fill=%27%23667eea%27/%3E%3Ctext x=%2715%27 y=%2720%27 text-anchor=%27middle%27 font-size=%2710%27 fill=%27white%27%3EIMG%3C/text%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: center center; border: 1px solid #30363d;"></div>
+      </div>
+      <div class="code-block" id="position-code">background-position: center center;</div>
+    </div>
+
+    <!-- background-size -->
+    <div class="section" id="background-size">
+      <h2>background-size 尺寸</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setSize(this, 'auto')">auto</button>
+        <button class="btn" onclick="setSize(this, 'cover')">cover</button>
+        <button class="btn" onclick="setSize(this, 'contain')">contain</button>
+        <button class="btn" onclick="setSize(this, '80px 80px')">80px 80px</button>
+        <button class="btn" onclick="setSize(this, '50% 50%')">50% 50%</button>
+      </div>
+      <div class="demo-area" style="padding: 0; overflow: hidden; justify-content: stretch;">
+        <div id="size-box" style="width: 100%; max-width: 400px; height: 150px; border-radius: 8px; background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2730%27 height=%2730%27%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%2712%27 fill=%27%23667eea%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: center; background-size: auto; border: 1px solid #30363d;"></div>
+      </div>
+      <div class="code-block" id="size-code">background-size: auto;</div>
+    </div>
+
+    <!-- background-attachment -->
+    <div class="section" id="background-attachment">
+      <h2>background-attachment 附件</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setAttachment(this, 'scroll')">scroll</button>
+        <button class="btn" onclick="setAttachment(this, 'fixed')">fixed</button>
+        <button class="btn" onclick="setAttachment(this, 'local')">local</button>
+      </div>
+      <p class="info" style="margin-bottom: 12px;">💡 fixed 效果请滚动页面查看（背景固定不动）</p>
+      <div id="attachment-container" style="height: 200px; overflow-y: auto; background: #0d1117; border: 1px solid #30363d; border-radius: 4px;">
+        <div id="attachment-box" style="width: 100%; height: 400px; background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27%3E%3Crect width=%2720%27 height=%2720%27 fill=%27%23333%27/%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%276%27 fill=%27%23667eea%27/%3E%3C/svg%3E'); background-repeat: repeat; background-attachment: scroll; padding: 20px;">
+          <div style="background: #161b22; padding: 20px; border-radius: 8px; color: #c9d1d9; font-size: 13px;">
+            <p style="margin-bottom: 12px;">滚动此区域查看 background-attachment 效果：</p>
+            <p style="color: #8b949e;">• <strong>scroll</strong>: 背景随内容滚动（默认）</p>
+            <p style="color: #8b949e;">• <strong>fixed</strong>: 背景固定不动，相对于视口</p>
+            <p style="color: #8b949e;">• <strong>local</strong>: 背景固定在元素内容上</p>
+            <br>
+            <p style="color: #8b949e;">scroll ↓</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-block" id="attachment-code">background-attachment: scroll;</div>
+    </div>
+
+    <!-- origin & clip -->
+    <div class="section" id="origin-clip">
+      <h2>background-origin 与 background-clip</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setOriginClip(this, 'padding')">padding-box</button>
+        <button class="btn" onclick="setOriginClip(this, 'border')">border-box</button>
+        <button class="btn" onclick="setOriginClip(this, 'content')">content-box</button>
+      </div>
+      <div class="demo-area" style="padding: 0; justify-content: stretch;">
+        <div id="origin-clip-box" style="width: 100%; max-width: 400px; height: 150px; padding: 20px; border: 10px dashed #30363d; border-radius: 8px; background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%277%27 fill=%27%23667eea%27/%3E%3C/svg%3E'); background-repeat: repeat; background-origin: padding-box; background-clip: padding-box; background-color: rgba(102,126,234,0.2);"></div>
+      </div>
+      <div class="code-block" id="origin-code">background-origin: padding-box; background-clip: padding-box;</div>
+    </div>
+
+    <!-- 多层背景 -->
+    <div class="section" id="multi-layer">
+      <h2>多层背景</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setMultiLayer(this, 'basic')">基础渐变+图片</button>
+        <button class="btn" onclick="setMultiLayer(this, 'texture')">纹理+颜色</button>
+        <button class="btn" onclick="setMultiLayer(this, 'stripes')">条纹叠加</button>
+      </div>
+      <div class="demo-area">
+        <div class="demo-box wide" id="multi-box">多层背景</div>
+      </div>
+      <div class="code-block" id="multi-code">/* 多层背景示例 */</div>
+    </div>
+
+    <!-- 分层背景实战 -->
+    <div class="section" id="layered-background">
+      <h2>实战：分层背景</h2>
+      <div class="controls">
+        <button class="btn active" onclick="setLayered(this, 'hero')">Hero 风格</button>
+        <button class="btn" onclick="setLayered(this, 'card')">卡片风格</button>
+        <button class="btn" onclick="setLayered(this, 'striped')">条纹动画</button>
+      </div>
+      <div class="demo-area" style="height: auto; padding: 40px; flex-direction: column; gap: 20px;">
+        <div id="layered-box-1" style="width: 100%; max-width: 400px; height: 120px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 18px;">内容区域</div>
+      </div>
+      <div class="code-block" id="layered-code">/* Hero 风格 */</div>
+    </div>
+
+  </div>
+
+  <script>
+    // 基础用法
+    function setBasicBg(btn, type) {
+      document.querySelectorAll('#basic-usage .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('basic-box');
+      const code = document.getElementById('basic-code');
+      if (type === 'color') {
+        box.style.cssText = 'background-color: #667eea;';
+        code.textContent = 'background-color: #667eea;';
+      } else if (type === 'image') {
+        box.style.cssText = "background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23667eea%27 rx=%2710%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27%23764ba2%27/%3E%3C/svg%3E'); background-size: 100px 100px; background-repeat: no-repeat; background-color: transparent;";
+        code.textContent = "background-image: url('image.png'); background-size: 100px 100px; background-repeat: no-repeat;";
+      } else if (type === 'gradient') {
+        box.style.cssText = 'background-image: linear-gradient(135deg, #667eea, #764ba2);';
+        code.textContent = "background-image: linear-gradient(135deg, #667eea, #764ba2);";
+      }
+    }
+
+    // 颜色示例
+    function setColor(btn, color) {
+      document.querySelectorAll('#color-examples .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('color-box');
+      box.style.backgroundColor = color;
+      document.getElementById('color-code').textContent = `background-color: ${color};`;
+    }
+
+    // 线性渐变
+    function setLinear(btn, gradient) {
+      document.querySelectorAll('#linear-gradient .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('linear-box');
+      box.style.backgroundImage = `linear-gradient(${gradient})`;
+      document.getElementById('linear-code').textContent = `background-image: linear-gradient(${gradient});`;
+    }
+
+    // 径向渐变
+    function setRadial(btn, gradient) {
+      document.querySelectorAll('#radial-gradient .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('radial-box');
+      box.style.backgroundImage = `radial-gradient(${gradient})`;
+      document.getElementById('radial-code').textContent = `background-image: radial-gradient(${gradient});`;
+    }
+
+    // 圆锥渐变
+    function setConic(btn, gradient) {
+      document.querySelectorAll('#conic-gradient .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('conic-box');
+      box.style.backgroundImage = `conic-gradient(${gradient})`;
+      document.getElementById('conic-code').textContent = `background-image: conic-gradient(${gradient});`;
+    }
+
+    // 重复渐变
+    function setRepeating(btn, type) {
+      document.querySelectorAll('#repeating-gradients .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('repeating-box');
+      const code = document.getElementById('repeating-code');
+      if (type === 'linear') {
+        box.style.backgroundImage = 'repeating-linear-gradient(45deg, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px)';
+        code.textContent = "background-image: repeating-linear-gradient(45deg, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px);";
+      } else {
+        box.style.backgroundImage = 'repeating-radial-gradient(circle, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px)';
+        code.textContent = "background-image: repeating-radial-gradient(circle, #667eea 0, #667eea 10px, #764ba2 10px, #764ba2 20px);";
+      }
+    }
+
+    // background-repeat
+    function setRepeat(btn, value) {
+      document.querySelectorAll('#background-repeat .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('repeat-box');
+      box.style.backgroundRepeat = value;
+      document.getElementById('repeat-code').textContent = `background-repeat: ${value};`;
+    }
+
+    // background-position
+    function setPosition(btn, value) {
+      document.querySelectorAll('#background-position .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('position-box');
+      box.style.backgroundPosition = value;
+      document.getElementById('position-code').textContent = `background-position: ${value};`;
+    }
+
+    // background-size
+    function setSize(btn, value) {
+      document.querySelectorAll('#background-size .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('size-box');
+      box.style.backgroundSize = value;
+      document.getElementById('size-code').textContent = `background-size: ${value};`;
+    }
+
+    // background-attachment
+    function setAttachment(btn, value) {
+      document.querySelectorAll('#background-attachment .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('attachment-box');
+      box.style.backgroundAttachment = value;
+      document.getElementById('attachment-code').textContent = `background-attachment: ${value};`;
+    }
+
+    // origin & clip
+    function setOriginClip(btn, type) {
+      document.querySelectorAll('#origin-clip .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('origin-clip-box');
+      if (type === 'padding') {
+        box.style.backgroundOrigin = 'padding-box';
+        box.style.backgroundClip = 'padding-box';
+      } else if (type === 'border') {
+        box.style.backgroundOrigin = 'border-box';
+        box.style.backgroundClip = 'border-box';
+      } else {
+        box.style.backgroundOrigin = 'content-box';
+        box.style.backgroundClip = 'content-box';
+      }
+      document.getElementById('origin-code').textContent = `background-origin: ${type === 'padding' ? 'padding' : type === 'border' ? 'border' : 'content'}-box; background-clip: ${type === 'padding' ? 'padding' : type === 'border' ? 'border' : 'content'}-box;`;
+    }
+
+    // 多层背景
+    function setMultiLayer(btn, type) {
+      document.querySelectorAll('#multi-layer .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('multi-box');
+      const code = document.getElementById('multi-code');
+      if (type === 'basic') {
+        box.style.cssText = "background: linear-gradient(to bottom, rgba(102,126,234,0.8), rgba(118,75,162,0.8)), url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27%3E%3Crect width=%2740%27 height=%2740%27 fill=%27%23333%27/%3E%3Ccircle cx=%2720%27 cy=%2720%27 r=%2710%27 fill=%27%23667eea%27/%3E%3C/svg%3E') no-repeat center / cover;";
+        code.textContent = "background: linear-gradient(to bottom, rgba(102,126,234,0.8), rgba(118,75,162,0.8)), url('mountains.jpg') no-repeat center / cover;";
+      } else if (type === 'texture') {
+        box.style.cssText = "background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27%3E%3Crect width=%2720%27 height=%2720%27 fill=%27%23eee%27/%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%275%27 fill=%27%23ddd%27/%3E%3C/svg%3E'), linear-gradient(135deg, #f5f5f5, #e0e0e0);";
+        code.textContent = "background: url('noise.png'), linear-gradient(135deg, #f5f5f5, #e0e0e0);";
+      } else {
+        box.style.cssText = "background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(102,126,234,0.1) 5px, rgba(102,126,234,0.1) 10px), linear-gradient(to right, #667eea, #764ba2);";
+        code.textContent = "background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(102,126,234,0.1) 5px, rgba(102,126,234,0.1) 10px), linear-gradient(to right, #667eea, #764ba2);";
+      }
+    }
+
+    // 分层背景实战
+    function setLayered(btn, type) {
+      document.querySelectorAll('#layered-background .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const box = document.getElementById('layered-box-1');
+      const code = document.getElementById('layered-code');
+      if (type === 'hero') {
+        box.style.cssText = "background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%2760%27%3E%3Crect width=%27100%27 height=%2760%27 fill=%27%23333%27/%3E%3Ccircle cx=%2750%27 cy=%2730%27 r=%2720%27 fill=%27%23667eea%27/%3E%3C/svg%3E') no-repeat center / cover; color: white;";
+        code.textContent = "background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('hero-bg.jpg') no-repeat center / cover;";
+      } else if (type === 'card') {
+        box.style.cssText = "background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 10px 30px rgba(102,126,234,0.4); color: white;";
+        code.textContent = "background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 10px 30px rgba(102,126,234,0.4);";
+      } else {
+        box.style.cssText = "background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px); color: #333;";
+        code.textContent = "background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #e0e0e0 10px, #e0e0e0 20px); animation: stripes 1s linear infinite;";
+      }
+    }
+  </script>
+</body>
+</html>
