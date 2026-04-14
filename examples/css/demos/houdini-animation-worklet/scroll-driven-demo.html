@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>滚动驱动动画 — CSS Houdini Animation Worklet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; margin-bottom: 24px; }
+
+    /* 滚动占位区域，制造可滚动页面 */
+    .scroll-space { height: 600px; }
+
+    /* 进度条容器 */
+    .progress-container {
+      position: fixed; top: 20px; right: 20px; width: 200px;
+      background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+      padding: 12px; z-index: 100;
+    }
+    .progress-label { font-size: 12px; color: #8b949e; margin-bottom: 8px; }
+    .progress-bar-bg { background: #21262d; height: 8px; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); width: 0%; border-radius: 4px; transition: none; }
+
+    /* 动画元素 */
+    .anim-box {
+      width: 120px; height: 120px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; color: #fff;
+      margin: 40px auto; position: relative;
+    }
+    .box-1 { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+    .box-2 { background: linear-gradient(135deg, #10b981, #06b6d4); }
+    .box-3 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+
+    /* 说明文字 */
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin: 40px 0; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 12px; }
+    .section p { font-size: 13px; color: #8b949e; line-height: 1.6; }
+    code { background: #21262d; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #79c0ff; }
+
+    /* 滚动触发区域 */
+    .scroll-trigger {
+      height: 300px; display: flex; align-items: center; justify-content: center;
+      border: 2px dashed #30363d; border-radius: 8px; margin: 40px 0;
+    }
+    .scroll-trigger p { color: #8b949e; font-size: 14px; }
+
+    /* 支持提示 */
+    .unsupported { background: rgba(240,136,62,0.1); border: 1px solid #f0883e; border-radius: 6px; padding: 16px; margin: 24px 0; color: #f0883e; font-size: 14px; display: none; }
+    .unsupported.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>滚动驱动动画</h1>
+    <p class="subtitle">使用 ScrollTimeline 驱动 Animation Worklet，动画与滚动位置完全同步</p>
+
+    <div class="info">
+      <strong>工作原理：</strong>ScrollTimeline 将滚动位置（0%~100%）映射为动画进度（0~1），
+      传递给 Worklet 中的 <code>animate(currentTime, effect)</code>，实现完全线程化的滚动动画。
+    </div>
+
+    <div class="unsupported" id="unsupported">
+      ⚠️ 您的浏览器不支持 Animation Worklet。请使用 Chrome 85+ 或 Edge 85+。
+    </div>
+
+    <!-- 进度条 -->
+    <div class="progress-container">
+      <div class="progress-label">滚动进度: <span id="progress-text">0%</span></div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="scroll-space"></div>
+
+    <!-- 动画区域 1 -->
+    <div class="anim-box box-1" id="box1">Scale</div>
+
+    <div class="scroll-trigger">
+      <p>↓ 继续滚动查看更多动画效果 ↓</p>
+    </div>
+
+    <!-- 动画区域 2 -->
+    <div class="anim-box box-2" id="box2">Rotate</div>
+
+    <div class="scroll-trigger">
+      <p>↓ 继续滚动 ↓</p>
+    </div>
+
+    <!-- 动画区域 3 -->
+    <div class="anim-box box-3" id="box3">Translate</div>
+
+    <div class="scroll-space"></div>
+
+    <!-- 说明 -->
+    <div class="section">
+      <h2>核心代码解析</h2>
+      <p>
+        <strong>1. 注册 Animator：</strong>通过 <code>registerAnimator()</code> 定义动画逻辑，
+        <code>currentTime</code> 参数范围为 0~1，对应滚动范围的开始到结束。
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>2. 创建 ScrollTimeline：</strong>指定 <code>scrollSource</code>（滚动容器）、
+        <code>orientation</code>（滚动方向）和 <code>endScrollOffset</code>（结束位置）。
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>3. 创建 WorkletAnimation：</strong>将 animator、时间线和目标元素组合，
+        调用 <code>.play()</code> 开始动画。
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>与 CSS Scroll-Driven Animation 的对比</h2>
+      <p>
+        CSS Scroll-Driven Animation（如 <code>animation-timeline: scroll()</code>）是纯声明式的，
+        而 Animation Worklet 允许你用完整的 JavaScript 逻辑处理滚动值，实现更复杂的动画效果，
+        如非线性映射、多元素联动等。
+      </p>
+    </div>
+
+    <div class="scroll-space"></div>
+  </div>
+
+  <!-- Animation Worklet 代码 -->
+  <script>
+    // ============================================================
+    // 滚动驱动动画 Animator 定义
+    // ============================================================
+
+    // 缩放动画：0 -> 1 进度驱动 scale
+    class ScaleAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        // currentTime 范围 0~1
+        const scale = 0.3 + currentTime * 1.2;
+        effect.target.style.transform = `scale(${scale})`;
+        effect.target.style.opacity = 0.3 + currentTime * 0.7;
+      }
+    }
+
+    // 旋转动画：0 -> 1 进度驱动 rotate
+    class RotateAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        const rotate = currentTime * 360;
+        effect.target.style.transform = `rotate(${rotate}deg)`;
+      }
+    }
+
+    // 位移动画：0 -> 1 进度驱动 translateX
+    class TranslateAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        const x = (currentTime - 0.5) * 200; // -100px 到 +100px
+        effect.target.style.transform = `translateX(${x}px)`;
+      }
+    }
+
+    // 注册 animators
+    registerAnimator('scale', ScaleAnimator);
+    registerAnimator('rotate', RotateAnimator);
+    registerAnimator('translate', TranslateAnimator);
+  </script>
+
+  <script>
+    // ============================================================
+    // 主脚本：加载 Worklet 并创建动画
+    // ============================================================
+
+    // 功能检测
+    if (!('animationWorklet' in CSS)) {
+      document.getElementById('unsupported').classList.add('show');
+    } else {
+      // 加载 Worklet 模块
+      // 注意：在实际部署中，应该将上面的 JS 代码提取为单独的 .js 文件
+      // 并通过 CSS.animationWorklet.addModule('worklet.js') 加载
+      // 这里为了演示方便，将 worklet 代码内联（实际不推荐）
+
+      async function initAnimations() {
+        try {
+          // 创建 ScrollTimeline
+          const scrollTimeline = new ScrollTimeline({
+            scrollSource: document.documentElement,
+            orientation: 'block',
+            startScrollOffset: 0,
+            endScrollOffset: document.body.scrollHeight - window.innerHeight
+          });
+
+          // 为每个盒子创建动画
+          const boxes = [
+            { id: 'box1', animator: 'scale' },
+            { id: 'box2', animator: 'rotate' },
+            { id: 'box3', animator: 'translate' }
+          ];
+
+          boxes.forEach(({ id, animator }) => {
+            const elem = document.getElementById(id);
+            const anim = new WorkletAnimation(
+              animator,
+              elem,
+              scrollTimeline,
+              {}
+            );
+            anim.play();
+          });
+
+          // 更新滚动进度条（主线程辅助显示，非 worklet 逻辑）
+          window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = Math.round((scrollTop / docHeight) * 100);
+            document.getElementById('progress-text').textContent = progress + '%';
+            document.getElementById('progress-fill').style.width = progress + '%';
+          });
+
+        } catch (e) {
+          console.warn('Animation Worklet 初始化失败:', e);
+        }
+      }
+
+      initAnimations();
+    }
+  </script>
+</body>
+</html>

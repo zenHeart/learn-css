@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时间线驱动动画 — CSS Houdini Animation Worklet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-bottom: 24px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+
+    /* 演示卡片 */
+    .demo-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+    .demo-card h2 { font-size: 18px; color: #f0f6fc; margin-bottom: 8px; }
+    .demo-card p { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.6; }
+
+    /* 动画元素 */
+    .anim-elem {
+      width: 80px; height: 80px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #fff; margin: 20px auto;
+    }
+    .slide-elem { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+    .fade-elem { background: linear-gradient(135deg, #10b981, #06b6d4); }
+    .counter-elem { background: linear-gradient(135deg, #f59e0b, #ef4444); font-size: 32px; }
+    .pulse-elem { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+
+    /* 控制按钮 */
+    .controls { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .btn { padding: 6px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+
+    .unsupported { background: rgba(240,136,62,0.1); border: 1px solid #f0883e; border-radius: 6px; padding: 16px; margin-bottom: 24px; color: #f0883e; font-size: 14px; display: none; }
+    .unsupported.show { display: block; }
+
+    /* 动画说明 */
+    .anim-info { font-size: 12px; color: #58a6ff; margin-top: 8px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>时间线驱动动画</h1>
+    <p class="subtitle">使用 DocumentTimeline 驱动 Animation Worklet，类似 Web Animations API 但运行在独立线程</p>
+
+    <div class="warning">
+      ⚠️ 需要通过 HTTP 服务器访问（如 <code>python -m http.server 8080</code>）才能运行 Animation Worklet。
+    </div>
+
+    <div class="unsupported" id="unsupported">
+      ⚠️ 您的浏览器不支持 Animation Worklet。请使用 Chrome 85+ 或 Edge 85+。
+    </div>
+
+    <div class="info">
+      <strong>时间线类型：</strong>
+      <code>document.timeline</code> — 基于文档时间线，动画时间与 wall clock 对齐。<br>
+      与 <code>element.animate()</code> 的主要区别：Worklet 动画运行在独立线程，不阻塞主线程。
+    </div>
+
+    <!-- 演示1: 滑动进入 -->
+    <div class="demo-card">
+      <h2>1. 滑动进入动画</h2>
+      <p>使用 SlideAnimator，从左侧滑入。可通过按钮控制播放/暂停/反向。</p>
+      <div class="anim-elem slide-elem" id="slide-box">SLIDE</div>
+      <div class="controls">
+        <button class="btn" onclick="playSlide()">▶ 播放</button>
+        <button class="btn" onclick="pauseSlide()">⏸ 暂停</button>
+        <button class="btn" onclick="reverseSlide()">⏮ 反向</button>
+        <button class="btn" onclick="resetSlide()">⏹ 重置</button>
+      </div>
+      <div class="anim-info" id="slide-info">状态: 等待播放</div>
+    </div>
+
+    <!-- 演示2: 淡入淡出 -->
+    <div class="demo-card">
+      <h2>2. 渐变动画</h2>
+      <p>使用 FadeAnimator，控制透明度在 0.2~1.0 之间循环。展示 animation iteration 的使用。</p>
+      <div class="anim-elem fade-elem" id="fade-box">FADE</div>
+      <div class="controls">
+        <button class="btn" onclick="playFade()">▶ 播放</button>
+        <button class="btn" onclick="pauseFade()">⏸ 暂停</button>
+      </div>
+      <div class="anim-info" id="fade-info">状态: 等待播放</div>
+    </div>
+
+    <!-- 演示3: 数字计数器 -->
+    <div class="demo-card">
+      <h2>3. 数字计数器</h2>
+      <p>使用 CounterAnimator，将 currentTime (0~1) 映射为目标数字 (0~999)。</p>
+      <div class="anim-elem counter-elem" id="counter-box">0</div>
+      <div class="controls">
+        <button class="btn" onclick="playCounter()">▶ 播放计数</button>
+        <button class="btn" onclick="pauseCounter()">⏸ 暂停</button>
+      </div>
+      <div class="anim-info" id="counter-info">当前值: 0</div>
+    </div>
+
+    <!-- 演示4: 脉冲效果 -->
+    <div class="demo-card">
+      <h2>4. 脉冲缩放动画</h2>
+      <p>使用 PulseAnimator，控制 scale 在 0.8~1.2 之间循环，持续播放。</p>
+      <div class="anim-elem pulse-elem" id="pulse-box">PULSE</div>
+      <div class="controls">
+        <button class="btn" onclick="playPulse()">▶ 开始</button>
+        <button class="btn" onclick="stopPulse()">⏹ 停止</button>
+      </div>
+      <div class="anim-info">原理: currentTime 循环映射到 scale 范围</div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Worklet 代码（实际项目应放在单独的 .js 文件中）
+    // ============================================================
+
+    // 滑动画廊动画: 0 -> 1 驱动 translateX
+    class SlideAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        const x = (1 - currentTime) * -200; // 从左外滑入
+        effect.target.style.transform = `translateX(${x}px)`;
+      }
+    }
+
+    // 渐变动画: 0 -> 1 驱动 opacity
+    class FadeAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        // 0.2 到 1.0 的范围
+        const opacity = 0.2 + currentTime * 0.8;
+        effect.target.style.opacity = opacity;
+      }
+    }
+
+    // 计数器动画: 0 -> 1 驱动数字变化
+    class CounterAnimator {
+      constructor(params) {
+        this.maxValue = params.maxValue || 999;
+        this.decimals = params.decimals || 0;
+      }
+
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        const value = currentTime * this.maxValue;
+        effect.target.textContent = value.toFixed(this.decimals);
+      }
+    }
+
+    // 脉冲动画: 使用 Math.sin 实现循环脉冲
+    class PulseAnimator {
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        // 使用正弦函数创建平滑的 0.8~1.2 缩放
+        const scale = 1.0 + Math.sin(currentTime * Math.PI * 2) * 0.2;
+        effect.target.style.transform = `scale(${scale})`;
+      }
+    }
+
+    registerAnimator('slide', SlideAnimator);
+    registerAnimator('fade', FadeAnimator);
+    registerAnimator('counter', CounterAnimator);
+    registerAnimator('pulse', PulseAnimator);
+  </script>
+
+  <script>
+    // ============================================================
+    // 主脚本
+    // ============================================================
+
+    if (!('animationWorklet' in CSS)) {
+      document.getElementById('unsupported').classList.add('show');
+    } else {
+      // 使用 document.timeline 驱动
+      const timeline = document.timeline;
+
+      // Slide 动画
+      let slideAnim;
+      function playSlide() {
+        if (!slideAnim) {
+          slideAnim = new WorkletAnimation('slide', document.getElementById('slide-box'), timeline, {});
+          slideAnim.onfinish = () => { document.getElementById('slide-info').textContent = '状态: 动画完成'; };
+        }
+        slideAnim.play();
+        document.getElementById('slide-info').textContent = '状态: 播放中';
+      }
+      function pauseSlide() { slideAnim?.pause(); document.getElementById('slide-info').textContent = '状态: 已暂停'; }
+      function reverseSlide() { slideAnim?.reverse(); document.getElementById('slide-info').textContent = '状态: 反向播放'; }
+      function resetSlide() {
+        if (slideAnim) { slideAnim.cancel(); slideAnim = null; }
+        document.getElementById('slide-box').style.transform = 'translateX(-200px)';
+        document.getElementById('slide-box').style.opacity = '1';
+        document.getElementById('slide-info').textContent = '状态: 已重置';
+      }
+
+      // Fade 动画
+      let fadeAnim;
+      function playFade() {
+        if (!fadeAnim) {
+          fadeAnim = new WorkletAnimation('fade', document.getElementById('fade-box'), timeline, {});
+        }
+        fadeAnim.play();
+        document.getElementById('fade-info').textContent = '状态: 播放中';
+      }
+      function pauseFade() { fadeAnim?.pause(); document.getElementById('fade-info').textContent = '状态: 已暂停'; }
+
+      // Counter 动画
+      let counterAnim;
+      function playCounter() {
+        if (!counterAnim) {
+          counterAnim = new WorkletAnimation('counter', document.getElementById('counter-box'), timeline, { maxValue: 999, decimals: 0 });
+          counterAnim.onupdate = (e) => {
+            document.getElementById('counter-info').textContent = `当前值: ${Math.round(e.currentTime * 999)}`;
+          };
+        }
+        counterAnim.play();
+      }
+      function pauseCounter() { counterAnim?.pause(); }
+
+      // Pulse 动画
+      let pulseAnim;
+      function playPulse() {
+        if (!pulseAnim) {
+          pulseAnim = new WorkletAnimation('pulse', document.getElementById('pulse-box'), timeline, {});
+        }
+        pulseAnim.play();
+      }
+      function stopPulse() { pulseAnim?.cancel(); }
+    }
+  </script>
+</body>
+</html>

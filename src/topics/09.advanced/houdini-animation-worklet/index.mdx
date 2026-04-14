@@ -1,0 +1,416 @@
+---
+title: "CSS Houdini Animation Worklet"
+category: "高级特性"
+tags:
+  - Houdini
+  - Animation Worklet
+  - WorkletAnimation
+  - registerAnimator
+  - 线程化动画
+description: "详解 CSS Houdini Animation Worklet，通过 registerAnimator 注册自定义动画控制器，实现主线程之外的高性能线程化动画"
+keywords: "CSS Houdini, Animation Worklet, registerAnimator, WorkletAnimation, 线程化动画, scroll-driven animation"
+---
+
+# CSS Houdini Animation Worklet
+
+**在主线程之外运行的高性能 CSS 动画**
+
+---
+
+## 概述
+
+Animation Worklet 是 Houdini 规范中负责动画的部分，它允许你在一个独立于主线程的 worklet 线程上运行动画逻辑。这意味着动画计算不会受到主线程上繁重 JavaScript 任务的干扰，可以保持丝滑的 60fps。
+
+### 与传统 CSS 动画的区别
+
+| 特性 | CSS Transition/Animation | Animation Worklet |
+|------|------------------------|-------------------|
+| 执行线程 | 主线程 | 独立 Worklet 线程 |
+| 滚动关联 | 有限 | 强大的滚动驱动能力 |
+| 可编程性 | 有限的关键帧 | 完整的 JavaScript 逻辑 |
+| 浏览器支持 | 全部现代浏览器 | 仅 Chromium |
+| 与 JS 通信 | 困难 | 通过 ScrollTimeline |
+
+### 工作原理
+
+1. **注册 Animator**：使用 `registerAnimator()` 注册一个 animator 类
+2. **加载 Worklet**：通过 `CSS.animationWorklet.addModule()` 加载 worklet 脚本
+3. **创建 Animation**：使用 `new WorkletAnimation()` 将 animator 与元素关联
+4. **驱动方式**：通过 `ScrollTimeline` 或 `DocumentTimeline` 驱动
+
+```js
+// my-animator.js
+class MyAnimator {
+  // constructor 在每次动画开始时调用
+  constructor(params) {
+    this.keyframes = params.keyframes || [];
+  }
+
+  // animate 每帧调用，接收当前时间和动画状态
+  animate(currentTime, effect) {
+    // 计算动画值并应用到效果目标
+    const progress = currentTime; // 0~1 范围
+    effect.target.style.transform = `translateX(${progress * 100}px)`;
+  }
+}
+registerAnimator('my-animator', MyAnimator);
+```
+
+```html
+<script>
+  CSS.animationWorklet.addModule('my-animator.js');
+</script>
+<div id="box"></div>
+<script>
+  const elem = document.getElementById('box');
+  const animation = new WorkletAnimation(
+    'my-animator',
+    elem,               // 目标元素
+    { transform: 'translateX(0px)' }, // 初始效果状态
+    document.timeline,   // 时间线
+    {}                  // 动画选项
+  );
+  animation.play();
+</script>
+```
+
+---
+
+## registerAnimator 注册自定义动画控制器
+
+### 基本语法
+
+```js
+registerAnimator(name, animatorClass)
+```
+
+- `name`：字符串，animator 的名称，用于 `WorkletAnimation` 引用
+- `animatorClass`：类定义，可包含 `constructor` 和 `animate` 方法
+
+```js
+class FadeAnimator {
+  constructor(params) {
+    // params 来自 WorkletAnimation 构造函数的第四个参数
+    this.targetOpacity = params.targetOpacity ?? 1;
+  }
+
+  animate(currentTime, effect) {
+    // currentTime: 动画进度（0~1）
+    // effect: { target, localTime, timeline }
+    if (!effect.target) return;
+    effect.target.style.opacity = currentTime;
+  }
+}
+registerAnimator('fade', FadeAnimator);
+```
+
+### 生命周期方法
+
+#### constructor(params)
+
+动画实例创建时调用，`params` 来自 `WorkletAnimation` 构造函数的选项对象。
+
+```js
+constructor(params) {
+  this.duration = params.duration || 1000;
+  this.easing = params.easing || 'linear';
+}
+```
+
+#### animate(currentTime, effect)
+
+每帧调用，核心逻辑所在：
+
+```js
+animate(currentTime, effect) {
+  // currentTime: 动画进度，0.0（开始）到 1.0（结束）
+  // effect: {
+  //   target: Element,        // 动画作用的元素
+  //   localTime: number,      // 局部时间（毫秒）
+  //   timeline: AnimationTimeline  // 关联的时间线
+  // }
+
+  const transform = `translateY(${(1 - currentTime) * -100}px)`;
+  effect.target.style.transform = transform;
+}
+```
+
+---
+
+## WorkletAnimation 构造函数
+
+### 语法
+
+```js
+new WorkletAnimation(animatorName, effects, timeline, options)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `animatorName` | string | 通过 `registerAnimator` 注册的名称 |
+| `effects` | Element 或 EffectNode | 动画作用的目标元素或效果节点 |
+| `timeline` | AnimationTimeline | 驱动动画的时间线（`DocumentTimeline` 或 `ScrollTimeline`） |
+| `options` | object | 传递给 animator constructor 的参数 |
+
+### 完整示例
+
+```js
+// 注册 animator
+class SlideAnimator {
+  constructor(params) {
+    this.fromX = params.fromX ?? 0;
+    this.toX = params.toX ?? 100;
+  }
+
+  animate(currentTime, effect) {
+    const x = this.fromX + (this.toX - this.fromX) * currentTime;
+    effect.target.style.transform = `translateX(${x}px)`;
+  }
+}
+registerAnimator('slide', SlideAnimator);
+
+// 创建动画
+const anim = new WorkletAnimation(
+  'slide',
+  document.getElementById('box'),
+  document.timeline,
+  { fromX: 0, toX: 300 }
+);
+anim.play();
+```
+
+### WorkletAnimation 实例方法
+
+```js
+// 播放
+anim.play();
+
+// 暂停
+anim.pause();
+
+// 反向播放
+anim.reverse();
+
+// 取消
+anim.cancel();
+
+// 设置播放速率
+anim.playbackRate = 2; // 2x 速度
+
+// 获取当前时间（相对于动画持续时间，0~1）
+const progress = anim.currentTime;
+
+// 监听事件（与 Web Animations API 相同）
+anim.onfinish = () => console.log('动画完成');
+```
+
+---
+
+## ScrollTimeline 滚动驱动
+
+`ScrollTimeline` 是 Animation Worklet 最强大的特性之一，允许动画直接由滚动位置驱动，完全独立于主线程。
+
+### 基本用法
+
+```js
+// 创建 ScrollTimeline
+const scrollTimeline = new ScrollTimeline({
+  scrollSource: document.documentElement, // 滚动容器
+  orientation: 'block',                    // 'block'|'inline'|'horizontal'|'vertical'
+  startScrollOffset: 0,                   // 开始偏移（px）
+  endScrollOffset: '100%',               // 结束偏移（px）
+  fill: 'forwards'                        // 填充模式
+});
+
+// 创建 WorkletAnimation 使用 ScrollTimeline
+const anim = new WorkletAnimation(
+  'parallax',
+  element,
+  scrollTimeline,
+  {}
+);
+anim.play();
+```
+
+### 与 CSS Scroll-Driven Animation 的对比
+
+| 特性 | CSS Scroll-Driven | Animation Worklet + ScrollTimeline |
+|------|------------------|-----------------------------------|
+| 编写方式 | 纯 CSS | JavaScript Worklet |
+| 逻辑复杂度 | 有限 | 完整 JS 能力 |
+| 主线程占用 | 无 | 极低 |
+| 浏览器支持 | Chromium 115+ | Chromium 85+ |
+| 与其他动画同步 | 困难 | 通过 shared timeline |
+
+```js
+// 对比：CSS scroll-driven animation
+// .element { animation: slide 1s linear scroll(); }
+
+// 对应 Worklet 版本
+class SlideAnimator {
+  animate(currentTime, effect) {
+    // currentTime 0~1 对应滚动范围的 startScrollOffset ~ endScrollOffset
+    const x = currentTime * 300;
+    effect.target.style.transform = `translateX(${x}px)`;
+  }
+}
+registerAnimator('scroll-slide', SlideAnimator);
+
+const scrollTimeline = new ScrollTimeline({
+  scrollSource: document.documentElement,
+  endScrollOffset: document.body.scrollHeight - window.innerHeight
+});
+new WorkletAnimation('scroll-slide', element, scrollTimeline, {}).play();
+```
+
+---
+
+## 实战案例
+
+### 案例一：滚动视差效果（Parallax）
+
+```js
+// parallax-animator.js
+class ParallaxAnimator {
+  constructor(params) {
+    this.speed = params.speed ?? 0.5; // 视差速度系数
+  }
+
+  animate(currentTime, effect) {
+    // currentTime 由 ScrollTimeline 提供（0~1 对应滚动范围）
+    const translateY = currentTime * window.innerHeight * this.speed;
+    effect.target.style.transform = `translateY(${translateY}px)`;
+  }
+}
+registerAnimator('parallax', ParallaxAnimator);
+```
+
+**HTML**：
+```html
+<style>
+  .parallax-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+</style>
+<div class="parallax-bg"></div>
+<script>
+  CSS.animationWorklet.addModule('parallax-animator.js');
+  const bg = document.querySelector('.parallax-bg');
+  const scrollTimeline = new ScrollTimeline({
+    scrollSource: document.documentElement
+  });
+  new WorkletAnimation(
+    'parallax',
+    bg,
+    scrollTimeline,
+    { speed: 0.3 }
+  ).play();
+</script>
+```
+
+### 案例二：进度指示器
+
+```js
+// progress-animator.js
+class ProgressAnimator {
+  constructor(params) {
+    this.direction = params.direction ?? 'width'; // 'width' | 'height' | 'scale'
+    this.colorStart = params.colorStart ?? '#3b82f6';
+    this.colorEnd = params.colorEnd ?? '#10b981';
+  }
+
+  animate(currentTime, effect) {
+    const el = effect.target;
+    const progress = Math.max(0, Math.min(1, currentTime));
+
+    if (this.direction === 'width') {
+      el.style.width = `${progress * 100}%`;
+    } else if (this.direction === 'height') {
+      el.style.height = `${progress * 100}%`;
+    } else if (this.direction === 'scale') {
+      el.style.transform = `scaleX(${progress})`;
+    }
+  }
+}
+registerAnimator('progress', ProgressAnimator);
+```
+
+### 案例三：滚动触发的数字计数器
+
+```js
+// counter-animator.js
+class CounterAnimator {
+  constructor(params) {
+    this.targetValue = params.targetValue ?? 100;
+    this.decimals = params.decimals ?? 0;
+  }
+
+  animate(currentTime, effect) {
+    const value = currentTime * this.targetValue;
+    effect.target.textContent = value.toFixed(this.decimals);
+  }
+}
+registerAnimator('counter', CounterAnimator);
+```
+
+---
+
+## 浏览器兼容性
+
+| 浏览器 | 支持情况 |
+|--------|----------|
+| Chrome | ✅ 85+ |
+| Edge | ✅ 85+ |
+| Firefox | ❌ 不支持 |
+| Safari | ❌ 不支持 |
+| iOS Safari | ❌ 不支持 |
+
+### 功能检测
+
+```js
+if ('animationWorklet' in CSS) {
+  CSS.animationWorklet.addModule('my-animator.js').then(() => {
+    // Worklet 加载成功
+  });
+} else {
+  // 回退方案：使用常规 CSS 动画或 Web Animations API
+  element.style.animation = 'fallback 1s forwards';
+}
+```
+
+### HTTPS 要求
+
+Animation Worklet 同样需要通过 HTTPS 或 localhost 访问才能正常工作。开发时可以使用 `npx serve .` 或 `python -m http.server` 启动本地服务器。
+
+---
+
+## 常见问题
+
+1. **Worklet 加载失败**：确保通过 HTTPS 或 localhost 访问
+2. **动画不执行**：检查 `animatorName` 是否与 `registerAnimator` 注册名一致
+3. **ScrollTimeline 无效**：确保 `scrollSource` 元素可滚动（内容超出视口）
+4. **性能问题**：Worklet 线程独立，但仍需避免在 `animate` 中执行过重操作
+
+---
+
+## 与 CSS Scroll-Driven Animation 的关系
+
+Animation Worklet 和 CSS Scroll-Driven Animation 都用于滚动驱动动画，但定位不同：
+
+- **CSS Scroll-Driven Animation**：声明式，CSS only，适合简单动画
+- **Animation Worklet**：编程式，完整 JS 能力，适合复杂逻辑
+
+现代浏览器优先实现 CSS Scroll-Driven Animation（性能更好、无需 JS）。对于简单滚动动画，优先使用 CSS；对于需要复杂计算或与其他数据源交互的场景，使用 Animation Worklet。
+
+---
+
+## 总结
+
+CSS Houdini Animation Worklet 通过将动画逻辑运行在独立线程上，实现了真正的高性能动画。结合 `ScrollTimeline`，可以创建丝滑的滚动驱动效果，不受主线程繁忙程度影响。
+
+尽管目前仅 Chromium 浏览器支持，但作为渐进增强的一部分，可以在支持的浏览器中提供更流畅的用户体验。
