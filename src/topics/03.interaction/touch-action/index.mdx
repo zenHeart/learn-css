@@ -1,0 +1,199 @@
+---
+title: "CSS touch-action 触摸操作控制"
+category: "交互"
+tags:
+  - CSS
+  - touch-action
+  - 触摸
+  - 手势
+  - 交互
+description: "详解CSS touch-action属性控制触摸操作的方法"
+keywords: "touch-action, 触摸操作, 手势控制, CSS交互"
+---
+
+# CSS touch-action 触摸操作控制
+
+## 概述
+
+`touch-action` 属性用于控制元素上触摸手势的行为。合理设置 touch-action 可以提升移动端用户体验，避免意外触发浏览器默认行为。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+```css
+.element {
+  touch-action: auto | none | pan-x | pan-y | manipulation | ...
+}
+```
+
+## 属性值
+
+### 1. auto
+
+浏览器处理所有触摸手势（默认值）：
+
+```css
+.touch-auto {
+  touch-action: auto;
+}
+```
+
+### 2. none
+
+禁止所有触摸手势，元素不会响应任何触摸事件：
+
+```css
+.touch-none {
+  touch-action: none;
+}
+```
+
+### 3. pan-x / pan-y
+
+允许水平或垂直方向的平移：
+
+```css
+.pan-horizontal {
+  touch-action: pan-x;
+}
+
+.pan-vertical {
+  touch-action: pan-y;
+}
+```
+
+### 4. manipulation
+
+允许平移和缩放，但禁用双击缩放（性能优化）：
+
+```css
+.pan-zoom {
+  touch-action: manipulation;
+}
+```
+
+### 5. pinch-zoom
+
+显式允许捏合缩放：
+
+```css
+.allow-zoom {
+  touch-action: pinch-zoom;
+}
+```
+
+### 6. double-click-zoom
+
+允许双击缩放：
+
+```css
+.allow-double-click {
+  touch-action: double-click-zoom;
+}
+```
+
+## 使用场景
+
+### 1. 禁用元素上的手势
+
+```css
+.map-overlay {
+  touch-action: none; /* 地图上的覆盖层不响应触摸 */
+}
+```
+
+### 2. 只允许水平滚动
+
+```css
+.horizontal-scroll {
+  touch-action: pan-x;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+```
+
+### 3. 只允许垂直滚动
+
+```css
+.vertical-scroll {
+  touch-action: pan-y;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+```
+
+### 4. 游戏控制
+
+```css
+.game-area {
+  touch-action: none; /* 游戏区域完全自定义触摸处理 */
+}
+```
+
+## 实际应用
+
+### 1. 按钮点击优化
+
+```css
+.button {
+  touch-action: manipulation; /* 移除触摸延迟 */
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+```
+
+### 2. 轮播图
+
+```css
+.carousel {
+  touch-action: pan-y pinch-zoom; /* 只允许垂直滑动切换幻灯片 */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+```
+
+### 3. 地图组件
+
+```css
+.map-container {
+  touch-action: none; /* 让地图库处理手势 */
+}
+
+.map-controls {
+  touch-action: manipulation; /* 控制按钮需要点击 */
+}
+```
+
+### 4. 表单输入
+
+```css
+input[type="text"], textarea {
+  touch-action: auto; /* 确保输入框正常工作 */
+}
+```
+
+## 浏览器兼容性
+
+`touch-action` 属性兼容性良好（移动端）：
+
+- Chrome 36+（Android）
+- Firefox 52+（Android）
+- Safari 13+（iOS 13+）
+- Edge 12+
+
+## 最佳实践
+
+1. **性能优化**：使用 `manipulation` 移除 300ms 触摸延迟
+2. **明确手势**：只允许需要的手势，避免冲突
+3. **测试多设备**：在真机上测试触摸行为
+4. **结合 JavaScript**：复杂手势需要 JavaScript 配合
+5. **注意可访问性**：确保键盘导航仍然工作
+
+## 参考资料
+
+- [touch-action - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action)
+- [ eliminating 300ms tap delay](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action#optimizing_maximum_scroll_performance_on_allowed_touches)

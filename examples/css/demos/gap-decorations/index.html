@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS gap 装饰与间距技巧 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .slider-container { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .slider { flex: 1; -webkit-appearance: none; height: 6px; background: #30363d; border-radius: 3px; outline: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    /* 演示容器 */
+    .demo-box { background: #21262d; border-radius: 8px; padding: 16px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d1117; border-radius: 8px; }
+    .demo-item { padding: 20px; background: #388bfd33; border-radius: 4px; text-align: center; font-size: 14px; font-weight: 600; color: #58a6ff; }
+    
+    .flex-demo { display: flex; flex-wrap: wrap; background: #0d1117; border-radius: 8px; }
+    .flex-item { width: calc(33.33% - 8px); padding: 20px; background: #3fb95033; border-radius: 4px; text-align: center; font-size: 14px; font-weight: 600; color: #3fb950; }
+    
+    .border-demo { display: flex; flex-direction: column; gap: 0; background: #0d1117; border-radius: 8px; overflow: hidden; }
+    .border-item { padding: 16px; background: #21262d; font-size: 14px; border-bottom: 1px solid #30363d; }
+    .border-item:last-child { border-bottom: none; }
+    
+    .gradient-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: linear-gradient(90deg, #667eea, #764ba2); padding: 2px; border-radius: 8px; }
+    .gradient-item { background: white; padding: 20px; text-align: center; font-size: 14px; font-weight: 600; }
+    .gradient-item:first-child { border-radius: 6px 0 0 6px; }
+    .gradient-item:last-child { border-radius: 0 6px 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS gap 装饰与间距技巧</h1>
+    <p class="subtitle">gap | row-gap | column-gap | 交互演示</p>
+
+    <!-- Gap 大小调整 -->
+    <div class="section">
+      <h2>Gap 大小调整</h2>
+      <div class="slider-container">
+        <span style="font-size: 12px; color: #8b949e;">Gap:</span>
+        <input type="range" class="slider" id="gap-slider" min="0" max="40" value="16">
+        <span id="gap-value" style="font-size: 12px; color: #79c0ff; min-width: 40px;">16px</span>
+      </div>
+      <div class="demo-grid demo-box" id="gap-demo" style="gap: 16px;">
+        <div class="demo-item">1</div>
+        <div class="demo-item">2</div>
+        <div class="demo-item">3</div>
+        <div class="demo-item">4</div>
+        <div class="demo-item">5</div>
+        <div class="demo-item">6</div>
+      </div>
+      <div class="code-block" id="gap-code">gap: 16px;</div>
+    </div>
+
+    <!-- Flex Gap 演示 -->
+    <div class="section">
+      <h2>Flexbox Gap</h2>
+      <div class="demo-flex flex-demo" id="flex-demo" style="gap: 16px;">
+        <div class="flex-item">项目 1</div>
+        <div class="flex-item">项目 2</div>
+        <div class="flex-item">项目 3</div>
+        <div class="flex-item">项目 4</div>
+        <div class="flex-item">项目 5</div>
+        <div class="flex-item">项目 6</div>
+      </div>
+      <div class="code-block">.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}</div>
+    </div>
+
+    <!-- 边框装饰 -->
+    <div class="section">
+      <h2>边框装饰技巧</h2>
+      <div class="demo-box">
+        <div class="border-demo" id="border-demo" style="gap: 0;">
+          <div class="border-item">卡片 1</div>
+          <div class="border-item">卡片 2</div>
+          <div class="border-item">卡片 3</div>
+        </div>
+      </div>
+      <div class="code-block">.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.card {
+  padding: 16px;
+  border-bottom: 1px solid #30363d;
+}
+
+.card:last-child {
+  border-bottom: none;
+}</div>
+    </div>
+
+    <!-- 渐变边框 -->
+    <div class="section">
+      <h2>渐变边框装饰</h2>
+      <div class="gradient-demo" id="gradient-demo" style="gap: 0;">
+        <div class="gradient-item">区域 1</div>
+        <div class="gradient-item">区域 2</div>
+        <div class="gradient-item">区域 3</div>
+      </div>
+      <div class="code-block">.gradient-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.gradient-item {
+  background: white;
+  padding: 20px;
+}</div>
+    </div>
+
+    <!-- 分别设置行列间距 -->
+    <div class="section">
+      <h2>行列间距分别设置</h2>
+      <div class="slider-container">
+        <span style="font-size: 12px; color: #8b949e;">行间距:</span>
+        <input type="range" class="slider" id="row-gap-slider" min="0" max="40" value="16">
+        <span id="row-gap-value" style="font-size: 12px; color: #79c0ff; min-width: 40px;">16px</span>
+      </div>
+      <div class="slider-container">
+        <span style="font-size: 12px; color: #8b949e;">列间距:</span>
+        <input type="range" class="slider" id="col-gap-slider" min="0" max="40" value="24">
+        <span id="col-gap-value" style="font-size: 12px; color: #79c0ff; min-width: 40px;">24px</span>
+      </div>
+      <div class="demo-grid demo-box" id="row-col-demo" style="gap: 16px 24px;">
+        <div class="demo-item">1</div>
+        <div class="demo-item">2</div>
+        <div class="demo-item">3</div>
+        <div class="demo-item">4</div>
+        <div class="demo-item">5</div>
+        <div class="demo-item">6</div>
+      </div>
+      <div class="code-block" id="row-col-code">gap: 16px 24px; /* row-gap column-gap */</div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 66+ (Flexbox), 84+ (Grid) ✓</li>
+          <li>Firefox 61+ (Flexbox), 66+ (Grid) ✓</li>
+          <li>Safari 12+ (Flexbox), 16+ (Grid) ✓</li>
+          <li>Edge 79+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Gap 滑块
+    const gapSlider = document.getElementById('gap-slider');
+    const gapValue = document.getElementById('gap-value');
+    const gapDemo = document.getElementById('gap-demo');
+    const gapCode = document.getElementById('gap-code');
+    
+    gapSlider.addEventListener('input', (e) => {
+      const value = e.target.value;
+      gapValue.textContent = value + 'px';
+      gapDemo.style.gap = value + 'px';
+      gapCode.textContent = `gap: ${value}px;`;
+    });
+    
+    // Flex Gap 演示
+    const flexDemo = document.getElementById('flex-demo');
+    const flexItems = flexDemo.querySelectorAll('.flex-item');
+    
+    // 动态调整 flex-item 宽度以适应 gap
+    function updateFlexItems() {
+      const gap = parseInt(gapSlider.value);
+      flexItems.forEach(item => {
+        item.style.width = `calc(33.33% - ${gap * 2}px)`;
+      });
+    }
+    
+    gapSlider.addEventListener('input', updateFlexItems);
+    updateFlexItems();
+    
+    // 行间距和列间距
+    const rowGapSlider = document.getElementById('row-gap-slider');
+    const colGapSlider = document.getElementById('col-gap-slider');
+    const rowGapValue = document.getElementById('row-gap-value');
+    const colGapValue = document.getElementById('col-gap-value');
+    const rowColDemo = document.getElementById('row-col-demo');
+    const rowColCode = document.getElementById('row-col-code');
+    
+    rowGapSlider.addEventListener('input', updateRowCol);
+    colGapSlider.addEventListener('input', updateRowCol);
+    
+    function updateRowCol() {
+      const rowGap = rowGapSlider.value;
+      const colGap = colGapSlider.value;
+      rowGapValue.textContent = rowGap + 'px';
+      colGapValue.textContent = colGap + 'px';
+      rowColDemo.style.gap = rowGap + 'px ' + colGap + 'px';
+      rowColCode.textContent = `gap: ${rowGap}px ${colGap}px; /* row-gap column-gap */`;
+    }
+  </script>
+</body>
+</html>
