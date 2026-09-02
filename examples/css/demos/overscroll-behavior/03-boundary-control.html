@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>overscroll-behavior 演示三：边界行为对比</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; }
+    h1 { font-size: 18px; color: #333; padding: 16px; }
+    .info-bar {
+      background: #fff7e6;
+      border: 1px solid #ffcc80;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #995500;
+      margin: 0 16px 16px;
+    }
+    .info-bar code { background: #fff3cc; padding: 1px 4px; border-radius: 3px; }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 0 16px;
+    }
+    @media (max-width: 768px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+    .demo-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .demo-header {
+      padding: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      color: white;
+    }
+    .demo-header.auto { background: #6c757d; }
+    .demo-header.contain { background: #28a745; }
+    .demo-header.none { background: #dc3545; }
+    .demo-content {
+      height: 250px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .demo-content::-webkit-scrollbar { width: 6px; }
+    .demo-content::-webkit-scrollbar-track { background: #f0f0f0; }
+    .demo-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    .demo-content.auto { overscroll-behavior: auto; }
+    .demo-content.contain { overscroll-behavior: contain; }
+    .demo-content.none { overscroll-behavior: none; }
+    .scroll-item {
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      color: #666;
+    }
+    .scroll-item:last-child { border-bottom: none; }
+    .demo-desc {
+      padding: 10px 12px;
+      font-size: 11px;
+      color: #888;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+    }
+    .behavior-table {
+      margin: 24px 16px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .behavior-table h3 {
+      padding: 16px;
+      font-size: 14px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #eee;
+    }
+    .behavior-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .behavior-table th, .behavior-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .behavior-table th {
+      background: #f5f5f5;
+      font-weight: 600;
+      color: #333;
+    }
+    .check { color: #28a745; }
+    .cross { color: #dc3545; }
+    .demo-code {
+      margin: 24px 16px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .demo-code-header {
+      padding: 8px 12px;
+      background: #2d2d2d;
+      font-size: 12px;
+      color: #888;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    .demo-code pre {
+      padding: 12px;
+      margin: 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: #d4d4d4;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .demo-code .keyword { color: #569cd6; }
+    .demo-code .value { color: #ce9178; }
+    .demo-code .comment { color: #6a9955; }
+  </style>
+</head>
+<body>
+  <h1>案例三：边界行为对比</h1>
+  <div class="info-bar">
+    💡 提示：对比三种值的差异。滚动到边界时观察：<code>auto</code> 会传递到父元素，<code>contain</code> 阻止传递但保留弹性，<code>none</code> 完全禁用弹性效果。
+  </div>
+
+  <div class="demo-grid">
+    <!-- auto -->
+    <div class="demo-card">
+      <div class="demo-header auto">auto（默认）</div>
+      <div class="demo-content auto" id="autoDemo">
+        <div class="scroll-item">列表项 #1</div>
+        <div class="scroll-item">列表项 #2</div>
+        <div class="scroll-item">列表项 #3</div>
+        <div class="scroll-item">列表项 #4</div>
+        <div class="scroll-item">列表项 #5</div>
+        <div class="scroll-item">列表项 #6</div>
+        <div class="scroll-item">列表项 #7</div>
+        <div class="scroll-item">列表项 #8</div>
+        <div class="scroll-item">列表项 #9</div>
+        <div class="scroll-item">列表项 #10</div>
+        <div class="scroll-item">列表项 #11</div>
+        <div class="scroll-item">列表项 #12</div>
+        <div class="scroll-item">列表项 #13</div>
+        <div class="scroll-item">列表项 #14</div>
+        <div class="scroll-item">列表项 #15</div>
+      </div>
+      <div class="demo-desc">滚动链会传递到父容器，弹性效果正常显示</div>
+    </div>
+
+    <!-- contain -->
+    <div class="demo-card">
+      <div class="demo-header contain">contain</div>
+      <div class="demo-content contain" id="containDemo">
+        <div class="scroll-item">列表项 #1</div>
+        <div class="scroll-item">列表项 #2</div>
+        <div class="scroll-item">列表项 #3</div>
+        <div class="scroll-item">列表项 #4</div>
+        <div class="scroll-item">列表项 #5</div>
+        <div class="scroll-item">列表项 #6</div>
+        <div class="scroll-item">列表项 #7</div>
+        <div class="scroll-item">列表项 #8</div>
+        <div class="scroll-item">列表项 #9</div>
+        <div class="scroll-item">列表项 #10</div>
+        <div class="scroll-item">列表项 #11</div>
+        <div class="scroll-item">列表项 #12</div>
+        <div class="scroll-item">列表项 #13</div>
+        <div class="scroll-item">列表项 #14</div>
+        <div class="scroll-item">列表项 #15</div>
+      </div>
+      <div class="demo-desc">阻止滚动链传递，弹性效果保留，下拉刷新禁用</div>
+    </div>
+
+    <!-- none -->
+    <div class="demo-card">
+      <div class="demo-header none">none</div>
+      <div class="demo-content none" id="noneDemo">
+        <div class="scroll-item">列表项 #1</div>
+        <div class="scroll-item">列表项 #2</div>
+        <div class="scroll-item">列表项 #3</div>
+        <div class="scroll-item">列表项 #4</div>
+        <div class="scroll-item">列表项 #5</div>
+        <div class="scroll-item">列表项 #6</div>
+        <div class="scroll-item">列表项 #7</div>
+        <div class="scroll-item">列表项 #8</div>
+        <div class="scroll-item">列表项 #9</div>
+        <div class="scroll-item">列表项 #10</div>
+        <div class="scroll-item">列表项 #11</div>
+        <div class="scroll-item">列表项 #12</div>
+        <div class="scroll-item">列表项 #13</div>
+        <div class="scroll-item">列表项 #14</div>
+        <div class="scroll-item">列表项 #15</div>
+      </div>
+      <div class="demo-desc">阻止滚动链传递，弹性效果完全禁用</div>
+    </div>
+  </div>
+
+  <div class="behavior-table">
+    <h3>值对比速查表</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>行为</th>
+          <th>auto</th>
+          <th>contain</th>
+          <th>none</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>滚动链传递到父容器</td>
+          <td class="check">✓ 会传递</td>
+          <td class="cross">✗ 阻止</td>
+          <td class="cross">✗ 阻止</td>
+        </tr>
+        <tr>
+          <td>边界弹性效果</td>
+          <td class="check">✓ 保留</td>
+          <td class="check">✓ 保留</td>
+          <td class="cross">✗ 禁用</td>
+        </tr>
+        <tr>
+          <td>下拉刷新手势</td>
+          <td class="check">✓ 启用</td>
+          <td class="cross">✗ 禁用</td>
+          <td class="cross">✗ 禁用</td>
+        </tr>
+        <tr>
+          <td>水平页面导航</td>
+          <td class="check">✓ 启用</td>
+          <td class="cross">✗ 禁用</td>
+          <td class="cross">✗ 禁用</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="demo-code">
+    <div class="demo-code-header">代码示例</div>
+    <pre><span class="comment">/* 阻止滚动链，保留弹性效果 */</span>
+<span class="keyword">.dialog-content</span> {
+  <span class="keyword">overflow-y</span>: <span class="value">auto</span>;
+  <span class="keyword">overscroll-behavior</span>: <span class="value">contain</span>;
+}
+
+<span class="comment">/* 彻底禁用边界效果 */</span>
+<span class="keyword">.scroll-area</span> {
+  <span class="keyword">overscroll-behavior</span>: <span class="value">none</span>;
+}
+
+<span class="comment">/* 分轴控制 */</span>
+<span class="keyword">.carousel</span> {
+  <span class="keyword">overscroll-behavior-x</span>: <span class="value">contain</span>;
+  <span class="keyword">overscroll-behavior-y</span>: <span class="value">none</span>;
+}</pre>
+  </div>
+</body>
+</html>

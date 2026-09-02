@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>overscroll-behavior 演示二：横向滚动与垂直锁定</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; }
+    h1 { font-size: 18px; color: #333; padding: 16px; }
+    .info-bar {
+      background: #e7f3ff;
+      border: 1px solid #b3d7ff;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #004a99;
+      margin: 0 16px 16px;
+    }
+    .info-bar code { background: #cce5ff; padding: 1px 4px; border-radius: 3px; }
+    .section { margin-bottom: 24px; }
+    .section-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      padding: 0 16px;
+    }
+    /* 横向轮播容器 */
+    .carousel {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      overflow-y: hidden; /* 明确禁止垂直滚动 */
+      overscroll-behavior-x: contain; /* 关键：横向滚动时阻止垂直传递 */
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .carousel::-webkit-scrollbar { height: 6px; }
+    .carousel::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 3px; }
+    .carousel::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    .carousel-item {
+      flex-shrink: 0;
+      width: 200px;
+      height: 140px;
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .carousel-item-title { font-weight: 600; font-size: 14px; color: #333; }
+    .carousel-item-desc { font-size: 12px; color: #666; margin-top: 4px; }
+    .carousel-item-tag {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .tag-blue { background: #e7f3ff; color: #004a99; }
+    .tag-green { background: #e7ffe7; color: #006600; }
+    .tag-orange { background: #fff3e7; color: #995500; }
+    .tag-purple { background: #f3e7ff; color: #550099; }
+    /* 对比：未设置 overscroll-behavior 的容器 */
+    .carousel-raw {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      /* 没有 overscroll-behavior */
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .carousel-raw .carousel-item { background: #fff0f0; }
+    .code-hint {
+      font-size: 11px;
+      color: #888;
+      padding: 0 16px;
+      margin-top: 4px;
+    }
+    /* 垂直嵌套滚动区域 */
+    .nested-scroll {
+      margin: 16px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .nested-scroll-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    .nested-content {
+      height: 200px;
+      overflow-y: auto;
+      overscroll-behavior-y: contain; /* 垂直方向 contain */
+      -webkit-overflow-scrolling: touch;
+    }
+    .nested-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+      color: #666;
+    }
+    .nested-item:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <h1>案例二：横向滚动与垂直锁定</h1>
+  <div class="info-bar">
+    💡 提示：<code>overscroll-behavior-x: contain</code> 在横向滚动时阻止滚动链传递到页面。<code>overflow-y: hidden</code> 确保垂直方向不会滚动。斜向滑动时背景不会乱跳。
+  </div>
+
+  <!-- 正确实现：使用 contain -->
+  <div class="section">
+    <div class="section-title">✅ 正确实现：overscroll-behavior-x: contain</div>
+    <div class="carousel">
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #1</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">精选</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #2</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-green">新品</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #3</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-orange">热卖</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #4</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-purple">推荐</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #5</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">精选</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片标题 #6</div>
+          <div class="carousel-item-desc">这是描述文字</div>
+        </div>
+        <span class="carousel-item-tag tag-green">新品</span>
+      </div>
+    </div>
+    <div class="code-hint">scroll-snap + overscroll-behavior-x: contain</div>
+  </div>
+
+  <!-- 错误实现：没有 contain -->
+  <div class="section">
+    <div class="section-title">⚠️ 对比：无 overscroll-behavior（斜滑可能触发页面滚动）</div>
+    <div class="carousel-raw">
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片 A</div>
+          <div class="carousel-item-desc">无 contain</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">示例</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片 B</div>
+          <div class="carousel-item-desc">无 contain</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">示例</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片 C</div>
+          <div class="carousel-item-desc">无 contain</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">示例</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片 D</div>
+          <div class="carousel-item-desc">无 contain</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">示例</span>
+      </div>
+      <div class="carousel-item">
+        <div>
+          <div class="carousel-item-title">卡片 E</div>
+          <div class="carousel-item-desc">无 contain</div>
+        </div>
+        <span class="carousel-item-tag tag-blue">示例</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 嵌套垂直滚动 -->
+  <div class="section">
+    <div class="section-title">🔽 嵌套垂直滚动区域：overscroll-behavior-y: contain</div>
+    <div class="nested-scroll">
+      <div class="nested-scroll-title">嵌套的可滚动区域</div>
+      <div class="nested-content">
+        <div class="nested-item">嵌套内容 #1 - 垂直滚动不会影响外部</div>
+        <div class="nested-item">嵌套内容 #2</div>
+        <div class="nested-item">嵌套内容 #3</div>
+        <div class="nested-item">嵌套内容 #4</div>
+        <div class="nested-item">嵌套内容 #5</div>
+        <div class="nested-item">嵌套内容 #6</div>
+        <div class="nested-item">嵌套内容 #7</div>
+        <div class="nested-item">嵌套内容 #8</div>
+        <div class="nested-item">嵌套内容 #9</div>
+        <div class="nested-item">嵌套内容 #10</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
