@@ -1,0 +1,128 @@
+---
+title: CSS writing-mode 书写模式
+category: CSS 文本
+tags: [css, writing-mode, text, layout, vertical, 书写模式, 文本布局]
+description: 详细介绍 CSS writing-mode 属性如何控制文本的排列方向，支持水平、垂直等多种书写模式。
+keywords: writing-mode, text-orientation, 书写模式, 文本方向, 垂直文本, CSS 布局
+---
+
+`writing-mode` 属性定义了文本水平或垂直排列的方向，支持从右到左、从上到下等多种书写模式。
+
+## 基本概念
+
+`writing-mode` 控制文本的行内流向（inline progression direction），即文本如何在一行中排列以及行与行之间的方向。
+
+## 语法
+
+```css
+writing-mode: horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr
+```
+
+## 取值说明
+
+### horizontal-tb - 水平从上到下（默认值）
+
+```css
+writing-mode: horizontal-tb;
+```
+
+- 文本水平排列
+- 行从上到下排列
+- 适合大多数语言（拉丁语、汉语等）
+- 这是默认值
+
+### vertical-rl - 垂直从右到左
+
+```css
+writing-mode: vertical-rl;
+```
+
+- 文本垂直排列
+- 行从右到左排列
+- 适合日语、汉语等垂直书写场景
+- 常用于古籍、排版设计
+
+### vertical-lr - 垂直从左到右
+
+```css
+writing-mode: vertical-lr;
+```
+
+- 文本垂直排列
+- 行从左到右排列
+- 适合某些少数民族语言
+
+### sideways-rl - 侧排从右到左
+
+```css
+writing-mode: sideways-rl;
+```
+
+- 文本垂直排列
+- 行从右到左排列
+- 文本保持正向（不旋转）
+
+### sideways-lr - 侧排从左到右
+
+```css
+writing-mode: sideways-lr;
+```
+
+- 文本垂直排列
+- 行从左到右排列
+- 文本保持正向
+
+## 使用场景
+
+### 垂直标题
+
+```css
+.vertical-title {
+  writing-mode: vertical-rl;
+  height: 300px;
+}
+```
+
+### 古籍排版
+
+```css
+.classic-book {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "SimSun", serif;
+}
+```
+
+### 多语言混排
+
+```css
+.mixed-content {
+  writing-mode: horizontal-tb;
+}
+```
+
+## text-orientation 配合
+
+`writing-mode` 通常与 `text-orientation` 配合使用：
+
+```css
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright; /* 字符保持正向 */
+}
+```
+
+## 浏览器支持
+
+所有现代浏览器都支持 `writing-mode` 属性。
+
+## 交互式演示
+
+{/* @playground id="css-writing-mode" mode="demo" */}
+
+## 总结
+
+- `horizontal-tb` 适合大多数场景
+- `vertical-rl` 适合中文、日文垂直排版
+- `vertical-lr` 适合特殊语言需求
+- `sideways-*` 适合现代侧排设计
