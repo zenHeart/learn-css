@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS perspective 与 preserve-3d - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 24px; min-height: 200px; padding: 40px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .slider-container { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .slider { flex: 1; -webkit-appearance: none; height: 6px; background: #30363d; border-radius: 3px; outline: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    
+    .box { width: 100px; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; cursor: pointer; transition: transform 0.5s ease; transform-style: preserve-3d; }
+    
+    .perspective-box { width: 80px; height: 80px; background: #a371f7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; transition: transform 0.5s ease; }
+    
+    /* 卡片 */
+    .card-demo { perspective: 500px; width: 150px; height: 100px; }
+    .card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+    .card.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .card-front { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .card-back { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; transform: rotateY(180deg); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS perspective 与 preserve-3d</h1>
+    <p class="subtitle">perspective | transform-style | 3D透视 | 交互演示</p>
+
+    <div class="section">
+      <h2>perspective 透视距离调整</h2>
+      <div class="slider-container">
+        <span style="font-size: 12px; color: #8b949e;">透视距离:</span>
+        <input type="range" class="slider" id="perspective-slider" min="100" max="1000" value="500">
+        <span id="perspective-value" style="font-size: 12px; color: #79c0ff; min-width: 60px;">500px</span>
+      </div>
+      <div class="demo-area" id="perspective-demo" style="perspective: 500px;">
+        <div class="box" id="rotate-3d">悬停旋转</div>
+      </div>
+      <div class="code-block" id="perspective-code">perspective: 500px;</div>
+      <p class="desc"><span class="tag">说明</span> 透视距离越小，3D 效果越强烈。悬停方块查看旋转效果。</p>
+    </div>
+
+    <div class="section">
+      <h2>3D 卡片翻转</h2>
+      <div class="demo-area">
+        <div class="card-demo">
+          <div class="card" id="flip-card">
+            <div class="card-face card-front">点击翻转</div>
+            <div class="card-face card-back">背面</div>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">.container { perspective: 500px; }
+.card { transform-style: preserve-3d; transition: transform 0.6s; }
+.card.flipped { transform: rotateY(180deg); }</div>
+    </div>
+
+    <div class="section">
+      <h2>多元素 3D 效果</h2>
+      <div class="demo-area" id="multi-demo" style="perspective: 800px;">
+        <div style="display: flex; gap: 8px; transform-style: preserve-3d;">
+          <div class="perspective-box" style="transform: rotateY(-30deg);">左</div>
+          <div class="perspective-box" style="transform: rotateY(0deg);">中</div>
+          <div class="perspective-box" style="transform: rotateY(30deg);">右</div>
+        </div>
+      </div>
+      <div class="code-block">.container { perspective: 800px; }
+.row { transform-style: preserve-3d; display: flex; gap: 8px; }
+.item:nth-child(1) { transform: rotateY(-30deg); }
+.item:nth-child(2) { transform: rotateY(0deg); }
+.item:nth-child(3) { transform: rotateY(30deg); }</div>
+    </div>
+
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block">/* 1. 定义透视容器 */
+.scene { perspective: 500px; }
+
+/* 2. 保留 3D 空间 */
+.parent { transform-style: preserve-3d; }
+
+/* 3. 子元素 3D 变换 */
+.child { transform: rotateY(45deg) translateZ(100px); }
+
+/* 4. perspective-origin 定义透视原点 */
+.scene { perspective-origin: center center; }</div>
+    </div>
+
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 36+ ✓</li>
+          <li>Firefox 16+ ✓</li>
+          <li>Safari 9+ ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 透视距离调整
+    const slider = document.getElementById('perspective-slider');
+    const value = document.getElementById('perspective-value');
+    const demo = document.getElementById('perspective-demo');
+    const code = document.getElementById('perspective-code');
+    
+    slider.addEventListener('input', (e) => {
+      const val = e.target.value;
+      value.textContent = val + 'px';
+      demo.style.perspective = val + 'px';
+      code.textContent = `perspective: ${val}px;`;
+    });
+    
+    // 卡片翻转
+    const flipCard = document.getElementById('flip-card');
+    flipCard.addEventListener('click', () => {
+      flipCard.classList.toggle('flipped');
+    });
+    
+    // 3D 旋转悬停
+    const rotateBox = document.getElementById('rotate-3d');
+    rotateBox.addEventListener('mouseenter', () => {
+      rotateBox.style.transform = 'rotateY(45deg) rotateX(15deg)';
+    });
+    rotateBox.addEventListener('mouseleave', () => {
+      rotateBox.style.transform = 'none';
+    });
+  </script>
+</body>
+</html>

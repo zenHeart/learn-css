@@ -1,0 +1,500 @@
+---
+title: "CSS :has() 关系选择器详解"
+category: "基础知识"
+tags:
+  - CSS选择器
+  - 关系选择器
+  - :has
+  - 父选择器
+  - CSS3
+description: "深入讲解CSS :has()选择器实现父元素选择及关系选择的方法"
+keywords: ":has, CSS选择器, 父选择器, 关系型伪类, 前向选择"
+---
+
+# CSS :has() 关系选择器详解
+
+## 什么是 :has()
+
+`:has()` 是 CSS 关系型伪类（Pseudo-class），俗称「父选择器」。它允许你根据元素的后代或兄弟元素来选择该元素。`:has()` 是 CSS Selectors Level 4 规范中引入的功能，是 CSS 选择器历史上革命性的突破。
+
+### 基本语法
+
+```css
+/* 选择包含 .featured 子元素的 section */
+section:has(.featured) {
+  /* styles */
+}
+
+/* 选择紧邻 h2 的 h1 */
+h1:has(+ h2) {
+  /* styles */
+}
+```
+
+### 语法详解
+
+```
+:has(<relative-selector-list>)
+```
+
+- `<relative-selector-list>`：相对选择器列表，用逗号分隔
+- 相对选择器：相对于 `:has()` 所在元素进行匹配
+- 支持复杂的选择器组合
+
+## 核心概念
+
+### 1. 关系型伪类
+
+`:has()` 是一种「关系型伪类」，它建立元素之间的关系：
+
+| 伪类类型 | 示例 | 说明 |
+|---------|------|------|
+| 关系型 | `:has()` | 根据与其他元素的关系选择 |
+| 状态型 | `:hover` | 根据用户交互状态选择 |
+| 结构型 | `:first-child` | 根据文档结构选择 |
+
+### 2. 父选择器
+
+传统 CSS 无法直接选择「父元素」，`:has()` 首次实现了这一能力：
+
+```css
+/* 选择包含图片的文章 */
+article:has(img) { }
+
+/* 选择包含特定子元素的容器 */
+.card:has(.badge) { }
+```
+
+### 3. 前向选择
+
+`:has()` 支持「前向选择」，即选择「后面有特定兄弟元素的元素」：
+
+```css
+/* 选择紧跟在 h2 后面的段落 */
+p:has(+ h2) { }
+
+/* 选择 h1 后面的所有兄弟元素 */
+h1:has(~ *) { }
+```
+
+### 4. 与 :is()/:where() 组合
+
+`:has()` 可以与 `:is()`、`:where()` 组合使用，实现更复杂的选择：
+
+```css
+/* 使用 :is() 简化选择器 */
+article:is(:has(h1), :has(h2)) { }
+
+/* 使用 :where() 无权重选择器 */
+:where(.dark-mode):has(img) { }
+```
+
+## 实战案例
+
+### 案例 1：父元素选择
+
+{/* @playground id="parent-selector" mode="demo" */}
+
+```css
+/* 选择包含 .featured 商品的 section */
+section:has(.featured) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 选择包含勾选状态复选框的 label */
+label:has(input[type="checkbox"]:checked) {
+  color: #22c55e;
+  font-weight: 600;
+}
+```
+
+### 案例 2：兄弟选择
+
+{/* @playground id="sibling-selector" mode="demo" */}
+
+```css
+/* 选择紧邻 h2 的 h1（相邻兄弟） */
+h1:has(+ h2) {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* h2 成为 h1 的对比标题 */
+h2:has(~ p) {
+  color: #64748b;
+}
+```
+
+### 案例 3：逻辑组合
+
+{/* @playground id="logical-combinators" mode="demo" */}
+
+```css
+/* OR 关系：包含 video 或 audio */
+body:has(video, audio) {
+  --media-indicator: 1;
+}
+
+/* AND 关系：同时包含 video 和 audio */
+body:has(video):has(audio) {
+  --media-indicator: 2;
+}
+
+/* NOT 关系：不包含特定元素 */
+article:has(.ad):not(:has(.featured)) {
+  opacity: 0.6;
+}
+```
+
+### 案例 4：表单状态
+
+{/* @playground id="form-states" mode="demo" */}
+
+```css
+/* 选择获得焦点的 input 所在的 form */
+form:has(input:focus) {
+  border-color: #3b82f6;
+}
+
+/* 选择包含已选中单选框的 fieldset */
+fieldset:has(input[type="radio"]:checked) {
+  background: #f0f9ff;
+}
+
+/* 选择验证失败的 input 所在的 div */
+div:has(input:invalid) .error-message {
+  display: block;
+}
+```
+
+### 案例 5：布局状态
+
+{/* @playground id="layout-states" mode="demo" */}
+
+```css
+/* 选择包含溢出内容的容器 */
+.container:has(*:overflow) {
+  outline: 2px dashed #f59e0b;
+}
+
+/* 选择包含绝对定位元素的相对定位容器 */
+.relative-container:has(> .absolute-child) {
+  outline: 2px solid #8b5cf6;
+}
+```
+
+## 兼容性
+
+`:has()` 已获得主流浏览器的广泛支持：
+
+| 浏览器 | 支持版本 |
+|-------|---------|
+| Chrome | 105+ |
+| Firefox | 121+ |
+| Safari | 15.4+ |
+| Edge | 105+ |
+
+### 降级方案
+
+对于不支持的浏览器，可以使用 JavaScript 回退：
+
+```javascript
+// 检测支持性
+if (!CSS.supports('selector(:has(*))')) {
+  // 使用 JavaScript 实现类似功能
+  document.querySelectorAll('.card').forEach(card => {
+    if (card.querySelector('.badge')) {
+      card.classList.add('has-badge');
+    }
+  });
+}
+```
+
+## 性能注意事项
+
+### ⚠️ 避免在 :root 或 body 上使用
+
+```css
+/* ❌ 性能差的写法 */
+:root:has(.dark-mode) { }
+body:has(.modal) { }
+```
+
+这些选择器会强制浏览器在每次 DOM 变化时重新评估整个文档。
+
+### ✅ 性能好的写法
+
+```css
+/* ✅ 限定在更具体的容器内 */
+.sidebar:has(.collapsed) { }
+.modal-backdrop:has(.modal) { }
+```
+
+### 性能优化建议
+
+1. **限制范围**：在更具体的父元素上使用 `:has()`
+2. **避免复杂选择器**：`:has()` 内部的选择器越简单越好
+3. **避免嵌套**：`a:has(b:has(c))` 性能很差
+4. **考虑静态替代**：如果可能，使用 class 或 data 属性
+
+## 与 jQuery has() 的对比
+
+| 特性 | CSS :has() | jQuery :has() |
+|------|-----------|---------------|
+| 语法 | `parent:has(child)` | `parent.has(child)` |
+| 权重 | 继承父元素权重 | 固定权重 |
+| 性能 | 浏览器原生优化 | JavaScript 实现 |
+| 动态更新 | 依赖 CSS 渲染引擎 | 需要手动触发 |
+
+## 常见用法汇总
+
+```css
+/* 购物车有商品时显示数量 */
+.cart:has(.item) .badge { display: flex; }
+
+/* 侧边栏有折叠项时显示指示器 */
+.aside:has(.collapsed) .toggle { visibility: visible; }
+
+/* 表单有错误时高亮整个表单 */
+.form:has(.error) { border-color: #ef4444; }
+
+/* 列表有选中项时启用批量操作 */
+.list:has(.selected) .bulk-actions { display: flex; }
+```
+
+## 参考资料
+
+- [CSS :has() - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/:has)
+- [Selectors Level 4 - W3C](https://www.w3.org/TR/selectors-4/)
+- [Can I Use :has()](https://caniuse.com/css-has)
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS :has() 关系选择器 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { display: flex; gap: 16px; min-height: 120px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .box { padding: 16px 24px; border-radius: 8px; font-size: 14px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    /* Demo specific styles */
+    .product-card { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; width: 140px; }
+    .product-card .badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+    .product-card .featured { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .product-card.normal { opacity: 0.7; }
+    
+    .section-card { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 8px; }
+    .section-card:has(.featured) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-color: #667eea; }
+    
+    .heading-demo { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 8px; }
+    .heading-demo h1:has(+ h2) { color: #f59e0b; border-bottom: 2px solid #f59e0b; }
+    
+    .media-indicator { display: inline-flex; align-items: center; gap: 8px; background: #21262d; padding: 8px 16px; border-radius: 20px; font-size: 13px; }
+    .media-indicator:has(video) { background: #3b82f633; border: 1px solid #3b82f6; color: #60a5fa; }
+    .media-indicator:has(audio) { background: #22c55e33; border: 1px solid #22c55e; color: #4ade80; }
+    .media-indicator:has(video):has(audio) { background: #a855f733; border-color: #a855f7; color: #c084fc; }
+    
+    .form-demo { background: #21262d; border: 2px solid #30363d; border-radius: 8px; padding: 20px; transition: border-color 0.2s; }
+    .form-demo:has(input:focus) { border-color: #3b82f6; }
+    .form-demo label { display: block; margin-bottom: 8px; }
+    .form-demo input { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 8px 12px; color: #c9d1d9; width: 100%; margin-bottom: 12px; }
+    .form-demo input:focus { outline: none; border-color: #3b82f6; }
+    
+    .container-demo { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; position: relative; min-height: 80px; }
+    .container-demo:has(.overflow-element) { outline: 2px dashed #f59e0b; }
+    .container-demo .overflow-element { width: 300px; height: 40px; background: #f59e0b33; border: 1px solid #f59e0b; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f59e0b; }
+    
+    .checkbox-demo label { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; margin-bottom: 8px; transition: all 0.2s; }
+    .checkbox-demo label:has(input:checked) { background: #22c55e22; border-color: #22c55e; color: #4ade80; }
+    .checkbox-demo input[type="checkbox"] { width: 18px; height: 18px; accent-color: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS :has() 关系选择器</h1>
+    <p class="subtitle">父选择器 | 兄弟选择 | 逻辑组合 | 表单状态</p>
+    
+    <!-- Case 1: Parent Selector -->
+    <div class="section">
+      <h2><span class="tag">案例 1</span>父元素选择</h2>
+      <div class="controls">
+        <button class="btn" onclick="toggleFeatured()">切换 Featured 商品</button>
+      </div>
+      <div class="demo-area">
+        <div class="section-card">
+          <p>普通卡片</p>
+          <p style="font-size: 12px; color: #6e7681;">无 featured 商品</p>
+        </div>
+        <div class="section-card" id="featured-card">
+          <p>Featured 卡片</p>
+          <p style="font-size: 12px; color: #6e7681;">包含 .featured 元素</p>
+        </div>
+      </div>
+      <div class="code-block">/* 选择包含 .featured 的 section-card */
+.section-card:has(.featured) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}</div>
+      <p class="desc">当卡片包含 .featured 元素时，背景会变成渐变色。</p>
+    </div>
+    
+    <!-- Case 2: Sibling Selector -->
+    <div class="section">
+      <h2><span class="tag">案例 2</span>兄弟选择</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: flex-start;">
+        <div class="heading-demo">
+          <h1 style="font-size: 20px;">主标题 H1</h1>
+          <h2 style="font-size: 16px; color: #8b949e;">副标题 H2（紧跟在 H1 后面）</h2>
+        </div>
+      </div>
+      <div class="code-block">/* 选择紧邻 h2 的 h1 */
+h1:has(+ h2) {
+  color: #f59e0b;
+  border-bottom: 2px solid #f59e0b;
+}</div>
+      <p class="desc">当 h1 后面紧跟 h2 时，h1 会获得特殊样式。</p>
+    </div>
+    
+    <!-- Case 3: Logical Combinators -->
+    <div class="section">
+      <h2><span class="tag">案例 3</span>逻辑组合</h2>
+      <div class="controls">
+        <button class="btn" onclick="toggleVideo()">切换 Video</button>
+        <button class="btn" onclick="toggleAudio()">切换 Audio</button>
+      </div>
+      <div class="demo-area">
+        <div id="media-panel" class="media-indicator">
+          <span id="media-text">无媒体</span>
+        </div>
+      </div>
+      <div class="code-block">/* OR: 包含 video 或 audio */
+body:has(video, audio) { --indicator: 1; }
+
+/* AND: 同时包含 video 和 audio */
+body:has(video):has(audio) { --indicator: 2; }
+
+/* NOT: 不包含 .ad */
+article:has(.ad):not(:has(.featured)) { opacity: 0.6; }</div>
+      <p class="desc">使用 OR (`,`) 和 AND (嵌套 :has) 关系组合选择器。</p>
+    </div>
+    
+    <!-- Case 4: Form States -->
+    <div class="section">
+      <h2><span class="tag">案例 4</span>表单状态</h2>
+      <div class="demo-area">
+        <div class="form-demo" id="form-demo">
+          <label>点击输入框查看效果</label>
+          <input type="text" placeholder="点击这里获得焦点...">
+          <div class="checkbox-demo">
+            <label>
+              <input type="checkbox" id="agree-check">
+              <span>同意条款（勾选查看效果）</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">/* 表单获得焦点时 */
+form:has(input:focus) { border-color: #3b82f6; }
+
+/* 复选框选中时的 label */
+label:has(input:checked) { 
+  background: #22c55e22; 
+  border-color: #22c55e; 
+}</div>
+      <p class="desc">根据表单元素的状态改变父容器样式。</p>
+    </div>
+    
+    <!-- Case 5: Layout States -->
+    <div class="section">
+      <h2><span class="tag">案例 5</span>布局状态</h2>
+      <div class="controls">
+        <button class="btn" onclick="toggleOverflow()">切换溢出内容</button>
+      </div>
+      <div class="demo-area">
+        <div class="container-demo" id="overflow-container">
+          <p style="font-size: 12px; color: #6e7681;">容器内容</p>
+        </div>
+      </div>
+      <div class="code-block">/* 包含溢出元素的容器 */
+.container:has(.overflow) {
+  outline: 2px dashed #f59e0b;
+}</div>
+      <p class="desc">检测容器内是否有溢出内容并显示指示器。</p>
+    </div>
+  </div>
+  
+  <script>
+    // Case 1: Toggle featured
+    function toggleFeatured() {
+      const card = document.getElementById('featured-card');
+      const badge = card.querySelector('.badge');
+      if (badge) {
+        badge.remove();
+      } else {
+        const newBadge = document.createElement('div');
+        newBadge.className = 'badge featured';
+        newBadge.textContent = 'Featured';
+        card.insertBefore(newBadge, card.firstChild);
+      }
+    }
+    
+    // Case 3: Media indicators
+    let hasVideo = false;
+    let hasAudio = false;
+    
+    function toggleVideo() {
+      hasVideo = !hasVideo;
+      updateMediaPanel();
+    }
+    
+    function toggleAudio() {
+      hasAudio = !hasAudio;
+      updateMediaPanel();
+    }
+    
+    function updateMediaPanel() {
+      const panel = document.getElementById('media-panel');
+      const text = document.getElementById('media-text');
+      if (hasVideo && hasAudio) {
+        text.textContent = '视频 + 音频 (AND)';
+      } else if (hasVideo) {
+        text.textContent = '视频 (OR)';
+      } else if (hasAudio) {
+        text.textContent = '音频 (OR)';
+      } else {
+        text.textContent = '无媒体';
+      }
+    }
+    
+    // Case 5: Overflow toggle
+    let showOverflow = false;
+    function toggleOverflow() {
+      const container = document.getElementById('overflow-container');
+      const overflow = container.querySelector('.overflow-element');
+      if (overflow) {
+        overflow.remove();
+      } else {
+        const newOverflow = document.createElement('div');
+        newOverflow.className = 'overflow-element';
+        newOverflow.textContent = '溢出内容 - 超出容器宽度';
+        container.appendChild(newOverflow);
+      }
+    }
+  </script>
+</body>
+</html>
