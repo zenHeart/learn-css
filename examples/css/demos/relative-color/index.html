@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 相对颜色演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: #0d1117; border-radius: 4px; }
+    .demo-label { min-width: 140px; font-size: 13px; color: #8b949e; }
+    .demo-area { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .color-swatch { height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #161b22; padding: 2px 6px; border-radius: 3px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-top: 12px; }
+    .button-demo { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .palette-item { display: flex; flex-direction: column; gap: 4px; }
+    .palette-swatch { height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .palette-label { font-size: 11px; color: #8b949e; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS 相对颜色（Relative Color Syntax）</h1>
+    <p class="subtitle">基于 oklch 颜色空间的相对颜色演示</p>
+
+    <!-- 基础语法演示 -->
+    <div class="section">
+      <h2>基础语法</h2>
+      <p class="info">相对颜色语法：<code>oklch(from &lt;origin-color&gt; &lt;L通道&gt; &lt;C通道&gt; &lt;H通道&gt;)</code></p>
+      
+      <div class="demo-row">
+        <div class="demo-label">基准颜色</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(55% 0.2 245);">oklch(55% 0.2 245)</div>
+        </div>
+      </div>
+      
+      <div class="demo-row">
+        <div class="demo-label">提亮 L+0.2</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(from oklch(55% 0.2 245) calc(L + 0.2) c h);">calc(L + 0.2)</div>
+        </div>
+      </div>
+      
+      <div class="demo-row">
+        <div class="demo-label">变暗 L-0.2</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(from oklch(55% 0.2 245) calc(L - 0.2) c h);">calc(L - 0.2)</div>
+        </div>
+      </div>
+      
+      <div class="demo-row">
+        <div class="demo-label">增加色度 *1.5</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(from oklch(55% 0.2 245) L calc(c * 1.5) h);">calc(c * 1.5)</div>
+        </div>
+      </div>
+      
+      <div class="demo-row">
+        <div class="demo-label">色相偏移 +60°</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(from oklch(55% 0.2 245) L c calc(h + 60));">calc(h + 60)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主题色阶 -->
+    <div class="section">
+      <h2>主题色阶生成</h2>
+      <p class="info">基于单一颜色自动生成完整色阶</p>
+      <div class="palette-grid" id="palette-demo"></div>
+    </div>
+
+    <!-- 悬停状态 -->
+    <div class="section">
+      <h2>悬停/激活状态</h2>
+      <div class="button-demo">
+        <button class="btn" id="btn-normal">Normal</button>
+        <button class="btn" id="btn-hover">Hover Me</button>
+        <button class="btn" id="btn-active">Click Me</button>
+      </div>
+      <div class="code-block">.button:hover {
+  background: oklch(from var(--primary) calc(L + 0.1) c h);
+}
+
+.button:active {
+  background: oklch(from var(--primary) calc(L - 0.1) c h);
+}</div>
+    </div>
+
+    <!-- 半透明变体 -->
+    <div class="section">
+      <h2>半透明变体</h2>
+      <div class="demo-row">
+        <div class="demo-label">100%</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(40% 0.15 240);">100% opacity</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">50% opacity</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(40% 0.15 240 / 50%);">50% opacity</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">20% opacity</div>
+        <div class="demo-area">
+          <div class="color-swatch" style="background: oklch(40% 0.15 240 / 20%);">20% opacity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 色彩和谐 -->
+    <div class="section">
+      <h2>色彩和谐</h2>
+      <div class="palette-grid" id="harmony-demo"></div>
+      <div class="code-block">/* 互补色（色相差 180°） */
+--complement: oklch(from var(--brand) L c calc(h + 180));
+
+/* 三角色（色相差 120°） */
+--triadic-1: oklch(from var(--brand) L c calc(h + 120));</div>
+    </div>
+
+    <!-- 协调阴影 -->
+    <div class="section">
+      <h2>协调阴影</h2>
+      <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+        <div class="color-swatch" style="width: 120px; height: 120px; background: oklch(70% 0.12 250); box-shadow: 0 4px 20px oklch(from oklch(70% 0.12 250) calc(L - 0.25) c h / 40%);">Card</div>
+        <div class="color-swatch" style="width: 120px; height: 120px; background: oklch(65% 0.18 180); box-shadow: 0 4px 20px oklch(from oklch(65% 0.18 180) calc(L - 0.25) c h / 40%);">Card</div>
+        <div class="color-swatch" style="width: 120px; height: 120px; background: oklch(60% 0.22 30); box-shadow: 0 4px 20px oklch(from oklch(60% 0.22 30) calc(L - 0.25) c h / 40%);">Card</div>
+      </div>
+      <div class="code-block">box-shadow: 0 4px 20px oklch(
+  from var(--card-color)   /* 基准颜色 */
+  calc(L - 0.25)           /* 变暗 */
+  c h / 40%               /* 降低透明度 */
+);</div>
+    </div>
+
+    <!-- 动态渐变 -->
+    <div class="section">
+      <h2>动态渐变</h2>
+      <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+        <div class="color-swatch" style="width: 160px; height: 80px; background: linear-gradient(to bottom, oklch(70% 0.2 250), oklch(from oklch(70% 0.2 250) calc(L - 0.35) c h));">上方亮 → 下方暗</div>
+        <div class="color-swatch" style="width: 160px; height: 80px; background: linear-gradient(135deg, oklch(65% 0.2 200), oklch(from oklch(65% 0.2 200) L calc(c * 1.5) calc(h + 60)));">对角渐变+色相偏移</div>
+        <div class="color-swatch" style="width: 160px; height: 80px; background: linear-gradient(to right, oklch(60% 0.15 300), oklch(from oklch(60% 0.15 300) L calc(c * 0.5) calc(h + 90)) 50%, oklch(from oklch(60% 0.15 300) L c calc(h + 180)));">多段渐变</div>
+      </div>
+    </div>
+
+    <!-- 基于 CSS 变量 -->
+    <div class="section">
+      <h2>基于 CSS 变量</h2>
+      <p class="info">使用 CSS 自定义属性作为基准颜色，便于主题切换</p>
+      <div class="demo-row">
+        <div class="demo-label">--primary 原始</div>
+        <div class="demo-area">
+          <div class="color-swatch" id="var-base">使用 CSS 变量</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">--primary-light</div>
+        <div class="demo-area">
+          <div class="color-swatch" id="var-light">提亮版本</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">--primary-dark</div>
+        <div class="demo-area">
+          <div class="color-swatch" id="var-dark">变暗版本</div>
+        </div>
+      </div>
+      <button class="btn" id="toggle-theme" style="background: oklch(55% 0.2 245); color: #fff; margin-top: 12px;">切换主题</button>
+    </div>
+
+    <!-- 色彩转换 -->
+    <div class="section">
+      <h2>颜色空间转换</h2>
+      <p class="info">使用 color() 函数在不同颜色空间之间转换</p>
+      <div class="palette-grid" id="colorspace-demo"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // 生成色阶
+    function generatePalette() {
+      const base = { l: 0.55, c: 0.2, h: 245 };
+      const steps = [
+        { name: '50', l: 0.95, c: base.c * 0.3, h: base.h },
+        { name: '100', l: 0.90, c: base.c * 0.5, h: base.h },
+        { name: '200', l: 0.80, c: base.c * 0.7, h: base.h },
+        { name: '300', l: 0.70, c: base.c * 0.85, h: base.h },
+        { name: '400', l: 0.62, c: base.c * 1.1, h: base.h },
+        { name: '500', l: base.l, c: base.c, h: base.h },
+        { name: '600', l: 0.48, c: base.c * 1.15, h: base.h },
+        { name: '700', l: 0.40, c: base.c * 1.1, h: base.h },
+        { name: '800', l: 0.32, c: base.c * 0.95, h: base.h },
+        { name: '900', l: 0.24, c: base.c * 0.8, h: base.h },
+      ];
+      return steps;
+    }
+
+    function oklchToCss(l, c, h) {
+      return `oklch(${l * 100}% ${c * 100} ${h})`;
+    }
+
+    function getTextColor(l) {
+      return l > 0.5 ? '#1a1a1a' : '#ffffff';
+    }
+
+    const paletteGrid = document.getElementById('palette-demo');
+    generatePalette().forEach(step => {
+      const color = oklchToCss(step.l, step.c, step.h);
+      const textColor = getTextColor(step.l);
+      paletteGrid.innerHTML += `
+        <div class="palette-item">
+          <div class="palette-swatch" style="background: ${color}; color: ${textColor};">${step.name}</div>
+          <div class="palette-label">${step.name}</div>
+        </div>
+      `;
+    });
+
+    // 色彩和谐
+    const harmonyBase = { l: 0.6, c: 0.2, h: 245 };
+    const harmonies = [
+      { name: '基准', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h },
+      { name: '互补 +180°', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h + 180 },
+      { name: '三角色1 +120°', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h + 120 },
+      { name: '三角色2 +240°', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h + 240 },
+      { name: '分裂补色 +150°', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h + 150 },
+      { name: '分裂补色 +210°', l: harmonyBase.l, c: harmonyBase.c, h: harmonyBase.h + 210 },
+    ];
+
+    const harmonyGrid = document.getElementById('harmony-demo');
+    harmonies.forEach(h => {
+      const color = oklchToCss(h.l, h.c, h.h);
+      harmonyGrid.innerHTML += `
+        <div class="palette-item">
+          <div class="palette-swatch" style="background: ${color};">${h.name}</div>
+          <div class="palette-label">${h.name}</div>
+        </div>
+      `;
+    });
+
+    // 悬停按钮
+    const btnNormal = document.getElementById('btn-normal');
+    const btnHover = document.getElementById('btn-hover');
+    const btnActive = document.getElementById('btn-active');
+    
+    const baseColor = 'oklch(55% 0.2 245)';
+    
+    btnNormal.style.background = baseColor;
+    btnNormal.style.color = '#fff';
+    btnNormal.textContent = 'Normal';
+    
+    btnHover.style.background = baseColor;
+    btnHover.style.color = '#fff';
+    btnHover.textContent = 'Hover Me';
+    btnHover.onmouseenter = () => { btnHover.style.background = 'oklch(from oklch(55% 0.2 245) calc(L + 0.12) c h)'; };
+    btnHover.onmouseleave = () => { btnHover.style.background = baseColor; };
+    
+    btnActive.style.background = baseColor;
+    btnActive.style.color = '#fff';
+    btnActive.textContent = 'Click Me';
+    btnActive.onmousedown = () => { btnActive.style.background = 'oklch(from oklch(55% 0.2 245) calc(L - 0.1) c h)'; };
+    btnActive.onmouseup = () => { btnActive.style.background = baseColor; };
+
+    // CSS 变量演示
+    const root = document.documentElement;
+    let isDark = false;
+    
+    function updateVarColors() {
+      const primary = isDark ? 'oklch(75% 0.15 245)' : 'oklch(55% 0.2 245)';
+      root.style.setProperty('--primary', primary);
+      
+      document.getElementById('var-base').style.background = primary;
+      document.getElementById('var-light').style.background = `oklch(from ${primary} calc(L + 0.15) c h)`;
+      document.getElementById('var-dark').style.background = `oklch(from ${primary} calc(L - 0.15) c h)`;
+    }
+    
+    updateVarColors();
+    document.getElementById('toggle-theme').onclick = () => {
+      isDark = !isDark;
+      updateVarColors();
+      document.body.style.background = isDark ? '#ffffff' : '#0d1117';
+      document.body.style.color = isDark ? '#1a1a1a' : '#c9d1d9';
+    };
+
+    // 颜色空间转换演示
+    const colorspaceColors = [
+      { name: 'srgb', color: 'color(srgb 0.2 0.5 0.9)' },
+      { name: 'srgb-linear', color: 'color(srgb-linear 0.04 0.26 0.82)' },
+      { name: 'display-p3', color: 'color(display-p3 0.25 0.48 0.88)' },
+      { name: 'a98-rgb', color: 'color(a98-rgb 0.35 0.45 0.9)' },
+      { name: 'prophoto', color: 'color(prophoto-rgb 0.4 0.5 0.85)' },
+      { name: 'rec2020', color: 'color(rec2020 0.3 0.45 0.88)' },
+    ];
+
+    const colorspaceGrid = document.getElementById('colorspace-demo');
+    colorspaceColors.forEach(c => {
+      colorspaceGrid.innerHTML += `
+        <div class="palette-item">
+          <div class="palette-swatch" style="background: ${c.color};">${c.name}</div>
+          <div class="palette-label">${c.name}</div>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
