@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS gap decorations 演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.6; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #f0883e; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; margin: 12px 0; }
+    
+    /* 控件 */
+    .controls { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+    .control-group label { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+    .control-group select, .control-group input[type="color"], .control-group input[type="range"] { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+    .control-group input[type="color"] { width: 50px; height: 32px; padding: 2px; }
+    .control-group input[type="range"] { width: 120px; }
+    
+    /* 预览区域 */
+    .preview-wrapper { background: #0d1117; border-radius: 8px; padding: 24px; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+    .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; max-width: 500px; }
+    .grid-cell { height: 80px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 500; }
+    .grid-cell:nth-child(2) { background: linear-gradient(135deg, #3fb950, #238636); }
+    .grid-cell:nth-child(3) { background: linear-gradient(135deg, #f0883e, #bd561d); }
+    .grid-cell:nth-child(4) { background: linear-gradient(135deg, #a371f7, #8957e5); }
+    .grid-cell:nth-child(5) { background: linear-gradient(135deg, #f85149, #da3633); }
+    .grid-cell:nth-child(6) { background: linear-gradient(135deg, #ffa657, #d29922); }
+    
+    /* 模拟 gap decorations 的样式 */
+    .gap-decoration-grid {
+      gap: 20px;
+      gap-decoration-type: all;
+      gap-color: #e0e0e0;
+      gap-width: 3px;
+      gap-style: solid;
+    }
+    
+    /* 预定义示例 */
+    .examples-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .example-card { background: #0d1117; border-radius: 8px; padding: 16px; }
+    .example-card h3 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+    .example-card p { font-size: 11px; color: #8b949e; margin-bottom: 12px; }
+    
+    /* 装饰类型演示 */
+    .dec-type-demo { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .dec-type-cell { height: 60px; background: #3fb950; border-radius: 4px; margin: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; }
+    
+    /* 样式演示 */
+    .style-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .style-cell { height: 60px; background: #58a6ff; border-radius: 4px; }
+    
+    /* 说明表格 */
+    .props-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .props-table th, .props-table td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    .props-table th { color: #8b949e; font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    .props-table td:first-child { font-weight: 500; color: #f0f6fc; }
+    .props-table td code { color: #f0883e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS gap decorations 间隙装饰</h1>
+    <p class="subtitle">为 grid 和 flex 容器的间隙添加样式的 CSS 新特性</p>
+
+    <!-- 属性说明 -->
+    <div class="section">
+      <h2>gap decorations 属性</h2>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>说明</th>
+            <th>候选值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>gap-decoration-type</code></td>
+            <td>装饰类型</td>
+            <td>none, corners, sides, edges, all</td>
+          </tr>
+          <tr>
+            <td><code>gap-color</code></td>
+            <td>间隙颜色</td>
+            <td>&lt;color&gt;</td>
+          </tr>
+          <tr>
+            <td><code>gap-width</code></td>
+            <td>间隙宽度</td>
+            <td>&lt;length&gt;, &lt;percentage&gt;</td>
+          </tr>
+          <tr>
+            <td><code>gap-style</code></td>
+            <td>间隙样式</td>
+            <td>solid, dashed, dotted, groove, ridge, inset, outset</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 交互式演示 -->
+    <div class="section">
+      <h2>交互式演示</h2>
+      <p class="info">调整以下参数查看 gap decorations 效果（浏览器支持有限，演示使用 CSS 模拟效果）</p>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label>gap-decoration-type</label>
+          <select id="dec-type">
+            <option value="all">all</option>
+            <option value="corners">corners</option>
+            <option value="sides">sides</option>
+            <option value="edges">edges</option>
+            <option value="none">none</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>gap-color</label>
+          <input type="color" id="dec-color" value="#e0e0e0">
+        </div>
+        <div class="control-group">
+          <label>gap-width</label>
+          <input type="range" id="dec-width" min="1" max="10" value="3">
+          <span id="width-val" style="font-size: 11px; color: #8b949e;">3px</span>
+        </div>
+        <div class="control-group">
+          <label>gap-style</label>
+          <select id="dec-style">
+            <option value="solid">solid</option>
+            <option value="dashed">dashed</option>
+            <option value="dotted">dotted</option>
+            <option value="groove">groove</option>
+            <option value="ridge">ridge</option>
+            <option value="inset">inset</option>
+            <option value="outset">outset</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>gap 间距</label>
+          <input type="range" id="dec-gap" min="5" max="40" value="20">
+          <span id="gap-val" style="font-size: 11px; color: #8b949e;">20px</span>
+        </div>
+      </div>
+      
+      <div class="preview-wrapper">
+        <div class="preview-grid gap-decoration-grid" id="preview-grid">
+          <div class="grid-cell">1</div>
+          <div class="grid-cell">2</div>
+          <div class="grid-cell">3</div>
+          <div class="grid-cell">4</div>
+          <div class="grid-cell">5</div>
+          <div class="grid-cell">6</div>
+        </div>
+      </div>
+      
+      <div class="code-block">.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: <span id="gap-code">20px</span>;
+  gap-decoration-type: <span id="type-code">all</span>;
+  gap-color: <span id="color-code">#e0e0e0</span>;
+  gap-width: <span id="width-code">3px</span>;
+  gap-style: <span id="style-code">solid</span>;
+}</div>
+    </div>
+
+    <!-- gap-decoration-type 说明 -->
+    <div class="section">
+      <h2>gap-decoration-type 各值效果</h2>
+      <p class="info">gap-decoration-type 控制哪些间隙部分应用装饰</p>
+      
+      <div class="examples-grid">
+        <div class="example-card">
+          <h3>none</h3>
+          <p>无装饰效果</p>
+          <div style="background: #0d1117; border-radius: 6px; padding: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <h3>corners</h3>
+          <p>只在交叉处装饰（四格交汇点）</p>
+          <div style="background: #0d1117; border-radius: 6px; padding: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; position: relative;">
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <!-- 模拟 corners 装饰点 -->
+              <div style="position: absolute; width: 6px; height: 6px; background: #e0e0e0; border-radius: 50%; top: calc(50% - 3px); left: calc(16.67% - 3px);"></div>
+              <div style="position: absolute; width: 6px; height: 6px; background: #e0e0e0; border-radius: 50%; top: calc(50% - 3px); left: calc(50% - 3px);"></div>
+              <div style="position: absolute; width: 6px; height: 6px; background: #e0e0e0; border-radius: 50%; top: calc(50% - 3px); left: calc(83.33% - 3px);"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <h3>sides</h3>
+          <p>只装饰内部边（分隔线）</p>
+          <div style="background: #0d1117; border-radius: 6px; padding: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <h3>edges</h3>
+          <p>只装饰外侧边缘</p>
+          <div style="background: #0d1117; border-radius: 6px; padding: 12px; border: 2px solid #e0e0e0;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <h3>all</h3>
+          <p>所有间隙都装饰（完整网格线）</p>
+          <div style="background: #0d1117; border-radius: 6px; padding: 12px; border: 2px solid #e0e0e0;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border: 2px solid #e0e0e0; padding: 2px;">
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+              <div style="height: 50px; background: #3fb950; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- gap-style 演示 -->
+    <div class="section">
+      <h2>gap-style 样式效果</h2>
+      <p class="info">gap-style 支持类似 border-style 的各种样式</p>
+      <div class="style-demo">
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px;"></div>
+          <code style="font-size: 11px;">solid</code>
+        </div>
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px; border: 3px dashed #ffa657;"></div>
+          <code style="font-size: 11px;">dashed</code>
+        </div>
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px; border: 3px dotted #f85149;"></div>
+          <code style="font-size: 11px;">dotted</code>
+        </div>
+      </div>
+      <div class="style-demo" style="margin-top: 16px;">
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px; border: 3px groove #3fb950;"></div>
+          <code style="font-size: 11px;">groove</code>
+        </div>
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px; border: 3px ridge #a371f7;"></div>
+          <code style="font-size: 11px;">ridge</code>
+        </div>
+        <div style="text-align: center;">
+          <div style="height: 60px; background: #58a6ff; margin-bottom: 8px; border-radius: 4px; border: 3px inset #f0883e;"></div>
+          <code style="font-size: 11px;">inset</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- 实际应用示例 -->
+    <div class="section">
+      <h2>实际应用示例</h2>
+      
+      <h3 style="font-size: 13px; color: #8b949e; margin-bottom: 12px;">1. 网格线装饰（模拟）</h3>
+      <div style="background: #0d1117; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border: 1px solid #30363d; padding: 16px; border-radius: 6px;">
+          <div style="height: 80px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 1</div>
+          <div style="height: 80px; background: linear-gradient(135deg, #3fb950, #238636); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 2</div>
+          <div style="height: 80px; background: linear-gradient(135deg, #f0883e, #bd561d); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 3</div>
+          <div style="height: 80px; background: linear-gradient(135deg, #a371f7, #8957e5); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 4</div>
+          <div style="height: 80px; background: linear-gradient(135deg, #f85149, #da3633); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 5</div>
+          <div style="height: 80px; background: linear-gradient(135deg, #ffa657, #d29922); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">项目 6</div>
+        </div>
+      </div>
+      <div class="code-block">/* 使用 background 模拟 gap decorations */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  background: 
+    linear-gradient(90deg, #30363d 1px, transparent 1px),
+    linear-gradient(180deg, #30363d 1px, transparent 1px);
+  background-size: calc(100% / 3 + 16px * 2 / 3) calc(100% / 2 + 16px);
+  background-position: -8px -8px;
+}</div>
+
+      <h3 style="font-size: 13px; color: #8b949e; margin: 20px 0 12px;">2. 画廊布局</h3>
+      <div style="background: #0d1117; border-radius: 8px; padding: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #43e97b, #38f9d7); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #fa709a, #fee140); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #a8edea, #fed6e3); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #ff9a9e, #fecfef); border-radius: 6px;"></div>
+          <div style="aspect-ratio: 1; background: linear-gradient(135deg, #ffecd2, #fcb69f); border-radius: 6px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>浏览器</th>
+            <th>支持状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chrome</td>
+            <td style="color: #f85149;">不支持（实验性功能）</td>
+          </tr>
+          <tr>
+            <td>Firefox</td>
+            <td style="color: #f85149;">不支持</td>
+          </tr>
+          <tr>
+            <td>Safari</td>
+            <td style="color: #f85149;">不支持</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="info" style="margin-top: 12px;">⚠️ gap decorations 是实验性功能，建议使用 @supports 检测或使用 CSS 背景模拟作为回退方案。</p>
+      <div class="code-block">/* @supports 回退 */
+@supports (gap-decoration-type: all) {
+  .grid-container {
+    gap-decoration-type: all;
+    gap-color: #e0e0e0;
+    gap-width: 2px;
+    gap-style: solid;
+  }
+}</div>
+    </div>
+
+  </div>
+
+  <script>
+    // 由于 gap decorations 浏览器支持有限
+    // 演示使用 CSS 模拟效果
+    const decType = document.getElementById('dec-type');
+    const decColor = document.getElementById('dec-color');
+    const decWidth = document.getElementById('dec-width');
+    const decStyle = document.getElementById('dec-style');
+    const decGap = document.getElementById('dec-gap');
+    
+    const previewGrid = document.getElementById('preview-grid');
+    const gapVal = document.getElementById('gap-val');
+    const widthVal = document.getElementById('width-val');
+    
+    const gapCode = document.getElementById('gap-code');
+    const typeCode = document.getElementById('type-code');
+    const colorCode = document.getElementById('color-code');
+    const widthCode = document.getElementById('width-code');
+    const styleCode = document.getElementById('style-code');
+    
+    function updatePreview() {
+      const gap = decGap.value + 'px';
+      const width = decWidth.value + 'px';
+      const color = decColor.value;
+      const style = decStyle.value;
+      const type = decType.value;
+      
+      gapVal.textContent = gap;
+      widthVal.textContent = width;
+      
+      gapCode.textContent = gap;
+      typeCode.textContent = type;
+      colorCode.textContent = color;
+      widthCode.textContent = width;
+      styleCode.textContent = style;
+      
+      // 模拟 gap decorations 效果
+      // 由于浏览器支持有限，这里用 border 模拟
+      if (type === 'none') {
+        previewGrid.style.background = 'transparent';
+        previewGrid.style.border = 'none';
+      } else if (type === 'edges') {
+        previewGrid.style.background = 'transparent';
+        previewGrid.style.border = `${width} ${style} ${color}`;
+      } else {
+        previewGrid.style.background = 'transparent';
+        previewGrid.style.border = `${width} ${style} ${color}`;
+      }
+      
+      previewGrid.style.gap = gap;
+    }
+    
+    decType.addEventListener('change', updatePreview);
+    decColor.addEventListener('input', updatePreview);
+    decWidth.addEventListener('input', updatePreview);
+    decStyle.addEventListener('change', updatePreview);
+    decGap.addEventListener('input', updatePreview);
+    
+    updatePreview();
+  </script>
+</body>
+</html>

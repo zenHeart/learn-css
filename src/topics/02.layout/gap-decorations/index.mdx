@@ -1,0 +1,283 @@
+---
+title: "CSS gap decorations 间隙装饰"
+category: "布局基础"
+tags:
+  - CSS
+  - gap
+  - gap-decoration
+  - 间隙
+  - 布局
+description: "详解CSS gap decorations模块，涵盖gap-decoration-type、gap-color、gap-width、gap-style等属性"
+keywords: "CSS gap decorations, gap-decoration-type, gap-color, gap-width, gap-style"
+---
+
+# CSS gap decorations 间隙装饰
+
+## 概述
+
+CSS gap decorations 是 CSS Gap API 的一部分，允许开发者为 grid 和 flex 容器中的间隙（gap）添加样式。这是一种给网格线、槽缝添加装饰效果的现代方法，目前正在开发中。
+
+## 基础回顾：gap 属性
+
+在了解 gap decorations 之前，先回顾一下基础的 `gap` 属性：
+
+### 语法
+
+```css
+.container {
+  /* 简写 */
+  gap: 10px;
+  gap: 10px 20px;  /* row-gap column-gap */
+  
+  /* 独立属性 */
+  row-gap: 10px;
+  column-gap: 20px;
+}
+```
+
+### 适用场景
+
+| 布局 | gap 属性 |
+|------|---------|
+| Flexbox | `gap`, `row-gap`, `column-gap` |
+| Grid | `gap`, `row-gap`, `column-gap` |
+| Multi-column | `column-gap` |
+
+## gap decorations 新特性
+
+### 核心属性
+
+| 属性 | 说明 | 候选值 |
+|------|------|--------|
+| `gap-decoration-type` | 装饰类型 | `none`, `corners`, `sides`, `edges`, `all` |
+| `gap-color` | 间隙颜色 | `<color>` |
+| `gap-width` | 间隙宽度 | `<length-percentage>` |
+| `gap-style` | 间隙样式 | `solid`, `dashed`, `dotted`, `groove`, `ridge`, `inset`, `outset` |
+
+### gap-decoration-type
+
+控制哪些间隙部分应用装饰：
+
+| 值 | 说明 |
+|----|------|
+| `none` | 无装饰（默认） |
+| `corners` | 只在交叉处装饰 |
+| `sides` | 只在两侧边缘装饰 |
+| `edges` | 只在外围边缘装饰 |
+| `all` | 所有间隙都装饰 |
+
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  gap-decoration-type: all;
+  gap-color: #e0e0e0;
+  gap-width: 2px;
+  gap-style: solid;
+}
+```
+
+### gap-color
+
+设置间隙的颜色，可与背景形成对比效果：
+
+```css
+.container {
+  gap: 16px;
+  gap-color: rgba(0, 0, 0, 0.1);  /* 微妙的分隔线效果 */
+}
+```
+
+### gap-width
+
+设置间隙的宽度（厚度）：
+
+```css
+.container {
+  gap: 20px;
+  gap-width: 4px;  /* 加粗网格线 */
+}
+```
+
+### gap-style
+
+设置间隙的边框样式，类似于 `border-style`：
+
+| 值 | 效果 |
+|----|------|
+| `solid` | 实线 |
+| `dashed` | 虚线 |
+| `dotted` | 点线 |
+| `groove` | 凹槽效果 |
+| `ridge` | 凸脊效果 |
+| `inset` | 内陷效果 |
+| `outset` | 外凸效果 |
+
+```css
+.grid-container {
+  gap: 10px;
+  gap-style: groove;
+  gap-color: #ccc;
+  gap-width: 3px;
+}
+```
+
+## 实际应用场景
+
+### 1. 网格线装饰
+
+为 CSS Grid 添加可见的网格线：
+
+```css
+.grid-with-lines {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  gap-decoration-type: all;
+  gap-color: #dee2e6;
+  gap-width: 1px;
+  gap-style: solid;
+}
+```
+
+### 2. 卡片间距装饰
+
+在卡片之间创建装饰性分隔：
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  gap-decoration-type: edges;
+  gap-color: #3b82f6;
+  gap-width: 2px;
+  gap-style: dashed;
+}
+```
+
+### 3. 画廊布局
+
+为图片画廊添加边距装饰：
+
+```css
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  gap-decoration-type: corners;
+  gap-color: #1f2937;
+  gap-width: 8px;
+  gap-style: solid;
+}
+```
+
+### 4. 调试布局
+
+使用 gap decorations 帮助可视化网格结构：
+
+```css
+/* 调试时使用 */
+.debug-grid {
+  display: grid;
+  gap: 12px;
+  gap-decoration-type: all;
+  gap-color: red;
+  gap-width: 1px;
+  gap-style: dashed;
+}
+```
+
+## 与其他 CSS 特性的配合
+
+### 结合 background
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  gap-decoration-type: edges;
+  gap-color: white;  /* 白色网格线 */
+  background: #f0f0f0;
+}
+```
+
+### 结合 border
+
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  /* 先移除间隙，再通过 border 创建效果 */
+  border: 1px solid #ccc;
+}
+```
+
+### 结合渐变背景
+
+```css
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  gap-decoration-type: all;
+  gap-color: rgba(255, 255, 255, 0.3);
+  gap-width: 4px;
+  gap-style: solid;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+```
+
+## 浏览器兼容性
+
+gap decorations 是一个实验性功能，目前支持度非常有限：
+
+| 浏览器 | 支持状态 |
+|--------|---------|
+| Chrome | 不支持（需要标志） |
+| Firefox | 不支持 |
+| Safari | 不支持 |
+
+> **提示**：在生产环境中使用前，请查看 [Can I Use](https://caniuse.com/) 获取最新支持信息。
+
+## 回退方案
+
+对于不支持 gap decorations 的浏览器，可以使用伪元素或背景渐变模拟：
+
+```css
+.grid-backup {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  /* 使用 background + background-position 模拟网格线 */
+  background: 
+    linear-gradient(90deg, #e0e0e0 1px, transparent 1px),
+    linear-gradient(180deg, #e0e0e0 1px, transparent 1px);
+  background-size: calc(100% / 3 + 20px * 2 / 3) calc(100% / 3 + 20px * 2 / 3);
+  background-position: -10px -10px;
+}
+```
+
+## CSS Gap API 完整属性列表
+
+| 属性 | 说明 |
+|------|------|
+| `gap` | row-gap 和 column-gap 简写 |
+| `row-gap` | 行间间隙 |
+| `column-gap` | 列间间隙 |
+| `grid-gap` | gap 的旧语法（已废弃） |
+| `grid-row-gap` | row-gap 的旧语法（已废弃） |
+| `grid-column-gap` | column-gap 的旧语法（已废弃） |
+| `gap-decoration-type` | 装饰类型（新增） |
+| `gap-color` | 间隙颜色（新增） |
+| `gap-width` | 间隙宽度（新增） |
+| `gap-style` | 间隙样式（新增） |
+
+## 参考资料
+
+- [CSS Gap API - Chrome Dev Blog](https://developer.chrome.com/blog/css-gap-decoration/)
+- [CSS-Tricks - gap](https://css-tricks.com/almanac/properties/g/gap/)
+- [Patrick Brosset - CSS Gap Decorations](https://blogs.windows.com/msedgedev/)
