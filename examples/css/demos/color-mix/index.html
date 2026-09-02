@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS color-mix() 颜色混合演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: #0d1117; border-radius: 4px; flex-wrap: wrap; }
+    .demo-label { min-width: 140px; font-size: 13px; color: #8b949e; }
+    .demo-area { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 200px; }
+    .color-box { width: 100%; height: 48px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #161b22; padding: 2px 6px; border-radius: 3px; }
+
+    /* 基础混合示例 */
+    .mix-equal { background: color-mix(in srgb, #ff0000 50%, #0000ff); }
+    .mix-70-30 { background: color-mix(in srgb, #ff0000 70%, #0000ff 30%); }
+    .mix-white { background: color-mix(in srgb, #3b82f6 50%, white); }
+    .mix-black { background: color-mix(in srgb, #3b82f6 50%, black); }
+
+    /* 颜色空间对比 */
+    .space-srgb { background: color-mix(in srgb, #ff0000, #0000ff); }
+    .space-hsl { background: color-mix(in hsl, #ff0000, #0000ff); }
+    .space-oklch { background: color-mix(in oklch, #ff0000, #0000ff); }
+
+    /* 主题色混合 */
+    .theme-primary { background: #3b82f6; }
+    .theme-light { background: color-mix(in srgb, #3b82f6 70%, white); }
+    .theme-dark { background: color-mix(in srgb, #3b82f6 70%, black); }
+    .theme-subtle { background: color-mix(in srgb, #3b82f6 15%, transparent); }
+
+    /* 状态色 */
+    .status-success { background: #22c55e; }
+    .status-success-bg { background: color-mix(in srgb, #22c55e 15%, transparent); border: 1px solid color-mix(in srgb, #22c55e 30%, transparent); padding: 12px; border-radius: 4px; color: #22c55e; }
+    .status-warning { background: #f59e0b; }
+    .status-warning-bg { background: color-mix(in srgb, #f59e0b 15%, transparent); border: 1px solid color-mix(in srgb, #f59e0b 30%, transparent); padding: 12px; border-radius: 4px; color: #f59e0b; }
+    .status-error { background: #ef4444; }
+    .status-error-bg { background: color-mix(in srgb, #ef4444 15%, transparent); border: 1px solid color-mix(in srgb, #ef4444 30%, transparent); padding: 12px; border-radius: 4px; color: #ef4444; }
+
+    /* 按钮示例 */
+    .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: color-mix(in srgb, #3b82f6 70%, white); }
+    .btn-primary:active { background: color-mix(in srgb, #3b82f6 70%, black); }
+    .btn-success { background: #22c55e; color: white; }
+    .btn-success:hover { background: color-mix(in srgb, #22c55e 70%, white); }
+
+    /* oklch 亮度混合 */
+    .oklch-base { background: oklch(70% 0.15 200); }
+    .oklch-light { background: color-mix(in oklch, oklch(70% 0.15 200) 50%, oklch(95% 0.1 200)); }
+    .oklch-dark { background: color-mix(in oklch, oklch(70% 0.15 200) 50%, oklch(20% 0.1 200)); }
+
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-top: 12px; }
+
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .comparison-item { background: #0d1117; border-radius: 4px; padding: 16px; }
+    .comparison-item h4 { font-size: 13px; color: #8b949e; margin-bottom: 12px; }
+    .comparison-item .color-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .comparison-item .mini-box { flex: 1; height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS color-mix() 颜色混合演示</h1>
+
+    <!-- 基础语法 -->
+    <div class="section">
+      <h2>基础语法</h2>
+      <div class="demo-row">
+        <div class="demo-label">等比例混合</div>
+        <div class="demo-area">
+          <div class="color-box mix-equal">50% 红 + 50% 蓝</div>
+          <div class="info"><code>color-mix(in srgb, #ff0000 50%, #0000ff)</code></div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">自定义比例</div>
+        <div class="demo-area">
+          <div class="color-box mix-70-30">70% 红 + 30% 蓝</div>
+          <div class="info"><code>color-mix(in srgb, #ff0000 70%, #0000ff 30%)</code></div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">与白色混合</div>
+        <div class="demo-area">
+          <div class="color-box mix-white">50% 主色 + 50% 白 → 浅色</div>
+          <div class="info"><code>color-mix(in srgb, #3b82f6 50%, white)</code></div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">与黑色混合</div>
+        <div class="demo-area">
+          <div class="color-box mix-black">50% 主色 + 50% 黑 → 深色</div>
+          <div class="info"><code>color-mix(in srgb, #3b82f6 50%, black)</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 颜色空间对比 -->
+    <div class="section">
+      <h2>颜色空间对比</h2>
+      <div class="comparison-grid">
+        <div class="comparison-item">
+          <h4>srgb（传统）</h4>
+          <div class="color-row">
+            <div class="mini-box" style="background: #ff0000;">红</div>
+            <div class="mini-box" style="background: #0000ff;">蓝</div>
+            <div class="mini-box space-srgb" style="color: white;">混合</div>
+          </div>
+          <div class="code-block">color-mix(in srgb, #ff0000, #0000ff)</div>
+        </div>
+        <div class="comparison-item">
+          <h4>hsl（色相空间）</h4>
+          <div class="color-row">
+            <div class="mini-box" style="background: #ff0000;">红</div>
+            <div class="mini-box" style="background: #0000ff;">蓝</div>
+            <div class="mini-box space-hsl" style="color: white;">混合</div>
+          </div>
+          <div class="code-block">color-mix(in hsl, #ff0000, #0000ff)</div>
+        </div>
+        <div class="comparison-item">
+          <h4>oklch（感知均匀）⭐推荐</h4>
+          <div class="color-row">
+            <div class="mini-box" style="background: #ff0000;">红</div>
+            <div class="mini-box" style="background: #0000ff;">蓝</div>
+            <div class="mini-box space-oklch" style="color: white;">混合</div>
+          </div>
+          <div class="code-block">color-mix(in oklch, #ff0000, #0000ff)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主题色混合 -->
+    <div class="section">
+      <h2>主题色混合实战</h2>
+      <div class="demo-row">
+        <div class="demo-label">按钮状态</div>
+        <div class="demo-area">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-primary">默认</button>
+            <button class="btn btn-primary" style="background: color-mix(in srgb, #3b82f6 70%, white);">悬停</button>
+            <button class="btn btn-primary" style="background: color-mix(in srgb, #3b82f6 70%, black);">按下</button>
+          </div>
+          <div class="info">通过混合主色与白色/黑色，自动生成悬停态和激活态</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">色板变体</div>
+        <div class="demo-area">
+          <div style="display: flex; gap: 8px;">
+            <div class="mini-box theme-primary" style="flex: 1; color: white;">primary</div>
+            <div class="mini-box theme-light" style="flex: 1;">light</div>
+            <div class="mini-box theme-dark" style="flex: 1; color: white;">dark</div>
+          </div>
+          <div class="code-block">color-mix(in srgb, var(--primary) 70%, white/black)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 状态色 -->
+    <div class="section">
+      <h2>状态色生成</h2>
+      <div class="demo-row">
+        <div class="demo-label">成功状态</div>
+        <div class="demo-area">
+          <div style="background: color-mix(in srgb, #22c55e 15%, transparent); border: 1px solid color-mix(in srgb, #22c55e 30%, transparent); padding: 12px; border-radius: 4px; color: #22c55e;">
+            操作成功！您的更改已保存。
+          </div>
+          <div class="code-block">bg: color-mix(in srgb, #22c55e 15%, transparent)</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">警告状态</div>
+        <div class="demo-area">
+          <div style="background: color-mix(in srgb, #f59e0b 15%, transparent); border: 1px solid color-mix(in srgb, #f59e0b 30%, transparent); padding: 12px; border-radius: 4px; color: #f59e0b;">
+            请注意，此操作不可撤销。
+          </div>
+          <div class="code-block">bg: color-mix(in srgb, #f59e0b 15%, transparent)</div>
+        </div>
+      </div>
+      <div class="demo-row">
+        <div class="demo-label">错误状态</div>
+        <div class="demo-area">
+          <div style="background: color-mix(in srgb, #ef4444 15%, transparent); border: 1px solid color-mix(in srgb, #ef4444 30%, transparent); padding: 12px; border-radius: 4px; color: #ef4444;">
+            发生错误，请重试。
+          </div>
+          <div class="code-block">bg: color-mix(in srgb, #ef4444 15%, transparent)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- oklch 亮度混合 -->
+    <div class="section">
+      <h2>oklch 亮度混合（更自然的过渡）</h2>
+      <div class="demo-row">
+        <div class="demo-label">同色相不同亮度</div>
+        <div class="demo-area">
+          <div style="display: flex; gap: 8px;">
+            <div class="mini-box oklch-base" style="flex: 1; color: white;">70% 亮度</div>
+            <div class="mini-box oklch-light" style="flex: 1; color: #333;">+ 95% 亮度</div>
+            <div class="mini-box oklch-dark" style="flex: 1; color: white;">+ 20% 亮度</div>
+          </div>
+          <div class="code-block">color-mix(in oklch, oklch(70% 0.15 200) 50%, oklch(95%/0.1 200))</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浏览器支持说明 -->
+    <div class="section">
+      <h2>浏览器支持</h2>
+      <div style="background: #0d1117; padding: 16px; border-radius: 4px; font-size: 13px; line-height: 1.8;">
+        <p>✅ <strong>Chrome 111+</strong>、<strong>Firefox 113+</strong>、<strong>Safari 16.2+</strong> 支持</p>
+        <p>⚠️ 建议使用 <code>@supports</code> 检测：</p>
+        <div class="code-block">@supports (color: color-mix(in srgb, red, blue)) {
+  /* 使用 color-mix() */
+}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

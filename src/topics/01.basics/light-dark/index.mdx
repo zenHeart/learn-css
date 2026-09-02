@@ -1,0 +1,271 @@
+---
+title: "CSS light-dark() 颜色切换函数"
+category: "基础知识"
+tags:
+  - light-dark()
+  - 颜色切换
+  - 主题切换
+  - CSS颜色
+  - 自动暗色模式
+description: "详解CSS light-dark()函数的语法、工作原理以及与prefers-color-scheme的区别"
+keywords: "light-dark(), CSS颜色, 主题切换, 暗色模式, 亮色模式, CSS颜色函数"
+---
+
+# CSS light-dark() 颜色切换函数
+
+## 概述
+
+`light-dark()` 是 CSS Color Level 4 中引入的一个 CSS 颜色函数，允许你在样式表中直接根据当前的配色方案（亮色或暗色）自动返回对应的颜色值。相比传统的 `@media (prefers-color-scheme)` 媒体查询 + CSS 变量覆盖方案，`light-dark()` 可以在声明点直接决定使用哪个颜色值，更加直观和简洁。
+
+## 语法
+
+```css
+light-dark(<light-color>, <dark-color>)
+```
+
+### 参数
+
+| 参数 | 说明 |
+|------|------|
+| `<light-color>` | 亮色模式下使用的颜色 |
+| `<dark-color>` | 暗色模式下使用的颜色 |
+
+### 返回值
+
+- 在亮色环境或未明确设置主题时，返回 `<light-color>`
+- 在暗色环境下，返回 `<dark-color>`
+
+## 工作原理
+
+`light-dark()` 依赖于 **color-scheme** 属性来确定当前应该使用哪组颜色。
+
+### 1. 设置配色方案
+
+```css
+/* 声明页面支持 light 和 dark 两种配色方案 */
+:root {
+  color-scheme: light dark;
+}
+```
+
+### 2. 使用 light-dark()
+
+```css
+.card {
+  background-color: light-dark(#ffffff, #1a1a1a);
+  color: light-dark(#333333, #e0e0e0);
+  border-color: light-dark(#e1e1e1, #444444);
+}
+```
+
+### 3. 生效机制
+
+- 当 `color-scheme: light dark` 被设置时，浏览器会根据用户代理样式（通常是系统主题）或通过 JavaScript/CSS 手动设置的 `color-scheme` 值，来决定使用哪组颜色。
+- 如果页面通过 `meta[name="color-scheme"]` 或 CSS `color-scheme` 声明了 `light`，则使用 `<light-color>`；声明了 `dark`，则使用 `<dark-color>`。
+- 可以在同一个声明块中同时存在多个 `light-dark()` 调用，它们共享同一个生效的配色上下文。
+
+## 完整示例
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  background-color: light-dark(#ffffff, #0f0f0f);
+  color: light-dark(#1a1a1a, #f0f0f0);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+.card {
+  background-color: light-dark(white, #1e1e1e);
+  border: 1px solid light-dark(#ddd, #333);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: light-dark(0 2px 8px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.4));
+}
+
+.button {
+  background-color: light-dark(#0066ff, #4d9fff);
+  color: light-dark(white, #000);
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+}
+
+a {
+  color: light-dark(#0066cc, #66b3ff);
+}
+
+code {
+  background-color: light-dark(#f5f5f5, #2d2d2d);
+  color: light-dark(#d63384, #f0a0d0);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SF Mono', monospace;
+}
+```
+
+## 与 prefers-color-scheme 的区别
+
+| 特性 | `light-dark()` | `prefers-color-scheme` |
+|------|---------------|----------------------|
+| **类型** | 颜色函数 | 媒体查询 |
+| **工作层级** | 声明级，直接返回颜色值 | 规则级，整块样式切换 |
+| **使用方式** | `color: light-dark(a, b)` | `@media (prefers-color-scheme: dark) { ... }` |
+| **代码组织** | 颜色值集中在一行 | 需要拆分到两个媒体查询块 |
+| **可读性** | 一目了然，亮暗成对出现 | 需跳转查看两个块 |
+| **灵活性** | 单一声明点，更难误删 | 整块覆盖，更易全局控制 |
+| **浏览器支持** | 较新，支持有限 | 所有现代浏览器均支持 |
+| **系统偏好检测** | 依赖 `color-scheme` 声明 | 直接查询系统偏好 |
+
+### 组合使用
+
+两者可以结合，以实现「优先 `light-dark()`，同时用 `prefers-color-scheme` 做降级」：
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+```
+
+> 注意：`color-scheme` 本身也可以接受系统偏好，但目前浏览器对其支持程度不一，组合使用可以确保行为符合预期。
+
+## 实际应用场景
+
+### 1. 语义化颜色变量
+
+```css
+:root {
+  color-scheme: light dark;
+
+  /* 使用 light-dark() 定义语义化变量 */
+  --color-bg: light-dark(#ffffff, #0f0f0f);
+  --color-surface: light-dark(#f8f8f8, #1a1a1a);
+  --color-text: light-dark(#1a1a1a, #f0f0f0);
+  --color-text-muted: light-dark(#666666, #999999);
+  --color-border: light-dark(#e0e0e0, #333333);
+  --color-primary: light-dark(#0066ff, #4d9fff);
+  --color-danger: light-dark(#dc3545, #ff6b6b);
+}
+
+/* 应用变量 */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+```
+
+### 2. 阴影与透明色
+
+暗色模式下通常需要更淡的阴影：
+
+```css
+.card {
+  box-shadow: light-dark(
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.5)
+  );
+}
+```
+
+### 3. 代码高亮
+
+```css
+code {
+  background-color: light-dark(#f0f0f0, #2d2d2d);
+  color: light-dark(#d63384, #ff79c6);
+}
+
+pre {
+  background-color: light-dark(#f5f5f5, #1e1e1e);
+  border: 1px solid light-dark(#ddd, #444);
+}
+```
+
+### 4. 表单控件
+
+```css
+input {
+  background-color: light-dark(white, #1a1a1a);
+  border: 1px solid light-dark(#ccc, #444);
+  color: light-dark(#000, #e0e0e0);
+}
+
+input:focus {
+  border-color: light-dark(#0066ff, #4d9fff);
+  outline: none;
+}
+
+input::placeholder {
+  color: light-dark(#999, #666);
+}
+```
+
+## 浏览器支持
+
+- **Chrome 123+** 支持
+- **Safari 17.5+** 支持（最早支持的浏览器）
+- **Firefox** 暂不支持（截至 2025 年）
+- **Edge 123+** 基于 Chromium，支持
+
+### 渐进增强
+
+由于 `light-dark()` 尚未被所有浏览器支持，建议采用渐进增强策略：
+
+```css
+/* 基础方案：prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f0f0f;
+    --text: #f0f0f0;
+  }
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+}
+
+/* 增强方案：light-dark() */
+@supports (color: light-dark(#fff, #000)) {
+  :root {
+    color-scheme: light dark;
+  }
+  body {
+    background-color: light-dark(#ffffff, #0f0f0f);
+    color: light-dark(#1a1a1a, #f0f0f0);
+  }
+}
+```
+
+### 特性检测
+
+```javascript
+const supportsLightDark = CSS.supports('color', 'light-dark(#fff, #000)');
+console.log('light-dark() 支持:', supportsLightDark);
+```
+
+## 使用建议
+
+1. **始终声明 `color-scheme`**：在 `:root` 中使用 `color-scheme: light dark`，否则行为可能不符合预期
+2. **优先用于语义化变量**：将 `light-dark()` 封装进 CSS 变量，便于后续维护
+3. **不要完全替代 `prefers-color-scheme`**：对于需要复杂样式切换的场景，媒体查询仍然更合适
+4. **做好降级方案**：使用 `@supports` 检测或 JavaScript 检测，确保不支持的浏览器也能正常显示
+5. **避免在同一个元素上混用两种方案**：容易造成样式冲突，难以调试
+
+{/* @playground id="index" mode="demo" */}
+
+## 参考资料
+
+- [CSS Color Level 4 - W3C](https://www.w3.org/TR/css-color-4/#light-dark)
+- [MDN - light-dark()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark)
+- [Can I Use - light-dark()](https://caniuse.com/css-color-function)

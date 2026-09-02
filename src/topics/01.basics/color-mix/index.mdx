@@ -1,0 +1,133 @@
+---
+title: CSS color-mix() 颜色混合
+category: 基础概念
+tags: [css, color, color-mix, color-space]
+description: 详细介绍 CSS color-mix() 函数的使用方法、颜色空间差异及实战应用。
+keywords: CSS 颜色, color-mix, 颜色混合, 颜色空间, oklch, hsl, srgb
+---
+
+# CSS color-mix() 颜色混合
+
+**使用 color-mix() 在指定颜色空间中混合两个颜色**
+
+-----
+
+## 基本语法
+
+```css
+color-mix(in <color-space>, <color> <percentage>, <color> <percentage>)
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `in <color-space>` | 颜色空间：srgb、hsl、oklch、srgb-linear、lab、oklab 等 |
+| `<color> <percentage>` | 要混合的颜色及其占比（0% ~ 100%） |
+
+### 示例
+
+```css
+/* 等比例混合红色和蓝色 */
+color-mix(in srgb, red 50%, blue);
+
+/* 70% 红色，30% 蓝色 */
+color-mix(in srgb, red 70%, blue 30%);
+
+/* 带透明度的混合 */
+color-mix(in srgb, rgb(255 0 0 / 0.5), blue);
+```
+
+## 颜色空间对比
+
+### srgb（默认）
+
+传统的显示器颜色空间，适合大多数场景：
+
+```css
+color-mix(in srgb, #ff0000, #0000ff)  /* 紫色 */
+color-mix(in srgb, white, black)       /* 灰色 */
+```
+
+### hsl
+
+基于色相、饱和度、亮度的空间，适合色调操作：
+
+```css
+/* 保持色相一致，混合饱和度和亮度 */
+color-mix(in hsl, hsl(200 80% 50%), hsl(0 80% 50%))
+```
+
+### oklch
+
+现代感知均匀颜色空间，推荐用于 UI 设计：
+
+```css
+/* 更自然的过渡效果 */
+color-mix(in oklch, #ff0000, #0000ff)
+
+/* 混合同一色相的不同亮度 */
+color-mix(in oklch, oklch(70% 0.2 200), oklch(30% 0.2 200))
+```
+
+> 💡 **oklch vs srgb**：oklch 是感知均匀的，混合结果更符合人眼感受，常用于主题色生成。
+
+## 实战案例
+
+### 案例一：主题色混合
+
+```css
+:root {
+  --primary: #3b82f6;
+  --primary-light: color-mix(in srgb, var(--primary) 70%, white);
+  --primary-dark: color-mix(in srgb, var(--primary) 70%, black);
+}
+
+.button {
+  background: var(--primary);
+}
+.button:hover {
+  background: var(--primary-light);
+}
+.button:active {
+  background: var(--primary-dark);
+}
+```
+
+### 案例二：状态色生成
+
+```css
+:root {
+  --success: #22c55e;
+  --success-bg: color-mix(in srgb, var(--success) 15%, transparent);
+  --success-border: color-mix(in srgb, var(--success) 30%, transparent);
+}
+
+.alert-success {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success);
+}
+```
+
+### 案例三：暗色模式适配
+
+```css
+:root {
+  --surface: #ffffff;
+  --surface-elevated: color-mix(in srgb, var(--surface) 90%, black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1a1a1a;
+    --surface-elevated: color-mix(in srgb, var(--surface) 90%, white);
+  }
+}
+```
+
+## 交互式演示
+
+下面是 CSS color-mix() 的交互式演示：
+
+{/* @playground id="color-mix" mode="demo" */}
