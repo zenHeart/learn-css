@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 内联元素垂直对齐 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { min-height: 80px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; line-height: 60px; }
+    .box { display: inline-block; width: 60px; height: 60px; background: #3b82f6; border-radius: 4px; color: white; font-size: 12px; text-align: center; line-height: 60px; }
+    .box.tall { height: 90px; }
+    .box.small { height: 40px; }
+    .box.green { background: #3fb950; }
+    .box.orange { background: #f0883e; }
+    .text { font-size: 16px; background: #21262d; padding: 4px 8px; border-radius: 4px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS 内联元素垂直对齐 交互演示</h1>
+
+    <div class="section">
+      <h2>vertical-align 对比</h2>
+      <div class="controls" id="va-controls">
+        <button class="btn active" data-value="baseline">baseline</button>
+        <button class="btn" data-value="top">top</button>
+        <button class="btn" data-value="middle">middle</button>
+        <button class="btn" data-value="bottom">bottom</button>
+        <button class="btn" data-value="text-top">text-top</button>
+        <button class="btn" data-value="text-bottom">text-bottom</button>
+      </div>
+      <div class="demo-area" id="va-demo">
+        <span class="text">文字</span>
+        <span class="box tall">图</span>
+        <span class="box small">片</span>
+      </div>
+      <div class="code-block" id="va-code">vertical-align: baseline;</div>
+      <p class="desc">baseline（默认）：元素基线与父元素基线对齐</p>
+    </div>
+
+    <div class="section">
+      <h2>多元素同行对齐</h2>
+      <div class="demo-area" id="multi-demo">
+        <span class="box tall">1</span>
+        <span class="box">2</span>
+        <span class="box small">3</span>
+        <span class="box green">4</span>
+        <span class="box orange">5</span>
+      </div>
+      <div class="controls" id="multi-controls">
+        <button class="btn active" data-value="baseline">baseline</button>
+        <button class="btn" data-value="top">top</button>
+        <button class="btn" data-value="middle">middle</button>
+        <button class="btn" data-value="bottom">bottom</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 垂直对齐控制
+    const vaDemo = document.getElementById('va-demo');
+    const vaCode = document.getElementById('va-code');
+    const vaControls = document.getElementById('va-controls');
+
+    vaControls.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#va-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        const value = e.target.dataset.value;
+        vaDemo.style.verticalAlign = value;
+        vaCode.textContent = `vertical-align: ${value};`;
+      }
+    });
+
+    // 多元素对齐控制
+    const multiDemo = document.getElementById('multi-demo');
+    const multiControls = document.getElementById('multi-controls');
+
+    multiControls.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn')) {
+        document.querySelectorAll('#multi-controls .btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        multiDemo.style.verticalAlign = e.target.dataset.value;
+      }
+    });
+  </script>
+</body>
+</html>
