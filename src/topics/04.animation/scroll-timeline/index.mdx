@@ -1,0 +1,232 @@
+---
+title: "CSS scroll-timeline 滚动驱动动画时间线"
+category: "动画"
+tags:
+  - CSS
+  - scroll-timeline
+  - 滚动驱动动画
+  - 交互动画
+  - CSS Animation
+description: "详解CSS scroll-timeline属性实现滚动驱动动画的方法"
+keywords: "scroll-timeline, 滚动驱动动画, scroll-driven animations, CSS Animation"
+---
+
+# CSS scroll-timeline 滚动驱动动画时间线
+
+## 概述
+
+`scroll-timeline` 是 CSS 滚动驱动动画（Scroll-Driven Animations）的核心属性，允许动画与滚动位置关联，实现滚动触发的动画效果。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+### 1. 定义滚动时间线
+
+```css
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.progress-bar {
+  animation: progress linear;
+  animation-timeline: scroll(root);
+}
+```
+
+### 2. 滚动时间线类型
+
+```css
+/* 根元素滚动 */
+animation-timeline: scroll(root);
+
+/* 最近的可滚动祖先 */
+animation-timeline: scroll(self);
+
+/* 指定滚动容器 */
+animation-timeline: scroll(nearest);
+```
+
+## 属性详解
+
+### animation-timeline
+
+指定动画的时间线来源：
+
+```css
+.element {
+  animation-timeline: scroll(root block);
+  /* 还可以指定方向 */
+  animation-timeline: scroll(inline);
+}
+```
+
+### scroll-timeline-name
+
+命名滚动时间线：
+
+```css
+.container {
+  scroll-timeline-name: --my-scroll;
+}
+
+.scrolled-element {
+  animation-timeline: --my-scroll;
+}
+```
+
+### scroll-timeline-axis
+
+指定滚动轴：
+
+```css
+.container {
+  scroll-timeline-axis: block; /* 垂直滚动（默认） */
+  /* 或 */
+  scroll-timeline-axis: inline; /* 水平滚动 */
+}
+```
+
+## 使用场景
+
+### 1. 进度条
+
+```css
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.progress {
+  animation: progress linear;
+  animation-timeline: scroll(root block);
+  transform-origin: left center;
+}
+```
+
+### 2. 滚动指示器
+
+```css
+@keyframes indicator {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.scroll-indicator {
+  animation: indicator ease-out;
+  animation-timeline: scroll(root block);
+}
+```
+
+### 3. 视差效果
+
+```css
+@keyframes parallax {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
+.parallax-bg {
+  animation: parallax ease;
+  animation-timeline: scroll(root block);
+}
+```
+
+## 实际应用
+
+### 1. 滚动阅读进度
+
+```css
+@keyframes reading-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #007bff, #00d4ff);
+  transform-origin: left;
+  animation: reading-progress linear;
+  animation-timeline: scroll(root block);
+}
+```
+
+### 2. 滚动淡入效果
+
+```css
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-element {
+  animation: fade-in linear both;
+  animation-timeline: scroll(root block);
+  animation-range: entry 0% entry 100%;
+}
+```
+
+### 3. 固定导航栏
+
+```css
+@keyframes shrink-header {
+  from { padding: 20px 0; }
+  to { padding: 10px 0; }
+}
+
+.header {
+  animation: shrink-header linear;
+  animation-timeline: scroll(root block);
+  position: sticky;
+  top: 0;
+}
+```
+
+## 浏览器兼容性
+
+`scroll-timeline` 是较新的 CSS 功能：
+
+- Chrome 115+（实验性）
+- Firefox: 不支持
+- Safari: 不支持
+- Edge 115+
+
+需要启用实验性功能：
+
+```bash
+# Chrome
+chrome://flags → Enable Experimental Web Platform Features
+```
+
+## 回退方案
+
+```css
+/* 使用 @supports 检测 */
+@supports (animation-timeline: scroll(root)) {
+  .progress {
+    animation-timeline: scroll(root block);
+  }
+}
+
+/* 使用 JavaScript 回退 */
+if (!CSS.supports('animation-timeline', 'scroll(root)')) {
+  // 使用 Intersection Observer 或 scroll 事件
+}
+```
+
+## 参考资料
+
+- [Scroll-Driven Animations - Chrome Blog](https://developer.chrome.com/blog/scroll-driven-animations/)
+- [CSS Animation Worklet - MDN](https://developer.mozilla.org/en-US/docs/Web/API/CSS_AnimationWorklet)
+- [Web Animations API - MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)

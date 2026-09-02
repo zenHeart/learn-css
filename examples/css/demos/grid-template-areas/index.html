@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS grid-template-areas 可视化布局 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    /* Grid 布局演示 */
+    .grid-demo {
+      display: grid;
+      gap: 8px;
+      min-height: 280px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .grid-item {
+      background: #21262d;
+      border-radius: 4px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #f0f6fc;
+      transition: all 0.3s;
+    }
+    
+    .grid-item:hover {
+      background: #30363d;
+    }
+    
+    /* 布局模板可视化 */
+    .template-viz {
+      display: grid;
+      gap: 2px;
+      background: #0d1117;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 16px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+    }
+    
+    .template-viz .cell {
+      padding: 4px 8px;
+      background: #21262d;
+      border-radius: 2px;
+      text-align: center;
+      color: #79c0ff;
+    }
+    
+    .template-viz .header { background: #388bfd33; color: #58a6ff; }
+    .template-viz .sidebar { background: #a371f733; color: #a371f7; }
+    .template-viz .main { background: #3fb95033; color: #3fb950; }
+    .template-viz .footer { background: #f0883e33; color: #f0883e; }
+    .template-viz .empty { background: transparent; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS grid-template-areas 可视化布局</h1>
+    <p class="subtitle">CSS Grid 布局 | 交互演示</p>
+
+    <!-- 模板可视化 -->
+    <div class="section">
+      <h2>布局模板可视化</h2>
+      <div class="template-viz" id="template-viz" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="cell header">header</div>
+        <div class="cell header">header</div>
+        <div class="cell header">header</div>
+        <div class="cell sidebar">sidebar</div>
+        <div class="cell main">main</div>
+        <div class="cell main">main</div>
+        <div class="cell footer">footer</div>
+        <div class="cell footer">footer</div>
+        <div class="cell footer">footer</div>
+      </div>
+      <div class="code-block" id="grid-code">grid-template-areas:
+  "header header header"
+  "sidebar main main"
+  "footer footer footer";</div>
+    </div>
+
+    <!-- 布局切换 -->
+    <div class="section">
+      <h2>布局模板切换</h2>
+      <div class="controls">
+        <button class="btn active" data-layout="classic">经典布局</button>
+        <button class="btn" data-layout="holy-grail">圣杯布局</button>
+        <button class="btn" data-layout="dashboard">仪表盘</button>
+        <button class="btn" data-layout="blog">博客布局</button>
+      </div>
+      <div class="grid-demo" id="layout-demo" style="grid-template-columns: repeat(3, 1fr); grid-template-areas:
+        'header header header'
+        'sidebar main main'
+        'footer footer footer';">
+        <div class="grid-item" style="grid-area: header; background: #388bfd33;">Header</div>
+        <div class="grid-item" style="grid-area: sidebar; background: #a371f733;">Sidebar</div>
+        <div class="grid-item" style="grid-area: main; background: #3fb95033;">Main Content</div>
+        <div class="grid-item" style="grid-area: footer; background: #f0883e33;">Footer</div>
+      </div>
+      <div class="code-block" id="layout-code">grid-template-areas:
+  "header header header"
+  "sidebar main main"
+  "footer footer footer";</div>
+    </div>
+
+    <!-- 响应式布局 -->
+    <div class="section">
+      <h2>响应式布局演示</h2>
+      <div class="controls">
+        <button class="btn" id="mobile-btn">移动端视图</button>
+        <button class="btn" id="desktop-btn">桌面端视图</button>
+      </div>
+      <div class="grid-demo" id="responsive-demo" style="grid-template-columns: 1fr; grid-template-areas:
+        'header'
+        'main'
+        'sidebar'
+        'footer';">
+        <div class="grid-item" style="grid-area: header;">Header</div>
+        <div class="grid-item" style="grid-area: main;">Main</div>
+        <div class="grid-item" style="grid-area: sidebar;">Sidebar</div>
+        <div class="grid-item" style="grid-area: footer;">Footer</div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 点击按钮切换移动端和桌面端视图，观察 grid-template-areas 的变化。</p>
+    </div>
+
+    <!-- 完整代码示例 -->
+    <div class="section">
+      <h2>完整代码示例</h2>
+      <div class="code-block">/* 1. 定义网格容器 */
+.page {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header"
+    "sidebar content"
+    "footer footer";
+  min-height: 100vh;
+  gap: 16px;
+}
+
+/* 2. 将元素分配到区域 */
+.header {
+  grid-area: header;
+  background: #388bfd;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: #a371f7;
+}
+
+.main {
+  grid-area: content;
+  background: #3fb950;
+}
+
+.footer {
+  grid-area: footer;
+  background: #f0883e;
+}
+
+/* 3. 响应式调整 */
+@media (max-width: 768px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar"
+      "footer";
+  }
+}</div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 57+ ✓</li>
+          <li>Firefox 52+ ✓</li>
+          <li>Safari 10.1+ ✓</li>
+          <li>Edge 16+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 布局模板配置
+    const layouts = {
+      classic: {
+        columns: 'repeat(3, 1fr)',
+        areas: `"header header header" "sidebar main main" "footer footer footer"`,
+        code: `grid-template-areas:
+  "header header header"
+  "sidebar main main"
+  "footer footer footer";`
+      },
+      'holy-grail': {
+        columns: 'auto 1fr auto',
+        areas: `"header header header" "nav main aside" "footer footer footer"`,
+        code: `grid-template-areas:
+  "header header header"
+  "nav main aside"
+  "footer footer footer";`
+      },
+      dashboard: {
+        columns: 'repeat(4, 1fr)',
+        areas: `"stats stats stats stats" "chart chart chart pie" "chart chart chart list"`,
+        code: `grid-template-areas:
+  "stats stats stats stats"
+  "chart chart chart pie"
+  "chart chart chart list";`
+      },
+      blog: {
+        columns: '1fr 300px',
+        areas: `"header header" "featured featured" "content sidebar" "footer footer"`,
+        code: `grid-template-areas:
+  "header header"
+  "featured featured"
+  "content sidebar"
+  "footer footer";`
+      }
+    };
+    
+    // 更新布局
+    function updateLayout(layoutName) {
+      const layout = layouts[layoutName];
+      const demo = document.getElementById('layout-demo');
+      const code = document.getElementById('layout-code');
+      
+      demo.style.gridTemplateColumns = layout.columns;
+      demo.style.gridTemplateAreas = layout.areas;
+      code.textContent = layout.code;
+      
+      // 更新模板可视化
+      updateTemplateViz(layout.areas);
+    }
+    
+    // 更新模板可视化
+    function updateTemplateViz(areas) {
+      const viz = document.getElementById('template-viz');
+      const rows = areas.trim().split('"').filter(s => s.trim() && !s.includes(' '));
+      
+      viz.style.gridTemplateColumns = `repeat(${rows[0].split(/\s+/).length}, 1fr)`;
+      viz.innerHTML = '';
+      
+      rows.forEach(row => {
+        const cells = row.trim().split(/\s+/);
+        cells.forEach(cell => {
+          const div = document.createElement('div');
+          div.className = `cell ${cell}`;
+          div.textContent = cell === '.' ? '' : cell;
+          viz.appendChild(div);
+        });
+      });
+    }
+    
+    // 布局按钮事件
+    document.querySelectorAll('[data-layout]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-layout]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateLayout(btn.dataset.layout);
+      });
+    });
+    
+    // 响应式布局切换
+    document.getElementById('mobile-btn').addEventListener('click', () => {
+      const demo = document.getElementById('responsive-demo');
+      demo.style.gridTemplateColumns = '1fr';
+      demo.style.gridTemplateAreas = `"header" "main" "sidebar" "footer"`;
+    });
+    
+    document.getElementById('desktop-btn').addEventListener('click', () => {
+      const demo = document.getElementById('responsive-demo');
+      demo.style.gridTemplateColumns = '200px 1fr 200px';
+      demo.style.gridTemplateAreas = `"header header header" "sidebar main aside" "footer footer footer"`;
+    });
+  </script>
+</body>
+</html>

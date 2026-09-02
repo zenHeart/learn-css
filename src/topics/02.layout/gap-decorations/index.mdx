@@ -1,0 +1,242 @@
+---
+title: "CSS gap 装饰与间距技巧"
+category: "布局"
+tags:
+  - CSS
+  - gap
+  - 间距
+  - Flexbox
+  - Grid
+  - 装饰
+description: "详解CSS gap属性的使用方法和创意装饰技巧"
+keywords: "gap, CSS间距, flex gap, grid gap, 装饰技巧"
+---
+
+# CSS gap 装饰与间距技巧
+
+## 概述
+
+`gap` 属性是 CSS Flexbox 和 Grid 布局中用于设置元素之间间距的属性。它是 `row-gap` 和 `column-gap` 的简写形式。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+### 1. 简写形式
+
+```css
+/* 设置相同的行间距和列间距 */
+.container {
+  gap: 20px;
+}
+
+/* 分别设置行间距和列间距 */
+.container {
+  gap: 10px 20px; /* row-gap column-gap */
+}
+```
+
+### 2. 分别设置
+
+```css
+.container {
+  row-gap: 10px;      /* 行间距 */
+  column-gap: 20px;   /* 列间距 */
+}
+```
+
+{/* @playground id="gap-demo" mode="demo" */}
+
+## 使用场景
+
+### 1. Flexbox 布局
+
+```css
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.flex-item {
+  width: calc(33.33% - 12px); /* 减去 gap 的影响 */
+}
+```
+
+### 2. Grid 布局
+
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+```
+
+### 3. 多列布局
+
+```css
+.columns {
+  column-count: 3;
+  column-gap: 40px;
+}
+```
+
+## 创意装饰技巧
+
+### 1. 渐变间距
+
+```css
+.decorative-gap {
+  gap: 20px;
+  background: linear-gradient(90deg, #007bff, #00d4ff);
+  padding: 2px;
+}
+
+.decorative-gap > * {
+  background: white;
+  padding: 16px;
+}
+```
+
+### 2. 边框装饰
+
+```css
+.border-gap {
+  gap: 16px;
+  padding: 16px;
+  background: #f0f0f0;
+}
+
+.border-gap > * + * {
+  border-top: 1px solid #ddd;
+}
+```
+
+### 3. 网格分隔线
+
+```css
+.grid-with-lines {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.grid-with-lines > * {
+  padding: 20px;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.grid-with-lines > *:nth-child(3n) {
+  border-right: none;
+}
+```
+
+### 4. 响应式间距
+
+```css
+.responsive-gap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .responsive-gap {
+    gap: 16px 24px; /* row-gap column-gap */
+  }
+}
+```
+
+## 实际应用
+
+### 1. 照片墙
+
+```css
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.photo-grid img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+```
+
+### 2. 标签云
+
+```css
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 4px 12px;
+  background: #f0f0f0;
+  border-radius: 16px;
+  font-size: 14px;
+}
+```
+
+### 3. 卡片列表
+
+```css
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+```
+
+## 浏览器兼容性
+
+`gap` 属性在现代浏览器中支持良好：
+
+- Chrome 66+（Flexbox）、84+（Grid）
+- Firefox 61+（Flexbox）、66+（Grid）
+- Safari 12+（Flexbox）、16+（Grid）
+- Edge 79+
+
+### 回退方案
+
+对于不支持 `gap` 的浏览器，可以使用 `margin` 作为回退：
+
+```css
+.container {
+  gap: 20px; /* 现代浏览器 */
+}
+
+@supports not (gap: 20px) {
+  .container > * + * {
+    margin-top: 20px;
+    margin-left: 20px;
+  }
+}
+```
+
+## 最佳实践
+
+1. **优先使用 gap**：在 Flexbox 和 Grid 布局中，gap 比 margin 更适合控制间距
+2. **注意百分比**：gap 不支持百分比值
+3. **响应式设计**：使用媒体查询调整不同屏幕尺寸的 gap 值
+4. **与 calc 结合**：当元素宽度需要动态计算时，结合 calc 使用
+
+## 参考资料
+
+- [gap - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/gap)
+- [Chrome Blog - Gap Decorations](https://developer.chrome.com/blog/gap-decorations)
+- [CSS Box Alignment - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment)

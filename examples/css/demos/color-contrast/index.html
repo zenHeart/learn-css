@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS color-contrast() 颜色对比函数 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { display: flex; gap: 16px; min-height: 120px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    
+    .demo-box { padding: 20px 30px; border-radius: 8px; font-size: 16px; font-weight: 600; text-align: center; min-width: 120px; }
+    .color-picker { width: 60px; height: 60px; border-radius: 8px; border: 2px solid #30363d; cursor: pointer; }
+    .contrast-ratio { font-size: 14px; color: #8b949e; margin-top: 8px; }
+    
+    .support-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .support-badge.supported { background: #3fb95033; color: #3fb950; }
+    .support-badge.unsupported { background: #f8514933; color: #f85149; }
+    
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 12px; }
+    .comparison-item { padding: 16px; border-radius: 8px; text-align: center; font-size: 14px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS color-contrast() 颜色对比函数</h1>
+    <p class="subtitle">CSS Color Level 5 规范 | 交互演示</p>
+
+    <!-- 浏览器支持 -->
+    <div class="section">
+      <h2>浏览器支持状态</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+        <div>
+          <span class="support-badge unsupported">不支持</span>
+          <span style="font-size: 12px; color: #8b949e; margin-left: 8px;">Chrome / Firefox / Edge</span>
+        </div>
+        <div>
+          <span class="support-badge supported">技术预览</span>
+          <span style="font-size: 12px; color: #8b949e; margin-left: 8px;">Safari 17.4+</span>
+        </div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 由于浏览器支持有限，下方演示使用 JavaScript 模拟 color-contrast() 的功能。</p>
+    </div>
+
+    <!-- 基础演示 -->
+    <div class="section">
+      <h2>基础用法 — 黑白色对比</h2>
+      <div class="controls">
+        <label style="font-size: 12px; color: #8b949e;">选择背景色：
+          <input type="color" id="bg-color" class="color-picker" value="#0066cc">
+        </label>
+      </div>
+      <div class="demo-area" style="justify-content: center;">
+        <div class="demo-box" id="contrast-demo" style="background: #0066cc; color: white;">
+          对比文字
+        </div>
+      </div>
+      <div class="code-block">color-contrast(<span id="code-bg">#0066cc</span> vs white, black)
+对比度: <span id="contrast-ratio">4.52</span>:1</div>
+      <p class="desc"><span class="tag">结果</span> 函数自动选择对比度更高的颜色（<span id="result-text">white</span>）</p>
+    </div>
+
+    <!-- 多颜色候选 -->
+    <div class="section">
+      <h2>多颜色候选对比</h2>
+      <div class="demo-area" style="justify-content: center;">
+        <div class="demo-box" id="multi-demo" style="background: #4CAF50;">
+          按钮文字
+        </div>
+      </div>
+      <div class="code-block">color-contrast(<span id="multi-bg">#4CAF50</span> vs white, black, #ffeb3b, #e91e63)</div>
+      <p class="desc">从多个候选颜色中选择对比度最高的。</p>
+    </div>
+
+    <!-- WCAG 对比度级别 -->
+    <div class="section">
+      <h2>WCAG 对比度级别</h2>
+      <div class="comparison-grid">
+        <div class="comparison-item" id="aa-demo" style="background: #333; color: white;">
+          AA 级<br><span style="font-size: 12px; font-weight: normal;">4.5:1+</span>
+        </div>
+        <div class="comparison-item" id="aa-large-demo" style="background: #333; color: white;">
+          AA 大文本<br><span style="font-size: 12px; font-weight: normal;">3:1+</span>
+        </div>
+        <div class="comparison-item" id="aaa-demo" style="background: #333; color: white;">
+          AAA 级<br><span style="font-size: 12px; font-weight: normal;">7:1+</span>
+        </div>
+      </div>
+      <div class="code-block">/* AA 级（普通文本 4.5:1） */
+color-contrast(bg vs candidates to AA)
+
+/* AAA 级（7:1） */
+color-contrast(bg vs candidates to AAA)</div>
+    </div>
+
+    <!-- 实际应用 -->
+    <div class="section">
+      <h2>实际应用：卡片系统</h2>
+      <div class="demo-area" style="flex-direction: column; gap: 12px;">
+        <div class="demo-box" id="card1" style="background: #0066cc; width: 100%;">
+          卡片 1 - 主要颜色
+        </div>
+        <div class="demo-box" id="card2" style="background: #22c55e; width: 100%;">
+          卡片 2 - 成功颜色
+        </div>
+        <div class="demo-box" id="card3" style="background: #f59e0b; width: 100%;">
+          卡片 3 - 警告颜色
+        </div>
+        <div class="demo-box" id="card4" style="background: #ef4444; width: 100%;">
+          卡片 4 - 错误颜色
+        </div>
+      </div>
+      <div class="code-block">/* 自动选择对比度最高的文字颜色 */
+.card {
+  background-color: var(--card-color);
+  color: color-contrast(var(--card-color) vs white, black);
+}</div>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>JavaScript 模拟实现</h2>
+      <div class="code-block">// 计算相对亮度
+function getLuminance(r, g, b) {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+// 计算对比度
+function getContrastRatio(color1, color2) {
+  const l1 = getLuminance(...color1);
+  const l2 = getLuminance(...color2);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+// 模拟 color-contrast()
+function colorContrast(bgColor, candidates) {
+  const bg = hexToRgb(bgColor);
+  let best = candidates[0];
+  let bestRatio = 0;
+  
+  for (const candidate of candidates) {
+    const ratio = getContrastRatio(bg, hexToRgb(candidate));
+    if (ratio > bestRatio) {
+      bestRatio = ratio;
+      best = candidate;
+    }
+  }
+  
+  return { color: best, ratio: bestRatio };
+}</div>
+    </div>
+  </div>
+
+  <script>
+    // 颜色转换辅助函数
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ] : [0, 0, 0];
+    }
+    
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+    
+    // 计算相对亮度
+    function getLuminance(r, g, b) {
+      const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+    
+    // 计算对比度
+    function getContrastRatio(color1, color2) {
+      const l1 = getLuminance(...color1);
+      const l2 = getLuminance(...color2);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+    
+    // 模拟 color-contrast
+    function colorContrast(bgHex, candidates) {
+      const bg = hexToRgb(bgHex);
+      let best = candidates[0];
+      let bestRatio = 0;
+      
+      for (const candidate of candidates) {
+        const ratio = getContrastRatio(bg, hexToRgb(candidate));
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = candidate;
+        }
+      }
+      
+      return { color: best, ratio: bestRatio };
+    }
+    
+    // 更新演示
+    function updateDemo() {
+      const bgColor = document.getElementById('bg-color').value;
+      const result = colorContrast(bgColor, ['white', 'black']);
+      
+      document.getElementById('contrast-demo').style.background = bgColor;
+      document.getElementById('contrast-demo').style.color = result.color;
+      document.getElementById('code-bg').textContent = bgColor.toUpperCase();
+      document.getElementById('contrast-ratio').textContent = result.ratio.toFixed(2);
+      document.getElementById('result-text').textContent = result.color === '#ffffff' ? 'white' : 'black';
+    }
+    
+    document.getElementById('bg-color').addEventListener('input', updateDemo);
+    
+    // 多颜色演示
+    function updateMultiDemo() {
+      const bgColor = '#4CAF50';
+      const result = colorContrast(bgColor, ['white', 'black', '#ffeb3b', '#e91e63']);
+      
+      document.getElementById('multi-demo').style.background = bgColor;
+      document.getElementById('multi-demo').style.color = result.color;
+      document.getElementById('multi-bg').textContent = bgColor;
+    }
+    
+    updateMultiDemo();
+    
+    // 卡片演示
+    function updateCards() {
+      const cards = [
+        { id: 'card1', color: '#0066cc' },
+        { id: 'card2', color: '#22c55e' },
+        { id: 'card3', color: '#f59e0b' },
+        { id: 'card4', color: '#ef4444' }
+      ];
+      
+      cards.forEach(card => {
+        const result = colorContrast(card.color, ['white', 'black']);
+        const el = document.getElementById(card.id);
+        el.style.background = card.color;
+        el.style.color = result.color;
+      });
+    }
+    
+    updateCards();
+  </script>
+</body>
+</html>

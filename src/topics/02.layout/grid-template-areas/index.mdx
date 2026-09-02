@@ -1,0 +1,219 @@
+---
+title: "CSS grid-template-areas 可视化布局"
+category: "布局"
+tags:
+  - CSS
+  - Grid
+  - grid-template-areas
+  - 可视化布局
+  - CSS Grid
+description: "详解CSS grid-template-areas属性实现可视化网格布局的方法"
+keywords: "grid-template-areas, CSS Grid, 可视化布局, grid布局"
+---
+
+# CSS grid-template-areas 可视化布局
+
+## 概述
+
+`grid-template-areas` 是 CSS Grid 布局中的强大功能，通过在网格容器上定义命名的网格区域，实现布局的可视化描述。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+### 1. 定义网格区域
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+}
+```
+
+### 2. 将元素分配到区域
+
+```css
+.header {
+  grid-area: header;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+
+.main {
+  grid-area: main;
+}
+
+.footer {
+  grid-area: footer;
+}
+```
+
+{/* @playground id="layout-demo" mode="demo" */}
+
+## 常见布局模式
+
+### 1. 经典网页布局
+
+```css
+.page {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header"
+    "sidebar content"
+    "footer footer";
+  min-height: 100vh;
+}
+```
+
+### 2. 圣杯布局
+
+```css
+.holy-grail {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header header"
+    "nav main aside"
+    "footer footer footer";
+}
+```
+
+### 3. 响应式布局
+
+```css
+.responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "sidebar"
+    "footer";
+}
+
+@media (min-width: 768px) {
+  .responsive {
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-areas:
+      "header header header"
+      "sidebar main aside"
+      "footer footer footer";
+  }
+}
+```
+
+## 实际应用场景
+
+### 1. 博客布局
+
+```css
+.blog {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "header header"
+    "featured featured"
+    "content sidebar"
+    "footer footer";
+}
+```
+
+### 2. 仪表盘
+
+```css
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto repeat(2, 200px);
+  grid-template-areas:
+    "stats stats stats stats"
+    "chart chart chart pie"
+    "chart chart chart list";
+}
+```
+
+### 3. 日历视图
+
+```css
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-areas:
+    "sun sun mon tue wed thu fri"
+    "event event . . . . ."
+    ". . event event event . .";
+}
+```
+
+## 高级技巧
+
+### 1. 合并单元格
+
+使用相同的区域名称可以合并单元格：
+
+```css
+grid-template-areas:
+  "header header header"
+  "sidebar main main"
+  "sidebar footer footer";
+/* sidebar 占两行 */
+```
+
+### 2. 使用句点（.）留空
+
+```css
+grid-template-areas:
+  "header header ."
+  "sidebar main main"
+  ". footer footer";
+```
+
+### 3. 区域形状限制
+
+区域必须是矩形，不能是 L 形或其他形状：
+
+```css
+/* 无效 - 不能创建 L 形区域 */
+grid-template-areas:
+  "header header"
+  "header sidebar";
+
+/* 有效 - 两个矩形 */
+grid-template-areas:
+  "header header"
+  "sidebar sidebar";
+```
+
+## 浏览器兼容性
+
+`grid-template-areas` 属性兼容性良好：
+
+- Chrome 57+
+- Firefox 52+
+- Safari 10.1+
+- Edge 16+
+
+## 最佳实践
+
+1. **使用语义化命名**：区域名称应反映内容用途
+2. **保持矩形区域**：避免创建非矩形区域
+3. **使用响应式设计**：结合媒体查询调整布局
+4. **配合其他 Grid 属性**：如 `grid-column`、`grid-row` 进行微调
+5. **考虑可访问性**：确保语义结构清晰
+
+## 参考资料
+
+- [grid-template-areas - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-areas)
+- [CSS Grid Layout - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout)
+- [WebKit Blog - Grid Template Areas](https://webkit.org/blog/17620/)
