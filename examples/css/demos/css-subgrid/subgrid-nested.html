@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subgrid 实战 - 复杂网格嵌套</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .desc { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+      min-height: 600px;
+      padding: 16px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f0f6fc;
+    }
+
+    .header-user {
+      font-size: 14px;
+      color: #8b949e;
+    }
+
+    .sidebar {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .nav-item {
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: #8b949e;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: #388bfd33;
+      border-color: #388bfd;
+      color: #58a6ff;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      gap: 16px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: auto auto;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      background: #388bfd33;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6e7681;
+      margin-top: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-top: 4px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .content-card {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .content-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f6fc;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .content-body {
+      padding: 12px 0;
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.6;
+    }
+
+    .content-footer {
+      padding-top: 12px;
+      border-top: 1px solid #30363d;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6e7681;
+    }
+
+    .footer {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      color: #6e7681;
+    }
+
+    .code {
+      margin-top: 20px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: #79c0ff;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Subgrid 实战：复杂网格嵌套</h1>
+    <p class="desc">多层嵌套的网格结构，使用 subgrid 保持对齐一致性</p>
+
+    <div class="dashboard">
+      <div class="header">
+        <span class="header-title">仪表盘</span>
+        <span class="header-user">欢迎，管理员</span>
+      </div>
+
+      <div class="sidebar">
+        <div class="nav-item active">概览</div>
+        <div class="nav-item">数据分析</div>
+        <div class="nav-item">用户管理</div>
+        <div class="nav-item">系统设置</div>
+        <div class="nav-item">帮助中心</div>
+      </div>
+
+      <div class="main-content">
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">总用户数</div>
+            <div class="stat-value">12,345</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-label">活跃用户</div>
+            <div class="stat-value">8,901</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-label">总收入</div>
+            <div class="stat-value">¥98,765</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-label">平均评分</div>
+            <div class="stat-value">4.8</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="content-card">
+            <div class="content-title">最近活动</div>
+            <div class="content-body">
+              <p>用户 "张三" 完成了订单 #12345</p>
+              <p>用户 "李四" 提交了反馈</p>
+              <p>用户 "王五" 升级了会员</p>
+            </div>
+            <div class="content-footer">
+              <span>查看全部</span>
+              <span>2 分钟前</span>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="content-title">系统状态</div>
+            <div class="content-body">
+              <p>服务器: 正常运行</p>
+              <p>数据库: 正常运行</p>
+              <p>API: 正常运行</p>
+            </div>
+            <div class="content-footer">
+              <span>查看详情</span>
+              <span>实时更新</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">© 2024 Learn CSS. All rights reserved.</div>
+    </div>
+
+    <div class="code">/* 多层嵌套的 subgrid 对齐示例 */
+
+/* 第一层：页面布局 */
+.dashboard {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+}
+
+/* 第二层：主内容区继承行列 */
+.main-content {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: subgrid;
+  gap: 16px;
+}
+
+/* 第三层：统计卡片继承列 */
+.stat-card {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: auto auto;
+}
+
+/* 第四层：内容卡片继承列 */
+.content-card {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-template-rows: auto 1fr auto;
+}</div>
+  </div>
+</body>
+</html>
