@@ -1,0 +1,327 @@
+# CSS shape-outside 实现文字环绕非矩形图片
+
+## 基础概念
+
+`shape-outside` 是 CSS 中用于控制文字环绕形状的属性。它允许文字围绕圆形、椭圆、多边形等非矩形路径流动，创造出更自然的排版效果。
+
+**核心原理**：`shape-outside` 需要与 `float` 属性配合使用，定义浮动元素周围文字可以环绕的**排除区域**（exclusion area）。被排除的区域不会放置文字，从而实现文字环绕效果。
+
+```css
+.element {
+  float: left;
+  shape-outside: circle(50%);
+  width: 200px;
+  height: 200px;
+}
+```
+
+**关键说明**：
+- `shape-outside` **不会改变元素本身的形状**，它只改变文字与该元素交互的方式
+- 元素本身仍然是矩形，只是文字绕着 `shape-outside` 定义的形状流动
+- 如果需要同时裁剪元素形状，需配合 `clip-path` 使用
+
+**与 `clip-path` 的区别**：
+| 属性 | 作用 | 效果 |
+|------|------|------|
+| `clip-path` | 裁剪元素可见区域 | 元素变成指定形状 |
+| `shape-outside` | 定义文字环绕区域 | 文字绕过指定形状 |
+
+## 支持的形状函数
+
+### circle() - 圆形
+
+```css
+/* 基本圆形，半径为元素宽高平均值的一半 */
+shape-outside: circle(50%);
+
+/* 指定半径和圆心位置 */
+shape-outside: circle(50% at 50% 50%);  /* 圆心在中心 */
+shape-outside: circle(30% at 20% 50%);   /* 偏心圆 */
+shape-outside: circle(80px at 10% 50%);  /* 固定半径 */
+```
+
+| 参数 | 说明 |
+|------|------|
+| `radius` | 圆的半径，支持长度值或百分比（相对于元素宽高平均值） |
+| `at center-x center-y` | 圆心位置，默认为 `50% 50%`（元素中心） |
+
+### ellipse() - 椭圆
+
+```css
+/* 标准椭圆，填充整个元素 */
+shape-outside: ellipse(50% 50%);
+
+/* 指定两个轴的半径 */
+shape-outside: ellipse(150px 300px at 50% 50%);  /* 水平椭圆 */
+shape-outside: ellipse(50% 30% at 50% 50%);      /* 垂直椭圆 */
+shape-outside: ellipse(50% 50% at 30% 70%);      /* 偏心椭圆 */
+```
+
+| 参数 | 说明 |
+|------|------|
+| `radius-x` | 椭圆 X 轴半径（半宽度） |
+| `radius-y` | 椭圆 Y 轴半径（半高度） |
+| `at center-x center-y` | 椭圆圆心位置 |
+
+### polygon() - 多边形
+
+```css
+/* 三角形 */
+shape-outside: polygon(50% 0, 100% 100%, 0 100%);
+
+/* 菱形 */
+shape-outside: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+
+/* 不规则四边形 */
+shape-outside: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+
+/* 带圆滑曲线的复杂形状（需要偶数个点） */
+shape-outside: polygon(0 20%, 30% 20%, 30% 0%, 70% 0%, 70% 20%, 100% 20%, 100% 100%, 0 100%);
+```
+
+| 参数 | 说明 |
+|------|------|
+| `x y` | 多边形顶点坐标，支持 px、%、em 等单位 |
+| 点数 | 至少需要 3 个顶点 |
+| 闭合 | 顶点按顺序连接，首尾自动闭合 |
+
+### url() - 图片形状
+
+```css
+/* 使用图片的 Alpha 通道定义形状 */
+shape-outside: url('circle.png');
+
+/* 配合 shape-image-threshold 控制透明度阈值 */
+shape-image-threshold: 0.5;  /* 只有透明度超过 50% 的像素才形成形状 */
+```
+
+| 参数 | 说明 |
+|------|------|
+| `shape-image-threshold` | 0.0（完全透明）到 1.0（完全不透明），默认 0 |
+
+### inset() - 内嵌矩形
+
+```css
+/* inset(top right bottom left) */
+shape-outside: inset(0 0 0 0);              /* 默认矩形（无形状） */
+shape-outside: inset(50% 0 0 0);           /* 只显示下半部分文字环绕 */
+shape-outside: inset(10px 20px 30px 10px); /* 内缩偏移 */
+shape-outside: inset(0 0 50% 0 round 20px); /* 带圆角 */
+```
+
+## 盒子模型参考
+
+`shape-outside` 可以配合盒子模型关键词，指定形状相对于哪个边框计算：
+
+```css
+/* 默认：相对于 margin 框 */
+shape-outside: circle(50%) margin-box;
+
+/* 相对于 padding 框 */
+shape-outside: circle(50%) padding-box;
+
+/* 相对于 border 框 */
+shape-outside: circle(50%) border-box;
+
+/* 相对于 content 框 */
+shape-outside: circle(50%) content-box;
+```
+
+| 值 | 说明 |
+|------|------|
+| `margin-box` | 相对于 margin 边框（默认） |
+| `padding-box` | 相对于 padding 边框 |
+| `border-box` | 相对于 border 边框 |
+| `content-box` | 相对于 content 边框 |
+
+## 与 shape-margin 配合
+
+`shape-margin` 用于在 `shape-outside` 定义的形状外围增加一段**空白距离**，使文字与元素之间保持更大的间隙：
+
+```css
+.shaped-image {
+  float: left;
+  shape-outside: circle(50%);
+  shape-margin: 20px;  /* 文字与圆形保持 20px 间距 */
+  width: 200px;
+  height: 200px;
+}
+```
+
+**效果**：文字不会紧贴着 `shape-outside` 定义的形状边缘，而是会保持 `shape-margin` 指定的额外间距。
+
+### 组合使用
+
+```css
+.example {
+  float: left;
+  width: 250px;
+  height: 250px;
+  shape-outside: circle(50% at 30% 50%) margin-box;
+  shape-margin: 15px;
+  border-radius: 50%;
+}
+```
+
+## 实战案例
+
+### 案例一：圆形头像文字环绕
+
+最常见的应用场景——圆形头像配合文字环绕：
+
+```css
+.avatar {
+  float: left;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  shape-outside: circle(50% at 50% 50%);
+  shape-margin: 15px;
+}
+```
+
+**效果**：文字在头像左右两侧自然流动，与圆形保持 15px 间距。
+
+### 案例二：多边形异形图片环绕
+
+使用 `polygon()` 实现不规则形状的文字环绕：
+
+```css
+.diamond-image {
+  float: left;
+  width: 200px;
+  height: 200px;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);  /* 裁剪元素为菱形 */
+  shape-outside: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);  /* 文字环绕菱形 */
+  shape-margin: 20px;
+}
+```
+
+**效果**：图片显示为菱形，文字围绕菱形边缘流动。
+
+### 案例三：使用透明图片定义形状
+
+利用 PNG 图片的 Alpha 通道定义复杂形状：
+
+```css
+.shaped-banner {
+  float: left;
+  width: 300px;
+  height: 300px;
+  shape-outside: url('cloud-shape.png');
+  shape-image-threshold: 0.3;  /* 透明度超过 30% 的区域形成形状 */
+  shape-margin: 25px;
+}
+```
+
+**效果**：文字围绕图片中的不规则透明区域流动，适合特殊品牌图形。
+
+### 案例四：双图对称环绕
+
+左右两侧浮动图片，中间文字自然流动：
+
+```css
+.left-image {
+  float: left;
+  shape-outside: circle(50%);
+  shape-margin: 20px;
+}
+
+.right-image {
+  float: right;
+  shape-outside: circle(50%);
+  shape-margin: 20px;
+}
+```
+
+**效果**：文字先环绕左侧圆形，流到右侧时再环绕右侧圆形，形成对称排版。
+
+### 案例五：梯形/斜边文字环绕
+
+使用 `polygon()` 创建斜边形状，实现报纸/杂志风格的文字环绕：
+
+```css
+.slanted-image {
+  float: left;
+  width: 250px;
+  height: 300px;
+  shape-outside: polygon(
+    0 0,           /* 左上 */
+    100% 15%,      /* 右上（向内倾斜） */
+    100% 100%,     /* 右下 */
+    0 100%         /* 左下 */
+  );
+  shape-margin: 20px;
+}
+```
+
+### 案例六：配合 clip-path 裁剪视觉元素
+
+同时使用 `shape-outside` 和 `clip-path` 让元素视觉和文字环绕一致：
+
+```css
+.heart-image {
+  float: left;
+  width: 200px;
+  height: 180px;
+  /* 定义心形多边形（近似心形） */
+  clip-path: polygon(
+    50% 0%, 65% 15%, 80% 5%, 100% 30%,
+    90% 60%, 70% 80%, 50% 100%,
+    30% 80%, 10% 60%, 0% 30%,
+    20% 5%, 35% 15%
+  );
+  shape-outside: polygon(
+    50% 0%, 65% 15%, 80% 5%, 100% 30%,
+    90% 60%, 70% 80%, 50% 100%,
+    30% 80%, 10% 60%, 0% 30%,
+    20% 5%, 35% 15%
+  );
+  shape-margin: 15px;
+}
+```
+
+## 浏览器兼容性
+
+现代浏览器已全面支持 `shape-outside`：
+
+- Chrome 37+ ✅
+- Firefox 62+ ✅
+- Safari 10.1+ ✅
+- Edge 79+ ✅
+
+### 兼容处理
+
+```css
+.shaped-element {
+  /* Safari 10.1-15 需要前缀 */
+  -webkit-shape-outside: circle(50%);
+  shape-outside: circle(50%);
+
+  /* 备用：使用 border-radius 模拟圆形基础效果 */
+  border-radius: 50%;
+}
+```
+
+## 性能优化
+
+1. **优先使用简单形状**：`circle()` 和 `ellipse()` 比 `polygon()` 性能更好
+2. **减少多边形顶点数**：多边形顶点数越少，浏览器计算越快
+3. **避免在滚动时触发动画**：`shape-outside` 动画性能良好，但避免在滚动事件中频繁更新
+4. **结合 `will-change` 优化**：对于需要动画的元素提前告知浏览器
+
+```css
+.animated-shape {
+  will-change: shape-outside;
+  transition: shape-outside 0.4s ease;
+}
+```
+
+## 辅助工具
+
+创建 `polygon()` 形状时，推荐使用以下可视化工具：
+
+- **CSS Clip-Path Maker** (bennettfeely.com/clippy)：可视化拖拽生成代码
+- **Chrome DevTools**：支持直接在 Elements 面板编辑 shape-outside
+- **Firefox Shape Path Editor**：内置形状路径编辑器

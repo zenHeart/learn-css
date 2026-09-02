@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS border-shape 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 24px; min-height: 160px; padding: 24px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .label { font-size: 13px; color: #8b949e; min-width: 120px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; }
+    .warning { background: #f0883e33; border: 1px solid #f0883e; border-radius: 4px; padding: 12px; font-size: 13px; color: #f0883e; margin-bottom: 16px; }
+
+    /* Demo element styles */
+    .demo-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      min-height: 80px;
+      padding: 16px 24px;
+      color: white;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Tooltip bubble - not supported, shows fallback */
+    .tooltip {
+      background: #3b82f6;
+      border-radius: 8px;
+      /* border-shape fallback using clip-path */
+      clip-path: polygon(
+        10px 0%, calc(100% - 10px) 0%, calc(100% - 10px) calc(100% - 15px),
+        55% calc(100% - 15px), 50% 100%, 45% calc(100% - 15px),
+        10px calc(100% - 15px)
+      );
+      padding: 16px 24px;
+      color: white;
+      font-weight: 600;
+      max-width: 220px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Chevron nav items */
+    .chevron-nav {
+      display: flex;
+      gap: 4px;
+    }
+    .chevron-item {
+      background: #a371f7;
+      padding: 10px 28px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      clip-path: polygon(
+        0% 50%, 8px 0%, calc(100% - 8px) 0%, 100% 50%,
+        calc(100% - 8px) 100%, 8px 100%
+      );
+      position: relative;
+    }
+    .chevron-item:first-child {
+      clip-path: polygon(
+        0% 0%, calc(100% - 8px) 0%, 100% 50%,
+        calc(100% - 8px) 100%, 0% 100%
+      );
+    }
+    .chevron-item:hover {
+      background: #8957e5;
+    }
+
+    /* Scalloped border */
+    .scalloped {
+      background: #f0883e;
+      clip-path: polygon(
+        0% 0%,
+        /* top edge - 5 scallops */
+        10% 5%, 20% 0%, 30% 5%, 40% 0%, 50% 5%, 60% 0%, 70% 5%, 80% 0%, 90% 5%, 100% 0%,
+        /* right edge - 5 scallops */
+        100% 10%, 100% 20%, 100% 30%, 100% 40%, 100% 50%, 100% 60%, 100% 70%, 100% 80%, 100% 90%, 100% 100%,
+        /* bottom edge - 5 scallops */
+        90% 95%, 80% 100%, 70% 95%, 60% 100%, 50% 95%, 40% 100%, 30% 95%, 20% 100%, 10% 95%, 0% 100%,
+        /* left edge - 5 scallops */
+        0% 90%, 0% 80%, 0% 70%, 0% 60%, 0% 50%, 0% 40%, 0% 30%, 0% 20%, 0% 10%
+      );
+      padding: 24px 32px;
+      color: white;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Arrow polygon */
+    .arrow-right {
+      background: #3fb950;
+      width: 80px;
+      height: 80px;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    /* Pill shape */
+    .pill {
+      background: #db61a2;
+      border-radius: 999px;
+      padding: 12px 32px;
+      color: white;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Heart shape */
+    .heart {
+      background: #f43f5e;
+      width: 80px;
+      height: 80px;
+      clip-path: polygon(
+        50% 100%, 15% 55%, 0% 35%, 15% 15%,
+        35% 0%, 50% 20%, 65% 0%, 85% 15%,
+        100% 35%, 85% 55%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    /* Star shape */
+    .star {
+      background: linear-gradient(135deg, #f59e0b, #eab308);
+      width: 80px;
+      height: 80px;
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .shape-showcase {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 20px;
+      padding: 24px;
+      background: #0d1117;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .shape-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .shape-item span {
+      font-size: 12px;
+      color: #8b949e;
+    }
+
+    /* Unsupported notice */
+    .unsupported {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #8b949e;
+    }
+    .unsupported strong {
+      color: #f0883e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS border-shape 交互演示</h1>
+    <p class="subtitle">基于 <a href="https://una.im/border-shape" style="color:#58a6ff">una.im/border-shape</a> 整理</p>
+
+    <div class="warning">
+      ⚠️ <strong>浏览器支持说明</strong>：border-shape 目前仅在 Chrome Canary 146+ 中可用，需开启 Experimental Web Platform Features 标志（<code>chrome://flags/#enable-experimental-web-platform-features</code>）。本演示使用 clip-path 作为降级方案。
+    </div>
+
+    <!-- Section 1: Tooltip -->
+    <div class="section">
+      <h2>1. 气泡提示框（Tooltip）</h2>
+      <p class="info">带箭头的气泡提示框是 border-shape 的经典应用，无需伪元素三角技巧，border 和 box-shadow 会完美跟随形状。</p>
+      <div class="demo-area">
+        <div class="demo-box tooltip">
+          这是一个使用 border-shape 制作的气泡提示框！
+        </div>
+      </div>
+      <div class="code-block">/* border-shape 语法（需要浏览器支持） */
+border-shape: shape(
+  from var(--r) 0,
+  hline to calc(100% - var(--r)),
+  curve to right var(--r) with right top,
+  vline to calc(100% - (var(--r) + var(--ah))),
+  curve to calc(100% - var(--r)) calc(100% - var(--ah)) with right calc(100% - var(--ah)),
+  hline to calc(var(--ap) + var(--aw)),
+  line by calc(var(--aw) * -1) var(--ah),
+  line by calc(var(--aw) * -1) calc(var(--ah) * -1),
+  hline to var(--r),
+  curve to left calc(100% - (var(--r) + var(--ah))) with left calc(100% - var(--ah)),
+  vline to var(--r),
+  curve to var(--r) top with left top
+);</div>
+    </div>
+
+    <!-- Section 2: Chevron Nav -->
+    <div class="section">
+      <h2>2. Chevron 导航</h2>
+      <p class="info">使用 border-shape 制作带凹口的导航项，无需 z-index 层叠，边框会完美跟随几何形状。</p>
+      <div class="demo-area">
+        <nav class="chevron-nav">
+          <div class="chevron-item">首页</div>
+          <div class="chevron-item">产品</div>
+          <div class="chevron-item">关于</div>
+          <div class="chevron-item">联系</div>
+        </nav>
+      </div>
+      <div class="code-block">/* 通用 chevron 项 */
+border-shape: shape(
+  from top left,
+  hline to calc(100% - var(--arrow-size)),
+  line to right center,
+  line to calc(100% - var(--arrow-size)) bottom,
+  hline to left,
+  line to var(--arrow-size) center,
+  close
+);
+
+/* 第一个元素：去掉左侧凹口 */
+border-shape: shape(
+  from top left,
+  hline to calc(100% - var(--arrow-size)),
+  line to right center,
+  line to calc(100% - var(--arrow-size)) bottom,
+  hline to left,
+  close
+);</div>
+    </div>
+
+    <!-- Section 3: Scalloped Border -->
+    <div class="section">
+      <h2>3. 扇贝形边框</h2>
+      <p class="info">使用 arc 命令绘制圆形边缘，content-box 确保百分比相对于内容区域而非包含 padding 的区域。</p>
+      <div class="demo-area">
+        <div class="scalloped">
+          扇贝形边框示例
+        </div>
+      </div>
+      <div class="code-block">border-shape: shape(
+  from 0% 0%,
+  /* 上边：从左到右，5个扇贝 */
+  arc by 20% 0% of 10% 10% small cw,
+  arc by 20% 0% of 10% 10% small cw,
+  arc by 20% 0% of 10% 10% small cw,
+  arc by 20% 0% of 10% 10% small cw,
+  arc by 20% 0% of 10% 10% small cw,
+  /* 右边、底边、左边类似... */
+  close
+) content-box;</div>
+    </div>
+
+    <!-- Section 4: Shape Showcase -->
+    <div class="section">
+      <h2>4. 各种形状</h2>
+      <p class="info">使用 polygon() 基础形状可以快速创建常见几何形状。</p>
+      <div class="shape-showcase">
+        <div class="shape-item">
+          <div class="arrow-right">→</div>
+          <span>箭头</span>
+        </div>
+        <div class="shape-item">
+          <div class="heart">♥</div>
+          <span>爱心</span>
+        </div>
+        <div class="shape-item">
+          <div class="star">★</div>
+          <span>星星</span>
+        </div>
+        <div class="shape-item">
+          <div class="pill">Pill</div>
+          <span>药丸形</span>
+        </div>
+      </div>
+      <div class="code-block">/* 箭头 */
+border-shape: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+
+/* 爱心 - 需要复杂的 polygon 坐标 */
+border-shape: polygon(
+  50% 100%, 15% 55%, 0% 35%, 15% 15%,
+  35% 0%, 50% 20%, 65% 0%, 85% 15%,
+  100% 35%, 85% 55%
+);
+
+/* 星星 */
+border-shape: polygon(
+  50% 0%, 61% 35%, 98% 35%, 68% 57%,
+  79% 91%, 50% 70%, 21% 91%, 32% 57%,
+  2% 35%, 39% 35%
+);</div>
+    </div>
+
+    <!-- Section 5: Comparison with clip-path -->
+    <div class="section">
+      <h2>5. border-shape vs clip-path</h2>
+      <p class="info">关键区别：clip-path 仅遮罩元素本身，border-shape 重新定义元素盒子，背景、border、box-shadow 都会跟随。</p>
+      <div class="demo-area" style="flex-direction: column; gap: 16px;">
+        <div style="display:flex;gap:24px;align-items:center;">
+          <span class="label">clip-path:</span>
+          <div style="width:80px;height:80px;background:#3b82f6;clip-path:polygon(50%0%,100%50%,50%100%,0%50%);border:4px solid #f0883e;box-shadow:0 4px 12px rgba(0,0,0,0.3);"></div>
+          <span class="info" style="margin:0;">边框和阴影不受 clip-path 影响，保持矩形</span>
+        </div>
+        <div style="display:flex;gap:24px;align-items:center;">
+          <span class="label">border-shape:</span>
+          <div style="width:80px;height:80px;background:#3b82f6;border:4px solid #f0883e;box-shadow:0 4px 12px rgba(0,0,0,0.3);" class="arrow-right"></div>
+          <span class="info" style="margin:0;">border 和 box-shadow 完美跟随形状（需要浏览器支持）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: CSS Variables for Tooltip -->
+    <div class="section">
+      <h2>6. 可配置的 Tooltip</h2>
+      <p class="info">使用 CSS 变量控制箭头位置、大小和圆角半径，便于在设计系统中复用。</p>
+      <div class="demo-area" style="flex-direction: column; gap: 16px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="label">箭头位置:</span>
+          <button class="btn" onclick="updateTooltip('ap','20%')">20%</button>
+          <button class="btn active" onclick="updateTooltip('ap','50%')">50%</button>
+          <button class="btn" onclick="updateTooltip('ap','80%')">80%</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="label">箭头高度:</span>
+          <button class="btn" onclick="updateTooltip('ah','6px')">6px</button>
+          <button class="btn active" onclick="updateTooltip('ah','10px')">10px</button>
+          <button class="btn" onclick="updateTooltip('ah','16px')">16px</button>
+        </div>
+        <div id="dynamic-tooltip" class="tooltip" style="margin-top:16px;">
+          动态 Tooltip 示例
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+  </style>
+
+  <script>
+    function updateTooltip(prop, value) {
+      document.documentElement.style.setProperty(`--${prop}`, value);
+      // Update active state
+      event.target.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
