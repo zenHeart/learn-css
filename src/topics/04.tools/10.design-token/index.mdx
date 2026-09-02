@@ -1,0 +1,382 @@
+---
+title: "Design Token 设计令牌"
+category: "开发工具"
+tags:
+  - Design Token
+  - 设计令牌
+  - 设计系统
+  - CSS变量
+  - 主题切换
+description: "详解Design Token设计令牌的概念、实践方法以及与CSS自定义属性的关系"
+keywords: "Design Token, 设计令牌, 设计系统, CSS变量, 主题切换, 设计决策"
+---
+
+# Design Token 设计令牌
+
+## 概述
+
+**Design Token（设计令牌）** 是将设计决策以结构化数据形式表达的规范。它是设计系统的基础构建块，充当设计师与开发者之间的"共同语言"。
+
+> Design Token 是设计决策的载体，让设计意图可以在不同平台、不同工具之间无缝传递。
+
+## 什么是 Design Token
+
+Design Token 最早由 Salesforce 提出，用于解决多平台设计一致性问题。它将颜色、间距、字体等设计决策抽象为可复用的"令牌"，通过工具链生成各平台（CSS、iOS、Android）对应的代码。
+
+一个典型的 Design Token JSON 文件：
+
+```json
+{
+  "color": {
+    "$type": "color",
+    "options": {
+      "blue-500": { "$value": "#3b82f6" },
+      "blue-600": { "$value": "#2563eb" },
+      "grey-100": { "$value": "#f3f4f6" },
+      "grey-900": { "$value": "#111827" }
+    },
+    "decisions": {
+      "primary": { "$value": "{color.options.blue-600}" },
+      "background": { "$value": "{color.options.grey-100}" },
+      "text": { "$value": "{color.options.grey-900}" }
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "options": {
+      "1": { "$value": "4px" },
+      "2": { "$value": "8px" },
+      "4": { "$value": "16px" },
+      "8": { "$value": "32px" }
+    }
+  }
+}
+```
+
+## 三层 Token 结构
+
+Design Token 按照抽象层级分为三层，它们逐层构建：
+
+### 1. Option Token（选项令牌）
+
+定义设计系统的"原材料"，如颜色色板、间距刻度、字体族等。
+
+```json
+{
+  "color": {
+    "blue-100": { "$value": "#dbeafe" },
+    "blue-500": { "$value": "#3b82f6" },
+    "blue-900": { "$value": "#1e3a8a" }
+  }
+}
+```
+
+### 2. Decision Token（决策令牌）
+
+定义设计决策，即"如何应用"这些选项。如语义化的 `surface`、`text`、`accent` 等。
+
+```json
+{
+  "color": {
+    "surface": { "$value": "{color.blue-100}" },
+    "text": { "$value": "{color.blue-900}" },
+    "accent": { "$value": "{color.blue-500}" }
+  }
+}
+```
+
+### 3. Component Token（组件令牌）
+
+指定具体应用位置，如 `button-primary-bg`、`card-border-color` 等。
+
+```json
+{
+  "button": {
+    "primary": {
+      "background": { "$value": "{color.accent}" },
+      "text": { "$value": "{color.surface}" }
+    }
+  }
+}
+```
+
+## CSS 变量与 Design Token 的关系
+
+在 Web 端，Design Token 最终通常编译为 CSS 自定义属性（CSS 变量）：
+
+```css
+/* 编译后的 CSS 变量 */
+:root {
+  /* Option Token */
+  --color-blue-100: #dbeafe;
+  --color-blue-500: #3b82f6;
+  --color-blue-900: #1e3a8a;
+
+  /* Decision Token */
+  --color-surface: var(--color-blue-100);
+  --color-text: var(--color-blue-900);
+  --color-accent: var(--color-blue-500);
+
+  /* Component Token */
+  --button-primary-bg: var(--color-accent);
+  --button-primary-text: #ffffff;
+}
+```
+
+Design Token 与 CSS 变量的关系：
+- **Design Token** 是设计层面的规范（平台无关的数据格式）
+- **CSS 变量** 是 Web 端的实现方式之一
+- Token 可以编译为 CSS 变量，也能编译为 SASS 变量、JSON 等
+
+## 颜色令牌
+
+颜色令牌是 Design Token 最常见的类型：
+
+```css
+:root {
+  /* 选项令牌 - 原始色板 */
+  --palette-blue-50: #eff6ff;
+  --palette-blue-100: #dbeafe;
+  --palette-blue-500: #3b82f6;
+  --palette-blue-900: #1e3a8a;
+
+  /* 决策令牌 - 语义化 */
+  --color-primary: var(--palette-blue-500);
+  --color-primary-hover: var(--palette-blue-600);
+  --color-surface: var(--palette-blue-50);
+  --color-text: var(--palette-blue-900);
+  --color-text-muted: #64748b;
+}
+```
+
+{/* @playground id="color-tokens" mode="demo" */}
+
+## 字体令牌
+
+字体令牌统一管理字体相关的设计决策：
+
+```css
+:root {
+  /* 字体族 */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* 字号刻度 */
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem;  /* 20px */
+  --font-size-2xl: 1.5rem;  /* 24px */
+  --font-size-4xl: 2.25rem; /* 36px */
+
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+```
+
+{/* @playground id="typography-tokens" mode="demo" */}
+
+## 间距令牌
+
+间距令牌建立统一的间距系统：
+
+```css
+:root {
+  /* 间距刻度 */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem;  /* 24px */
+  --space-8: 2rem;    /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem;   /* 48px */
+  --space-16: 4rem;   /* 64px */
+
+  /* 语义化间距 */
+  --spacing-component: var(--space-4);
+  --spacing-section: var(--space-8);
+  --spacing-page: var(--space-16);
+}
+```
+
+{/* @playground id="spacing-tokens" mode="demo" */}
+
+## 实战案例：主题切换
+
+利用 Design Token 实现亮色/暗色主题切换：
+
+```css
+/* 亮色主题（默认） */
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f3f4f6;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-primary: #3b82f6;
+}
+
+/* 暗色主题 */
+[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-primary: #60a5fa;
+}
+```
+
+```html
+<button id="theme-toggle">切换主题</button>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  btn.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = current === 'dark' ? 'light' : 'dark';
+  });
+</script>
+```
+
+{/* @playground id="theme-switching" mode="demo" */}
+
+## 实战案例：设计系统组件
+
+使用 Design Token 构建一致的组件样式：
+
+```css
+/* Button 组件 */
+.btn {
+  padding: var(--spacing-component);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Card 组件 */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-section);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Input 组件 */
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+```
+
+{/* @playground id="design-system" mode="demo" */}
+
+## 与 CSS 自定义属性的对比
+
+| 特性 | CSS 自定义属性 | Design Token |
+|------|---------------|--------------|
+| **定义方式** | `--var-name: value` | JSON/ YAML 格式 |
+| **跨平台** | 仅 Web | 可编译为多平台代码 |
+| **工具链** | 手动维护 | 通过 Style Dictionary 等工具自动生成 |
+| **命名规范** | 自由命名 | 有规范的层级和命名约定 |
+| **设计协作** | 设计师难以直接参与 | 设计工具（Figma）可直接同步 |
+| **适用场景** | 简单主题切换 | 大型设计系统、多平台一致性 |
+
+### CSS 自定义属性的局限性
+
+```css
+/* CSS 自定义属性 — 缺乏语义层级 */
+:root {
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --gray-100: #f3f4f6;
+  --gray-900: #111827;
+}
+
+/* 开发者需要记住颜色语义 */
+.button {
+  /* 很难知道 --primary 是什么意思 */
+  background: var(--primary);
+  color: var(--white);
+}
+```
+
+### Design Token 的优势
+
+```css
+/* Design Token — 语义清晰、层级分明 */
+:root {
+  /* Option Token */
+  --palette-blue-500: #3b82f6;
+  --palette-white: #ffffff;
+
+  /* Decision Token */
+  --color-accent: var(--palette-blue-500);
+  --color-on-accent: var(--palette-white);
+
+  /* Component Token */
+  --button-bg: var(--color-accent);
+  --button-text: var(--color-on-accent);
+}
+
+/* 开发者直接使用语义化 Token */
+.button {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+```
+
+## 工具链推荐
+
+- **Style Dictionary**：最流行的 Token 转换工具，支持 CSS/SCSS/Android/iOS
+- **Theo**：Salesforce 推出的 Token 管理工具
+- **Tokens Studio**：Figma 插件，支持与 Git 双向同步
+- **Specify**：设计系统 Token 管理平台
+
+## 总结
+
+Design Token 是设计系统的"基础设施"，核心价值：
+
+1. **单一数据源**：设计决策统一存储，消除设计-开发不一致
+2. **多平台支持**：一次定义，多端编译
+3. **主题切换**：轻松实现亮/暗主题、品牌定制
+4. **可维护性**：修改 Token 值，全局生效，无需逐个组件修改
