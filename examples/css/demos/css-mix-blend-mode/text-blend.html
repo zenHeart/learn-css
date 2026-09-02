@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文字与背景混合 - mix-blend-mode 演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1e293b;
+      margin-bottom: 24px;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    /* 文字混合演示区域 */
+    .text-blend-demo {
+      position: relative;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin-bottom: 16px;
+    }
+
+    .text-blend-demo .overlay-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: -2px;
+    }
+
+    .text-blend-demo.multiply .overlay-text { mix-blend-mode: multiply; }
+    .text-blend-demo.screen .overlay-text { mix-blend-mode: screen; }
+    .text-blend-demo.overlay .overlay-text { mix-blend-mode: overlay; }
+    .text-blend-demo.darken .overlay-text { mix-blend-mode: darken; }
+    .text-blend-demo.lighten .overlay-text { mix-blend-mode: lighten; }
+    .text-blend-demo.difference .overlay-text { mix-blend-mode: difference; }
+
+    .demo-label {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+
+    /* 文字描边效果 */
+    .stroke-demo {
+      position: relative;
+      height: 180px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: url('https://picsum.photos/seed/blend1/800/400') center/cover;
+      margin-bottom: 16px;
+    }
+
+    .stroke-demo .stroke-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 72px;
+      font-weight: 900;
+      color: white;
+      -webkit-text-stroke: 2px white;
+      paint-order: stroke fill;
+    }
+
+    .stroke-demo.blend .stroke-text {
+      mix-blend-mode: multiply;
+    }
+
+    /* 多行文字混合 */
+    .multi-text-demo {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #ff6b6b 0%, #4ecdc4 100%);
+      margin-bottom: 16px;
+    }
+
+    .multi-text-demo .big-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px;
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+    }
+
+    .multi-text-demo .big-text span {
+      mix-blend-mode: multiply;
+    }
+
+    .multi-text-demo .big-text span:nth-child(2) {
+      mix-blend-mode: screen;
+      color: #ffe66d;
+    }
+
+    /* 选择器切换模式 */
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      padding: 8px 16px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: monospace;
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover {
+      border-color: #667eea;
+      background: #eff6ff;
+    }
+
+    .mode-btn.active {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    /* 交互式演示 */
+    .interactive-demo {
+      position: relative;
+      height: 220px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      margin-bottom: 16px;
+    }
+
+    .interactive-demo .word {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      font-weight: 900;
+      color: white;
+      cursor: pointer;
+      transition: mix-blend-mode 0.3s;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .code-comment { color: #6a9955; }
+    .code-prop { color: #9cdcfe; }
+    .code-value { color: #ce9178; }
+  </style>
+</head>
+<body>
+  <h1>📝 文字与背景混合模式</h1>
+
+  <div class="demo-section">
+    <h2>不同混合模式下的文字效果</h2>
+    <p>白色文字叠加在渐变背景上，不同混合模式产生不同视觉效果：</p>
+
+    <div class="text-blend-demo multiply">
+      <div class="overlay-text">BLEND</div>
+      <span class="demo-label">mix-blend-mode: multiply</span>
+    </div>
+
+    <div class="text-blend-demo screen">
+      <div class="overlay-text">SCREEN</div>
+      <span class="demo-label">mix-blend-mode: screen</span>
+    </div>
+
+    <div class="text-blend-demo overlay">
+      <div class="overlay-text">OVERLAY</div>
+      <span class="demo-label">mix-blend-mode: overlay</span>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>文字描边 + 混合模式</h2>
+    <p>结合文字描边和混合模式，创造独特的文字效果：</p>
+
+    <div class="stroke-demo blend">
+      <div class="stroke-text">Hello World</div>
+    </div>
+    <pre><code><span class="code-comment">/* 文字描边 + 混合模式 */</span>
+<span class="code-prop">.stroke-text</span> {
+  <span class="code-prop">font-size</span>: <span class="code-value">72px</span>;
+  <span class="code-prop">font-weight</span>: <span class="code-value">900</span>;
+  <span class="code-prop">color</span>: <span class="code-value">white</span>;
+  <span class="code-prop">-webkit-text-stroke</span>: <span class="code-value">2px white</span>; <span class="code-comment">/* 文字描边 */</span>
+  <span class="code-prop">paint-order</span>: <span class="code-value">stroke fill</span>; <span class="code-comment">/* 先描边后填充 */</span>
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 与背景混合 */</span>
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>多行文字不同混合模式</h2>
+    <p>同一区域内，多行文字可以设置不同的混合模式：</p>
+
+    <div class="multi-text-demo">
+      <div class="big-text">
+        <span>HELLO</span>
+        <span>WORLD</span>
+      </div>
+    </div>
+    <pre><code><span class="code-comment">/* 多行文字不同混合模式 */</span>
+<span class="code-prop">.big-text</span> {
+  <span class="code-prop">display</span>: <span class="code-value">flex</span>;
+  <span class="code-prop">flex-direction</span>: <span class="code-value">column</span>;
+}
+
+<span class="code-prop">.big-text span:nth-child(1)</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 白色文字在渐变上变暗 */</span>
+}
+
+<span class="code-prop">.big-text span:nth-child(2)</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">screen</span>; <span class="code-comment">/* 黄色文字在渐变上变亮 */</span>
+  <span class="code-prop">color</span>: <span class="code-value">#ffe66d</span>;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>交互式演示：点击切换混合模式</h2>
+    <p>点击按钮切换文字的混合模式，观察效果变化：</p>
+
+    <div class="mode-selector">
+      <button class="mode-btn active" onclick="setMode('normal')">normal</button>
+      <button class="mode-btn" onclick="setMode('multiply')">multiply</button>
+      <button class="mode-btn" onclick="setMode('screen')">screen</button>
+      <button class="mode-btn" onclick="setMode('overlay')">overlay</button>
+      <button class="mode-btn" onclick="setMode('darken')">darken</button>
+      <button class="mode-btn" onclick="setMode('lighten')">lighten</button>
+      <button class="mode-btn" onclick="setMode('difference')">difference</button>
+    </div>
+
+    <div class="interactive-demo">
+      <div class="word" id="interactiveWord">TEXT</div>
+    </div>
+  </div>
+
+  <script>
+    const word = document.getElementById('interactiveWord');
+    const buttons = document.querySelectorAll('.mode-btn');
+
+    function setMode(mode) {
+      word.style.mixBlendMode = mode;
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
