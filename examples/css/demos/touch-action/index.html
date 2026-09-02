@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS touch-action 触摸操作控制 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    
+    .demo-area { background: #0d1117; border-radius: 8px; padding: 16px; min-height: 150px; }
+    
+    .scroll-box {
+      width: 100%;
+      height: 200px;
+      overflow: auto;
+      background: #161b22;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+    }
+    
+    .scroll-content {
+      width: 300%;
+      height: 300%;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding: 16px;
+      gap: 8px;
+    }
+    
+    .touch-box {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    
+    .touch-box.blue { background: #388bfd33; color: #58a6ff; border: 2px solid #388bfd; }
+    .touch-box.red { background: #f8514933; color: #f85149; border: 2px solid #f85149; }
+    .touch-box.green { background: #3fb95033; color: #3fb950; border: 2px solid #3fb950; }
+    .touch-box.purple { background: #a371f733; color: #a371f7; border: 2px solid #a371f7; }
+    
+    .event-log {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+    
+    .event-log .event { color: #7ee787; margin-bottom: 4px; }
+    .event-log .event.start { color: #58a6ff; }
+    .event-log .event.end { color: #ffa657; }
+    
+    .info-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .info-box p { font-size: 12px; color: #8b949e; margin-bottom: 8px; }
+    .info-box p:last-child { margin-bottom: 0; }
+    .info-box strong { color: #f0f6fc; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS touch-action 触摸操作控制</h1>
+    <p class="subtitle">移动端触摸手势控制 | 交互演示</p>
+
+    <!-- touch-action 值 -->
+    <div class="section">
+      <h2>touch-action 属性值</h2>
+      <div class="info-box">
+        <p><strong>提示：</strong>这些演示需要在移动设备或触摸模拟器（如 Chrome DevTools）上测试才能看到效果。</p>
+        <p><strong>auto</strong> - 浏览器处理所有触摸手势（默认）</p>
+        <p><strong>none</strong> - 禁止所有触摸手势</p>
+        <p><strong>pan-x</strong> - 只允许水平平移</p>
+        <p><strong>pan-y</strong> - 只允许垂直平移</p>
+        <p><strong>manipulation</strong> - 允许平移和缩放，禁用双击缩放</p>
+      </div>
+      <div class="code-block">.element {
+  touch-action: auto | none | pan-x | pan-y | manipulation;
+}</div>
+    </div>
+
+    <!-- pan-x 演示 -->
+    <div class="section">
+      <h2>touch-action: pan-x（只允许水平滚动）</h2>
+      <div class="scroll-box" id="pan-x-demo" style="touch-action: pan-x;">
+        <div class="scroll-content">
+          <div class="touch-box blue">1</div>
+          <div class="touch-box red">2</div>
+          <div class="touch-box green">3</div>
+          <div class="touch-box purple">4</div>
+          <div class="touch-box blue">5</div>
+          <div class="touch-box red">6</div>
+        </div>
+      </div>
+      <div class="code-block">touch-action: pan-x; /* 只能水平滑动，不能垂直滑动 */</div>
+      <p class="desc"><span class="tag">效果</span> 在此区域滑动时，只能水平移动，不能垂直滚动。</p>
+    </div>
+
+    <!-- pan-y 演示 -->
+    <div class="section">
+      <h2>touch-action: pan-y（只允许垂直滚动）</h2>
+      <div class="scroll-box" id="pan-y-demo" style="touch-action: pan-y;">
+        <div class="scroll-content">
+          <div class="touch-box blue">1</div>
+          <div class="touch-box red">2</div>
+          <div class="touch-box green">3</div>
+          <div class="touch-box purple">4</div>
+          <div class="touch-box blue">5</div>
+          <div class="touch-box red">6</div>
+        </div>
+      </div>
+      <div class="code-block">touch-action: pan-y; /* 只能垂直滑动，不能水平滑动 */</div>
+      <p class="desc"><span class="tag">效果</span> 在此区域滑动时，只能垂直移动，不能水平滚动。</p>
+    </div>
+
+    <!-- none 演示 -->
+    <div class="section">
+      <h2>touch-action: none（禁止所有触摸手势）</h2>
+      <div class="scroll-box" id="none-demo" style="touch-action: none;">
+        <div class="scroll-content">
+          <div class="touch-box blue">1</div>
+          <div class="touch-box red">2</div>
+          <div class="touch-box green">3</div>
+          <div class="touch-box purple">4</div>
+          <div class="touch-box blue">5</div>
+          <div class="touch-box red">6</div>
+        </div>
+      </div>
+      <div class="code-block">touch-action: none; /* 所有触摸手势被禁用 */</div>
+      <p class="desc"><span class="tag">效果</span> 触摸事件不会被处理，但可以通过 JavaScript 监听 touch 事件来自定义处理。</p>
+    </div>
+
+    <!-- manipulation 演示 -->
+    <div class="section">
+      <h2>touch-action: manipulation（允许平移和缩放）</h2>
+      <div class="scroll-box" id="manip-demo" style="touch-action: manipulation;">
+        <div class="scroll-content">
+          <div class="touch-box blue">1</div>
+          <div class="touch-box red">2</div>
+          <div class="touch-box green">3</div>
+          <div class="touch-box purple">4</div>
+          <div class="touch-box blue">5</div>
+          <div class="touch-box red">6</div>
+        </div>
+      </div>
+      <div class="code-block">touch-action: manipulation;
+/* 允许平移和缩放
+   禁用双击缩放（提升性能） */</div>
+      <p class="desc"><span class="tag">推荐</span> 移动端性能优化的推荐值，移除 300ms 点击延迟。</p>
+    </div>
+
+    <!-- 触摸事件日志 -->
+    <div class="section">
+      <h2>触摸事件检测</h2>
+      <div class="demo-area" id="touch-area" style="touch-action: none;">
+        <div class="touch-box blue" style="touch-action: none;">触摸此区域</div>
+      </div>
+      <div class="event-log" id="event-log">
+        <div style="color: #6e7681; font-size: 11px;">等待触摸事件...</div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 在移动设备上触摸上方区域，查看事件日志。</p>
+    </div>
+
+    <!-- 实际应用 -->
+    <div class="section">
+      <h2>实际应用场景</h2>
+      <div class="code-block">/* 1. 移除按钮点击延迟 */
+.button {
+  touch-action: manipulation;
+  padding: 12px 24px;
+}
+
+/* 2. 游戏区域完全自定义控制 */
+.game-canvas {
+  touch-action: none; /* 自定义触摸处理 */
+}
+
+/* 3. 轮播图只允许滑动切换 */
+.carousel {
+  touch-action: pan-y; /* 垂直方向滑动切换幻灯片 */
+  overflow-x: auto;
+}
+
+/* 4. 地图控件 */
+.map-overlay {
+  touch-action: none; /* 让地图库处理手势 */
+}
+
+.map-button {
+  touch-action: manipulation; /* 按钮需要正常点击 */
+}</div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 36+ (Android) ✓</li>
+          <li>Firefox 52+ (Android) ✓</li>
+          <li>Safari 13+ (iOS 13+) ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 触摸事件日志
+    const touchArea = document.getElementById('touch-area');
+    const eventLog = document.getElementById('event-log');
+    let logCount = 0;
+    
+    function addLog(message, type = '') {
+      logCount++;
+      const entry = document.createElement('div');
+      entry.className = `event ${type}`;
+      entry.textContent = `[${logCount}] ${message}`;
+      
+      if (logCount === 1) {
+        eventLog.innerHTML = '';
+      }
+      
+      eventLog.appendChild(entry);
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+    
+    // 添加触摸事件监听
+    ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(eventType => {
+      touchArea.addEventListener(eventType, (e) => {
+        e.preventDefault();
+        const touch = e.touches[0] || e.changedTouches[0];
+        if (touch) {
+          addLog(`${eventType}: x=${touch.clientX.toFixed(0)}, y=${touch.clientY.toFixed(0)}`, eventType.includes('start') ? 'start' : 'end');
+        } else {
+          addLog(eventType, eventType.includes('start') ? 'start' : 'end');
+        }
+      }, { passive: false });
+    });
+    
+    // 鼠标事件作为降级
+    touchArea.addEventListener('mousedown', (e) => {
+      addLog(`mousedown: x=${e.clientX}, y=${e.clientY}`, 'start');
+    });
+    
+    touchArea.addEventListener('mouseup', (e) => {
+      addLog(`mouseup: x=${e.clientX}, y=${e.clientY}`, 'end');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+---
+title: "CSS Box Alignment 盒对齐模块"
+category: "布局"
+tags:
+  - CSS
+  - Box Alignment
+  - justify-content
+  - align-items
+  - place-items
+description: "详解CSS Box Alignment模块的属性和使用方法"
+keywords: "box-alignment, justify-content, align-items, justify-self, align-self"
+---
+
+# CSS Box Alignment 盒对齐模块
+
+## 概述
+
+CSS Box Alignment 模块定义了如何在容器内对齐框（盒子），适用于 Flexbox、Grid 和 Block 布局。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 核心属性
+
+### 1. justify-content 和 align-content
+
+控制**容器**中内容的对齐：
+
+```css
+.container {
+  justify-content: center; /* 主轴方向 */
+  align-content: center;   /* 交叉轴方向 */
+}
+```
+
+{/* @playground id="content-demo" mode="demo" */}
+
+### 2. justify-items 和 align-items
+
+控制**容器**中所有项目默认的对齐方式：
+
+```css
+.container {
+  justify-items: center; /* 单元格水平对齐 */
+  align-items: center;   /* 单元格垂直对齐 */
+}
+```
+
+### 3. justify-self 和 align-self
+
+控制**单个项目**自身的对齐：
+
+```css
+.item {
+  justify-self: end; /* 单元格内水平对齐 */
+  align-self: start;  /* 单元格内垂直对齐 */
+}
+```
+
+## 对齐值
+
+| 值 | 说明 |
+|---|------|
+| `start` | 从起始边缘对齐 |
+| `end` | 从结束边缘对齐 |
+| `center` | 居中对齐 |
+| `stretch` | 拉伸填满容器 |
+| `baseline` | 按基线对齐 |
+| `left` / `right` | 左右对齐（不适合主轴） |
+| `normal` | 默认行为 |
+
+## 使用场景
+
+### 1. Flexbox 主轴对齐
+
+```css
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+}
+```
+
+### 2. Flexbox 交叉轴对齐
+
+```css
+.flex-container {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
+```
+
+### 3. Grid 单元格对齐
+
+```css
+.grid-container {
+  display: grid;
+  justify-items: start;
+  align-items: center;
+}
+```
+
+### 4. 单个项目特殊对齐
+
+```css
+.special-item {
+  justify-self: end;
+  align-self: stretch;
+}
+```
+
+## place-items 和 place-self
+
+简写属性：
+
+```css
+/* place-items */
+place-items: center;
+/* 等同于 */
+align-items: center;
+justify-items: center;
+
+/* place-self */
+place-self: center;
+/* 等同于 */
+align-self: center;
+justify-self: center;
+```
+
+## 实际应用
+
+### 1. 垂直居中
+
+```css
+.center-box {
+  display: flex;
+  place-items: center;
+  place-content: center;
+  min-height: 100vh;
+}
+```
+
+### 2. 空间分配
+
+```css
+.distribute {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+```
+
+### 3. 表单对齐
+
+```css
+.form-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  gap: 16px;
+}
+```
+
+## 浏览器兼容性
+
+Box Alignment 属性兼容性良好：
+
+- Chrome 57+
+- Firefox 52+
+- Safari 10.1+
+- Edge 16+
+
+## 最佳实践
+
+1. **理解主轴和交叉轴**：Flexbox 中主轴由 `flex-direction` 决定
+2. **选择合适的属性**：容器用 `*-items`/`*-content`，项目用 `*-self`
+3. **使用简写属性**：`place-items` 和 `place-self` 可以简化代码
+4. **注意 fallback**：旧浏览器可能需要额外的对齐方式
+
+## 参考资料
+
+- [CSS Box Alignment - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment)
+- [Box Alignment in Flexbox - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment/Box_Alignment_in_Flexbox)
+- [Box Alignment in Grid Layout - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment/Box_Alignment_in_Grid_Layout)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Animation Worklet — 示例总览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-bottom: 24px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .demo-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; transition: all 0.15s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .demo-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .demo-card h3 { font-size: 15px; color: #f0f6fc; margin-bottom: 8px; }
+    .demo-card p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+    .demo-card .tag { display: inline-block; padding: 2px 8px; background: #21262d; border-radius: 4px; font-size: 11px; color: #58a6ff; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+    .badge-no { background: #da3633; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Animation Worklet</h1>
+    <p class="subtitle">通过 registerAnimator 注册自定义动画器，实现高性能的线程化动画</p>
+
+    <div class="warning">
+      ⚠️ Animation Worklet 需要通过 <strong>HTTP 服务器</strong> 或 <strong>localhost</strong> 访问。<br>
+      启动方式：<code>python -m http.server 8080</code> 或 <code>npx serve .</code>
+    </div>
+
+    <div class="info">
+      <strong>浏览器支持：</strong>
+      <span class="badge badge-yes">Chrome 84+</span>
+      <span class="badge badge-yes">Edge 84+</span>
+      <span class="badge badge-no">Firefox ❌</span>
+      <span class="badge badge-no">Safari ❌</span>
+    </div>
+
+    <div class="demo-grid">
+      <a class="demo-card" href="scroll-linked-demo.html">
+        <h3>滚动关联动画</h3>
+        <p>演示基于滚动位置触发的动画效果，Animation Worklet 运行在独立线程实现流畅的 scroll-linked 动画。</p>
+        <span class="tag">核心</span>
+      </a>
+
+      <a class="demo-card" href="frame-sync-demo.html">
+        <h3>帧同步动画</h3>
+        <p>演示基于时间轴的帧同步动画，包括滑入滑出、循环动画等模式。</p>
+        <span class="tag">进阶</span>
+      </a>
+    </div>
+
+    <div style="margin-top:32px;">
+      <h2 style="font-size:16px;color:#f0f6fc;margin-bottom:12px;">Worklet 文件</h2>
+      <ul style="font-size:13px;color:#8b949e;list-style:disc;padding-left:20px;line-height:2;">
+        <li><code>worklets/scroll-animator.js</code> — 滚动关联动画器</li>
+        <li><code>worklets/frame-animator.js</code> — 帧同步动画器</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
