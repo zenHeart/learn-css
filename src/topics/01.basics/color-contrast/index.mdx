@@ -1,0 +1,204 @@
+---
+title: "CSS color-contrast() 颜色对比函数"
+category: "基础知识"
+tags:
+  - CSS颜色
+  - color-contrast
+  - 颜色对比
+  - 对比度
+  - CSS3
+description: "详解CSS color-contrast()函数的使用方法和应用场景"
+keywords: "color-contrast, CSS颜色, 颜色对比, WCAG, 对比度"
+---
+
+# CSS color-contrast() 颜色对比函数
+
+## 什么是 color-contrast()
+
+`color-contrast()` 是 CSS 颜色函数，用于从一组颜色中自动选择符合指定对比度要求的颜色。这是 CSS Color Level 5 规范中引入的功能，主要用于确保文字与背景之间的对比度符合 WCAG 可访问性标准。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+```css
+color-contrast(<base-color> vs <color1>, <color2> [, ...])
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `<base-color>` | 基础颜色（通常是背景色） |
+| `<color1>`, `<color2>` | 用于对比的颜色候选列表 |
+| `<target-contrast>` | 可选的目标对比度（默认 4.5，用于普通文本） |
+
+### 语法扩展
+
+```css
+/* 指定目标对比度 */
+color-contrast(<base-color> vs <color1>, <color2> to AA, <target-contrast>)
+```
+
+## 使用示例
+
+### 1. 基础用法
+
+```css
+/* 从白色和黑色中选择与蓝色背景对比度更高的 */
+.element {
+  background-color: blue;
+  color: color-contrast(blue vs white, black);
+}
+```
+
+{/* @playground id="basic-demo" mode="demo" */}
+
+### 2. 多颜色候选
+
+```css
+/* 从多个颜色中选择最合适的 */
+.button {
+  background-color: #4CAF50;
+  color: color-contrast(
+    #4CAF50,
+    white,
+    black,
+    #ffeb3b,
+    #e91e63
+  );
+}
+```
+
+### 3. 指定目标对比度
+
+```css
+/* AA 级标准（普通文本 4.5:1，大文本 3:1） */
+.text {
+  background-color: #333;
+  color: color-contrast(#333 vs white, black to AA);
+}
+
+/* AAA 级标准（7:1） */
+.premium-text {
+  background-color: #333;
+  color: color-contrast(#333 vs white, black to AAA);
+}
+```
+
+### 4. 动态主题适配
+
+```css
+:root {
+  --bg: #ffffff;
+  --text: color-contrast(var(--bg) vs #1a1a1a, #333333, white);
+}
+```
+
+## 实际应用场景
+
+### 1. 自动文字颜色选择
+
+```css
+.card {
+  /* 自动选择白色或黑色文字 */
+  background-color: var(--card-color);
+  color: color-contrast(var(--card-color) vs white, black);
+}
+```
+
+### 2. 按钮状态颜色
+
+```css
+.button {
+  --hover-bg: color-mix(in srgb, var(--primary) 80%, black);
+  background-color: var(--primary);
+  color: color-contrast(var(--primary) vs white, black);
+}
+
+.button:hover {
+  background-color: var(--hover-bg);
+  /* 颜色自动适配 */
+  color: color-contrast(var(--hover-bg) vs white, black);
+}
+```
+
+### 3. 动态调色板
+
+```css
+.color-system {
+  --surface: #f5f5f5;
+  --on-surface: color-contrast(var(--surface) to AA);
+  
+  --primary: #0066cc;
+  --on-primary: color-contrast(var(--primary) vs white, black);
+}
+```
+
+## 对比度级别
+
+WCAG 定义了以下对比度级别：
+
+| 级别 | 最小对比度 | 适用范围 |
+|------|-----------|---------|
+| AA | 4.5:1 | 普通文本 |
+| AA Large | 3:1 | 大文本（18px+ 或 14px+ 粗体） |
+| AAA | 7:1 | 增强对比度 |
+| AAA Large | 4.5:1 | 大文本 |
+
+## 浏览器兼容性
+
+`color-contrast()` 是较新的 CSS 功能，浏览器支持有限：
+
+- Chrome: 不支持
+- Firefox: 不支持
+- Safari 17.4+（技术预览版）
+- Edge: 不支持
+
+## 替代方案
+
+由于浏览器支持有限，可以使用 JavaScript 替代方案：
+
+```javascript
+// 计算对比度
+function getContrastRatio(color1, color2) {
+  const lum1 = getLuminance(color1);
+  const lum2 = getLuminance(color2);
+  return (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
+}
+
+// 获取相对亮度
+function getLuminance(color) {
+  // 转换颜色并计算...
+}
+
+// 选择最佳对比色
+function chooseContrastColor(bgColor, candidates) {
+  let bestColor = candidates[0];
+  let bestRatio = 0;
+  
+  for (const candidate of candidates) {
+    const ratio = getContrastRatio(bgColor, candidate);
+    if (ratio > bestRatio) {
+      bestRatio = ratio;
+      bestColor = candidate;
+    }
+  }
+  
+  return bestColor;
+}
+```
+
+## 最佳实践
+
+1. **使用 AA 作为默认目标**：大多数网站应至少满足 WCAG AA 标准
+2. **结合 CSS 变量**：与 CSS 自定义属性结合使用更灵活
+3. **测试多种背景**：确保在浅色和深色背景上都有良好对比度
+4. **考虑用户偏好**：允许用户切换高对比度模式
+
+## 参考资料
+
+- [CSS Color Level 5 - W3C](https://www.w3.org/TR/css-color-5/)
+- [color-contrast() - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-contrast)
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+- [WCAG 2.1 对比度要求](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

@@ -1,0 +1,223 @@
+---
+title: "CSS @keyframes 动画关键帧详解"
+category: "动画"
+tags:
+  - CSS
+  - @keyframes
+  - 动画
+  - 关键帧
+  - 交互动画
+description: "详解CSS @keyframes规则创建复杂动画的方法"
+keywords: "@keyframes, 动画关键帧, CSS动画, keyframe animation"
+---
+
+# CSS @keyframes 动画关键帧详解
+
+## 概述
+
+`@keyframes` 规则用于定义 CSS 动画的中间状态（关键帧），通过在不同时间点指定不同的样式值，创建复杂的动画效果。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+### 1. 百分比写法
+
+```css
+@keyframes slideIn {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(20px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+```
+
+### 2. from/to 写法
+
+```css
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+```
+
+## 使用方式
+
+```css
+.element {
+  animation: slideIn 0.5s ease-out forwards;
+}
+```
+
+## 动画属性
+
+### 完整写法
+
+```css
+.element {
+  animation-name: slideIn;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0s;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  animation-fill-mode: forwards;
+}
+```
+
+### 缩写
+
+```css
+/* name duration timing-function delay iteration-count direction fill-mode */
+animation: slideIn 0.5s ease-out 0s 1 normal forwards;
+```
+
+## animation-fill-mode
+
+| 值 | 说明 |
+|---|------|
+| `none` | 默认，动画前后不应用任何样式 |
+| `forwards` | 动画结束后保持最后一帧的样式 |
+| `backwards` | 动画开始前应用第一帧的样式 |
+| `both` | 同时应用 forwards 和 backwards |
+
+## animation-direction
+
+| 值 | 说明 |
+|---|------|
+| `normal` | 正常播放（从 0% 到 100%） |
+| `reverse` | 反向播放（从 100% 到 0%） |
+| `alternate` | 交替播放（正→反→正...） |
+| `alternate-reverse` | 反向交替（反→正→反...） |
+
+## 常用动画示例
+
+### 1. 淡入淡出
+
+```css
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+```
+
+### 2. 滑入滑出
+
+```css
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+```
+
+### 3. 缩放
+
+```css
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+```
+
+### 4. 旋转
+
+```css
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+```
+
+### 5. 颜色渐变
+
+```css
+@keyframes colorShift {
+  0% { background-color: #667eea; }
+  50% { background-color: #764ba2; }
+  100% { background-color: #667eea; }
+}
+```
+
+## 实际应用
+
+### 1. 加载动画
+
+```css
+@keyframes loader {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(100px); }
+  100% { transform: translateX(0); }
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  animation: loader 1s ease-in-out infinite;
+}
+```
+
+### 2. 浮动效果
+
+```css
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.floating {
+  animation: float 2s ease-in-out infinite;
+}
+```
+
+### 3. 闪烁效果
+
+```css
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.blink {
+  animation: blink 1s linear infinite;
+}
+```
+
+## 浏览器兼容性
+
+`@keyframes` 兼容性极佳：
+
+- Chrome 43+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 性能优化
+
+1. **使用 transform 和 opacity**：避免触发重排
+2. **避免动画布局属性**：如 width、height、margin 等
+3. **使用 will-change**：
+
+```css
+.animated {
+  will-change: transform, opacity;
+}
+```
+
+## 参考资料
+
+- [@keyframes - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes)
+- [CSS Animation - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations)
+- [CSS Animation 交互演示](https://github.com/zenHeart/learn-css/blob/main/examples/css/demos/css-animation-guide.html)
