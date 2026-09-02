@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Counters 计数器演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    .demo-box {
+      padding: 15px;
+      border: 2px dashed #ccc;
+      border-radius: 6px;
+      margin: 10px 0;
+      background: #fafafa;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    /* ========== 示例 1: 基础章节编号 ========== */
+    .example-1 {
+      counter-reset: chapter;
+    }
+
+    .example-1 h3 {
+      counter-increment: chapter;
+      position: relative;
+      padding-left: 60px;
+    }
+
+    .example-1 h3::before {
+      content: "第 " counter(chapter) " 章";
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    /* ========== 示例 2: 多级编号 ========== */
+    .example-2 {
+      counter-reset: chapter;
+    }
+
+    .example-2 h3 {
+      counter-increment: chapter;
+      counter-reset: section;
+      position: relative;
+      padding-left: 70px;
+    }
+
+    .example-2 h4 {
+      counter-increment: section;
+      position: relative;
+      padding-left: 100px;
+    }
+
+    .example-2 h3::before {
+      content: "第 " counter(chapter) " 章";
+      position: absolute;
+      left: 0;
+      color: #dc2626;
+      font-weight: bold;
+    }
+
+    .example-2 h4::before {
+      content: counter(chapter) "." counter(section);
+      position: absolute;
+      left: 70px;
+      color: #059669;
+      font-weight: bold;
+    }
+
+    /* ========== 示例 3: 有序列表样式 ========== */
+    .example-3 ol {
+      counter-reset: item;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .example-3 li {
+      counter-increment: item;
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .example-3 li::before {
+      content: counter(item) ".";
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    /* ========== 示例 4: 嵌套列表 ========== */
+    .example-4 ul {
+      counter-reset: item;
+      list-style: none;
+      padding-left: 20px;
+    }
+
+    .example-4 li {
+      counter-increment: item;
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 5px;
+    }
+
+    .example-4 li::before {
+      content: counters(item, ".") " ";
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+      color: #7c3aed;
+    }
+
+    /* ========== 示例 5: 表格行号 ========== */
+    .example-5 table {
+      counter-reset: row-number;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .example-5 th, .example-5 td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    .example-5 th {
+      background: #f3f4f6;
+      text-align: left;
+    }
+
+    .example-5 tr td:first-child {
+      counter-increment: row-number;
+      font-weight: bold;
+      text-align: center;
+      background: #fef3c7;
+    }
+
+    .example-5 tr td:first-child::before {
+      content: counter(row-number);
+    }
+
+    /* ========== 示例 6: 罗马数字样式 ========== */
+    .example-6 {
+      counter-reset: roman-counter;
+    }
+
+    .example-6 h3 {
+      counter-increment: roman-counter;
+      position: relative;
+      padding-left: 50px;
+    }
+
+    .example-6 h3::before {
+      content: counter(roman-counter, upper-roman) ".";
+      position: absolute;
+      left: 0;
+      color: #dc2626;
+      font-weight: bold;
+    }
+
+    /* ========== 示例 7: 带前导零 ========== */
+    .example-7 {
+      counter-reset: zero-counter;
+    }
+
+    .example-7 h3 {
+      counter-increment: zero-counter;
+      position: relative;
+      padding-left: 50px;
+    }
+
+    .example-7 h3::before {
+      content: counter(zero-counter, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    /* 导航样式 */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tabs button {
+      padding: 10px 20px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-tabs button:hover {
+      border-color: #2563eb;
+    }
+
+    .nav-tabs button.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Counters 计数器演示</h1>
+
+  <div class="demo-section">
+    <div class="nav-tabs">
+      <button class="active" onclick="showTab('tab1')">基础章节</button>
+      <button onclick="showTab('tab2')">多级编号</button>
+      <button onclick="showTab('tab3')">列表样式</button>
+      <button onclick="showTab('tab4')">嵌套列表</button>
+      <button onclick="showTab('tab5')">表格行号</button>
+      <button onclick="showTab('tab6')">罗马数字</button>
+    </div>
+
+    <!-- 示例 1: 基础章节编号 -->
+    <div id="tab1" class="tab-content active">
+      <h2>1. 基础章节编号</h2>
+      <pre><code>body { counter-reset: chapter; }
+h2 { counter-increment: chapter; }
+h2::before { content: "第 " counter(chapter) " 章"; }</code></pre>
+      <div class="demo-box example-1">
+        <h3>CSS 基础入门</h3>
+        <p>本章介绍 CSS 的基本概念和语法。</p>
+        <h3>选择器详解</h3>
+        <p>本章深入讲解各种 CSS 选择器。</p>
+        <h3>盒模型</h3>
+        <p>理解 CSS 盒模型是布局的基础。</p>
+      </div>
+    </div>
+
+    <!-- 示例 2: 多级编号 -->
+    <div id="tab2" class="tab-content">
+      <h2>2. 多级编号（章节.小节）</h2>
+      <pre><code>body { counter-reset: chapter section; }
+h2 { counter-increment: chapter; counter-reset: section; }
+h2::before { content: counter(chapter) "、"; }
+h3 { counter-increment: section; }
+h3::before { content: counter(chapter) "." counter(section) "、"; }</code></pre>
+      <div class="demo-box example-2">
+        <h3>HTML 基础</h3>
+        <h4>HTML 标签</h4>
+        <h4>HTML 属性</h4>
+        <h3>CSS 基础</h3>
+        <h4>CSS 选择器</h4>
+        <h4>CSS 盒模型</h4>
+        <h3>JavaScript</h3>
+        <h4>变量和数据类型</h4>
+      </div>
+    </div>
+
+    <!-- 示例 3: 有序列表样式 -->
+    <div id="tab3" class="tab-content">
+      <h2>3. 有序列表样式</h2>
+      <pre><code>ol { counter-reset: item; list-style: none; }
+li { counter-increment: item; }
+li::before { content: counter(item) "."; font-weight: bold; }</code></pre>
+      <div class="demo-box example-3">
+        <ol>
+          <li>第一步：安装开发环境</li>
+          <li>第二步：创建项目结构</li>
+          <li>第三步：编写代码</li>
+          <li>第四步：测试功能</li>
+          <li>第五步：部署上线</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 示例 4: 嵌套列表 -->
+    <div id="tab4" class="tab-content">
+      <h2>4. 嵌套列表（自动嵌套编号）</h2>
+      <pre><code>ul { counter-reset: item; list-style: none; }
+li { counter-increment: item; }
+li::before { content: counters(item, ".") " "; }</code></pre>
+      <div class="demo-box example-4">
+        <ul>
+          <li>第一章
+            <ul>
+              <li>第一节
+                <ul>
+                  <li>小节 1.1.1</li>
+                  <li>小节 1.1.2</li>
+                </ul>
+              </li>
+              <li>第二节</li>
+            </ul>
+          </li>
+          <li>第二章
+            <ul>
+              <li>第一节</li>
+              <li>第二节</li>
+            </ul>
+          </li>
+          <li>第三章</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 示例 5: 表格行号 -->
+    <div id="tab5" class="tab-content">
+      <h2>5. 表格行号</h2>
+      <pre><code>table { counter-reset: row-number; }
+tr td:first-child::before {
+  counter-increment: row-number;
+  content: counter(row-number);
+}</code></pre>
+      <div class="demo-box example-5">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th>姓名</th>
+              <th>部门</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <td>张三</td>
+              <td>技术部</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>李四</td>
+              <td>产品部</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>王五</td>
+              <td>设计部</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>赵六</td>
+              <td>市场部</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 示例 6: 罗马数字 -->
+    <div id="tab6" class="tab-content">
+      <h2>6. 罗马数字样式</h2>
+      <pre><code>h2::before { content: counter(counter, upper-roman) "."; }</code></pre>
+      <div class="demo-box example-6">
+        <h3>古罗马建筑</h3>
+        <p>介绍古罗马时期的建筑风格。</p>
+        <h3>罗马法律</h3>
+        <p>罗马法对现代法律的影响。</p>
+        <h3>罗马文化</h3>
+        <p>罗马的艺术和文学成就。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>7. 计数器样式对照表</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>样式</th>
+          <th>示例输出</th>
+          <th>CSS 代码</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>decimal</td>
+          <td>1, 2, 3...</td>
+          <td><code>counter(name, decimal)</code></td>
+        </tr>
+        <tr>
+          <td>decimal-leading-zero</td>
+          <td>01, 02, 03...</td>
+          <td><code>counter(name, decimal-leading-zero)</code></td>
+        </tr>
+        <tr>
+          <td>lower-alpha</td>
+          <td>a, b, c...</td>
+          <td><code>counter(name, lower-alpha)</code></td>
+        </tr>
+        <tr>
+          <td>upper-alpha</td>
+          <td>A, B, C...</td>
+          <td><code>counter(name, upper-alpha)</code></td>
+        </tr>
+        <tr>
+          <td>lower-roman</td>
+          <td>i, ii, iii...</td>
+          <td><code>counter(name, lower-roman)</code></td>
+        </tr>
+        <tr>
+          <td>upper-roman</td>
+          <td>I, II, III...</td>
+          <td><code>counter(name, upper-roman)</code></td>
+        </tr>
+        <tr>
+          <td>lower-greek</td>
+          <td>α, β, γ...</td>
+          <td><code>counter(name, lower-greek)</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      // 隐藏所有 tab content
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // 显示选中的 tab
+      document.getElementById(tabId).classList.add('active');
+
+      // 更新按钮状态
+      document.querySelectorAll('.nav-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
