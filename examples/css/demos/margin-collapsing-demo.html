@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Margin Collapsing & BFC 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 8px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 6px 6px 0 0; color: #8b949e; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .tab:hover { color: #c9d1d9; }
+    .tab.active { background: #161b22; border-bottom-color: #161b22; color: #58a6ff; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 0 6px 6px 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { min-height: 100px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-bottom: 12px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; padding: 12px; background: #0d1117; border-radius: 4px; }
+    .info strong { color: #58a6ff; }
+
+    /* Demo specific styles */
+    .parent { background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6; padding: 20px; margin-bottom: 8px; }
+    .child { background: #3b82f6; color: white; padding: 16px; text-align: center; font-weight: 600; }
+    .sibling { background: #3fb950; color: white; padding: 16px; text-align: center; font-weight: 600; margin-top: 20px; }
+
+    .margin-box { background: rgba(219, 97, 162, 0.2); border: 2px solid #db61a2; padding: 8px; margin: 8px; }
+    .margin-vis { position: relative; }
+    .margin-label { position: absolute; font-size: 10px; color: #db61a2; }
+    .margin-top-label { top: -16px; left: 4px; }
+    .margin-bottom-label { bottom: -16px; left: 4px; }
+
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+    .comparison-item { background: #0d1117; border-radius: 4px; padding: 12px; }
+    .comparison-item h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+    .comparison-item .demo { min-height: 80px; padding: 12px; background: #161b22; border-radius: 4px; }
+
+    .bfc-trigger { display: inline-block; padding: 4px 8px; background: #388bfd33; border: 1px solid #58a6ff; border-radius: 4px; font-size: 11px; color: #58a6ff; margin: 2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Margin Collapsing & BFC</h1>
+    <p class="subtitle">外边距合并机制与 Block Formatting Context 原理 — 交互式演示</p>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button class="tab active" data-tab="sibling">场景一：兄弟 margin 合并</button>
+      <button class="tab" data-tab="parent-child">场景二：父子 margin 合并</button>
+      <button class="tab" data-tab="empty">场景三：空元素 margin 合并</button>
+      <button class="tab" data-tab="bfc">BFC 阻止合并</button>
+      <button class="tab" data-tab="solution">解决方案对比</button>
+    </div>
+
+    <!-- 场景一：兄弟 margin 合并 -->
+    <div class="section" id="tab-sibling">
+      <h2>场景一：兄弟元素之间的 margin 合并</h2>
+      <div class="demo-area" id="sibling-demo">
+        <div class="sibling" style="margin-bottom: 20px;">上元素 (margin-bottom: 20px)</div>
+        <div class="sibling" style="margin-top: 30px;">下元素 (margin-top: 30px)</div>
+      </div>
+      <div class="controls">
+        <button class="btn" data-change="sibling" data-prop="margin-bottom" data-val="10px">上: 10px</button>
+        <button class="btn active" data-change="sibling" data-prop="margin-bottom" data-val="20px">上: 20px</button>
+        <button class="btn" data-change="sibling" data-prop="margin-bottom" data-val="40px">上: 40px</button>
+        <button class="btn" data-change="sibling" data-prop="margin-top" data-val="10px">下: 10px</button>
+        <button class="btn active" data-change="sibling" data-prop="margin-top" data-val="30px">下: 30px</button>
+        <button class="btn" data-change="sibling" data-prop="margin-top" data-val="60px">下: 60px</button>
+      </div>
+      <div class="code-block">/* 结果：两个元素的 margin 合并为 max(20px, 30px) = 30px */
+.box1 { margin-bottom: 20px; }
+.box2 { margin-top: 30px; }
+/* 实际间距 = 30px（取较大值），而不是 50px */</div>
+      <div class="info">
+        <strong>核心结论：</strong>垂直方向相邻的 margin 会合并，取较大值。
+        这是 CSS 的默认行为，目的是让段落之间的间距一致（不管内容多少）。
+      </div>
+    </div>
+
+    <!-- 场景二：父子 margin 合并 -->
+    <div class="section" id="tab-parent-child" style="display:none;">
+      <h2>场景二：父元素与第一个/最后一个子元素的 margin 合并</h2>
+      <h3>问题：为什么子元素的 margin 似乎"穿透"到父元素外面？</h3>
+      <div class="demo-area" id="parent-child-demo">
+        <div class="parent" style="margin-top: 0;">
+          <div class="child" style="margin-top: 40px;">子元素 (margin-top: 40px)</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" data-change="parent-child" data-child-margin="10px">子 margin-top: 10px</button>
+        <button class="btn" data-change="parent-child" data-child-margin="40px">子 margin-top: 40px</button>
+        <button class="btn" data-change="parent-child" data-child-margin="80px">子 margin-top: 80px</button>
+      </div>
+      <div class="code-block">/* 现象：子元素的 margin-top 没有把父元素撑开，
+   而是"穿透"到父元素外面，和父元素的 margin-top 合并 */
+.parent { margin-top: 0; }
+.child { margin-top: 40px; }
+/* 实际：整个父容器距离顶部的距离是 40px，而不是 0 */</div>
+      <div class="info">
+        <strong>为什么发生？</strong>当父元素没有 border、padding、inline content 阻挡时，
+        父元素的 margin-top 和第一个子元素的 margin-top 会合并（形成一个更大的 margin）。
+        这是因为它们共享同一个"块级上下文边缘"。
+      </div>
+    </div>
+
+    <!-- 场景三：空元素 margin 合并 -->
+    <div class="section" id="tab-empty" style="display:none;">
+      <h2>场景三：空块级元素的上下 margin 合并</h2>
+      <div class="demo-area" id="empty-demo">
+        <div class="sibling">上面的元素</div>
+        <div style="margin-top: 30px; margin-bottom: 30px; background: #f0883e33; color: #f0883e; padding: 8px; text-align: center; border: 1px dashed #f0883e;">空元素 (margin-top:30px + margin-bottom:30px)</div>
+        <div class="sibling">下面的元素</div>
+      </div>
+      <div class="code-block">/* 空元素的上下 margin 也会合并 */
+.empty { margin-top: 30px; margin-bottom: 30px; }
+/* 实际效果 = max(30px, 30px) = 30px，不是 60px */
+
+/* 如果空元素有 border 或 padding，则不会合并 */
+.empty { margin-top: 30px; margin-bottom: 30px; padding: 1px 0; } /* 不合并 */</div>
+      <div class="info">
+        <strong>根因：</strong>空元素的上下 margin "相遇"了，合并为一个。
+        加上任何 border、padding、height、min-height 都可以阻止合并。
+      </div>
+    </div>
+
+    <!-- BFC 阻止合并 -->
+    <div class="section" id="tab-bfc" style="display:none;">
+      <h2>BFC 如何阻止 margin 合并？</h2>
+      <p style="font-size: 13px; color: #8b949e; margin-bottom: 16px;">
+        BFC（Block Formatting Context）创建一个独立的格式化上下文，
+        其内部的 margin 不会与外部的 margin 合并。
+      </p>
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4>❌ 无 BFC（默认）— margin 穿透</h4>
+          <div class="demo" id="no-bfc-demo">
+            <div class="parent" style="margin-top: 0; padding: 0; border: none;">
+              <div class="child" style="margin-top: 40px; border: none; padding: 0;">子 margin-top: 40px</div>
+            </div>
+          </div>
+          <div class="code-block" style="font-size: 11px;">/* margin 穿透到父元素外部 */</div>
+        </div>
+        <div class="comparison-item">
+          <h4>✅ overflow: hidden — 创建 BFC</h4>
+          <div class="demo" id="bfc-demo">
+            <div class="parent" style="margin-top: 0; padding: 0; border: none; overflow: hidden;">
+              <div class="child" style="margin-top: 40px; border: none; padding: 0;">子 margin-top: 40px</div>
+            </div>
+          </div>
+          <div class="code-block" style="font-size: 11px;">/* margin 被"包含"在父元素内 */</div>
+        </div>
+      </div>
+      <h3 style="margin-top: 20px;">所有触发 BFC 的方式</h3>
+      <div style="margin: 12px 0;">
+        <span class="bfc-trigger">overflow: hidden/scroll/auto</span>
+        <span class="bfc-trigger">display: flow-root</span>
+        <span class="bfc-trigger">display: inline-block</span>
+        <span class="bfc-trigger">position: absolute/fixed</span>
+        <span class="bfc-trigger">float: left/right</span>
+        <span class="bfc-trigger">flex/grid 容器</span>
+      </div>
+      <div class="code-block">/* overflow: hidden 创建 BFC */
+.parent { overflow: hidden; }
+/* 或更现代的方式 */
+.parent { display: flow-root; } /* 唯一作用就是创建 BFC */</div>
+    </div>
+
+    <!-- 解决方案对比 -->
+    <div class="section" id="tab-solution" style="display:none;">
+      <h2>阻止 margin 合并的 5 种方案</h2>
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4>1. overflow: hidden</h4>
+          <div class="demo">
+            <div style="overflow: hidden; background: #3b82f620; padding: 10px;">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">副作用：裁剪溢出的内容</div>
+        </div>
+        <div class="comparison-item">
+          <h4>2. padding-top: 0.1px</h4>
+          <div class="demo">
+            <div style="padding-top: 0.1px; background: #3b82f620; padding-bottom: 0;">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">✓ 视觉无影响，✓ 不裁剪内容</div>
+        </div>
+        <div class="comparison-item">
+          <h4>3. border-top: 1px solid transparent</h4>
+          <div class="demo">
+            <div style="border-top: 1px solid transparent; background: #3b82f620; padding: 10px;">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">✓ 视觉效果好，有 1px 线</div>
+        </div>
+        <div class="comparison-item">
+          <h4>4. display: flow-root</h4>
+          <div class="demo">
+            <div style="display: flow-root; background: #3b82f620; padding: 10px;">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">✓ 纯 CSS，✓ 无副作用，⚠️ 兼容性</div>
+        </div>
+        <div class="comparison-item">
+          <h4>5. 父元素变成 flex/grid</h4>
+          <div class="demo">
+            <div style="display: flex; flex-direction: column; background: #3b82f620; padding: 10px;">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">✓ 改变布局，✓ 常用于实际项目</div>
+        </div>
+        <div class="comparison-item">
+          <h4>6. ::before 或 ::after 伪元素</h4>
+          <div class="demo">
+            <div style="background: #3b82f620; padding: 10px;" class="with-before">
+              <div style="margin-top: 40px; background: #3b82f6; color: white; padding: 10px;">子元素</div>
+            </div>
+          </div>
+          <div class="desc">::before { display: table; } 触发 BFC</div>
+        </div>
+      </div>
+      <style>
+        .with-before::before { content: ''; display: table; margin-top: -1px; }
+      </style>
+    </div>
+
+    <!-- BFC 表格 -->
+    <div class="section">
+      <h2>BFC 触发条件速查表</h2>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: #21262d;">
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #30363d; color: #f0f6fc;">属性</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #30363d; color: #f0f6fc;">值</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #30363d; color: #f0f6fc;">副作用</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #30363d; color: #f0f6fc;">推荐度</th>
+            </tr>
+          </thead>
+          <tbody style="color: #8b949e;">
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">overflow</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">hidden / scroll / auto</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">裁剪溢出内容</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★★★☆</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">display</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">flow-root</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">无（专门创建 BFC）</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★★★★</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">display</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">inline-block</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">产生匿名块盒</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★★☆☆</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">position</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">absolute / fixed</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">脱离文档流</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★☆☆☆</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">float</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">left / right</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">脱离文档流</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★☆☆☆</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #21262d;">flex / grid</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">容器</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">改变子元素布局</td><td style="padding: 8px; border-bottom: 1px solid #21262d;">★★★★☆</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>总结：</strong>overflow: hidden 阻止 margin 合并的本质是创建了 BFC。
+      BFC 内部的布局与外部隔离，内部的 margin 不会"穿透"到外部与外部的 margin 合并。
+      这就是为什么 overflow: hidden 可以"包含"子元素的 margin。
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        tab.classList.add('active');
+        const targetId = 'tab-' + tab.dataset.tab;
+        const target = document.getElementById(targetId);
+        if (target) target.style.display = 'block';
+      });
+    });
+
+    // Sibling margin controls
+    document.querySelectorAll('[data-change="sibling"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prop = btn.dataset.prop;
+        const val = btn.dataset.val;
+        const demo = document.getElementById('sibling-demo');
+        const boxes = demo.querySelectorAll('.sibling');
+        if (prop.includes('margin-bottom')) {
+          boxes[0].style.marginBottom = val;
+          document.querySelectorAll('[data-change="sibling"][data-prop="margin-bottom"]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        } else {
+          boxes[1].style.marginTop = val;
+          document.querySelectorAll('[data-change="sibling"][data-prop="margin-top"]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      });
+    });
+
+    // Parent-child margin controls
+    document.querySelectorAll('[data-change="parent-child"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.childMargin;
+        const demo = document.getElementById('parent-child-demo');
+        const child = demo.querySelector('.child');
+        child.style.marginTop = val;
+        document.querySelectorAll('[data-change="parent-child"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
