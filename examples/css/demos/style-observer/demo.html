@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Style Observer 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    h2 { font-size: 18px; margin-bottom: 16px; color: #f0f6fc; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .demo-area { display: flex; gap: 12px; min-height: 160px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: flex-start; flex-wrap: wrap; }
+    .box { width: 80px; height: 80px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; transition: all 0.3s; cursor: pointer; }
+    .box.blue { background: #3b82f6; }
+    .box.purple { background: #a371f7; }
+    .box.green { background: #3fb950; }
+    .box.orange { background: #f0883e; }
+    .box.pink { background: #db61a2; }
+    .box.gold { background: #d29922; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 8px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #8b949e; margin-top: 8px; line-height: 1.5; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { background: #1f6feb17; border: 1px solid #1f6feb; border-radius: 4px; padding: 12px; font-size: 13px; color: #58a6ff; margin-bottom: 12px; }
+    .log-area { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; max-height: 200px; overflow-y: auto; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #21262d; color: #8b949e; }
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .time { color: #6e7681; margin-right: 8px; }
+    .log-entry .attr { color: #f0883e; }
+    .log-entry .value { color: #3fb950; }
+    .item-list { list-style: none; }
+    .item-list li { padding: 8px 12px; background: #21262d; border-radius: 4px; margin-bottom: 8px; color: #c9d1d9; font-size: 14px; }
+    .theme-box { width: 200px; height: 120px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; background: #ffffff; color: #1a1a1a; }
+    .theme-box.dark { background: #1a1a1a; color: #ffffff; }
+    .theme-box.sepia { background: #f4ecd8; color: #5c4b37; }
+    .transition-info { font-size: 11px; color: #6e7681; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Style Observer 交互演示</h1>
+
+    <!-- View Transitions API Demo -->
+    <div class="section">
+      <h2>CSS View Transitions API</h2>
+      <div class="info" id="vt-support">检测浏览器支持中...</div>
+
+      <div class="controls">
+        <button class="btn" id="btn-color">切换颜色</button>
+        <button class="btn" id="btn-size">切换尺寸</button>
+        <button class="btn" id="btn-rotate">旋转</button>
+        <button class="btn" id="btn-all">组合动画</button>
+        <button class="btn" id="btn-add">添加元素</button>
+        <button class="btn" id="btn-theme">切换主题</button>
+      </div>
+
+      <div class="demo-area" id="view-transition-demo">
+        <div class="box blue" style="view-transition-name: box-1;">Box 1</div>
+        <div class="box purple" style="view-transition-name: box-2;">Box 2</div>
+        <div class="box green" style="view-transition-name: box-3;">Box 3</div>
+      </div>
+
+      <p class="desc">
+        点击按钮触发不同的 CSS 样式变化。View Transitions API 会捕获变化前后的状态，并自动创建平滑的过渡动画。
+        注意：每个带 view-transition-name 的元素会有独立的过渡效果。
+      </p>
+
+      <div class="code-block" id="vt-code">// 点击按钮查看代码</div>
+    </div>
+
+    <!-- MutationObserver Demo -->
+    <div class="section">
+      <h2>MutationObserver 样式监控</h2>
+
+      <div class="controls">
+        <button class="btn" id="btn-monitor-start">开始监控</button>
+        <button class="btn" id="btn-monitor-stop">停止监控</button>
+        <button class="btn" id="btn-change-style">改变样式</button>
+        <button class="btn" id="btn-clear-log">清空日志</button>
+      </div>
+
+      <div class="demo-area">
+        <div class="box orange" id="monitor-target" style="width: 100px; height: 100px;">监控目标</div>
+      </div>
+
+      <div class="log-area" id="mutation-log">
+        <div class="log-entry">点击"开始监控"按钮来监控此元素的样式变化...</div>
+      </div>
+
+      <p class="desc">
+        MutationObserver 可以监控元素 style 属性的变化。当样式变化时，会记录变化的详细信息。
+        这个 API 适用于需要响应式处理样式变化的场景。
+      </p>
+    </div>
+
+    <!-- View Transition Name Demo -->
+    <div class="section">
+      <h2>view-transition-name 独立过渡</h2>
+
+      <div class="controls">
+        <button class="btn" id="btn-move-boxes">移动位置</button>
+        <button class="btn" id="btn-swap-colors">交换颜色</button>
+      </div>
+
+      <div class="demo-area" id="named-demo">
+        <div class="box pink" id="named-box-1" style="view-transition-name: named-box-1;">A</div>
+        <div class="box gold" id="named-box-2" style="view-transition-name: named-box-2;">B</div>
+      </div>
+
+      <p class="desc">
+        使用 view-transition-name 可以为每个元素创建独立的过渡。
+        点击"移动位置"可以看到元素平滑移动；点击"交换颜色"可以看到颜色渐变过渡。
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ===== View Transitions Support Detection =====
+    const vtSupportEl = document.getElementById('vt-support');
+    if (document.startViewTransition) {
+      vtSupportEl.textContent = '✓ 浏览器支持 View Transitions API';
+      vtSupportEl.style.background = '#23863617';
+      vtSupportEl.style.borderColor = '#238636';
+      vtSupportEl.style.color = '#3fb950';
+    } else {
+      vtSupportEl.textContent = '✗ 浏览器不支持 View Transitions API，将使用降级方案';
+      vtSupportEl.style.background = '#f8514917';
+      vtSupportEl.style.borderColor = '#f85149';
+      vtSupportEl.style.color = '#f85149';
+    }
+
+    // ===== Helper Functions =====
+    function runWithVT(callback, fallback) {
+      if (document.startViewTransition) {
+        document.startViewTransition(callback);
+      } else {
+        callback();
+      }
+    }
+
+    function updateCodeBlock(code) {
+      document.getElementById('vt-code').textContent = code;
+    }
+
+    // ===== Box Colors Demo =====
+    const colors = ['blue', 'purple', 'green', 'orange', 'pink', 'gold'];
+    let colorIndex = 0;
+
+    document.getElementById('btn-color').addEventListener('click', () => {
+      runWithVT(() => {
+        const boxes = document.querySelectorAll('#view-transition-demo .box');
+        colorIndex = (colorIndex + 1) % colors.length;
+        boxes.forEach((box, i) => {
+          box.className = 'box ' + colors[(colorIndex + i) % colors.length];
+        });
+      });
+      updateCodeBlock(`// 切换颜色动画
+document.startViewTransition(() => {
+  box.className = 'box ' + newColor;
+});`);
+    });
+
+    // ===== Box Size Demo =====
+    let sizeIndex = 0;
+    const sizes = [
+      { width: '80px', height: '80px' },
+      { width: '120px', height: '80px' },
+      { width: '80px', height: '120px' },
+      { width: '120px', height: '120px' }
+    ];
+
+    document.getElementById('btn-size').addEventListener('click', () => {
+      runWithVT(() => {
+        sizeIndex = (sizeIndex + 1) % sizes.length;
+        document.querySelectorAll('#view-transition-demo .box').forEach(box => {
+          box.style.width = sizes[sizeIndex].width;
+          box.style.height = sizes[sizeIndex].height;
+        });
+      });
+      updateCodeBlock(`// 切换尺寸动画
+document.startViewTransition(() => {
+  box.style.width = '120px';
+  box.style.height = '120px';
+});`);
+    });
+
+    // ===== Rotate Demo =====
+    let rotation = 0;
+    document.getElementById('btn-rotate').addEventListener('click', () => {
+      runWithVT(() => {
+        rotation += 45;
+        document.querySelectorAll('#view-transition-demo .box').forEach(box => {
+          box.style.transform = `rotate(${rotation}deg)`;
+        });
+      });
+      updateCodeBlock(`// 旋转动画
+document.startViewTransition(() => {
+  box.style.transform = 'rotate(45deg)';
+});`);
+    });
+
+    // ===== Combined Animation =====
+    document.getElementById('btn-all').addEventListener('click', () => {
+      runWithVT(() => {
+        colorIndex = (colorIndex + 1) % colors.length;
+        sizeIndex = (sizeIndex + 1) % sizes.length;
+        rotation += 90;
+        document.querySelectorAll('#view-transition-demo .box').forEach((box, i) => {
+          box.className = 'box ' + colors[(colorIndex + i) % colors.length];
+          box.style.width = sizes[sizeIndex].width;
+          box.style.height = sizes[sizeIndex].height;
+          box.style.transform = `rotate(${rotation}deg)`;
+        });
+      });
+      updateCodeBlock(`// 组合动画
+document.startViewTransition(() => {
+  box.style.background = 'new-color';
+  box.style.transform = 'rotate(90deg) scale(1.2)';
+});`);
+    });
+
+    // ===== Add Elements =====
+    let itemCount = 3;
+    const itemColors = ['blue', 'purple', 'green'];
+
+    document.getElementById('btn-add').addEventListener('click', () => {
+      runWithVT(() => {
+        itemCount++;
+        const demo = document.getElementById('view-transition-demo');
+        const newBox = document.createElement('div');
+        newBox.className = 'box ' + itemColors[itemCount % itemColors.length];
+        newBox.style.viewTransitionName = 'box-' + itemCount;
+        newBox.textContent = 'Box ' + itemCount;
+        newBox.style.opacity = '0';
+        demo.appendChild(newBox);
+        // Trigger reflow
+        newBox.offsetHeight;
+        newBox.style.opacity = '1';
+      });
+      updateCodeBlock(`// 添加新元素
+document.startViewTransition(() => {
+  const newBox = document.createElement('div');
+  newBox.className = 'box';
+  container.appendChild(newBox);
+});`);
+    });
+
+    // ===== Theme Toggle =====
+    let themeIndex = 0;
+    const themes = ['light', 'dark', 'sepia'];
+
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      runWithVT(() => {
+        themeIndex = (themeIndex + 1) % themes.length;
+        const box = document.querySelector('#view-transition-demo .box');
+        box.className = 'box ' + themes[themeIndex];
+        box.style.background = {
+          light: '#3b82f6',
+          dark: '#8b5cf6',
+          sepia: '#d97706'
+        }[themes[themeIndex]];
+      });
+      updateCodeBlock(`// 主题切换
+document.startViewTransition(() => {
+  document.body.classList.toggle('dark-theme');
+});`);
+    });
+
+    // ===== MutationObserver Demo =====
+    const monitorTarget = document.getElementById('monitor-target');
+    const mutationLog = document.getElementById('mutation-log');
+    let observer = null;
+
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+      entry.innerHTML = `<span class="time">[${time}]</span> ${message}`;
+      mutationLog.appendChild(entry);
+      mutationLog.scrollTop = mutationLog.scrollHeight;
+    }
+
+    document.getElementById('btn-monitor-start').addEventListener('click', () => {
+      if (observer) {
+        log('监控已启动，无需重复启动', 'warn');
+        return;
+      }
+
+      observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            const oldStyle = mutation.oldValue || '(无)';
+            const newStyle = mutation.target.style.cssText || '(无)';
+            log(`样式变化: <span class="attr">${oldStyle}</span> → <span class="value">${newStyle}</span>`);
+          }
+        });
+      });
+
+      observer.observe(monitorTarget, {
+        attributes: true,
+        attributeOldValue: true,
+        attributeFilter: ['style']
+      });
+
+      log('✓ 开始监控元素样式变化');
+      document.getElementById('btn-monitor-start').classList.add('active');
+    });
+
+    document.getElementById('btn-monitor-stop').addEventListener('click', () => {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+        log('✓ 停止监控');
+        document.getElementById('btn-monitor-start').classList.remove('active');
+      } else {
+        log('监控未启动', 'warn');
+      }
+    });
+
+    document.getElementById('btn-change-style').addEventListener('click', () => {
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const randomWidth = 60 + Math.floor(Math.random() * 80);
+      const randomHeight = 60 + Math.floor(Math.random() * 80);
+
+      if (observer) {
+        // If observer is active, we need to manually trigger
+        monitorTarget.style.background = randomColor;
+        monitorTarget.style.width = randomWidth + 'px';
+        monitorTarget.style.height = randomHeight + 'px';
+      } else {
+        // Without observer, use startViewTransition for visual feedback
+        runWithVT(() => {
+          monitorTarget.style.background = randomColor;
+          monitorTarget.style.width = randomWidth + 'px';
+          monitorTarget.style.height = randomHeight + 'px';
+        });
+        log(`视觉变化: 背景=${randomColor}, 尺寸=${randomWidth}x${randomHeight}`);
+      }
+    });
+
+    document.getElementById('btn-clear-log').addEventListener('click', () => {
+      mutationLog.innerHTML = '<div class="log-entry">日志已清空</div>';
+    });
+
+    // ===== Named Transition Demo =====
+    const namedDemo = document.getElementById('named-demo');
+    let positions = [
+      { left: true },
+      { left: false }
+    ];
+    let posIndex = 0;
+
+    document.getElementById('btn-move-boxes').addEventListener('click', () => {
+      runWithVT(() => {
+        posIndex = (posIndex + 1) % positions.length;
+        const boxes = namedDemo.querySelectorAll('.box');
+        if (posIndex === 0) {
+          boxes[0].style.flexDirection = 'row';
+          boxes[1].style.flexDirection = 'row';
+        } else {
+          boxes[0].style.flexDirection = 'column';
+          boxes[1].style.flexDirection = 'column';
+        }
+      });
+    });
+
+    document.getElementById('btn-swap-colors').addEventListener('click', () => {
+      runWithVT(() => {
+        const box1 = document.getElementById('named-box-1');
+        const box2 = document.getElementById('named-box-2');
+        const tempColor = box1.style.background;
+        box1.style.background = box2.style.background || '#db61a2';
+        box2.style.background = tempColor || '#d29922';
+      });
+    });
+
+    // Initialize
+    updateCodeBlock(`// 点击上方按钮查看对应代码`);
+  </script>
+</body>
+</html>
