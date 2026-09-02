@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox flex 简写与 align-self, order</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 120px; display: flex; gap: 8px; width: 100%; }
+    .demo-item { width: 80px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 12px; min-height: 80px; }
+    .demo-item.green { background: linear-gradient(135deg, #3fb950, #238636); }
+    .demo-item.orange { background: linear-gradient(135deg, #d29922, #9e6a03); }
+    .demo-item.red { background: linear-gradient(135deg, #f78166, #da3633); }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: #f0f6fc; font-weight: 500; }
+    td { color: #8b949e; }
+    td code { color: #79c0ff; font-family: 'SF Mono', Monaco, monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>flex 简写 &amp; align-self &amp; order</h1>
+
+    <div class="section">
+      <h2>flex 简写模式</h2>
+      <table>
+        <thead>
+          <tr><th>简写</th><th>等价值</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>flex: 0 0 100px</code></td><td>grow:0, shrink:0, basis:100px</td><td>固定尺寸，完全不伸缩</td></tr>
+          <tr><td><code>flex: 1</code></td><td>grow:1, shrink:1, basis:0%</td><td>等比伸缩，初始为0</td></tr>
+          <tr><td><code>flex: auto</code></td><td>grow:1, shrink:1, basis:auto</td><td>可伸缩，使用自身尺寸</td></tr>
+          <tr><td><code>flex: none</code></td><td>grow:0, shrink:0, basis:auto</td><td>完全不伸缩</td></tr>
+          <tr><td><code>flex: 2</code></td><td>grow:2, shrink:1, basis:0%</td><td>2倍伸缩比例</td></tr>
+        </tbody>
+      </table>
+      <div class="info" style="margin-top:12px;">
+        最常见错误：input { flex: 1; } 实际上等于 flex: 1 1 0%，初始尺寸是 0！<br>
+        正确写法：input { flex: 1 1 auto; }
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>align-self 覆盖 align-items</h2>
+      <div class="demo-area" style="align-items: flex-start; height: 160px;">
+        <div class="demo-item">flex-start<br>(继承)</div>
+        <div class="demo-item green" style="align-self: center;">center<br>(覆盖)</div>
+        <div class="demo-item orange" style="align-self: flex-end;">flex-end<br>(覆盖)</div>
+        <div class="demo-item red" style="align-self: stretch; height: auto;">stretch<br>(覆盖)</div>
+      </div>
+      <div class="code-block">align-self: auto | stretch | flex-start | center | flex-end | baseline</div>
+      <div class="info">align-self 允许单个 item 覆盖容器 align-items 的设置</div>
+    </div>
+
+    <div class="section">
+      <h2>order 控制排列顺序</h2>
+      <div class="demo-area">
+        <div class="demo-item" style="order:3;">A<br>(order=3)</div>
+        <div class="demo-item green" style="order:1;">B<br>(order=1)</div>
+        <div class="demo-item orange" style="order:2;">C<br>(order=2)</div>
+        <div class="demo-item red" style="order:0;">D<br>(order=0)</div>
+      </div>
+      <div class="info">
+        order 只改变视觉顺序，不改变 DOM 顺序！<br>
+        屏幕阅读器仍按 DOM 顺序读取，对无障碍不友好。<br>
+        order 默认为 0，数值越小越靠前。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>组合示例：Sticky Footer</h2>
+      <div style="background:#21262d;border-radius:6px;overflow:hidden;height:300px;display:flex;flex-direction:column;">
+        <div style="background:linear-gradient(135deg,#58a6ff,#1f6feb);padding:16px;color:white;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;">Header</div>
+        <div style="background:#0d1117;flex:1;padding:16px;color:#8b949e;font-size:14px;display:flex;align-items:center;justify-content:center;">Main Content (flex: 1)</div>
+        <div style="background:linear-gradient(135deg,#3fb950,#238636);padding:16px;color:white;font-weight:600;font-size:14px;">Footer</div>
+      </div>
+      <div class="code-block">body { display: flex; flex-direction: column; min-height: 100vh; }
+main { flex: 1; }</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox Sticky Footer 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .demo-frame { background: #21262d; border-radius: 6px; overflow: hidden; }
+    .demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .demo-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .demo-btn:hover { background: #30363d; }
+    .demo-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sticky Footer 粘性页脚</h1>
+
+    <div class="section">
+      <h2>Flexbox 实现 Sticky Footer</h2>
+      <div class="demo-controls">
+        <button class="demo-btn active" data-mode="short">内容少</button>
+        <button class="demo-btn" data-mode="long">内容多</button>
+      </div>
+      <div class="demo-frame" id="frame" style="height: 400px; display: flex; flex-direction: column;">
+        <div style="background: linear-gradient(135deg, #58a6ff, #1f6feb); padding: 16px 20px; color: white; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px;">Header</div>
+        <div id="mainContent" style="background: #0d1117; flex: 1; padding: 20px; color: #8b949e; font-size: 14px; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 0;">
+          <div><p style="margin-bottom:8px;font-size:16px;color:#c9d1d9;">内容区域</p><p style="font-size:12px;">flex: 1 占据所有剩余空间</p></div>
+        </div>
+        <div style="background: linear-gradient(135deg, #3fb950, #238636); padding: 16px 20px; color: white; font-weight: 600; font-size: 15px;">Footer - 始终在底部</div>
+      </div>
+      <div class="code-block">html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+main { flex: 1; }</div>
+      <div class="info">核心原理：flex: 1 让 main 区域占据所有剩余空间，footer 被推到最下方</div>
+    </div>
+
+    <div class="section">
+      <h2>常见错误写法</h2>
+      <div class="info" style="border-left: 3px solid #f78166;">
+        <strong>错误：使用 position: absolute</strong><br>
+        footer { position: absolute; bottom: 0; }<br>
+        会导致 footer 覆盖内容，且不占文档流高度
+      </div>
+      <div class="info" style="border-left: 3px solid #3fb950; margin-top: 12px;">
+        <strong>正确：Flexbox</strong><br>
+        body { display: flex; flex-direction: column; min-height: 100vh; }<br>
+        main { flex: 1; }<br>
+        Footer 自然在底部，内容区域自适应
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const contents = {
+      short: '<div><p style="margin-bottom:8px;font-size:16px;color:#c9d1d9;">内容区域</p><p style="font-size:12px;">flex: 1 占据所有剩余空间</p></div>',
+      long: '<div style="text-align:left;display:block;"><p style="margin-bottom:8px;font-size:16px;color:#c9d1d9;">更多内容</p><p style="font-size:13px;margin-bottom:6px;">这是多行内容...</p><p style="font-size:13px;margin-bottom:6px;">Lorem ipsum dolor sit amet...</p><p style="font-size:13px;margin-bottom:6px;">内容足够多时会撑开页面...</p></div>'
+    };
+    document.querySelectorAll('.demo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('mainContent').innerHTML = contents[btn.dataset.mode];
+      });
+    });
+  </script>
+</body>
+</html>

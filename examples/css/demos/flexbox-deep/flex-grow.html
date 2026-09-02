@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox flex-grow 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 100px; display: flex; gap: 8px; width: 100%; }
+    .demo-item { background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 13px; min-width: 60px; height: 60px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .stats { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+    .stat { background: #21262d; padding: 8px 12px; border-radius: 4px; font-size: 12px; }
+    .stat span { color: #58a6ff; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>flex-grow 放大比例</h1>
+
+    <div class="section">
+      <h2>flex-grow 比例分配</h2>
+      <div class="stats">
+        <div class="stat">容器宽度: <span id="containerWidth">600</span>px</div>
+        <div class="stat">item 基础总宽: <span id="itemWidth">180</span>px</div>
+        <div class="stat">剩余空间: <span id="remaining">420</span>px</div>
+      </div>
+      <div class="controls">
+        <button class="control-btn active" data-mode="equal">等比 (1:1:1)</button>
+        <button class="control-btn" data-mode="ratio124">比例 (1:2:4)</button>
+        <button class="control-btn" data-mode="one">只有一个 grow</button>
+        <button class="control-btn" data-mode="zero">全部为 0</button>
+      </div>
+      <div class="demo-area" id="demo">
+        <div class="demo-item" id="item1" style="flex-basis:60px;flex-grow:1;">60px</div>
+        <div class="demo-item" id="item2" style="flex-basis:60px;flex-grow:1;">60px</div>
+        <div class="demo-item" id="item3" style="flex-basis:60px;flex-grow:1;">60px</div>
+      </div>
+      <div class="code-block" id="codeBlock">flex-grow: 1 1 1;</div>
+      <div class="label" id="sizeLabel">实际宽度：~200px each</div>
+    </div>
+
+    <div class="section">
+      <h2>计算公式</h2>
+      <div class="info">
+        <strong>计算公式：</strong><br><br>
+        实际宽度 = 基础尺寸 + 剩余空间 x (grow / 总grow)<br><br>
+        <strong>示例（容器 600px，三个 item 各 60px）：</strong><br>
+        剩余空间 = 600 - 60x3 = 420px<br>
+        每个 item = 60 + 420x(1/3) = 200px
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>常见场景</h2>
+      <div style="background:#0d1117;border-radius:6px;padding:16px;display:flex;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;height:60px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">flex: 1</div>
+        <div style="flex:0 0 120px;height:60px;background:linear-gradient(135deg,#3fb950,#238636);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">fixed 120px</div>
+      </div>
+      <div class="info">flex: 1 让第一个 item 占据所有剩余空间，第二个保持固定 120px</div>
+    </div>
+  </div>
+
+  <script>
+    function updateStats() {
+      const items = document.querySelectorAll('.demo-item');
+      let totalBasis = 0;
+      items.forEach(item => {
+        const basis = parseInt(item.style.flexBasis) || 60;
+        totalBasis += basis;
+      });
+      document.getElementById('containerWidth').textContent = 600;
+      document.getElementById('itemWidth').textContent = totalBasis;
+      document.getElementById('remaining').textContent = Math.max(0, 600 - totalBasis);
+    }
+
+    const modes = {
+      equal: { grow: [1, 1, 1], basis: [60, 60, 60], label: 'flex-grow: 1 -> ~200px each', code: 'flex-grow: 1 1 1;' },
+      ratio124: { grow: [1, 2, 4], basis: [60, 60, 60], label: '比例为 1:2:4 -> 120px / 180px / 300px', code: 'item1: grow=1, item2: grow=2, item3: grow=4' },
+      one: { grow: [1, 0, 0], basis: [60, 60, 60], label: '只有第一个 grow -> 第一个 480px', code: 'item1: flex-grow: 1, item2: 0, item3: 0' },
+      zero: { grow: [0, 0, 0], basis: [60, 60, 60], label: '全部为 0 -> 保持 60px，不分配剩余空间', code: 'flex-grow: 0 (默认，不放大)' }
+    };
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = modes[btn.dataset.mode];
+        const items = document.querySelectorAll('.demo-item');
+        items.forEach((item, i) => {
+          item.style.flexBasis = mode.basis[i] + 'px';
+          item.style.flexGrow = mode.grow[i];
+          item.textContent = mode.basis[i] + 'px + 剩余';
+        });
+        document.getElementById('codeBlock').textContent = mode.code;
+        document.getElementById('sizeLabel').textContent = mode.label;
+        updateStats();
+      });
+    });
+    updateStats();
+  </script>
+</body>
+</html>

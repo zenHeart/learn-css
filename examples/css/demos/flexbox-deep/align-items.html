@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox align-items 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 160px; display: flex; gap: 8px; width: 100%; }
+    .demo-item { width: 60px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 13px; }
+    .demo-item.tall { height: 100px; }
+    .demo-item.medium { height: 70px; }
+    .demo-item.short { height: 50px; }
+    .demo-item.baseline { padding: 10px 0; font-size: 24px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>align-items 交叉轴对齐（单行）</h1>
+
+    <div class="section">
+      <h2>align-items 五种模式</h2>
+      <div class="controls">
+        <button class="control-btn" data-ai="stretch">stretch</button>
+        <button class="control-btn" data-ai="flex-start">flex-start</button>
+        <button class="control-btn active" data-ai="center">center</button>
+        <button class="control-btn" data-ai="flex-end">flex-end</button>
+        <button class="control-btn" data-ai="baseline">baseline</button>
+      </div>
+      <div class="demo-area" id="demo" style="align-items: center;">
+        <div class="demo-item tall">高</div>
+        <div class="demo-item medium">中</div>
+        <div class="demo-item short">矮</div>
+        <div class="demo-item tall">高</div>
+      </div>
+      <div class="code-block">align-items: center;</div>
+      <div class="info">align-items 控制所有 items 在交叉轴上的对齐方式（单行有效）<br>stretch：拉伸至填满容器（默认）<br>flex-start：靠交叉轴起点对齐<br>center：居中对齐<br>flex-end：靠交叉轴终点对齐<br>baseline：按文字 baseline 对齐</div>
+    </div>
+
+    <div class="section">
+      <h2>baseline 对齐效果</h2>
+      <div class="demo-area" style="align-items: baseline;">
+        <div class="demo-item baseline" style="font-size:14px;">小字</div>
+        <div class="demo-item baseline" style="font-size:20px;">中字</div>
+        <div class="demo-item baseline" style="font-size:28px;">大字</div>
+        <div class="demo-item baseline" style="font-size:36px;">超大</div>
+      </div>
+      <div class="info">baseline 对齐：items 的文字基线在同一条水平线上</div>
+    </div>
+
+    <div class="section">
+      <h2>stretch（默认）效果</h2>
+      <div class="demo-area" style="align-items: stretch; height: 160px;">
+        <div class="demo-item" style="height:auto;">自动高度</div>
+        <div class="demo-item" style="height:auto;">自动高度</div>
+        <div class="demo-item" style="height:auto;">自动高度</div>
+      </div>
+      <div class="info">stretch 是默认值，前提是 items 没有设置明确高度且没有 max-height/min-height 限制</div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const ai = btn.dataset.ai;
+        document.getElementById('demo').style.alignItems = ai;
+        document.querySelector('.code-block').textContent = 'align-items: ' + ai + ';';
+      });
+    });
+  </script>
+</body>
+</html>
