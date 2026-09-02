@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Animation Worklet — 帧同步动画</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { border: 2px dashed #30363d; border-radius: 8px; padding: 40px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; min-height: 150px; position: relative; overflow: hidden; }
+    .anim-box { width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-bottom: 24px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .controls { display: flex; gap: 8px; margin-top: 16px; }
+    .btn { padding: 8px 16px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 13px; cursor: pointer; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Animation Worklet — 帧同步动画</h1>
+
+    <div class="warning">
+      ⚠️ Animation Worklet 需要通过 <strong>HTTP 服务器</strong> 访问。请用 <code>python -m http.server 8080</code> 启动。
+    </div>
+
+    <div class="section">
+      <h2>Worklet 实现</h2>
+      <div class="code-block">class FrameAnimator {
+  animate(currentTime, effect) {
+    const duration = 3000; // 3秒循环
+    const progress = (currentTime % duration) / duration;
+
+    let x, opacity;
+    if (progress < 0.25) {
+      // 0-25%: 滑入
+      const t = progress / 0.25;
+      const eased = 1 - Math.pow(1 - t, 3);
+      x = (eased - 1) * 100;
+      opacity = eased;
+    } else if (progress < 0.5) {
+      // 25-50%: 停留
+      x = 0; opacity = 1;
+    } else if (progress < 0.75) {
+      // 50-75%: 向右
+      const t = (progress - 0.5) / 0.25;
+      x = 30 * (1 - Math.pow(1 - t, 3));
+      opacity = 1;
+    } else {
+      // 75-100%: 淡出
+      const t = (progress - 0.75) / 0.25;
+      opacity = 1 - Math.pow(1 - t, 2);
+      x = 30 + t * 20;
+    }
+
+    effect.target.style.transform = `translateX(${x}px)`;
+    effect.target.style.opacity = opacity;
+  }
+}
+registerAnimator('frame', FrameAnimator);</div>
+    </div>
+
+    <div class="section">
+      <h2>动画演示（Fallback — CSS Animation）</h2>
+      <p style="font-size:13px;color:#8b949e;margin-bottom:12px;">
+        启用 Worklet 后使用 <code>WorkletAnimation</code> 播放，当前为 CSS Animation 降级演示
+      </p>
+      <div class="demo-area">
+        <div class="anim-box" id="animBox">动画</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="playBtn">▶ 播放</button>
+        <button class="btn" id="pauseBtn">⏸ 暂停</button>
+        <button class="btn" id="resetBtn">↺ 重置</button>
+      </div>
+      <div class="code-block">/* WorkletAnimation 方式 */
+const effect = new KeyframeEffect(elem, [], { duration: 0 });
+const anim = new WorkletAnimation('frame', effect);
+anim.play();</div>
+    </div>
+
+    <div class="section">
+      <h2>关键 API</h2>
+      <div class="info">
+        <strong>currentTime</strong>：由浏览器驱动的当前时间（毫秒）<br>
+        <strong>effect.target</strong>：动画关联的 DOM 元素<br>
+        <strong>currentTime % duration</strong>：取模实现循环动画<br>
+        <strong>WorkletAnimation</strong>：主线程接口，用于创建和管理 worklet 动画
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const box = document.getElementById('animBox');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let anim;
+
+    // CSS Animation fallback
+    const keyframes = [
+      { transform: 'translateX(-100px)', opacity: 0 },
+      { transform: 'translateX(0)', opacity: 1, offset: 0.25 },
+      { transform: 'translateX(0)', opacity: 1, offset: 0.5 },
+      { transform: 'translateX(30px)', opacity: 1, offset: 0.75 },
+      { transform: 'translateX(50px)', opacity: 0 }
+    ];
+
+    anim = box.animate(keyframes, {
+      duration: 3000,
+      iterations: Infinity,
+      easing: 'linear'
+    });
+
+    playBtn.addEventListener('click', () => { anim.play(); playBtn.classList.add('active'); pauseBtn.classList.remove('active'); });
+    pauseBtn.addEventListener('click', () => { anim.pause(); pauseBtn.classList.add('active'); playBtn.classList.remove('active'); });
+    resetBtn.addEventListener('click', () => { anim.cancel(); anim.play(); });
+
+    // Worklet 版本
+    if ('animationWorklet' in CSS) {
+      CSS.animationWorklet.addModule('worklets/frame-animator.js').then(() => {
+        const effect = new KeyframeEffect(box, [], { duration: 0 });
+        const workletAnim = new WorkletAnimation('frame', effect);
+        // 实际使用 workletAnim 替代 CSS Animation
+      }).catch(e => console.warn('Worklet load failed:', e));
+    }
+  </script>
+</body>
+</html>

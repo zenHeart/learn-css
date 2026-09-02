@@ -1,0 +1,310 @@
+---
+title: "CSS Houdini Animation Worklet"
+category: "高级特性"
+tags:
+  - Houdini
+  - Animation Worklet
+  - registerAnimator
+  - WorkletAnimation
+  - 自定义动画
+description: "详解 CSS Houdini Animation Worklet，通过 registerAnimator 注册自定义动画器，实现高性能线程化动画"
+keywords: "CSS Houdini, Animation Worklet, registerAnimator, WorkletAnimation, 自定义动画"
+---
+
+# CSS Houdini Animation Worklet
+
+**通过 JavaScript Worklet 创建高性能的线程化动画**
+
+---
+
+## 概述
+
+Animation Worklet 是 Houdini CSS API 的一部分，允许开发者创建基于工作线程（worklet）的高性能动画。与传统 CSS 动画和 Web Animations API 不同，Animation Worklet 运行在独立线程上，不受主线程布局和渲染影响，可以实现极其流畅的动画效果。
+
+### 与其他动画方案的区别
+
+| 方案 | 运行线程 | 性能 | 控制能力 |
+|------|----------|------|----------|
+| CSS Transition/Animation | 主线程 | 中等 | 有限 |
+| Web Animations API | 主线程 | 中等 | 较强 |
+| **Animation Worklet** | **独立线程** | **高** | **完全控制** |
+| CSS Scroll-driven Animations | 主线程 | 高 | 有限 |
+
+### 基本工作流程
+
+1. **加载 Worklet**：`await CSS.animationWorklet.addModule('animator.js')`
+2. **注册动画器**：`registerAnimator(name, class)`
+3. **创建动画**：`new WorkletAnimation(name, keyframes, options)`
+
+---
+
+## registerAnimator 注册动画器
+
+### 基本语法
+
+```js
+registerAnimator(name, classDefinition)
+```
+
+- `name`：动画器名称
+- `classDefinition`：类定义，必须实现 `animate(currentTime, effect)` 方法
+
+### 主类定义
+
+```js
+class MyAnimator {
+  constructor() {
+    // 初始化，可访问全局作用域
+  }
+
+  animate(currentTime, effect) {
+    // currentTime: 当前时间（毫秒）
+    // effect: 关联的 KeyframeEffect
+    // 在这里计算并应用动画状态
+  }
+
+  // 可选：取消时清理
+  cancel() {}
+}
+registerAnimator('my-animator', MyAnimator);
+```
+
+---
+
+## WorkletGlobalScope 全局作用域
+
+在 Animation Worklet 中运行的代码拥有独立的全局作用域，提供以下属性和方法：
+
+### currentTime
+
+当前动画时间（毫秒），由浏览器驱动：
+
+```js
+animate(currentTime, effect) {
+  // currentTime 由浏览器按帧更新
+  const progress = currentTime / 1000; // 转换为秒
+  element.style.transform = `translateX(${progress * 100}px)`;
+}
+```
+
+### scrollLinked
+
+关联滚动-linked 动画：
+
+```js
+animate(currentTime, effect) {
+  if (this.scrollLinked) {
+    const scrollY = this.scrollTimeline.scrollOffset;
+    // 基于滚动位置计算动画
+  }
+}
+```
+
+### 示例：帧同步动画
+
+```js
+class ParallaxAnimator {
+  animate(currentTime, effect) {
+    const scrollY = this.scrollOffset || 0;
+    const parallaxOffset = scrollY * 0.5;
+
+    // 更新每个 layer 的 transform
+    this.layers.forEach((layer, i) => {
+      const depth = i * 0.2 + 0.1;
+      layer.style.transform = `translateY(${-parallaxOffset * depth}px)`;
+    });
+  }
+}
+registerAnimator('parallax', ParallaxAnimator);
+```
+
+---
+
+## WorkletAnimation 创建动画
+
+### 基本语法
+
+```js
+const animation = new WorkletAnimation(
+  'my-animator',    // 动画器名称
+  keyframeEffect,    // KeyframeEffect 对象
+  document.timeline, // 时间线（可选）
+  options            // 配置选项
+);
+animation.play();
+```
+
+### 完整示例
+
+```js
+// 1. 注册动画器
+registerAnimator('slide-in', class {
+  animate(currentTime, effect) {
+    const duration = 500; // ms
+    const progress = Math.min(currentTime / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+    effect.target.style.transform = `translateX(${(1 - eased) * -200}px)`;
+    effect.target.style.opacity = eased;
+  }
+});
+
+// 2. 在主线程创建并播放
+const elem = document.querySelector('.slide-element');
+const effect = new KeyframeEffect(elem, [], { duration: 500 });
+const animation = new WorkletAnimation('slide-in', effect);
+animation.play();
+```
+
+---
+
+## 与 CSS Scroll-driven Animations 对比
+
+| 特性 | Animation Worklet | CSS Scroll-driven |
+|------|-------------------|-------------------|
+| 运行线程 | 独立线程 | 主线程 |
+| JavaScript 控制 | ✅ 完全控制 | ❌ CSS-only |
+| 滚动关联 | ✅ scrollLinked | ✅ 内置支持 |
+| 浏览器支持 | Chromium only | 主流浏览器 |
+| 性能 | 极高 | 高 |
+| API 复杂度 | 较高 | 简单 |
+
+### 何时使用 Animation Worklet
+
+- 需要基于滚动位置做复杂的 JavaScript 计算
+- 需要在动画中进行条件判断
+- 需要多个元素协同动画（如视差效果）
+- 对性能要求极高（60fps+）
+
+### 何时使用 Scroll-driven Animations
+
+- 只需要简单的滚动关联动画
+- 需要更好的浏览器兼容性
+- 不需要复杂的 JavaScript 逻辑
+
+---
+
+## 实战案例
+
+### 案例一：滚动视差（Parallax）
+
+```js
+class ParallaxAnimator {
+  constructor() {
+    this.layers = [];
+  }
+
+  animate(currentTime, effect) {
+    const scrollY = this.scrollOffset || 0;
+
+    this.layers.forEach((layer, i) => {
+      const depth = 0.1 + i * 0.15;
+      const move = scrollY * depth;
+      layer.element.style.transform = `translateY(${move}px)`;
+    });
+  }
+}
+registerAnimator('parallax', ParallaxAnimator);
+
+// 主线程使用
+document.querySelectorAll('.parallax-layer').forEach((el, i) => {
+  const effect = new KeyframeEffect(el, [], { duration: 0 });
+  const anim = new WorkletAnimation('parallax', effect);
+  anim.scrollLinked = true;
+  anim.play();
+});
+```
+
+### 案例二：帧同步动画
+
+```js
+class FrameSyncAnimator {
+  animate(currentTime, effect) {
+    const duration = 2000; // 2秒循环
+    const cycleTime = currentTime % duration;
+    const progress = cycleTime / duration;
+
+    // 0-25%: 从左滑入
+    // 25-75%: 停留
+    // 75-100%: 向右滑出
+    let x, opacity;
+    if (progress < 0.25) {
+      const t = progress / 0.25;
+      x = -100 + t * 100;
+      opacity = t;
+    } else if (progress < 0.75) {
+      x = 0;
+      opacity = 1;
+    } else {
+      const t = (progress - 0.75) / 0.25;
+      x = t * 100;
+      opacity = 1 - t;
+    }
+
+    effect.target.style.transform = `translateX(${x}%)`;
+    effect.target.style.opacity = opacity;
+  }
+}
+registerAnimator('frame-sync', FrameSyncAnimator);
+```
+
+---
+
+## 浏览器兼容性
+
+| 浏览器 | 支持情况 |
+|--------|----------|
+| Chrome | ✅ 84+ |
+| Edge | ✅ 84+ |
+| Firefox | ❌ 不支持 |
+| Safari | ❌ 不支持 |
+
+**注意**：Animation Worklet 已在 Chrome 84 中默认启用，但需要通过 HTTPS 或 localhost 访问。
+
+### 功能检测
+
+```js
+if ('animationWorklet' in CSS) {
+  await CSS.animationWorklet.addModule('animator.js');
+} else {
+  // 回退方案：使用 CSS animations 或 Web Animations API
+  element.animate([...], { duration: 500, easing: 'ease-out' });
+}
+```
+
+---
+
+## 常见问题
+
+### 1. Worklet 与主线程通信
+
+通过共享的 `effect.target` 直接操作 DOM 元素：
+
+```js
+animate(currentTime, effect) {
+  effect.target.style.transform = '...'; // 直接操作 DOM
+}
+```
+
+### 2. 滚动关联
+
+Animation Worklet 的滚动关联通过 `scrollLinked` 属性控制：
+
+```js
+animation.scrollLinked = true; // 启用滚动关联
+animation.scrollTimeline = scrollTimeline; // 关联滚动时间线
+```
+
+### 3. 性能优化
+
+- 避免在 `animate()` 中进行布局计算
+- 使用 `transform` 和 `opacity` 做动画（触发 Composite）
+- 批量 DOM 操作
+
+---
+
+## 总结
+
+Animation Worklet 为高性能动画提供了一个强大的底层 API。虽然目前仅 Chromium 浏览器支持，但它为需要极致流畅动画效果的应用（如长滚动页面、复杂交互界面）提供了新的可能性。
+
+配合 CSS Scroll-driven Animations，可以根据场景选择最合适的方案：简单滚动关联用 CSS，需要复杂 JavaScript 逻辑时用 Animation Worklet。
