@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS color-mix() 颜色空间对比演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .compare-item { text-align: center; }
+    .color-swatch { height: 60px; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .color-label { font-size: 13px; color: #f0f6fc; font-weight: 500; }
+    .color-value { font-size: 11px; color: #6e7681; font-family: 'SF Mono', Monaco, monospace; margin-top: 4px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; padding: 12px; background: #0d1117; border-radius: 4px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 16px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px; }
+    .badge-oklch { background: #238636; }
+    .badge-hsl { background: #9e6a03; }
+    .badge-srgb { background: #6e7681; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: #f0f6fc; font-weight: 500; }
+    td { color: #8b949e; }
+    td:first-child { color: #79c0ff; font-family: 'SF Mono', Monaco, monospace; }
+    .swatch-small { display: inline-block; width: 20px; height: 20px; border-radius: 4px; vertical-align: middle; margin-right: 8px; }
+
+    /* 演示用颜色 */
+    .demo-red { background: #ff0000; }
+    .demo-blue { background: #0000ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 color-mix() 颜色空间对比</h1>
+
+    <div class="section">
+      <h2>红色 + 蓝色 = 紫色？</h2>
+      <p style="font-size: 13px; color: #8b949e; margin-bottom: 16px;">不同颜色空间混合同一组颜色，结果差异巨大：</p>
+
+      <div class="compare-grid">
+        <div class="compare-item">
+          <div class="color-swatch demo-red">#ff0000</div>
+          <div class="color-label">红色</div>
+          <div class="color-value">#ff0000</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch demo-blue">#0000ff</div>
+          <div class="color-label">蓝色</div>
+          <div class="color-value">#0000ff</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in srgb, #ff0000 50%, #0000ff);">srgb</div>
+          <div class="color-label">srgb <span class="badge badge-srgb">偏灰暗</span></div>
+          <div class="color-value">#800080 暗紫</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in hsl, #ff0000 50%, #0000ff);">hsl</div>
+          <div class="color-label">hsl <span class="badge badge-hsl">色相偏移</span></div>
+          <div class="color-value">#ff00ff 亮紫</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in oklch, #ff0000 50%, #0000ff);">oklch</div>
+          <div class="color-label">oklch <span class="badge badge-oklch">推荐</span></div>
+          <div class="color-value">更饱和自然的紫</div>
+        </div>
+      </div>
+      <div class="info">
+        💡 <strong>结论：</strong>在 oklch 空间中混合，饱和度保持更自然；在 srgb 空间混合，结果往往偏灰暗；在 hsl 空间混合，色相可能发生意外偏移。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>各颜色空间详细对比</h2>
+
+      <h3>50% 红色 + 50% 蓝色</h3>
+      <div class="compare-grid">
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in srgb, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">srgb</div>
+          <div class="color-value">暗沉</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in srgb-linear, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">srgb-linear</div>
+          <div class="color-value">物理准确</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in hsl, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">hsl</div>
+          <div class="color-value">色相居中</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in hwb, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">hwb</div>
+          <div class="color-value">白度/黑度</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in oklch, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">oklch <span class="badge badge-oklch">推荐</span></div>
+          <div class="color-value">感知均匀</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in oklab, #ff0000 50%, #0000ff);"></div>
+          <div class="color-label">oklab</div>
+          <div class="color-value">Lab 空间</div>
+        </div>
+      </div>
+
+      <h3>30% 绿色 + 70% 蓝色</h3>
+      <div class="compare-grid">
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in srgb, #00ff00 30%, #0000ff);"></div>
+          <div class="color-label">srgb</div>
+          <div class="color-value">偏蓝偏暗</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in oklch, #00ff00 30%, #0000ff);"></div>
+          <div class="color-label">oklch <span class="badge badge-oklch">推荐</span></div>
+          <div class="color-value">青绿自然</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in hsl, #00ff00 30%, #0000ff);"></div>
+          <div class="color-label">hsl</div>
+          <div class="color-value">色相偏移</div>
+        </div>
+      </div>
+
+      <h3>白色 + 黑色（生成灰度）</h3>
+      <div class="compare-grid">
+        <div class="compare-item">
+          <div class="color-swatch" style="background: #ffffff;"></div>
+          <div class="color-label">白色</div>
+          <div class="color-value">#ffffff</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: #cccccc;"></div>
+          <div class="color-label">srgb 50%</div>
+          <div class="color-value">#808080 → #cccccc</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in srgb, #fff 50%, #000);"></div>
+          <div class="color-label">srgb</div>
+          <div class="color-value">#808080</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: color-mix(in oklch, #fff 50%, #000);"></div>
+          <div class="color-label">oklch</div>
+          <div class="color-value">#adadad</div>
+        </div>
+        <div class="compare-item">
+          <div class="color-swatch" style="background: #000000;"></div>
+          <div class="color-label">黑色</div>
+          <div class="color-value">#000000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>推荐选型指南</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th>推荐颜色空间</th>
+            <th>原因</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>主题色派生</td>
+            <td><span class="swatch-small" style="background: color-mix(in oklch, #3b82f6 50%, #fff);"></span>oklch</td>
+            <td>饱和度自然，亮度感知均匀</td>
+          </tr>
+          <tr>
+            <td>状态色生成</td>
+            <td><span class="swatch-small" style="background: color-mix(in srgb, #3b82f6 50%, #22c55e);"></span>srgb</td>
+            <td>符合传统设计直觉，简单可靠</td>
+          </tr>
+          <tr>
+            <td>调深/调浅</td>
+            <td><span class="swatch-small" style="background: color-mix(in oklch, #3b82f6, #000 20%);"></span>oklch / hwb</td>
+            <td>保持色相，增加黑色或白色</td>
+          </tr>
+          <tr>
+            <td>渐变增强</td>
+            <td><span class="swatch-small" style="background: color-mix(in oklch, #667eea, white 20%);"></span>oklch</td>
+            <td>混合过渡平滑，避免色相跳变</td>
+          </tr>
+          <tr>
+            <td>透明度混合</td>
+            <td><span class="swatch-small" style="background: color-mix(in srgb, #3b82f6 40%, transparent);"></span>srgb</td>
+            <td>透明色在 srgb 中处理更一致</td>
+          </tr>
+          <tr>
+            <td>精确物理混色</td>
+            <td><span class="swatch-small" style="background: color-mix(in srgb-linear, #ff0000 50%, #0000ff);"></span>srgb-linear</td>
+            <td>基于光强度的物理混色，无 gamma 校正</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>实战代码对比</h2>
+      <div class="code-block">/* 生成浅色变体 — oklch 更自然 */
+--primary-light: color-mix(in oklch, var(--primary), #fff 30%);
+--primary-light: color-mix(in oklch, var(--primary), #fff 20%);
+
+/* 生成深色变体 — oklch 保持饱和度 */
+--primary-dark: color-mix(in oklch, var(--primary), #000 25%);
+
+/* 灰度混合 — srgb 和 oklch 结果不同 */
+color-mix(in srgb, #fff 50%, #000);  /* 灰色 #808080 */
+color-mix(in oklch, #fff 50%, #000);  /* 浅灰 #adadad */
+
+/* 渐变过渡 — oklch 避免色相跳变 */
+background: linear-gradient(
+  135deg,
+  color-mix(in oklch, #667eea, white 15%),
+  color-mix(in oklch, #667eea 50%, #764ba2 50%),
+  color-mix(in oklch, #764ba2, white 15%)
+);</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>混合横排竖排布局 - CSS 垂直排版</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "SimSun", serif;
+      background: linear-gradient(180deg, #f8f6f1 0%, #efe9df 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4a4a4a;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+      font-weight: normal;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 2.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* 演示区域 */
+    .demo-area {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-section h2 {
+      color: #5a5a5a;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      padding-left: 1rem;
+      border-left: 3px solid #7c9a5e;
+      font-weight: normal;
+    }
+
+    .demo-section p {
+      color: #777;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ===== 示例1：左侧竖排标题 + 右侧横排正文 ===== */
+    .layout-book {
+      display: flex;
+      gap: 2rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .book-title {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+      padding: 2.5rem 1.5rem;
+      border-radius: 6px;
+      font-size: 2rem;
+      letter-spacing: 0.4em;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(44, 62, 80, 0.3);
+    }
+
+    .book-content {
+      flex: 1;
+      writing-mode: horizontal-tb;
+      line-height: 2.2;
+      font-size: 1rem;
+    }
+
+    .book-content h3 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .book-content p {
+      text-indent: 2em;
+      color: #555;
+      margin-bottom: 1em;
+    }
+
+    /* ===== 示例2：顶部横排 + 底部竖排的分区布局 ===== */
+    .layout-split {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .split-header {
+      background: linear-gradient(135deg, #8e7cc3, #9b8ed4);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      writing-mode: horizontal-tb;
+    }
+
+    .split-header h2 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      letter-spacing: 0.3em;
+      border: none;
+      padding: 0;
+      color: #fff;
+    }
+
+    .split-header p {
+      margin-top: 0.5rem;
+      opacity: 0.85;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    .split-body {
+      display: flex;
+    }
+
+    .split-main {
+      flex: 1;
+      padding: 2rem;
+      writing-mode: horizontal-tb;
+      border-right: 1px solid #eee;
+    }
+
+    .split-main h3 {
+      color: #6c5ce7;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .split-main p {
+      color: #555;
+      line-height: 2;
+      margin-bottom: 1em;
+    }
+
+    .split-sidebar {
+      width: 120px;
+      background: linear-gradient(180deg, #f8f6f1, #efe9df);
+      padding: 1.5rem 1rem;
+    }
+
+    .sidebar-title {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 1rem;
+      color: #8e7cc3;
+      letter-spacing: 0.3em;
+    }
+
+    /* ===== 示例3：双栏对比布局 ===== */
+    .layout-compare {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .compare-box {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .compare-header {
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .compare-box:first-child .compare-header {
+      background: #e8f4f8;
+      color: #2980b9;
+    }
+
+    .compare-box:last-child .compare-header {
+      background: #fdf2e9;
+      color: #d35400;
+    }
+
+    .compare-content {
+      padding: 1.5rem;
+    }
+
+    .compare-content.vertical {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      min-height: 200px;
+      font-size: 1.1rem;
+      line-height: 2.5;
+    }
+
+    .compare-content.horizontal {
+      writing-mode: horizontal-tb;
+      line-height: 2;
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .compare-content.horizontal p {
+      margin-bottom: 0.8em;
+    }
+
+    /* ===== 示例4：卡片式混合布局 ===== */
+    .layout-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      padding: 1.2rem;
+      font-size: 1.1rem;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-body {
+      padding: 1.2rem;
+    }
+
+    /* 左侧竖排的卡片标题 */
+    .card:nth-child(1) .card-header {
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 0.3em;
+      color: #c46b35;
+      padding: 2rem 1rem;
+    }
+
+    /* 右侧竖排的卡片标题 */
+    .card:nth-child(2) .card-header {
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 0.3em;
+      color: #5ba4a4;
+      padding: 2rem 1rem;
+    }
+
+    /* 横排的卡片标题 */
+    .card:nth-child(3) .card-header {
+      background: linear-gradient(135deg, #d299c2, #fef9d7);
+      writing-mode: horizontal-tb;
+      color: #8b5a7c;
+      padding: 1.2rem;
+    }
+
+    .card-body p {
+      color: #666;
+      line-height: 1.9;
+      font-size: 0.95rem;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .layout-book {
+        flex-direction: column;
+      }
+
+      .book-title {
+        writing-mode: horizontal-tb;
+        padding: 1.5rem;
+        text-align: center;
+      }
+
+      .split-body {
+        flex-direction: column;
+      }
+
+      .split-sidebar {
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid #eee;
+      }
+
+      .sidebar-title {
+        writing-mode: horizontal-tb;
+      }
+
+      .layout-compare {
+        flex-direction: column;
+      }
+
+      .compare-content.vertical {
+        writing-mode: horizontal-tb;
+        min-height: auto;
+      }
+    }
+
+    /* 代码提示框 */
+    .code-tip {
+      background: #f5f5f5;
+      border-left: 3px solid #7c9a5e;
+      padding: 1rem 1.5rem;
+      margin-top: 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .code-tip code {
+      background: #e8e8e8;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-family: "Consolas", "Monaco", monospace;
+      color: #c7254e;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔄 混合横排竖排布局</h1>
+  <p class="subtitle">CSS writing-mode 实现复杂的混合排版需求</p>
+
+  <div class="demo-area">
+
+    <!-- 示例1：左侧竖排标题 + 右侧横排正文 -->
+    <div class="demo-section">
+      <h2>📚 示例一：书名竖排 + 正文横排</h2>
+      <p>常见的书籍封面或杂志文章布局：左侧书名竖排，右侧正文横排。</p>
+      <div class="layout-book">
+        <div class="book-title">红楼梦</div>
+        <div class="book-content">
+          <h3>第三回</h3>
+          <p>贾雨村夤缘复旧职，林黛玉抛父进京都。</p>
+          <p>却说雨村忙回头看时，不是别人，乃是当年同僚，姓张名如圭。他系此地人，革职后在家闲居，当下雨村即忙迎接上去。</p>
+          <p>那张如圭说道：「偶闻得都中奏准起复旧员之信，我便四处寻情找门路，不想竟遇见老同年，因此十分得意。」</p>
+        </div>
+      </div>
+      <div class="code-tip">
+        <strong>核心代码：</strong>
+        <code>.book-title { writing-mode: vertical-rl; text-orientation: upright; }</code>
+        <br>
+        <code>.book-content { writing-mode: horizontal-tb; }</code>
+      </div>
+    </div>
+
+    <!-- 示例2：顶部横排 + 底部竖排 -->
+    <div class="demo-section">
+      <h2>📄 示例二：分区布局（顶部横排 + 侧边竖排）</h2>
+      <p>页面顶部使用横排标题，下方区域使用侧边竖排目录。</p>
+      <div class="layout-split">
+        <div class="split-header">
+          <h2>技术文档</h2>
+          <p>CSS Writing Modes 完全指南</p>
+        </div>
+        <div class="split-body">
+          <div class="split-main">
+            <h3>writing-mode 属性</h3>
+            <p>writing-mode 属性定义了文本的排列方向。在中文排版中，我们经常需要将文字设置为垂直方向。</p>
+            <p>常见的取值包括 vertical-rl（垂直从右到左）和 vertical-lr（垂直从左到右）。</p>
+            <h3>text-orientation 属性</h3>
+            <p>这个属性控制垂直模式下字符的朝向。mixed 是默认值，汉字正向，英文旋转。</p>
+            <p>upright 可让所有字符都正向站立，适合纯中文竖排场景。</p>
+          </div>
+          <div class="split-sidebar">
+            <div class="sidebar-title">目 录</div>
+          </div>
+        </div>
+      </div>
+      <div class="code-tip">
+        <strong>核心代码：</strong>
+        <code>.split-header { writing-mode: horizontal-tb; }</code>
+        <br>
+        <code>.sidebar-title { writing-mode: vertical-rl; text-orientation: upright; }</code>
+      </div>
+    </div>
+
+    <!-- 示例3：双栏对比 -->
+    <div class="demo-section">
+      <h2>⚖️ 示例三：竖排 vs 横排对比展示</h2>
+      <p>并排展示同一内容在竖排和横排模式下的不同效果。</p>
+      <div class="layout-compare">
+        <div class="compare-box">
+          <div class="compare-header">竖排模式（vertical-rl）</div>
+          <div class="compare-content vertical">
+            <p>床前明月光</p>
+            <p>疑是地上霜</p>
+            <p>举头望明月</p>
+            <p>低头思故乡</p>
+          </div>
+        </div>
+        <div class="compare-box">
+          <div class="compare-header">横排模式（horizontal-tb）</div>
+          <div class="compare-content horizontal">
+            <p>床前明月光，疑是地上霜。</p>
+            <p>举头望明月，低头思故乡。</p>
+            <p>—— 唐·李白《静夜思》</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-tip">
+        <strong>核心代码：</strong>
+        <code>.compare-content.vertical { writing-mode: vertical-rl; text-orientation: upright; }</code>
+        <br>
+        <code>.compare-content.horizontal { writing-mode: horizontal-tb; }</code>
+      </div>
+    </div>
+
+    <!-- 示例4：卡片式混合布局 -->
+    <div class="demo-section">
+      <h2>📦 示例四：卡片式混合布局</h2>
+      <p>多个卡片使用不同的标题方向，展示灵活多变的排版方式。</p>
+      <div class="layout-cards">
+        <div class="card">
+          <div class="card-header">设计规范</div>
+          <div class="card-body">
+            <p>本文档规定了产品的设计规范，包括颜色、字体、间距等各项标准。</p>
+            <p>所有设计稿应遵循本规范进行制作。</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">开发指南</div>
+          <div class="card-body">
+            <p>本指南面向前端开发人员，介绍了组件的使用方法和注意事项。</p>
+            <p>建议配合设计规范一起阅读。</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">更新日志</div>
+          <div class="card-body">
+            <p>v2.1.0 新增深色模式支持</p>
+            <p>v2.0.0 全新设计语言</p>
+            <p>v1.0.0 正式发布</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

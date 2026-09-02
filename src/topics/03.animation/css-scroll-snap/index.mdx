@@ -1,0 +1,331 @@
+---
+title: CSS Scroll Snap 滚动捕捉
+category: 动画
+tags: [scroll-snap, 交互, 轮播图]
+description: CSS Scroll Snap 完整教程：滚动捕捉机制与实战，详解 scroll-snap-type、scroll-snap-align、scroll-snap-stop 等属性
+---
+
+## 学习目标
+
+CSS Scroll Snap 提供了控制滚动行为的能力，让滚动操作在用户停止时自动"吸附"到指定位置。通过本章学习：
+
+1. 理解 Scroll Snap 的核心概念和原理
+2. 掌握 `scroll-snap-type`、`scroll-snap-align`、`scroll-snap-stop` 等属性的用法
+3. 学会与 `overflow` 属性配合实现各种滚动吸附效果
+4. 能够独立实现移动端轮播图等常见组件
+
+## 核心概念
+
+### 什么是 Scroll Snap？
+
+Scroll Snap 是 CSS 提供的一种滚动吸附机制。当用户在滚动容器中滑动内容并停止时，浏览器会自动将视图"吸附"到预定义的 snap point（捕捉点）。这与 iOS/Android 原生应用中的滚动行为类似，比如手机主屏幕左右滑动时会自动停在某一页。
+
+> **与 JS 滚动库的区别：** CSS Scroll Snap 不是通过 JavaScript 直接控制滚动位置，而是为浏览器提供一组捕捉位置，让浏览器在原生滚动行为基础上自行决定何时吸附。这样做的好处是动画效果与平台原生体验一致（相同的滚动动画、惯性等）。
+
+### 关键术语
+
+| 术语 | 说明 |
+|------|------|
+| **Snap Container** | 设置了 `scroll-snap-type` 的滚动容器 |
+| **Snap Area** | 容器内需要吸附的子元素（设置 `scroll-snap-align`） |
+| **Snap Point** | 吸附点，由 Snap Area 的边缘决定 |
+| **scroll-snap-type** | 定义容器的吸附方向和严格程度 |
+| **scroll-snap-align** | 定义子元素的哪个边缘作为吸附点 |
+| **scroll-padding** | 调整容器的吸附区域偏移 |
+
+---
+
+## 主要属性详解
+
+### 1. scroll-snap-type
+
+定义滚动容器的吸附类型。
+
+```css
+.container {
+  scroll-snap-type: [ x | y | both ] [ mandatory | proximity ];
+}
+```
+
+**方向值：**
+
+- `x`：仅水平方向吸附
+- `y`：仅垂直方向吸附
+- `both`：两个方向都吸附（构成二维网格吸附）
+
+**严格程度：**
+
+- `mandatory`（强制）：用户停止滚动时，浏览器**必须**吸附到最近的 snap point。如果某个 snap area 高度超过视口，用户将无法滚动看到其中间部分（始终吸附到顶部或底部）。
+- `proximity`（接近）：浏览器**可能**吸附到 snap point，仅当用户停止滚动时位置与 snap point 足够近（通常在几百像素内）时才吸附。如果用户滚动到两个 snap point 中间位置，浏览器可以不吸附。
+
+> **建议：** 优先使用 `mandatory` 获得一致的用户体验，但需确保 snap area 不超过视口尺寸。使用 `proximity` 时吸附行为不可预测。
+
+**简写与拆分写法：**
+
+```css
+/* 简写 */
+scroll-snap-type: x mandatory;
+scroll-snap-type: y proximity;
+scroll-snap-type: both mandatory;
+
+/* 拆分为两个属性（现代浏览器支持） */
+scroll-snap-type: block mandatory;   /* 块级方向（默认同 y） */
+scroll-snap-type: inline proximity;   /* 行内方向（默认同 x） */
+```
+
+---
+
+### 2. scroll-snap-align
+
+定义子元素（Snap Area）的吸附对齐方式。
+
+```css
+.snap-area {
+  scroll-snap-align: [ start | center | end ] | [ start | center | end ] [ start | center | end ];
+}
+```
+
+**单值语法：** 水平和垂直方向使用相同的对齐方式。
+
+```css
+scroll-snap-align: start;    /* 左/上边缘对齐容器边缘 */
+scroll-snap-align: center;   /* 元素中心对齐容器中心 */
+scroll-snap-align: end;      /* 右/下边缘对齐容器边缘 */
+```
+
+**双值语法：** 分别指定块级方向（block）和行内方向（inline）的对齐。
+
+```css
+scroll-snap-align: start center;  /* 垂直方向对齐 start，水平方向对齐 center */
+```
+
+**对齐方向的相对性：**
+
+- 垂直滚动（`y`/`block`）时：`start` = 顶部边缘，`end` = 底部边缘
+- 水平滚动（`x`/`inline`）时：`start` = 左边缘，`end` = 右边缘
+
+---
+
+### 3. scroll-snap-stop
+
+控制用户滚动时是否允许跳过 snap point。
+
+```css
+.snap-area {
+  scroll-snap-stop: normal | always;
+}
+```
+
+- `normal`（默认）：用户可以跳过多个 snap point 后才停止
+- `always`：强制滚动容器在该元素处停止，用户不能跳过此 snap point
+
+> **注意：** 截至 2024 年，`scroll-snap-stop` 在主流浏览器中支持有限（Chrome 未默认开启），使用时需注意降级处理。
+
+---
+
+### 4. scroll-padding 系列
+
+调整 Snap Container 的吸附区域偏移，类似于给容器添加"内边距"。
+
+```css
+.container {
+  /* 完整写法 */
+  scroll-padding: 10px;
+  scroll-padding: 10px 20px;
+  scroll-padding-top: 10px;
+  scroll-padding-right: 20px;
+  scroll-padding-bottom: 10px;
+  scroll-padding-left: 20px;
+
+  /* 逻辑属性写法 */
+  scroll-padding-inline: 20px;
+  scroll-padding-block: 10px;
+}
+```
+
+**典型场景：** 当容器顶部有固定导航栏时，使用 `scroll-padding-top` 让吸附点避开导航栏：
+
+```css
+.container {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 60px; /* 吸附时留出导航栏空间 */
+}
+```
+
+---
+
+### 5. scroll-margin 系列
+
+调整 Snap Area 的吸附区域偏移，作用于子元素。
+
+```css
+.snap-area {
+  scroll-margin: 10px;
+  scroll-margin-top: 10px;
+  /* ... */
+}
+```
+
+> **scroll-padding vs scroll-margin：** 前者作用于容器（缩小可吸附区域），后者作用于子元素（扩大可吸附区域）。
+
+---
+
+## 与 overflow 的配合
+
+Scroll Snap 必须配合 `overflow` 属性使用，因为只有可滚动容器才能产生滚动行为。
+
+### 关键规则
+
+```css
+.container {
+  overflow: auto; /* 或 overflow: scroll */
+  scroll-snap-type: y mandatory;
+}
+```
+
+- `overflow: hidden` 禁止滚动，无法触发 snap
+- `overflow: auto` 和 `overflow: scroll` 都允许滚动，区别在于是否始终显示滚动条
+- 容器必须有明确的尺寸（宽度或高度受限），否则无法滚动
+
+### 常见问题
+
+**1. 子元素总高度不超过容器，无法滚动：**
+
+```css
+.container {
+  height: 100vh;        /* 固定视口高度 */
+  overflow-y: auto;     /* 允许垂直滚动 */
+}
+section {
+  min-height: 100vh;    /* 每个 section 至少占满一屏 */
+}
+```
+
+**2. 水平滚动需设置 `white-space: nowrap`：**
+
+```css
+.container {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  display: flex;         /* 子元素横向排列 */
+}
+```
+
+**3. 嵌套滚动的陷阱：**
+
+父容器和子容器同时可滚动时，滚动事件可能被父容器捕获，导致子容器无法滚动。解决方案是限制父容器的滚动方向或使用 `overscroll-behavior` 控制连锁滚动。
+
+---
+
+## 实战案例
+
+### 案例 1：移动端全屏轮播图
+
+这是最常见的 Scroll Snap 场景——移动端轮播图，每个 slide 占满一屏。
+
+{/* @playground id="carousel" mode="demo" */}
+
+**核心实现：**
+
+1. 容器设置 `overflow-x: auto` + `scroll-snap-type: x mandatory`
+2. 每个 slide 设置 `scroll-snap-align: start`
+3. 添加 `scroll-padding` 或调整 slide 宽度实现视觉居中
+
+```css
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-snap-points-x: repeat(100%); /* 兼容旧版 Firefox/Edge */
+}
+
+.carousel__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+```
+
+---
+
+### 案例 2：垂直全屏切换页面
+
+类似于移动端的长滚动页面，每个 section 占满一屏，滚动时自动吸附。
+
+{/* @playground id="vertical-scroll" mode="demo" */}
+
+**核心实现：**
+
+```css
+html {
+  scroll-snap-type: y mandatory;
+  /* Safari 需要同时设置 body */
+  scroll-snap-type: y mandatory;
+}
+
+section {
+  height: 100vh;
+  width: 100vw;
+  scroll-snap-align: start;
+}
+```
+
+---
+
+### 案例 3：水平图片画廊
+
+{/* @playground id="gallery" mode="demo" */}
+
+---
+
+## 兼容性与性能考虑
+
+### 浏览器支持
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| scroll-snap-type | 69+ | 68+ | 11+ | 79+ |
+| scroll-snap-align | 69+ | 68+ | 11+ | 79+ |
+| scroll-snap-stop | 115+ | ❌ | ❌ | ❌ |
+| scroll-padding | 69+ | 68+ | 14.1+ | 79+ |
+| scroll-margin | 69+ | 68+ | 14.1+ | 79+ |
+
+**移动端支持良好**，iOS Safari 11+、Android Chrome 69+ 均已支持。
+
+### Polyfill
+
+对于需要兼容旧版浏览器的场景，可以使用 [css-scroll-snap-polyfill](https://www.npmjs.com/package/css-scroll-snap-polyfill)：
+
+```html
+<script src="https://bundle.run/css-scroll-snap-polyfill@0.1.2"></script>
+<script>
+  cssScrollSnapPolyfill();
+</script>
+```
+
+### 性能最佳实践
+
+1. **避免 mandatory + 大元素组合：** `mandatory` 模式下，如果 snap area 高度超过视口，浏览器无法显示其中间部分，用户体验会很差。
+2. **合理设置 snap point 密度：** 过多的 snap point 会导致滚动不流畅，用户无法自由滚动到任意位置。
+3. **避免嵌套可滚动容器：** 嵌套的滚动容器会争夺滚动事件，建议通过 `overscroll-behavior` 控制。
+4. **硬件加速：** 滚动区域可添加 `will-change: scroll-position` 提示浏览器进行优化。
+
+---
+
+## 总结
+
+### 核心知识点回顾
+
+- **scroll-snap-type**：定义吸附方向（x/y/both）和严格程度（mandatory/proximity）
+- **scroll-snap-align**：定义子元素的对齐方式（start/center/end）
+- **scroll-snap-stop**：控制是否强制在每个 snap point 处停止
+- **scroll-padding**：调整容器吸附区域的内偏移
+- **scroll-margin**：调整子元素吸附区域的外偏移
+- Scroll Snap 必须配合 `overflow: auto/scroll` 使用
+- 主流浏览器已广泛支持，移动端兼容性良好
+
+### 延伸阅读
+
+- [MDN: CSS Scroll Snap](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll_snap)
+- [CSS-Tricks: Practical CSS Scroll Snapping](https://css-tricks.com/practical-css-scroll-snapping/)
+- [web.dev: Well-controlled scrolling with CSS scroll snap](https://web.dev/articles/css-scroll-snap)
+- [CSS Scroll Snap Module Level 1 规范](https://drafts.csswg.org/css-scroll-snap/)

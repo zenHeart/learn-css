@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>text-orientation 属性对比演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "SimSun", serif;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      color: #e0e0e0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+
+    .intro {
+      text-align: center;
+      color: #a0d8ef;
+      margin-bottom: 2.5rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .demo-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .demo-card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-card .subtitle {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    /* mixed 模式（默认） */
+    .mode-mixed {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      min-height: 320px;
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-size: 1.1rem;
+      line-height: 2.2;
+    }
+
+    .mode-mixed h3 {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      color: #ff6b6b;
+      margin-bottom: 1rem;
+    }
+
+    /* upright 模式 */
+    .mode-upright {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      min-height: 320px;
+      background: rgba(78, 205, 196, 0.15);
+      border: 1px solid rgba(78, 205, 196, 0.3);
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-size: 1.1rem;
+      line-height: 2.2;
+    }
+
+    .mode-upright h3 {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      color: #4ecdc4;
+      margin-bottom: 1rem;
+    }
+
+    /* sideways 模式 */
+    .mode-sideways {
+      writing-mode: vertical-rl;
+      text-orientation: sideways;
+      min-height: 320px;
+      background: rgba(255, 230, 125, 0.15);
+      border: 1px solid rgba(255, 230, 125, 0.3);
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-size: 1.1rem;
+      line-height: 2.2;
+    }
+
+    .mode-sideways h3 {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      color: #ffe67d;
+      margin-bottom: 1rem;
+    }
+
+    /* 对比表格 */
+    .comparison-table {
+      max-width: 1000px;
+      margin: 3rem auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .comparison-table h2 {
+      color: #ffd700;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    td:first-child {
+      font-weight: 600;
+      color: #4ecdc4;
+    }
+
+    .code {
+      font-family: "Consolas", "Monaco", monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .highlight-box {
+      background: rgba(255, 215, 0, 0.1);
+      border-left: 4px solid #ffd700;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .highlight-box p {
+      margin-bottom: 0.5rem;
+    }
+
+    .emoji {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
+
+    /* 英文/数字混排示例 */
+    .mixed-content {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      min-height: 200px;
+      background: rgba(255, 107, 107, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      line-height: 2.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔤 text-orientation 字符朝向对比</h1>
+
+  <p class="intro">
+    <code>text-orientation</code> 属性控制垂直模式下每个字符的朝向。
+    在混合语言环境中，这个属性决定了中文、英文、数字等不同字符如何排列。
+  </p>
+
+  <div class="demo-grid">
+
+    <!-- mixed 模式 -->
+    <div class="demo-card">
+      <h2><span class="emoji">📖</span>mixed（默认）</h2>
+      <p class="subtitle">汉字正向，英文/数字旋转90度</p>
+      <div class="mode-mixed">
+        <h3>混合语言测试 Mixed</h3>
+        <p>静夜思</p>
+        <p>CSS 3</p>
+        <p>ABC abc 123</p>
+        <p>Hello World</p>
+      </div>
+      <div class="highlight-box">
+        <p><strong>效果说明：</strong></p>
+        <p>• 中文字符保持正向站立</p>
+        <p>• 英文和数字旋转90度侧排</p>
+        <p>• 这是 <span class="code">text-orientation</span> 的默认值</p>
+      </div>
+    </div>
+
+    <!-- upright 模式 -->
+    <div class="demo-card">
+      <h2><span class="emoji">📱</span>upright</h2>
+      <p class="subtitle">所有字符都正向站立</p>
+      <div class="mode-upright">
+        <h3>混合语言测试 Mixed</h3>
+        <p>静夜思</p>
+        <p>CSS 3</p>
+        <p>ABC abc 123</p>
+        <p>Hello World</p>
+      </div>
+      <div class="highlight-box">
+        <p><strong>效果说明：</strong></p>
+        <p>• 所有字符都正向站立</p>
+        <p>• 汉字、英文、数字均如此</p>
+        <p>• 适合纯中文竖排阅读</p>
+      </div>
+    </div>
+
+    <!-- sideways 模式 -->
+    <div class="demo-card">
+      <h2><span class="emoji">➡️</span>sideways</h2>
+      <p class="subtitle">所有字符侧排90度</p>
+      <div class="mode-sideways">
+        <h3>混合语言测试 Mixed</h3>
+        <p>静夜思</p>
+        <p>CSS 3</p>
+        <p>ABC abc 123</p>
+        <p>Hello World</p>
+      </div>
+      <div class="highlight-box">
+        <p><strong>效果说明：</strong></p>
+        <p>• 所有字符旋转90度侧排</p>
+        <p>• 整体文字流向不变</p>
+        <p>• 适合特殊排版需求</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 英文混排示例 -->
+  <div class="comparison-table">
+    <h2>📊 常见场景对比</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>中文</th>
+          <th>英文单词</th>
+          <th>数字</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code">mixed</span></td>
+          <td>正向 ✅</td>
+          <td>旋转90度 ↻</td>
+          <td>旋转90度 ↻</td>
+          <td>中英混排的技术文档</td>
+        </tr>
+        <tr>
+          <td><span class="code">upright</span></td>
+          <td>正向 ✅</td>
+          <td>正向 ✅</td>
+          <td>正向 ✅</td>
+          <td>纯中文竖排小说、诗词</td>
+        </tr>
+        <tr>
+          <td><span class="code">sideways</span></td>
+          <td>旋转90度 ↻</td>
+          <td>旋转90度 ↻</td>
+          <td>旋转90度 ↻</td>
+          <td>特殊艺术排版</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 实际应用示例 -->
+  <div class="comparison-table">
+    <h2>💡 实际应用示例：中英混排</h2>
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 280px;">
+        <h3 style="color: #ff6b6b; margin-bottom: 1rem;">mixed 模式（默认）</h3>
+        <div class="mixed-content" style="text-orientation: mixed;">
+          <p>版本号 Version 1.2.3</p>
+          <p>CSS 又称层叠样式表</p>
+          <p>共 365 天 24 Hours</p>
+        </div>
+        <p style="margin-top: 1rem; color: #888; font-size: 0.9rem;">
+          英文和数字会旋转90度，与中文混排时不太美观
+        </p>
+      </div>
+      <div style="flex: 1; min-width: 280px;">
+        <h3 style="color: #4ecdc4; margin-bottom: 1rem;">upright 模式</h3>
+        <div class="mixed-content" style="text-orientation: upright;">
+          <p>版本号 Version 1.2.3</p>
+          <p>CSS 又称层叠样式表</p>
+          <p>共 365 天 24 Hours</p>
+        </div>
+        <p style="margin-top: 1rem; color: #888; font-size: 0.9rem;">
+          所有字符正向站立，阅读体验更好
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 为演示卡片添加点击高亮效果
+    document.querySelectorAll('.demo-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+      });
+    });
+  </script>
+
+</body>
+</html>

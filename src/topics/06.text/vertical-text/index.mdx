@@ -1,0 +1,271 @@
+# CSS 文字竖排学习指南
+
+## 学习目标
+
+- 理解 CSS 垂直文字排版的原理与应用场景
+- 掌握 `writing-mode` 属性实现水平与垂直模式的切换
+- 掌握 `text-orientation` 属性控制字符朝向
+- 能够处理混合横排竖排的排版需求
+- 了解兼容性处理方案
+
+## 核心概念
+
+### writing-mode 书写模式
+
+`writing-mode` 属性定义了文本的排列方向，决定了文字是水平还是垂直流动。
+
+```css
+/* 垂直从右到左（中文/日文传统排版） */
+writing-mode: vertical-rl;
+
+/* 垂直从左到右（蒙古文等） */
+writing-mode: vertical-lr;
+
+/* 水平从左到右（默认） */
+writing-mode: horizontal-tb;
+```
+
+- **`vertical-rl`**：垂直方向，右侧为行头（句子起始），左侧为行尾。最符合中文竖排习惯。
+- **`vertical-lr`**：垂直方向，左侧为行头，右侧为行尾。
+- **`horizontal-tb`**：水平方向，从左到右，从上到下。
+
+### text-orientation 字符朝向
+
+`text-orientation` 属性控制垂直模式下字符的朝向。
+
+```css
+/* 混合模式：西文保持横向，中文保持正向 */
+text-orientation: mixed;
+
+/* 正向模式：所有字符都正向站立（适用于全中文场景） */
+text-orientation: upright;
+
+/* 侧排模式：所有字符旋转90度侧排 */
+text-orientation: sideways;
+```
+
+- **`mixed`**（默认）：汉字保持正向站立，拉丁字母旋转90度。
+- **`upright`**：所有字符都正向站立，汉字与西文均如此。
+- **`sideways`**：所有字符侧排90度。
+
+### Unicode 双向文本控制
+
+当垂直排版中混入从右到左（RTL）语言（如阿拉伯文、希伯来文）时，需要控制文本方向。
+
+```html
+<!-- 使用 dir 属性控制方向 -->
+<p dir="rtl">مرحبا</p>
+
+<!-- 使用 bdi 隔离双向文本 -->
+<p><bdi>مرحبا</bdi> 你好</p>
+```
+
+## 属性详解
+
+### writing-mode 完整取值
+
+| 值 | 说明 |
+|-----|------|
+| `horizontal-tb` | 水平从左到右，从上到下（默认值） |
+| `vertical-rl` | 垂直从上到下，从右到左 |
+| `vertical-lr` | 垂直从上到下，从左到右 |
+| `sideways-rl` | 垂直从右到左（文字侧面朝上） |
+| `sideways-lr` | 垂直从左到右（文字侧面朝上） |
+
+> **注意**：`sideways-rl` 和 `sideways-lr` 目前浏览器支持度有限，谨慎使用。
+
+### text-orientation 完整取值
+
+| 值 | 说明 | 浏览器支持 |
+|-----|------|-----------|
+| `mixed` | 默认值，汉字正向，西文旋转 | 良好 |
+| `upright` | 所有字符正向站立 | 良好 |
+| `sideways` | 所有字符侧排90度 | 较好 |
+| `use-glyph-orientation` | 使用字符集自带方向（已废弃） | — |
+
+### 字符方向控制
+
+- **`<bdi>`**（Bidirectional Isolate）：隔离双向文本，防止上下文影响。
+- **`<bdo>`**（Bidirectional Override）：强制覆盖文本方向。
+- **`dir`** 属性：设置元素的基本方向（`ltr` / `rtl`）。
+
+## 实战案例
+
+### 竖排古文/诗词展示
+
+```css
+.poem {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 1.5rem;
+  line-height: 2;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5e6d3, #e8d5c4);
+  border-radius: 8px;
+}
+```
+
+```html
+<article class="poem">
+  <h2>静夜思</h2>
+  <p>床前明月光</p>
+  <p>疑是地上霜</p>
+  <p>举头望明月</p>
+  <p>低头思故乡</p>
+</article>
+```
+
+### 竖排中文小说阅读器
+
+```css
+.reader {
+  writing-mode: vertical-rl;
+  text-orientation: mixed; /* 英文混排时 mixed 更自然 */
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+```
+
+### 混合横排竖排排版
+
+通过将不同区块设置为不同的 `writing-mode`，实现复杂排版：
+
+```css
+.main-title {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.content {
+  writing-mode: horizontal-tb; /* 正文保持横排 */
+}
+```
+
+```html
+<aside class="main-title">
+  <h1>水浒传</h1>
+</aside>
+<main class="content">
+  <p>话说当时宋江翻身下来...</p>
+</main>
+```
+
+## 兼容性处理
+
+### IE 浏览器
+
+IE 使用旧版 CSS 语法，使用 `-ms-writing-mode` 前缀：
+
+```css
+.vertical {
+  -ms-writing-mode: tb-rl;     /* IE 的 vertical-rl */
+  writing-mode: vertical-rl;   /* 标准语法 */
+}
+```
+
+| IE 值 | 标准对应 |
+|-------|---------|
+| `tb-rl` | `vertical-rl` |
+| `tb-lr` | `vertical-lr` |
+| `lr-tb` | `horizontal-tb` |
+
+### iOS Safari 注意事项
+
+1. **iOS 14 以下**：`text-orientation: upright` 对部分 emoji 和西文标点支持不完整。
+2. **性能问题**：大量垂直文字布局可能触发 iOS Safari 的渲染问题，可通过 `will-change: contents` 优化。
+3. **滚动方向**：垂直模式下滚动方向可能与预期相反，需注意用户体验。
+
+### Firefox 浏览器
+
+Firefox 完整支持 `writing-mode` 和 `text-orientation`，无特殊前缀需求。
+
+### 综合兼容写法
+
+```css
+.vertical-text {
+  -ms-writing-mode: tb-rl;
+  writing-mode: vertical-rl;
+  -webkit-text-orientation: upright;
+  text-orientation: upright;
+}
+```
+
+## 常见问题与解决方案
+
+### Q1：竖排时标点符号位置不对？
+
+**问题**：中文标点在竖排时挤在一起或位置异常。
+
+**解决**：设置适当的 `text-indent` 或使用 `punctuation-trim`（需浏览器支持）。
+
+```css
+.vertical {
+  writing-mode: vertical-rl;
+  hanging-punctuation: first allow-end; /* 悬挂标点 */
+}
+```
+
+### Q2：西文单词在竖排中被截断？
+
+**问题**：英文单词在垂直模式下显示异常。
+
+**解决**：使用 `word-break: break-all` 或 `overflow-wrap: break-word`。
+
+```css
+.vertical {
+  writing-mode: vertical-rl;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+```
+
+### Q3：垂直模式下图片如何旋转？
+
+**解决**：使用 `transform: rotate(90deg)` 手动旋转图片。
+
+```css
+img {
+  transform: rotate(90deg);
+}
+```
+
+### Q4：如何让垂直文字在容器内居中？
+
+```css
+.vertical-container {
+  writing-mode: vertical-rl;
+  display: flex;
+  justify-content: center;
+}
+```
+
+### Q5：打印时垂直文字方向错误？
+
+**解决**：使用 `@page` 规则单独设置打印样式，或在打印媒体查询中切换回横排。
+
+```css
+@media print {
+  .vertical {
+    writing-mode: horizontal-tb;
+  }
+}
+```
+
+## 延伸阅读
+
+- [CSS Writing Modes Level 3 - W3C](https://www.w3.org/TR/css-writing-modes-3/)
+- [CSS Text Module Level 4 - W3C](https://www.w3.org/TR/css-text-4/)
+- [中文竖排的历史与演变](https://en.wikipedia.org/wiki/Vertical_writing)
+
+## 相关属性参考
+
+| 属性 | 说明 |
+|-----|------|
+| `writing-mode` | 文本排列方向 |
+| `text-orientation` | 字符朝向 |
+| `direction` | 文本基本方向 |
+| `unicode-bidi` | Unicode 双向算法控制 |
+| `text-combine-upright` | 数字/字母组合横向展示 |
+| `hanging-punctuation` | 悬挂标点 |

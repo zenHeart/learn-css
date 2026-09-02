@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>古文竖排展示 - CSS 垂直排版实战</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "KaiTi", "楷体", "STKaiti", "华文楷体", serif;
+      background: #f5f0e8;
+      min-height: 100vh;
+      padding: 2rem;
+      color: #3d3d3d;
+    }
+
+    /* 宣纸纹理背景 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(139, 90, 43, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 90, 43, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(139, 90, 43, 0.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    h1 {
+      text-align: center;
+      color: #5d4037;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+      letter-spacing: 0.2em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #8d6e63;
+      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* 竖排文字容器基础样式 */
+    .vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+    }
+
+    /* 古典风格竖排卡片 */
+    .poem-card {
+      background: linear-gradient(135deg, #fffef9 0%, #f9f3e3 100%);
+      border: 1px solid #d4c5a9;
+      border-radius: 4px;
+      padding: 2rem 1.5rem;
+      box-shadow:
+        0 4px 20px rgba(139, 90, 43, 0.1),
+        inset 0 0 60px rgba(139, 90, 43, 0.03);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .poem-card:hover {
+      transform: translateY(-6px);
+      box-shadow:
+        0 12px 40px rgba(139, 90, 43, 0.15),
+        inset 0 0 60px rgba(139, 90, 43, 0.03);
+    }
+
+    /* 装饰角标 */
+    .poem-card::before,
+    .poem-card::after {
+      content: '❧';
+      position: absolute;
+      font-size: 1.5rem;
+      color: #c4a574;
+      opacity: 0.6;
+    }
+
+    .poem-card::before {
+      top: 0.5rem;
+      left: 0.5rem;
+    }
+
+    .poem-card::after {
+      bottom: 0.5rem;
+      right: 0.5rem;
+      transform: rotate(180deg);
+    }
+
+    .poem-title {
+      writing-mode: horizontal-tb;
+      text-orientation: mixed;
+      font-size: 1.4rem;
+      color: #5d4037;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: normal;
+      letter-spacing: 0.15em;
+    }
+
+    .poem-author {
+      writing-mode: horizontal-tb;
+      font-size: 0.85rem;
+      color: #8d6e63;
+      text-align: right;
+      margin-top: 1.5rem;
+    }
+
+    .poem-content {
+      font-size: 1.15rem;
+      line-height: 2.4;
+      letter-spacing: 0.25em;
+      color: #3d3d3d;
+    }
+
+    /* 诗词语义化结构 */
+    .poem-content p {
+      margin-bottom: 0.8em;
+    }
+
+    .poem-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 静夜思 */
+    #poem-1 {
+      min-height: 320px;
+    }
+
+    /* 望庐山瀑布 */
+    #poem-2 {
+      min-height: 380px;
+    }
+
+    /* 登鹳雀楼 */
+    #poem-3 {
+      min-height: 280px;
+    }
+
+    /* 另一个古文示例 */
+    .prose-card {
+      background: linear-gradient(135deg, #faf6ed 0%, #f0e6d2 100%);
+      border: 2px solid #c9b896;
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 500px;
+      margin: 2rem auto;
+      box-shadow: 0 8px 32px rgba(139, 90, 43, 0.12);
+    }
+
+    .prose-title {
+      writing-mode: horizontal-tb;
+      font-size: 1.6rem;
+      color: #5d4037;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.2em;
+    }
+
+    .prose-content {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 1.2rem;
+      line-height: 2.6;
+      letter-spacing: 0.3em;
+      min-height: 300px;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 1.5rem;
+      border-radius: 4px;
+      border: 1px solid #e0d5c0;
+    }
+
+    .prose-content p {
+      text-indent: 2em;
+      text-align: justify;
+    }
+
+    /* 布局说明 */
+    .layout-demo {
+      background: rgba(93, 64, 55, 0.08);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 3rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .layout-demo h2 {
+      color: #5d4037;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      writing-mode: horizontal-tb;
+    }
+
+    .layout-demo .description {
+      color: #8d6e63;
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+      writing-mode: horizontal-tb;
+    }
+
+    .side-by-side {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .side-title {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      background: linear-gradient(135deg, #8b5a2b, #a0522d);
+      color: #fff;
+      padding: 2rem 1rem;
+      border-radius: 8px;
+      font-size: 1.8rem;
+      letter-spacing: 0.3em;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(139, 90, 43, 0.3);
+    }
+
+    .side-content {
+      writing-mode: horizontal-tb;
+      flex: 1;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #d4c5a9;
+      line-height: 2;
+      color: #3d3d3d;
+      font-size: 1rem;
+    }
+
+    .side-content p {
+      text-indent: 2em;
+      margin-bottom: 1em;
+    }
+
+    /* 页脚装饰 */
+    .footer-decor {
+      text-align: center;
+      margin-top: 3rem;
+      color: #c4a574;
+      font-size: 1.5rem;
+      letter-spacing: 0.5em;
+    }
+
+    @media (max-width: 768px) {
+      .side-by-side {
+        flex-direction: column;
+      }
+
+      .side-title {
+        writing-mode: horizontal-tb;
+        padding: 1rem 2rem;
+      }
+
+      .container {
+        gap: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📜 古文竖排展示</h1>
+  <p class="subtitle">CSS writing-mode + text-orientation 实现传统中文竖排</p>
+
+  <div class="container">
+
+    <!-- 静夜思 -->
+    <div class="poem-card" id="poem-1">
+      <h2 class="poem-title">静夜思</h2>
+      <div class="poem-content vertical-text">
+        <p>床前明月光</p>
+        <p>疑是地上霜</p>
+        <p>举头望明月</p>
+        <p>低头思故乡</p>
+      </div>
+      <p class="poem-author">—— 唐·李白</p>
+    </div>
+
+    <!-- 望庐山瀑布 -->
+    <div class="poem-card" id="poem-2">
+      <h2 class="poem-title">望庐山瀑布</h2>
+      <div class="poem-content vertical-text">
+        <p>日照香炉生紫烟</p>
+        <p>遥看瀑布挂前川</p>
+        <p>飞流直下三千尺</p>
+        <p>疑是银河落九天</p>
+      </div>
+      <p class="poem-author">—— 唐·李白</p>
+    </div>
+
+    <!-- 登鹳雀楼 -->
+    <div class="poem-card" id="poem-3">
+      <h2 class="poem-title">登鹳雀楼</h2>
+      <div class="poem-content vertical-text">
+        <p>白日依山尽</p>
+        <p>黄河入海流</p>
+        <p>欲穷千里目</p>
+        <p>更上一层楼</p>
+      </div>
+      <p class="poem-author">—— 唐·王之涣</p>
+    </div>
+
+  </div>
+
+  <!-- 古文排版示例 -->
+  <div class="prose-card">
+    <h2 class="prose-title">桃花源记（节选）</h2>
+    <div class="prose-content vertical-text">
+      <p>晋太元中，武陵人捕鱼为业。缘溪行，忘路之远近。忽逢桃花林，夹岸数百步，中无杂树，芳草鲜美，落英缤纷。渔人甚异之。复前行，欲穷其林。</p>
+      <p>林尽水源，便得一山，山有小口，仿佛若有光。便舍船，从口入。初极狭，才通人。复行数十步，豁然开朗。土地平旷，屋舍俨然，有良田、美池、桑竹之属。阡陌交通，鸡犬相闻。其中往来种作，男女衣着，悉如外人。黄发垂髫，并怡然自乐。</p>
+    </div>
+    <p class="poem-author" style="writing-mode: horizontal-tb; margin-top: 1rem;">—— 晋·陶渊明</p>
+  </div>
+
+  <!-- 布局示例：书名+正文 -->
+  <div class="layout-demo">
+    <h2>💡 实际应用：书名竖排 + 正文横排</h2>
+    <p class="description">
+      常见的中文排版布局：左侧书名竖排，右侧正文横排。这种布局在书籍封面、杂志文章中非常常见。
+    </p>
+    <div class="side-by-side">
+      <div class="side-title">水浒传</div>
+      <div class="side-content">
+        <p>话说当时宋江翻身下来，在床边地下睡了一觉。正在困倦之际，只听得后面有人叫唤，宋江偷睛看时，却是两个公人，一个是铁臂膊蔡福，一个是一枝花蔡庆。三个坐定，点了素馔酒菜，叫酒保取将酒来。</p>
+        <p>宋江便推说害了一身病，医治不得，又不肯吃酒饭，终日只是思量肉味，面上肉都瘦了。两个公人相劝，只吃得两杯便住了。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-decor">◆ ◆ ◆</div>
+
+  <script>
+    // 为每首诗添加动态效果
+    document.querySelectorAll('.poem-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.background = 'linear-gradient(135deg, #fffef5 0%, #faf3e8 100%)';
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.background = 'linear-gradient(135deg, #fffef9 0%, #f9f3e3 100%)';
+      });
+    });
+  </script>
+
+</body>
+</html>

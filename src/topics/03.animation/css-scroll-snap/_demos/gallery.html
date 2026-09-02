@@ -1,0 +1,109 @@
+<h3>水平图片画廊</h3>
+<p>水平滚动浏览图片，使用 <code>scroll-snap-type: x mandatory</code> + <code>scroll-padding: 50%</code> 实现居中吸附效果。每个卡片宽度 60%，中间那张会被吸附到视口中心。</p>
+
+<div class="gallery-container">
+  <div class="gallery">
+    <div class="card">
+      <div class="card-image img-1"></div>
+      <div class="card-label">图片 1</div>
+    </div>
+    <div class="card">
+      <div class="card-image img-2"></div>
+      <div class="card-label">图片 2</div>
+    </div>
+    <div class="card">
+      <div class="card-image img-3"></div>
+      <div class="card-label">图片 3</div>
+    </div>
+    <div class="card">
+      <div class="card-image img-4"></div>
+      <div class="card-label">图片 4</div>
+    </div>
+    <div class="card">
+      <div class="card-image img-5"></div>
+      <div class="card-label">图片 5</div>
+    </div>
+    <div class="card">
+      <div class="card-image img-6"></div>
+      <div class="card-label">图片 6</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .gallery-container {
+    width: 100%;
+    padding: 10px 0;
+    background: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  .gallery {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 calc(50% - 120px); /* 配合 scroll-padding: 50% 实现居中 */
+    scroll-padding: 50%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .gallery::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card {
+    flex: 0 0 240px;
+    scroll-snap-align: center;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+
+  .card:hover {
+    transform: scale(1.02);
+  }
+
+  .card-image {
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .img-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .img-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .img-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .img-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+  .img-5 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+  .img-6 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+
+  .card-label {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+  }
+</style>

@@ -1,0 +1,77 @@
+<h3>垂直全屏切换页面</h3>
+<p>滚动切换各个 Section，每个 Section 占满一屏（100vh）。设置 <code>scroll-snap-type: y mandatory</code>，每个 Section 对齐顶部。</p>
+
+<div class="page-container">
+  <section class="section section-1">
+    <h2>Section 1</h2>
+    <p>开始探索</p>
+  </section>
+  <section class="section section-2">
+    <h2>Section 2</h2>
+    <p>向下滚动</p>
+  </section>
+  <section class="section section-3">
+    <h2>Section 3</h2>
+    <p>继续前进</p>
+  </section>
+  <section class="section section-4">
+    <h2>Section 4</h2>
+    <p>到达终点</p>
+  </section>
+</div>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .page-container {
+    width: 100%;
+    height: 300px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .section {
+    height: 100%;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: start;
+  }
+
+  .section h2 {
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .section p {
+    color: rgba(255,255,255,0.8);
+    font-size: 1rem;
+  }
+
+  .section-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .section-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .section-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .section-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+</style>
