@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Layout API — 瀑布流布局演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .demo-area { border: 12px solid #30363d; border-radius: 8px; padding: 10px; margin-bottom: 16px; }
+    .masonry-container { column-count: 3; column-gap: 10px; }
+    .masonry-item { break-inside: avoid; margin-bottom: 10px; border-radius: 6px; color: white; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Layout API — 瀑布流布局</h1>
+    <p class="subtitle">通过 Layout API 实现瀑布流（Masonry）效果，自动选择最短列放置元素</p>
+
+    <div class="warning">
+      ⚠️ Layout API 需要在 Chrome/Edge 中开启实验性功能：<code>chrome://flags/#enable-experimental-web-platform-features</code>
+    </div>
+
+    <div class="section">
+      <h2>Worklet 实现</h2>
+      <div class="code-block">class MasonryLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const columnWidth = 150;
+    const gap = 10;
+    const columnCount = Math.max(1,
+      Math.floor((availableInlineSize + gap) / (columnWidth + gap)));
+    const actualColumnWidth =
+      (availableInlineSize - gap * (columnCount - 1)) / columnCount;
+
+    const columnHeights = new Array(columnCount).fill(0);
+    const childFragments = [];
+
+    for (const child of children) {
+      const minHeightCol = columnHeights.indexOf(Math.min(...columnHeights));
+      const fragment = await child.layoutNextFragment({
+        availableInlineSize: actualColumnWidth
+      });
+
+      // 缩放以适应列宽
+      if (fragment.inlineSize > actualColumnWidth) {
+        const scale = actualColumnWidth / fragment.inlineSize;
+        fragment.inlineSize = actualColumnWidth;
+        fragment.blockSize = fragment.blockSize * scale;
+      }
+
+      fragment.inlineOffset = edges.inlineStart + minHeightCol * (actualColumnWidth + gap);
+      fragment.blockOffset = edges.blockStart + columnHeights[minHeightCol];
+      columnHeights[minHeightCol] += fragment.blockSize + gap;
+      childFragments.push(fragment);
+    }
+
+    return {
+      autoBlockSize: Math.max(...columnHeights) + edges.block,
+      childFragments
+    };
+  }
+}
+registerLayout('masonry', MasonryLayout);</div>
+    </div>
+
+    <div class="section">
+      <h2>效果演示（Fallback — CSS column 模拟）</h2>
+      <div class="demo-area">
+        <div class="masonry-container">
+          <div class="masonry-item" style="height:120px;background:linear-gradient(135deg,#6366f1,#8b5cf6);">项目 1</div>
+          <div class="masonry-item" style="height:80px;background:linear-gradient(135deg,#ec4899,#f97316);">项目 2</div>
+          <div class="masonry-item" style="height:150px;background:linear-gradient(135deg,#22c55e,#3b82f6);">项目 3</div>
+          <div class="masonry-item" style="height:60px;background:linear-gradient(135deg,#f97316,#eab308);">项目 4</div>
+          <div class="masonry-item" style="height:100px;background:linear-gradient(135deg,#8b5cf6,#ec4899);">项目 5</div>
+          <div class="masonry-item" style="height:130px;background:linear-gradient(135deg,#3b82f6,#22c55e);">项目 6</div>
+          <div class="masonry-item" style="height:70px;background:linear-gradient(135deg,#ef4444,#f97316);">项目 7</div>
+          <div class="masonry-item" style="height:90px;background:linear-gradient(135deg,#06b6d4,#8b5cf6);">项目 8</div>
+        </div>
+      </div>
+      <div class="code-block">/* CSS 使用 */
+.masonry-container {
+  display: layout(masonry);  /* 瀑布流 */
+  width: 400px;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>关键算法</h2>
+      <div class="info">
+        <strong>columnHeights</strong>：记录每列当前高度<br>
+        <strong>minHeightCol = indexOf(min(...columnHeights))</strong>：找到最短的列<br>
+        <strong>fragment.blockOffset</strong>：子元素放置在最短列的底部<br>
+        <strong>columnHeights[minHeightCol] += fragment.blockSize + gap</strong>：更新列高度
+      </div>
+    </div>
+  </div>
+</body>
+</html>

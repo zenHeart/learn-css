@@ -1,0 +1,215 @@
+---
+title: "CSS 文字竖排实现与优化"
+category: "文本排版"
+tags:
+  - CSS
+  - 文字竖排
+  - writing-mode
+  - text-orientation
+description: "详解CSS文字竖排的各种实现方式、writing-mode属性和优化技巧"
+keywords: "CSS文字竖排, writing-mode, text-orientation, 竖向排版"
+---
+
+# CSS 文字竖排实现与优化
+
+## 概述
+
+CSS 文字竖排是指将文本从水平排列变为垂直（竖向）排列。在中文、日文等竖排文本常见的排版需求中非常重要。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 核心属性
+
+### 1. writing-mode
+
+`writing-mode` 属性控制文本的排列方向：
+
+```css
+/* 水平从左到右（默认） */
+writing-mode: horizontal-tb;
+
+/* 垂直从右到左（日文传统排版） */
+writing-mode: vertical-rl;
+
+/* 垂直从左到右（蒙古文、满文） */
+writing-mode: vertical-lr;
+```
+
+{/* @playground id="writing-mode-demo" mode="demo" */}
+
+### 2. text-orientation
+
+控制竖排时字符的方向：
+
+```css
+/* 字符保持直立（中文、日文） */
+text-orientation: upright;
+
+/* 字符横向旋转（西文字母） */
+text-orientation: mixed;
+
+/* 所有字符横向旋转 */
+text-orientation: sideways;
+
+/* 使用金牛座字体的字形方向 */
+text-orientation: use-glyph-orientation;
+```
+
+{/* @playground id="text-orientation-demo" mode="demo" */}
+
+## 实现方式
+
+### 1. 基础竖排
+
+```css
+.vertical-text {
+  writing-mode: vertical-rl;
+}
+```
+
+### 2. 竖排+直排文字
+
+```css
+.vertical-cjk {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+```
+
+### 3. 竖排+横排标点
+
+```css
+.vertical-mixed {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+```
+
+## 实际应用场景
+
+### 1. 古文排版
+
+```css
+.classical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "SimSun", "宋体", serif;
+  line-height: 1.8;
+}
+```
+
+### 2. 标题竖排
+
+```css
+.vertical-title {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  letter-spacing: 0.5em;
+}
+```
+
+### 3. 侧边栏标签
+
+```css
+.sidebar-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+```
+
+## 优化技巧
+
+### 1. 行高调整
+
+竖排时需要调整行高以适应视觉：
+
+```css
+.vertical-text {
+  writing-mode: vertical-rl;
+  line-height: 1.5; /* 竖排行高通常较小 */
+  letter-spacing: 0.1em; /* 字间距微调 */
+}
+```
+
+### 2. 文字对齐
+
+```css
+.vertical-justified {
+  writing-mode: vertical-rl;
+  text-align: justify; /* 两端对齐 */
+  text-combine-upright: digits 2; /* 2位数字横排 */
+}
+```
+
+### 3. 省略号处理
+
+```css
+.vertical-ellipsis {
+  writing-mode: vertical-rl;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+```
+
+## 与其他属性的结合
+
+### 1. 与 text-combine-upright
+
+```css
+.combine-demo {
+  writing-mode: vertical-rl;
+  text-combine-upright: digits 3; /* 3位及以下数字横向组合 */
+}
+```
+
+### 2. 与 ruby（ruby 标注）
+
+```css
+.ruby-demo {
+  writing-mode: vertical-rl;
+}
+ruby {
+  text-orientation: upright;
+}
+```
+
+## 浏览器兼容性
+
+`writing-mode` 属性兼容性良好：
+
+- Chrome 48+
+- Firefox 41+
+- Safari 11+
+- Edge 12+
+
+`text-orientation` 属性：
+
+- Chrome 48+
+- Firefox 41+
+- Safari 11+
+- Edge 79+
+
+`text-combine-upright` 属性：
+
+- Chrome 48+
+- Firefox: 不支持
+- Safari 11+
+- Edge 79+
+
+## 最佳实践
+
+1. **选择合适的 writing-mode**：根据内容选择 `vertical-rl`（中文常用）或 `vertical-lr`
+2. **注意 text-orientation**：中文应使用 `upright`，西文应使用 `mixed`
+3. **调整间距**：竖排时适当调整 `letter-spacing` 和 `line-height`
+4. **考虑标点处理**：中文标点在竖排时的样式可能需要额外处理
+5. **测试多浏览器**：确保在各浏览器中的表现一致
+
+## 参考资料
+
+- [CSS Writing Modes - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Writing_Modes)
+- [writing-mode - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/writing-mode)
+- [text-orientation - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/text-orientation)
