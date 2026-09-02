@@ -1,0 +1,362 @@
+---
+title: 关键帧 @keyframes
+tags: [animation, keyframes]
+description: CSS @keyframes 规则详解：语法、填充模式、播放方向、动画组合
+---
+
+
+
+## 学习目标
+
+掌握 CSS `@keyframes` 规则的完整用法，理解关键帧动画的时序控制机制。
+
+1. 理解 `@keyframes` 语法和关键帧时序原理
+2. 掌握 `animation-fill-mode` 的四种填充行为
+3. 掌握 `animation-direction` 的播放方向控制
+4. 了解 `animation-composition`（CSS 2024）动画组合
+
+## 核心概念
+
+### @keyframes 规则
+
+`@keyframes` 用于定义 CSS 动画的中间状态。一个动画由多个关键帧组成，每个关键帧描述了元素在特定时间点的样式。
+
+```css
+/* 百分比写法：0% = from，100% = to */
+@keyframes slideRight {
+  0%   { transform: translateX(0); opacity: 1; }
+  50%  { transform: translateX(100px); opacity: 0.8; }
+  100% { transform: translateX(200px); opacity: 0.5; }
+}
+
+/* from/to 写法：仅两帧时常用 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+```
+
+### 关键帧顺序与时序
+
+**关键帧的书写顺序无关紧要，百分比值决定它们的播放时间。**
+
+```css
+/* 顺序颠倒，效果完全相同 */
+@keyframes equiv {
+  100% { top: 0; }
+  0%   { top: 100%; }
+}
+```
+
+浏览器会按百分比值从小到大自动排序，然后按时间顺序执行动画。
+
+{/* @playground id="keyframes-order" mode="demo" */}
+
+### 百分比与时间对应关系
+
+假设 `animation-duration: 4s`：
+
+| 关键帧 | 实际时间点 |
+|--------|-----------|
+| `0%`   | 0s        |
+| `50%`  | 2s        |
+| `100%` | 4s        |
+
+中间可以插任意多个百分比值：
+
+```css
+@keyframes complex {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.1); }
+  50%  { transform: scale(1); }
+  75%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+```
+
+## animation-fill-mode：填充模式
+
+控制动画**前后**元素样式的继承方式。
+
+| 值 | 说明 | 动画前 | 动画播放中 | 动画结束后 |
+|----|------|--------|------------|------------|
+| `none` | 默认，无填充 | 保持原有样式 | 动画样式 | 恢复原有样式 |
+| `forwards` | 停在最后一帧 | 保持原有样式 | 动画样式 | **保持最后一帧** |
+| `backwards` | 显示第一帧 | **显示第一帧** | 动画样式 | 恢复原有样式 |
+| `both` | 兼具 forwards + backwards | **显示第一帧** | 动画样式 | **保持最后一帧** |
+
+```css
+/* forwards：让动画停在结束状态 */
+@keyframes fillForwards {
+  0%   { background: #3b82f6; }
+  100% { background: #22c55e; border-radius: 50%; }
+}
+.box {
+  animation: fillForwards 1.5s 1 forwards;
+}
+```
+
+{/* @playground id="fill-mode" mode="demo" */}
+
+> 当 `animation-iteration-count` > 1 时，`forwards` 停在**最后一次迭代的最后一帧**，`backwards` 显示**第一次迭代的第一帧**。
+
+## animation-iteration-count：播放次数
+
+```css
+/* 具体次数 */
+animation-iteration-count: 3;
+
+/* 无限循环 */
+animation-iteration-count: infinite;
+```
+
+常见场景：
+
+```css
+/* Loading 动画：无限循环 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading { animation: spin 1s linear infinite; }
+
+/* 一次性动画：播完停止 */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+.toast { animation: slideIn 0.3s ease-out 1 forwards; }
+```
+
+## animation-direction：播放方向
+
+| 值 | 说明 | 播放行为 |
+|----|------|----------|
+| `normal` | 正向播放 | 0% → 100% |
+| `reverse` | 反向播放 | 100% → 0% |
+| `alternate` | 交替播放 | 正向 → 反向 → 正向 → ... |
+| `alternate-reverse` | 反向交替 | 反向 → 正向 → 反向 → ... |
+
+```css
+/* alternate 让动画更自然（正反交替） */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}
+.box { animation: pulse 1s infinite alternate; }
+```
+
+{/* @playground id="direction" mode="demo" */}
+
+## animation-composition（CSS 2024）
+
+> 较新属性，Chrome 112+ 支持。
+
+当同一个元素上有多个动画修改同一属性时，`animation-composition` 决定如何组合它们。
+
+```css
+/* 语法 */
+animation-composition: replace;   /* 默认：替换 */
+animation-composition: add;       /* 累加 */
+animation-composition: accumulate;/* 累积 */
+```
+
+### replace（默认值）
+
+后一个动画完全替换前一个动画的效果。
+
+```css
+@keyframes slide {
+  to { transform: translateX(100px); }
+}
+@keyframes scale {
+  to { transform: scale(1.5); }
+}
+.box {
+  animation: slide 1s, scale 1s;
+  /* 最终只有 scale 效果，slide 被替换 */
+}
+```
+
+### add（累加）
+
+两个动画效果叠加。例如：一个平移 + 一个缩放，结果是**平移且缩放**。
+
+```css
+@keyframes slide {
+  to { transform: translateX(100px); }
+}
+@keyframes scale {
+  to { transform: scale(1.5); }
+}
+.box {
+  animation: slide 1s, scale 1s;
+  animation-composition: add;
+  /* transform: translateX(100px) scale(1.5) */
+}
+```
+
+### accumulate（累积）
+
+数值型属性值相乘。例如：两次 `translateY(10px)` 累积成 `translateY(20px)`。
+
+```css
+@keyframes rise {
+  to { transform: translateY(10px); }
+}
+@keyframes bounce {
+  to { transform: translateY(20px); }
+}
+.box {
+  animation: rise 1s, bounce 1s;
+  animation-composition: accumulate;
+  /* transform: translateY(30px) — 累加效果 */
+}
+```
+
+## 常见错误
+
+### 忘记给动画命名
+
+```css
+/* ❌ 错误：@keyframes 名称与 animation-name 不匹配 */
+@keyframes slideRight { ... }
+animation-name: slide; /* 拼写错误，动画不运行 */
+
+<!-- ✅ 正确 -->
+animation-name: slideRight;
+```
+
+### 混淆 `0%` 和 `from`
+
+`0%` 和 `from` 完全等价，但**不能混用**：
+
+```css
+/* ❌ 错误：不能同时使用两种写法 */
+@keyframes wrong {
+  from { opacity: 0; }
+  50%  { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+
+/* ✅ 正确：统一使用一种语法 */
+@keyframes correct {
+  0%   { opacity: 0; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+```
+
+### `infinite` 没有终止条件
+
+```css
+/* ❌ 错误：hover 暂停，但移动端无法 hover */
+.box:hover {
+  animation-play-state: paused;
+}
+
+/* ✅ 正确：提供其他停止机制 */
+.paused {
+  animation-play-state: paused;
+}
+<button onclick="document.querySelector('.box').classList.toggle('paused')">暂停</button>
+```
+
+### 缺少 `animation-duration`
+
+```css
+/* ❌ 错误：没有设置时长，默认为 0s，动画不运行 */
+animation-name: slideRight;
+
+/* ✅ 正确：始终指定时长 */
+animation: slideRight 1s;
+```
+
+## 最佳实践
+
+### 使用可读的百分比步骤
+
+```css
+/* ✅ 清晰的步骤定义 */
+@keyframes stepBased {
+  0%   { background: #3b82f6; }
+  50%  { background: #a371f7; }
+  100% { background: #3fb950; }
+}
+
+/* ❌ 过于密集的百分比 */
+@keyframes messy {
+  0%   { ... }
+  10%  { ... }
+  15%  { ... }
+  23%  { ... }
+  100% { ... }
+}
+```
+
+### 使用有意义的动画名称
+
+```css
+/* ✅ 名称描述动画效果 */
+@keyframes slideInFromLeft { ... }
+@keyframes pulseScale { ... }
+@keyframes fadeInUp { ... }
+
+/* ❌ 模糊的名称 */
+@keyframes anim1 { ... }
+@keyframes kf { ... }
+```
+
+### 使用 `animation` 复合属性
+
+```css
+/* ✅ 复合属性，一行搞定 */
+animation: slideIn 0.5s ease-out 0.2s 1 forwards;
+
+/* ✅ 等价于 */
+animation-name: slideIn;
+animation-duration: 0.5s;
+animation-timing-function: ease-out;
+animation-delay: 0.2s;
+animation-iteration-count: 1;
+animation-fill-mode: forwards;
+```
+
+### 优先使用 `alternate` 做平滑循环
+
+```css
+/* ✅ 正反交替，运行自然 */
+animation: pulse 1s infinite alternate;
+
+/* ⚠️ 单向无限循环会有突兀的重置感 */
+animation: pulse 1s infinite;
+```
+
+## 附录：@keyframes 完整语法
+
+```css
+@keyframes <animation-name> {
+  <percentage> {
+    /* CSS 样式声明 */
+  }
+  /* 也可以用 from/to 替代 0%/100% */
+  from { ... }
+  to   { ... }
+}
+```
+
+关键帧百分比值可以是 `0%` 到 `100%` 之间的任意值，浏览器按百分比从小到大排序执行。
+
+## 相关属性
+
+| 属性 | 说明 |
+|------|------|
+| `animation` | 复合属性 |
+| `animation-name` | 动画名称 |
+| `animation-duration` | 持续时间 |
+| `animation-timing-function` | 缓动函数 |
+| `animation-delay` | 延迟时间 |
+| `animation-iteration-count` | 播放次数 |
+| `animation-direction` | 播放方向 |
+| `animation-fill-mode` | 填充模式 |
+| `animation-play-state` | 播放/暂停 |
+| `animation-composition` | 动画组合（CSS 2024） |

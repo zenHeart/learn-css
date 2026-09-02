@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS scroll-behavior 属性演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #00d9ff;
+      padding-top: 30px;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(22, 33, 62, 0.95);
+      border-bottom: 1px solid #0f3460;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+    }
+
+    .nav-title {
+      font-weight: 600;
+      color: #00d9ff;
+      font-size: 14px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: #eee;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: #0f3460;
+    }
+
+    /* 主内容区 */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-top: 80px;
+    }
+
+    /* 滚动行为切换器 */
+    .behavior-switcher {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 30px;
+      border: 1px solid #0f3460;
+    }
+
+    .behavior-switcher h2 {
+      color: #00d9ff;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .behavior-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .behavior-btn {
+      padding: 10px 20px;
+      border: 2px solid #0f3460;
+      border-radius: 8px;
+      background: transparent;
+      color: #eee;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .behavior-btn:hover {
+      border-color: #00d9ff;
+    }
+
+    .behavior-btn.active {
+      background: #00d9ff;
+      color: #1a1a2e;
+      border-color: #00d9ff;
+      font-weight: 600;
+    }
+
+    .behavior-btn code {
+      font-family: monospace;
+      background: rgba(0,0,0,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .active .behavior-btn code {
+      background: rgba(0,0,0,0.3);
+    }
+
+    /* 滚动区域 */
+    .scroll-container {
+      height: 400px;
+      overflow-y: auto;
+      background: #16213e;
+      border-radius: 12px;
+      border: 1px solid #0f3460;
+      position: relative;
+    }
+
+    .scroll-container h3 {
+      color: #ffd700;
+      margin-bottom: 12px;
+    }
+
+    .section {
+      min-height: 350px;
+      padding: 30px;
+      border-bottom: 1px dashed #0f3460;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-id {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .section h2 {
+      color: #00d9ff;
+      margin-bottom: 16px;
+    }
+
+    .section p {
+      color: #aaa;
+      line-height: 1.8;
+      max-width: 600px;
+    }
+
+    /* 锚点标记 */
+    .anchor-marker {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0f3460;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #ffd700;
+    }
+
+    /* 跳转按钮 */
+    .jump-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .jump-btn {
+      padding: 8px 16px;
+      background: #0f3460;
+      color: #eee;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .jump-btn:hover {
+      background: #00d9ff;
+      color: #1a1a2e;
+    }
+
+    /* 滚动指示器 */
+    .scroll-indicator {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #16213e;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #0f3460;
+      z-index: 999;
+    }
+
+    .scroll-indicator p {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .scroll-indicator .current-section {
+      font-size: 14px;
+      color: #00d9ff;
+      font-weight: 600;
+    }
+
+    /* 信息区 */
+    .info-section {
+      margin-top: 40px;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #0f3460;
+    }
+
+    .info-section h2 {
+      color: #00d9ff;
+      margin-bottom: 16px;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .comparison-table th {
+      background: #0f3460;
+      color: #00d9ff;
+    }
+
+    .comparison-table tr:hover {
+      background: #0d1b2a;
+    }
+
+    .code-block {
+      background: #0d1b2a;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: #a0a0a0;
+    }
+
+    .code-block .keyword { color: #c678dd; }
+    .code-block .string { color: #98c379; }
+    .code-block .property { color: #e5c07b; }
+    .code-block .value { color: #00d9ff; }
+
+    /* JS 控制区 */
+    .js-control {
+      margin-top: 40px;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #0f3460;
+    }
+
+    .js-control h2 {
+      color: #00d9ff;
+      margin-bottom: 16px;
+    }
+
+    .js-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .js-btn {
+      padding: 10px 20px;
+      background: #0f3460;
+      color: #eee;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .js-btn:hover {
+      background: #00d9ff;
+      color: #1a1a2e;
+    }
+
+    .js-btn.smooth {
+      border: 2px solid #4aff4a;
+    }
+
+    .js-btn.instant {
+      border: 2px solid #ff4a4a;
+    }
+
+    .js-btn.auto {
+      border: 2px solid #ffd700;
+    }
+
+    /* 动画指示器 */
+    .animation-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: 10px;
+    }
+
+    .animation-badge.smooth {
+      background: #4aff4a;
+      color: #1a1a2e;
+    }
+
+    .animation-badge.instant,
+    .animation-badge.auto {
+      background: #ff4a4a;
+      color: white;
+    }
+
+    /* 减少动画偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-container {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <span class="nav-title">scroll-behavior 演示</span>
+      <div class="nav-links">
+        <a href="#section-1">简介</a>
+        <a href="#section-2">核心概念</a>
+        <a href="#section-3">使用场景</a>
+        <a href="#section-4">对比表格</a>
+        <a href="#section-5">最佳实践</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容 -->
+  <main>
+    <!-- 滚动行为切换器 -->
+    <div class="behavior-switcher">
+      <h2>切换滚动行为 <span id="current-badge" class="animation-badge auto">auto</span></h2>
+      <div class="behavior-options">
+        <button class="behavior-btn active" data-behavior="auto">
+          <code>scroll-behavior: auto</code>
+          <span> - 默认即时滚动</span>
+        </button>
+        <button class="behavior-btn" data-behavior="smooth">
+          <code>scroll-behavior: smooth</code>
+          <span> - 平滑滚动动画</span>
+        </button>
+        <button class="behavior-btn" data-behavior="instant">
+          <code>scroll-behavior: instant</code>
+          <span> - 强制即时滚动</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 可滚动容器 -->
+    <div class="scroll-container" id="scrollContainer">
+      <!-- Section 1 -->
+      <div class="section" id="section-1">
+        <span class="section-id">#section-1</span>
+        <span class="anchor-marker">📍 当前区域</span>
+        <h2>简介</h2>
+        <p>
+          <strong>scroll-behavior</strong> 是 CSS 属性，用于控制用户点击锚点链接或程序触发滚动时，浏览器的滚动行为方式。
+          设置为 <code>smooth</code> 时，浏览器会以平滑动画的方式滚动到目标位置；
+          设置为 <code>auto</code> 或 <code>instant</code> 时，则是即时跳转。
+        </p>
+        <div class="jump-buttons">
+          <a href="#section-2" class="jump-btn">跳转到: 核心概念 →</a>
+          <a href="#section-5" class="jump-btn">跳转到: 最佳实践 →</a>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="section" id="section-2">
+        <span class="section-id">#section-2</span>
+        <span class="anchor-marker">📍 当前区域</span>
+        <h2>核心概念</h2>
+        <p>
+          <strong>scroll-behavior: smooth</strong> 开启后，所有通过锚点链接（<code>&lt;a href="#id"&gt;</code>）
+          触发的滚动都会使用平滑动画过渡。这种行为对于长页面导航特别有用，可以帮助用户理解自己在页面中的位置。
+        </p>
+        <p>
+          注意：<code>scroll-behavior</code> 不仅可以应用于 <code>&lt;html&gt;</code> 元素，
+          还可以应用于任何可滚动的容器元素，控制该容器内部的滚动行为。
+        </p>
+        <div class="jump-buttons">
+          <a href="#section-3" class="jump-btn">跳转到: 使用场景 →</a>
+          <a href="#section-1" class="jump-btn">↑ 返回: 简介</a>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="section" id="section-3">
+        <span class="section-id">#section-3</span>
+        <span class="anchor-marker">📍 当前区域</span>
+        <h2>使用场景</h2>
+        <p>
+          <strong>单页应用（SPA）</strong>：在单页应用中，平滑滚动可以帮助用户感知页面结构。
+        </p>
+        <p>
+          <strong>文档导航</strong>：长文档中使用平滑滚动到锚点，提升阅读体验。
+        </p>
+        <p>
+          <strong>固定导航栏</strong>：配合 <code>scroll-padding-top</code> 可以防止内容被固定导航栏遮挡。
+        </p>
+        <div class="jump-buttons">
+          <a href="#section-4" class="jump-btn">跳转到: 对比表格 →</a>
+          <a href="#section-2" class="jump-btn">↑ 返回: 核心概念</a>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="section" id="section-4">
+        <span class="section-id">#section-4</span>
+        <span class="anchor-marker">📍 当前区域</span>
+        <h2>对比表格</h2>
+        <p>下表展示了 CSS <code>scroll-behavior</code> 与 JavaScript <code>scrollIntoView()</code> 的对比：</p>
+        <div class="jump-buttons">
+          <a href="#section-5" class="jump-btn">跳转到: 最佳实践 →</a>
+          <a href="#section-3" class="jump-btn">↑ 返回: 使用场景</a>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="section" id="section-5">
+        <span class="section-id">#section-5</span>
+        <span class="anchor-marker">📍 当前区域</span>
+        <h2>最佳实践</h2>
+        <p>
+          <strong>1. 尊重用户偏好</strong>：使用 <code>@media (prefers-reduced-motion: reduce)</code>
+          为减少动画偏好用户关闭平滑滚动。
+        </p>
+        <p>
+          <strong>2. 配合 scroll-padding</strong>：使用固定导航栏时，记得设置
+          <code>scroll-padding-top</code> 防止内容被遮挡。
+        </p>
+        <p>
+          <strong>3. 性能考虑</strong>：在性能敏感的场景下，可考虑使用即时滚动。
+        </p>
+        <div class="jump-buttons">
+          <a href="#section-1" class="jump-btn">↑ 返回顶部</a>
+          <a href="#section-4" class="jump-btn">↑ 返回: 对比表格</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 滚动指示器 -->
+    <div class="scroll-indicator">
+      <p>当前区域</p>
+      <div class="current-section" id="currentSection">-</div>
+    </div>
+
+    <!-- JS 控制区 -->
+    <div class="js-control">
+      <h2>JavaScript scrollIntoView() 对比</h2>
+      <p style="color: #888; margin-bottom: 16px;">
+        点击下方按钮，使用 JavaScript 方式滚动到目标区域。注意：JS 的 scrollIntoView() 会覆盖 CSS 的 scroll-behavior 设置。
+      </p>
+      <div class="js-buttons">
+        <button class="js-btn smooth" onclick="scrollWithJS('smooth')">
+          scrollIntoView({ behavior: 'smooth' })
+        </button>
+        <button class="js-btn instant" onclick="scrollWithJS('instant')">
+          scrollIntoView({ behavior: 'instant' })
+        </button>
+        <button class="js-btn auto" onclick="scrollWithJS('auto')">
+          scrollIntoView({ behavior: 'auto' })
+        </button>
+      </div>
+      <div class="code-block">
+        <pre><span class="keyword">const</span> element = document.<span class="method">getElementById</span>(<span class="string">'section-3'</span>);
+element.<span class="method">scrollIntoView</span>({
+  <span class="property">behavior</span>: <span class="string">'smooth'</span>,  <span class="comment">// 或 'instant', 'auto'</span>
+  <span class="property">block</span>: <span class="string">'start'</span>      <span class="comment">// 'center', 'end', 'nearest'</span>
+});</pre>
+      </div>
+    </div>
+
+    <!-- 信息区 -->
+    <div class="info-section">
+      <h2>scroll-behavior vs scrollIntoView()</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>特性</th>
+            <th>CSS scroll-behavior</th>
+            <th>JS scrollIntoView()</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>控制方式</td>
+            <td>CSS 属性声明</td>
+            <td>JavaScript API 调用</td>
+          </tr>
+          <tr>
+            <td>作用域</td>
+            <td>影响所有滚动操作</td>
+            <td>仅影响当前调用</td>
+          </tr>
+          <tr>
+            <td>动画时长</td>
+            <td>浏览器决定</td>
+            <td>浏览器决定</td>
+          </tr>
+          <tr>
+            <td>兼容性</td>
+            <td>现代浏览器</td>
+            <td>更广泛</td>
+          </tr>
+          <tr>
+            <td>参数控制</td>
+            <td>无</td>
+            <td>可设置 block/inline</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top: 24px;">浏览器兼容性</h2>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>属性值</th>
+            <th>Chrome</th>
+            <th>Firefox</th>
+            <th>Safari</th>
+            <th>Edge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>auto</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+          </tr>
+          <tr>
+            <td>smooth</td>
+            <td>✅ 61+</td>
+            <td>✅ 36+</td>
+            <td>✅ 15.4+</td>
+            <td>✅ 79+</td>
+          </tr>
+          <tr>
+            <td>instant</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+            <td>✅ 1+</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const scrollContainer = document.getElementById('scrollContainer');
+    const behaviorButtons = document.querySelectorAll('.behavior-btn');
+    const currentBadge = document.getElementById('current-badge');
+    const currentSectionDisplay = document.getElementById('currentSection');
+    const sections = document.querySelectorAll('.section');
+
+    // 设置 scroll-behavior
+    function setScrollBehavior(behavior) {
+      scrollContainer.style.scrollBehavior = behavior;
+      
+      // 更新按钮状态
+      behaviorButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.behavior === behavior);
+      });
+      
+      // 更新徽章
+      currentBadge.textContent = behavior;
+      currentBadge.className = `animation-badge ${behavior}`;
+    }
+
+    // 按钮点击事件
+    behaviorButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setScrollBehavior(btn.dataset.behavior);
+      });
+    });
+
+    // 更新当前区域显示
+    function updateCurrentSection() {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const containerCenter = containerRect.top + containerRect.height / 2;
+      
+      let currentSection = null;
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= containerCenter && rect.bottom >= containerCenter) {
+          currentSection = section;
+        }
+      });
+      
+      if (currentSection) {
+        currentSectionDisplay.textContent = currentSection.id;
+      }
+    }
+
+    // 监听滚动
+    scrollContainer.addEventListener('scroll', () => {
+      updateCurrentSection();
+    });
+
+    // 初始化
+    setScrollBehavior('auto');
+    updateCurrentSection();
+
+    // JS scrollIntoView 对比
+    function scrollWithJS(behavior) {
+      const targetSection = document.getElementById('section-3');
+      targetSection.scrollIntoView({
+        behavior: behavior,
+        block: 'start'
+      });
+      
+      // 临时覆盖 CSS 设置以展示对比效果
+      scrollContainer.style.scrollBehavior = behavior;
+      setTimeout(() => {
+        scrollContainer.style.scrollBehavior = '';
+      }, 100);
+    }
+  </script>
+</body>
+</html>

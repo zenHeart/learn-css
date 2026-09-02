@@ -1,0 +1,355 @@
+---
+title: "CSS grid-template-areas 网格区域布局"
+category: "布局基础"
+tags:
+  - CSS
+  - Grid
+  - grid-template-areas
+  - 布局
+  - 响应式
+description: "详解CSS grid-template-areas属性，通过可视化方式定义网格布局"
+keywords: "CSS grid-template-areas, grid布局, 网格区域, 圣杯布局"
+---
+
+# CSS grid-template-areas 网格区域布局
+
+## 概述
+
+`grid-template-areas` 是 CSS Grid 布局中一个强大的特性，它允许你通过在网格容器上声明具名区域来创建布局。这种方式的优势在于**可视化**——你可以在 CSS 中直接看到页面的布局结构。
+
+## 基础语法
+
+### 定义网格区域
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+}
+```
+
+### 将元素分配到区域
+
+```css
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.aside { grid-area: aside; }
+.footer { grid-area: footer; }
+```
+
+## 工作原理
+
+### 1. 命名规则
+
+区域名称可以是任意字符串，但必须：
+- 由字母、数字、下划线或连字符组成
+- 以字母或下划线开头
+- 不能包含空格（可用下划线代替）
+
+### 2. 视觉对应
+
+`grid-template-areas` 中的每一行对应网格的一行，每一组空格分隔的名称对应网格的一列：
+
+```
+"header header header"  →  第一行，三列都是 header
+"sidebar main aside"    →  第二行，分别是 sidebar, main, aside
+"footer footer footer"  →  第三行，三列都是 footer
+```
+
+### 3. 区域合并
+
+同一个名称连续出现在多行多列中，表示该元素跨越这些单元格：
+
+```css
+grid-template-areas:
+  "header header header"
+  "sidebar main main"   /* main 跨越两列 */
+  "footer footer footer";
+```
+
+## 常见布局模式
+
+### 1. 圣杯布局 (Holy Grail Layout)
+
+经典的 header + sidebar + main + aside + footer 布局：
+
+```css
+.holy-grail {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+  min-height: 100vh;
+  gap: 16px;
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.aside { grid-area: aside; }
+.footer { grid-area: footer; }
+```
+
+### 2. 杂志布局
+
+多列、多行的复杂杂志式排版：
+
+```css
+.magazine {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "hero hero hero sidebar"
+    "article1 article2 article3 sidebar"
+    "footer footer footer footer";
+  gap: 16px;
+}
+
+.hero { grid-area: hero; }
+.article1 { grid-area: article1; }
+.article2 { grid-area: article2; }
+.article3 { grid-area: article3; }
+.sidebar { grid-area: sidebar; }
+.footer { grid-area: footer; }
+```
+
+### 3. 响应式网格布局
+
+通过媒体查询改变区域定义：
+
+```css
+.responsive-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "sidebar"
+    "footer";
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: 200px 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar main"
+      "footer footer";
+  }
+}
+```
+
+### 4. 卡片网格
+
+统一的卡片布局：
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-areas:
+    "card1 card2 card3"
+    "card4 card5 card6";
+  gap: 24px;
+}
+
+/* 或者让每个卡片自己决定位置 */
+.card:nth-child(1) { grid-area: card1; }
+.card:nth-child(2) { grid-area: card2; }
+/* ... */
+```
+
+### 5. 沉浸式产品展示
+
+电商产品详情页：
+
+```css
+.product-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "gallery info"
+    "gallery description"
+    "gallery specs"
+    "related related";
+  gap: 32px;
+}
+
+.gallery { grid-area: gallery; }
+.info { grid-area: info; }
+.description { grid-area: description; }
+.specs { grid-area: specs; }
+.related { grid-area: related; }
+```
+
+## 高级技巧
+
+### 1. 点号表示空单元格
+
+使用 `.` 或未命名的区域表示空单元格：
+
+```css
+.layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "header header ."
+    "sidebar main aside"
+    ". footer footer";
+}
+```
+
+### 2. 区域形状要求
+
+同一区域必须形成矩形，不能是 L 形或更复杂的形状：
+
+```css
+/* ❌ 无效：区域形状不规则 */
+grid-template-areas:
+  "header header"
+  "sidebar header";
+
+/* ✅ 有效：每个区域都是矩形 */
+grid-template-areas:
+  "header header"
+  "sidebar main";
+```
+
+### 3. 使用 CSS 变量
+
+结合自定义属性实现主题化布局：
+
+```css
+:root {
+  --layout-areas: 
+    "header header"
+    "sidebar main"
+    "footer footer";
+}
+
+.container {
+  display: grid;
+  grid-template-areas: var(--layout-areas);
+}
+```
+
+### 4. 与 grid-area 简写
+
+`grid-area` 属性可以同时设置四个网格线位置：
+
+```css
+.item {
+  grid-area: 1 / 1 / 3 / 2;  /* row-start / col-start / row-end / col-end */
+}
+```
+
+## 实际应用示例
+
+### 仪表盘布局
+
+```css
+.dashboard {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 64px 1fr 64px;
+  grid-template-areas:
+    "nav header"
+    "nav main"
+    "nav footer";
+  min-height: 100vh;
+}
+
+.nav { grid-area: nav; background: #1a1a2e; }
+.header { grid-area: header; }
+.main { grid-area: main; overflow-y: auto; }
+.footer { grid-area: footer; }
+```
+
+### 博客文章布局
+
+```css
+.blog-post {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "header header"
+    "meta sidebar"
+    "content sidebar"
+    "footer footer";
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.post-header { grid-area: header; }
+.post-meta { grid-area: meta; }
+.post-content { grid-area: content; }
+.sidebar { grid-area: sidebar; }
+.post-footer { grid-area: footer; }
+```
+
+### 画廊展示
+
+```css
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 200px);
+  grid-template-areas:
+    "large large small1 small2"
+    "large large small3 small4"
+    "small5 small6 large large";
+  gap: 12px;
+}
+
+.item-large { grid-area: large; }
+.item-small:nth-child(2) { grid-area: small1; }
+.item-small:nth-child(3) { grid-area: small2; }
+/* ... */
+```
+
+## 浏览器兼容性
+
+`grid-template-areas` 已获得所有主流浏览器的良好支持：
+
+| 浏览器 | 支持版本 |
+|--------|---------|
+| Chrome | 57+ |
+| Firefox | 52+ |
+| Safari | 10.1+ |
+| Edge | 16+ |
+
+## 与其他布局方式对比
+
+| 特性 | grid-template-areas | Flexbox | 传统 Float |
+|------|---------------------|---------|------------|
+| 二维布局 | ✅ | ❌ | ❌ |
+| 可视化语法 | ✅ | ❌ | ❌ |
+| 响应式 | ✅ | 中 | ❌ |
+| 复杂布局 | ✅ | 中 | ❌ |
+
+## 最佳实践
+
+1. **语义化命名**：使用有意义的区域名称，如 `header`、`sidebar`、`main`
+2. **保持简洁**：复杂布局可以拆分为多个网格嵌套
+3. **响应式优先**：从移动端布局开始，逐步扩展
+4. **利用 `auto-fill`/`auto-fit`**：创建自适应网格
+5. **结合媒体查询**：在不同断点改变布局
+
+## 参考资料
+
+- [CSS Grid Layout - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout)
+- [Grid by Example - Rachel Andrew](https://gridbyexample.com/)
+- [webkit.org - Grid Template Areas](https://webkit.org/blog/17620/grid-how-grid-template-areas-offer-a-visual-solution-for-your-code/)

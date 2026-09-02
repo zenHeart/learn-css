@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @keyframes 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 140px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .ball { width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .ball.purple { background: #a371f7; }
+    .ball.green { background: #3fb950; }
+    .ball.orange { background: #f0883e; }
+    .ball.red { background: #f85149; }
+    .bar { width: 80px; height: 50px; background: #58a6ff; border-radius: 4px; flex-shrink: 0; }
+    .track { width: 100%; height: 4px; background: #30363d; border-radius: 2px; position: relative; }
+    .marker { width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; position: absolute; top: -4px; left: 0; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    .tag.red { background: #f8514933; color: #f85149; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .comparison-item { background: #0d1117; border-radius: 4px; padding: 16px; }
+    .comparison-item h4 { font-size: 14px; color: #f0f6fc; margin-bottom: 8px; }
+    .comparison-item p { font-size: 12px; color: #8b949e; }
+
+    /* @keyframes definitions */
+    @keyframes slideRight {
+      0%   { transform: translateX(0); opacity: 1; }
+      50%  { transform: translateX(100px); opacity: 0.8; }
+      100% { transform: translateX(200px); opacity: 0.5; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.2); }
+    }
+    @keyframes fadeInUp {
+      0%   { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes growWidth {
+      0%   { width: 40px; }
+      100% { width: 200px; }
+    }
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orderDemo {
+      0%   { transform: translateX(0); background: #3b82f6; }
+      50%  { transform: translateX(100px); background: #a371f7; }
+      100% { transform: translateX(200px); background: #3fb950; }
+    }
+    @keyframes fillForwards {
+      0%   { background: #3b82f6; border-radius: 4px; }
+      100% { background: #22c55e; border-radius: 50%; }
+    }
+    @keyframes fillBackwards {
+      0%   { background: #3b82f6; }
+      100% { background: #a371f7; }
+    }
+    @keyframes slideIn {
+      0%   { transform: translateX(-100%); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    /* composition demos */
+    @keyframes slideX {
+      to { transform: translateX(150px); }
+    }
+    @keyframes scaleUp {
+      to { transform: scale(1.5); }
+    }
+    @keyframes translateY10 {
+      to { transform: translateY(30px); }
+    }
+    @keyframes translateY20 {
+      to { transform: translateY(60px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS @keyframes 交互演示</h1>
+    <p class="subtitle">@keyframes 语法 · 关键帧顺序 · fill-mode · direction · composition</p>
+
+    <!-- 关键帧顺序无关 -->
+    <div class="section">
+      <h2>关键帧顺序与时序</h2>
+      <p class="desc">浏览器按百分比值自动排序，书写顺序不影响播放时间。<span class="tag">0%</span> = <span class="tag">from</span>，<span class="tag">100%</span> = <span class="tag">to</span></p>
+      <div class="demo-area" id="order-demo">
+        <div class="ball purple" id="order-ball">顺序</div>
+      </div>
+      <div class="controls" id="order-controls">
+        <button class="btn active" data-value="0% { transform: translateX(0); background: #3b82f6; } 50% { transform: translateX(100px); background: #a371f7; } 100% { transform: translateX(200px); background: #3fb950; }">顺序书写</button>
+        <button class="btn" data-value="100% { transform: translateX(0); background: #3b82f6; } 0% { transform: translateX(200px); background: #3fb950; } 50% { transform: translateX(100px); background: #a371f7; }">颠倒书写</button>
+      </div>
+      <div class="code-block" id="order-code">@keyframes orderDemo {
+  0%   { transform: translateX(0); background: #3b82f6; }
+  50%  { transform: translateX(100px); background: #a371f7; }
+  100% { transform: translateX(200px); background: #3fb950; }
+}</div>
+    </div>
+
+    <!-- animation-fill-mode -->
+    <div class="section">
+      <h2>animation-fill-mode 填充模式</h2>
+      <div class="demo-area" id="fill-demo">
+        <div class="ball green" id="fill-ball">fill</div>
+        <div style="width:1px;height:60px;background:#f0883e;opacity:0.5;margin-left:250px;"></div>
+      </div>
+      <div class="controls" id="fill-controls">
+        <button class="btn active" data-value="none">none</button>
+        <button class="btn" data-value="forwards">forwards</button>
+        <button class="btn" data-value="backwards">backwards</button>
+        <button class="btn" data-value="both">both</button>
+      </div>
+      <div class="code-block" id="fill-code">animation: fillForwards 1.5s 1 none;</div>
+      <p class="desc">
+        <span class="tag">none</span> 动画前后保持原样 |
+        <span class="tag green">forwards</span> 停在最后一帧 |
+        <span class="tag orange">backwards</span> delay 期间显示第一帧 |
+        <span class="tag red">both</span> both = backwards + forwards
+      </p>
+    </div>
+
+    <!-- animation-direction -->
+    <div class="section">
+      <h2>animation-direction 播放方向</h2>
+      <div class="demo-area" id="dir-demo">
+        <div class="ball purple" id="dir-ball">方向</div>
+      </div>
+      <div class="controls" id="dir-controls">
+        <button class="btn active" data-value="normal">normal</button>
+        <button class="btn" data-value="reverse">reverse</button>
+        <button class="btn" data-value="alternate">alternate</button>
+        <button class="btn" data-value="alternate-reverse">alternate-reverse</button>
+      </div>
+      <div class="code-block" id="dir-code">animation: slideRight 2s infinite normal;</div>
+      <p class="desc">
+        <span class="tag">normal</span> 正向 0%→100% |
+        <span class="tag orange">reverse</span> 反向 100%→0% |
+        <span class="tag green">alternate</span> 交替（正→反→正...） |
+        <span class="tag red">alternate-reverse</span> 反向交替
+      </p>
+    </div>
+
+    <!-- animation-iteration-count -->
+    <div class="section">
+      <h2>animation-iteration-count 播放次数</h2>
+      <div class="demo-area" id="count-demo">
+        <div class="ball orange" id="count-ball">次数</div>
+      </div>
+      <div class="controls" id="count-controls">
+        <button class="btn active" data-value="1">1 次</button>
+        <button class="btn" data-value="2">2 次</button>
+        <button class="btn" data-value="3">3 次</button>
+        <button class="btn" data-value="infinite">infinite</button>
+      </div>
+      <div class="code-block" id="count-code">animation: slideRight 1.5s 1;</div>
+      <p class="desc">
+        <span class="tag">具体数字</span> 播放指定次数后停止 |
+        <span class="tag red">infinite</span> 无限循环，需配合 <span class="tag">animation-play-state: paused</span> 控制停止
+      </p>
+    </div>
+
+    <!-- animation-composition -->
+    <div class="section">
+      <h2>animation-composition 动画组合 <span class="tag red">CSS 2024</span></h2>
+      <p class="desc">当多个动画作用于同一元素时，决定如何组合效果。Chrome 112+ 支持。</p>
+      <div class="demo-area" id="comp-demo">
+        <div class="ball red" id="comp-ball" style="animation: slideX 1.5s infinite alternate, scaleUp 1.5s infinite alternate; animation-composition: replace;">组合</div>
+      </div>
+      <div class="controls" id="comp-controls">
+        <button class="btn active" data-value="replace">replace（替换）</button>
+        <button class="btn" data-value="add">add（累加）</button>
+        <button class="btn" data-value="accumulate">accumulate（累积）</button>
+      </div>
+      <div class="code-block" id="comp-code">animation-composition: replace;</div>
+      <p class="desc">
+        <span class="tag">replace</span> 后动画替换前一个（最终只有 scale）<br>
+        <span class="tag green">add</span> 两个 transform 叠加（平移+缩放）<br>
+        <span class="tag orange">accumulate</span> 数值相乘 translateY(30px)+translateY(60px)=translateY(90px)
+      </p>
+      <div class="code-block">/* 演示用动画定义 */
+@keyframes slideX  { to { transform: translateX(150px); } }
+@keyframes scaleUp { to { transform: scale(1.5); } }
+@keyframes translateY10 { to { transform: translateY(30px); } }
+@keyframes translateY20 { to { transform: translateY(60px); } }
+
+#comp-ball {
+  animation: slideX 1.5s infinite alternate, scaleUp 1.5s infinite alternate;
+  animation-composition: replace; /* 切换此值观察效果 */
+}</div>
+    </div>
+
+    <!-- 百分比 vs from/to -->
+    <div class="section">
+      <h2>百分比 vs from/to</h2>
+      <div class="demo-area" id="syntax-demo">
+        <div class="ball green" id="syntax-ball" style="animation: fadeInUp 1.5s infinite alternate;">淡入上移</div>
+      </div>
+      <div class="controls" id="syntax-controls">
+        <button class="btn active" data-value="0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); }">百分比 0%/100%</button>
+        <button class="btn" data-value="from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); }">from / to</button>
+      </div>
+      <div class="code-block" id="syntax-code">@keyframes fadeInUp {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}</div>
+      <p class="desc">
+        <span class="tag">0%</span> = <span class="tag">from</span>（起始帧），
+        <span class="tag">100%</span> = <span class="tag">to</span>（结束帧）。
+        三帧以上必须用百分比。
+      </p>
+    </div>
+
+    <!-- 常见错误 -->
+    <div class="section">
+      <h2>常见错误演示</h2>
+
+      <h3>① 名称不匹配</h3>
+      <div class="demo-area" id="error1-demo">
+        <div class="ball red" id="error1-ball" style="animation: wrongName 1.5s 1 forwards;">不运行</div>
+      </div>
+      <div class="code-block">/* @keyframes 定义为 slideRight，但 animation-name 写成 wrongName */
+@keyframes slideRight {
+  to { transform: translateX(200px); }
+}
+animation-name: wrongName; /* ❌ 拼写错误，动画不运行 */</div>
+
+      <h3>② 缺少 animation-duration</h3>
+      <div class="demo-area" id="error2-demo">
+        <div class="ball orange" id="error2-ball" style="animation-name: slideRight;">无时长</div>
+      </div>
+      <div class="code-block">/* 默认为 0s，动画不会播放 */
+animation-name: slideRight;
+/* ✅ 必须指定 animation-duration: 1.5s; */</div>
+
+      <h3>③ infinite 无停止机制（移动端注意）</h3>
+      <div class="demo-area" id="error3-demo">
+        <div class="ball green" id="error3-ball" style="animation: pulse 1s infinite;">无限循环</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-left:auto;">
+          <button class="btn" id="pause-btn">暂停/恢复</button>
+        </div>
+      </div>
+      <div class="code-block">/* hover 暂停在桌面有效，但移动端无法 hover */
+.box:hover { animation-play-state: paused; }
+
+/* ✅ 提供 JS 控制或媒体查询 */
+@media (hover: none) { .box { animation: none; } }</div>
+    </div>
+
+    <!-- animation vs transition -->
+    <div class="section">
+      <h2>Animation vs Transition 对比</h2>
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4><span class="tag orange">Transition</span></h4>
+          <p>
+            · 需要<span style="color:#f0883e;">触发条件</span>：hover、active、JS<br>
+            · 只能描述<span style="color:#f0883e;">两态</span>之间的过渡<br>
+            · 不能循环<br>
+            · GPU 加速，性能好<br>
+            · 适合：状态切换反哺
+          </p>
+        </div>
+        <div class="comparison-item">
+          <h4><span class="tag">@keyframes Animation</span></h4>
+          <p>
+            · <span style="color:#58a6ff;">自动播放</span>，无需触发<br>
+            · 支持<span style="color:#58a6ff;">多关键帧</span>定义复杂轨迹<br>
+            · 可以循环<br>
+            · 可暂停/控制<br>
+            · 适合：循环动画、入场序列、复杂动画
+          </p>
+        </div>
+      </div>
+      <div class="code-block">/* Transition：需要 hover 触发 */
+.box { transition: transform 0.3s ease; }
+.box:hover { transform: scale(1.2); }
+
+/* Animation：自动播放，定义多帧 */
+.box { animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}</div>
+    </div>
+
+    <p class="info">CSS @keyframes 支持所有现代浏览器。animation-composition 为 CSS 2024 新增属性，请确认浏览器支持情况。</p>
+  </div>
+
+  <script>
+    // 重启动画辅助函数
+    function restartBall(ball, ...args) {
+      ball.style.animation = 'none';
+      ball.offsetHeight; // 触发重排，强制重启
+      ball.style.animation = args.join(' ');
+    }
+
+    // 关键帧顺序
+    const orderBall = document.getElementById('order-ball');
+    document.getElementById('order-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#order-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      const keyframes = '@keyframes orderDemo { ' + e.target.dataset.value + ' }';
+      const style = document.createElement('style');
+      style.id = 'dynamic-order';
+      const old = document.getElementById('dynamic-order');
+      if (old) old.remove();
+      document.head.appendChild(style);
+      style.sheet.insertRule(keyframes, 0);
+      restartBall(orderBall, 'orderDemo 2s 1 forwards');
+      document.getElementById('order-code').textContent = keyframes;
+    });
+
+    // fill-mode
+    const fillBall = document.getElementById('fill-ball');
+    document.getElementById('fill-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#fill-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      restartBall(fillBall, `fillForwards 1.5s 1 ${e.target.dataset.value}`);
+      document.getElementById('fill-code').textContent = `animation: fillForwards 1.5s 1 ${e.target.dataset.value};`;
+    });
+
+    // direction
+    const dirBall = document.getElementById('dir-ball');
+    document.getElementById('dir-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#dir-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      restartBall(dirBall, `slideRight 2s infinite ${e.target.dataset.value}`);
+      document.getElementById('dir-code').textContent = `animation: slideRight 2s infinite ${e.target.dataset.value};`;
+    });
+
+    // iteration-count
+    const countBall = document.getElementById('count-ball');
+    document.getElementById('count-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#count-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      restartBall(countBall, `slideRight 1.5s ${e.target.dataset.value}`);
+      document.getElementById('count-code').textContent = `animation: slideRight 1.5s ${e.target.dataset.value};`;
+    });
+
+    // composition
+    const compBall = document.getElementById('comp-ball');
+    document.getElementById('comp-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#comp-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      compBall.style.animationCompositions = e.target.dataset.value;
+      compBall.style.animationComposition = e.target.dataset.value;
+      document.getElementById('comp-code').textContent = `animation-composition: ${e.target.dataset.value};`;
+    });
+
+    // syntax
+    const syntaxBall = document.getElementById('syntax-ball');
+    document.getElementById('syntax-controls').addEventListener('click', e => {
+      if (!e.target.classList.contains('btn')) return;
+      document.querySelectorAll('#syntax-controls .btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      const keyframes = '@keyframes fadeInUp { ' + e.target.dataset.value + ' }';
+      const style = document.createElement('style');
+      style.id = 'dynamic-syntax';
+      const old = document.getElementById('dynamic-syntax');
+      if (old) old.remove();
+      document.head.appendChild(style);
+      style.sheet.insertRule(keyframes, 0);
+      restartBall(syntaxBall, 'fadeInUp 1.5s infinite alternate');
+      document.getElementById('syntax-code').textContent = keyframes;
+    });
+
+    // pause/resume for infinite demo
+    const pauseBtn = document.getElementById('pause-btn');
+    const error3Ball = document.getElementById('error3-ball');
+    let paused = false;
+    pauseBtn.addEventListener('click', () => {
+      paused = !paused;
+      error3Ball.style.animationPlayState = paused ? 'paused' : 'running';
+      pauseBtn.textContent = paused ? '继续' : '暂停/恢复';
+    });
+  </script>
+</body>
+</html>
