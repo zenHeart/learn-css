@@ -1,0 +1,281 @@
+---
+title: mix-blend-mode
+category: 视觉效果
+tags: [mix-blend-mode, blend-mode, css-effects]
+description: 详细介绍 CSS mix-blend-mode 混合模式属性，包括各种混合模式值的原理和视觉效果。
+keywords: mix-blend-mode, multiply, screen, overlay, 混合模式, CSS 混合
+---
+
+## 学习目标
+
+通过本章学习，你将：
+
+1. 理解 CSS 混合模式的基本概念和混合原理
+2. 掌握 `mix-blend-mode` 的各种取值及其视觉效果
+3. 学会区分 `mix-blend-mode` 和 `background-blend-mode`
+4. 能够灵活运用混合模式实现各种视觉效果
+
+---
+
+## 快速上手
+
+### mix-blend-mode
+
+`mix-blend-mode` 属性控制元素内容与父元素内容的混合方式。当元素叠加在其它内容之上时，使用混合模式可以创造出丰富的视觉效果。
+
+```css
+.element {
+  mix-blend-mode: multiply;
+}
+```
+
+### 基本示例
+
+{/* @playground id="mix-blend-mode-demo" mode="code" */}
+
+---
+
+## 工作原理
+
+### 混合模式基础
+
+混合模式源于图形编辑软件（如 Photoshop），其核心思想是：**当两层图像叠加时，根据数学公式计算每个像素的最终颜色**。
+
+- **前景层**：应用 `mix-blend-mode` 的元素
+- **背景层**：前景层下方的所有内容
+- **结果**：混合后的视觉效果
+
+### 常用混合模式原理
+
+| 模式 | 原理 | 效果特点 |
+|------|------|----------|
+| `multiply` | 正片叠底 | 黑色完全变黑，白色保持不变，类似照片叠底片 |
+| `screen` | 滤色 | 与 multiply 相反，白色完全保留，黑色变透明 |
+| `overlay` | 叠加 | 根据底层颜色交替使用 multiply/screen，暗部加深，亮部提亮 |
+| `darken` | 变暗 | 保留较暗的像素 |
+| `lighten` | 变亮 | 保留较亮的像素 |
+| `difference` | 差值 | 两种颜色相减，产生高对比度效果 |
+| `color-dodge` | 颜色减淡 | 使底层颜色变亮以反映混合颜色 |
+| `color-burn` | 颜色加深 | 使底层颜色变暗以反映混合颜色 |
+
+---
+
+## 主要属性详解
+
+### mix-blend-mode
+
+- **作用**：定义元素的Content与父元素内容的混合方式
+- **默认值**：`normal`（无混合）
+- **适用于**：所有元素
+- **继承性**：不继承
+
+#### 取值列表
+
+```css
+/* 基础混合模式 */
+mix-blend-mode: normal;      /* 正常，无混合 */
+mix-blend-mode: multiply;    /* 正片叠底 */
+mix-blend-mode: screen;      /* 滤色 */
+mix-blend-mode: overlay;     /* 叠加 */
+mix-blend-mode: darken;      /* 变暗 */
+mix-blend-mode: lighten;     /* 变亮 */
+mix-blend-mode: color-dodge; /* 颜色减淡 */
+mix-blend-mode: color-burn;  /* 颜色加深 */
+mix-blend-mode: hard-light;  /* 强光 */
+mix-blend-mode: soft-light;  /* 柔光 */
+mix-blend-mode: difference;  /* 差值 */
+mix-blend-mode: exclusion;   /* 排除 */
+
+/* 颜色混合模式（CSS Compositing and Blending Level 1） */
+mix-blend-mode: hue;         /* 色相 */
+mix-blend-mode: saturation;  /* 饱和度 */
+mix-blend-mode: color;       /* 颜色 */
+mix-blend-mode: luminosity;  /* 亮度 */
+
+/* 全局值 */
+mix-blend-mode: inherit;      /* 继承 */
+mix-blend-mode: initial;     /*初始值 */
+mix-blend-mode: unset;       /* 未设置 */
+```
+
+### background-blend-mode（对比）
+
+`background-blend-mode` 与 `mix-blend-mode` 的关键区别：
+
+| 特性 | `mix-blend-mode` | `background-blend-mode` |
+|------|------------------|------------------------|
+| 作用对象 | 元素的整个内容（包括文字、图片、子元素） | 仅元素的背景（背景色、背景图） |
+| 混合内容 | 与父元素所有内容混合 | 与同一元素的其它背景混合 |
+| 使用场景 | 文字与背景混合、多元素叠加 | 多重背景图混合 |
+
+```css
+/* 错误示例：background-blend-mode 不能混合文字 */
+.element {
+  background-image: url('image.jpg');
+  background-blend-mode: multiply; /* 仅混合背景，不影响文字 */
+}
+
+/* 正确示例：mix-blend-mode 混合包括文字 */
+.element {
+  background-image: url('image.jpg');
+  mix-blend-mode: multiply; /* 文字和背景一起混合 */
+}
+```
+
+### isolation
+
+`isolation` 属性创建一个新的层叠上下文，阻止混合模式影响父元素外部的内容。
+
+```css
+.container {
+  isolation: isolate; /* 创建一个隔离层，混合模式只在容器内生效 */
+}
+```
+
+- `auto`：默认，不创建隔离层
+- `isolate`：创建隔离层
+
+---
+
+## 实战应用示例
+
+### 场景一：文字与背景图片混合
+
+将文字与背景图片混合，创造独特的视觉效果：
+
+1. **目标分析**：文字作为前景层，背景图片作为背景层，通过 `mix-blend-mode` 融合
+2. **HTML 结构**：
+
+```html
+<div class="text-blend">
+  <h1>Hello Blend</h1>
+</div>
+```
+
+3. **CSS 实现**：
+
+```css
+.text-blend {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.text-blend h1 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 80px;
+  font-weight: bold;
+  color: white;
+  mix-blend-mode: multiply; /* 文字与渐变背景混合 */
+}
+```
+
+4. **效果演示**：白色文字与渐变背景通过 multiply 混合，产生深色文字效果
+
+---
+
+### 场景二：图片叠加效果
+
+将两张图片通过混合模式叠加：
+
+```css
+.overlay-container {
+  position: relative;
+  width: 400px;
+  height: 300px;
+}
+
+.overlay-container img:first-child {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-container img:last-child {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  mix-blend-mode: screen; /* 叠加区域产生滤色效果 */
+}
+```
+
+---
+
+### 场景三：图层混合与隔离
+
+使用 `isolation` 属性控制混合范围：
+
+```css
+.effect-group {
+  isolation: isolate; /* 整个组的混合不影响页面其它内容 */
+}
+
+.effect-group .layer-1 {
+  mix-blend-mode: multiply;
+}
+
+.effect-group .layer-2 {
+  mix-blend-mode: screen;
+}
+```
+
+---
+
+## 最佳实践与注意事项
+
+### 性能方面
+
+- 混合模式涉及像素计算，复杂场景可能影响渲染性能
+- 避免在动画中频繁改变混合模式
+- 在移动设备上谨慎使用多层混合
+
+### 可访问性 (Accessibility)
+
+- 确保文字在混合模式下仍然具有良好的对比度
+- 不要仅依赖视觉混合效果传达重要信息
+- 提供足够的背景色或阴影确保文字可读
+
+### 常见陷阱
+
+- **陷阱 1**：忘记父元素的背景色会影响混合结果
+  - **解决**：使用 `isolation: isolate` 创建隔离层
+- **陷阱 2**：`background-blend-mode` 和 `mix-blend-mode` 混淆使用
+  - **解决**：前者只影响背景，后者影响整个元素内容
+- **陷阱 3**：在透明背景上混合模式不生效
+  - **解决**：确保有实际的背景内容可以混合
+
+### 浏览器兼容性
+
+- `mix-blend-mode` 在现代浏览器中支持良好
+- IE 和旧版 Edge 不支持
+- Safari 早期版本可能有细微差异
+
+---
+
+## 总结
+
+### 核心知识点回顾
+
+- `mix-blend-mode` 控制元素内容与父元素内容的混合
+- 常用混合模式：
+  - `multiply`：正片叠底，黑色变黑
+  - `screen`：滤色，白色保留
+  - `overlay`：叠加，暗部加深、亮部提亮
+  - `darken`/`lighten`：变暗/变亮
+  - `difference`：差值，高对比度
+- `background-blend-mode` 仅作用于背景图片/颜色
+- `isolation: isolate` 可创建隔离层，限制混合范围
+- SVG 中使用 `mix-blend-mode` 需注意 `enable-background` 属性
+
+### 延伸阅读
+
+- [MDN: mix-blend-mode](https://developer.mozilla.org/zh-CN/docs/Web/CSS/mix-blend-mode)
+- [CSS Compositing and Blending Level 1](https://www.w3.org/TR/compositing-1/)
+- [CSS Mix Blend Mode — Quick Reference](https://css-tricks.com/almanac/properties/m/mix-blend-mode/)

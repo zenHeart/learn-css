@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>font-variation-settings 可变字体演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .info-box strong {
+      color: #1e40af;
+    }
+
+    /* 可变字体特性轴表格 */
+    .axis-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .axis-table th, .axis-table td {
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .axis-table th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+
+    .axis-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #dbeafe;
+      color: #1e40af;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: monospace;
+    }
+
+    /* 可变字体演示卡片 */
+    .vf-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .vf-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background: white;
+    }
+
+    .vf-card h3 {
+      margin: 0 0 15px 0;
+      color: #1f2937;
+      font-size: 1em;
+    }
+
+    .vf-sample {
+      font-size: 48px;
+      text-align: center;
+      padding: 30px;
+      background: #f9fafb;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vf-controls {
+      margin-top: 15px;
+    }
+
+    .vf-controls label {
+      display: block;
+      font-size: 0.85em;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    .vf-controls input[type="range"] {
+      width: 100%;
+    }
+
+    .vf-controls .value-display {
+      font-family: monospace;
+      font-size: 0.85em;
+      color: #2563eb;
+      margin-top: 5px;
+    }
+
+    /* 字重渐变演示 */
+    .weight-gradient {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .weight-item {
+      padding: 15px 20px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .weight-item:last-child {
+      border-bottom: none;
+    }
+
+    .weight-label {
+      font-size: 0.8em;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+
+    /* 宽度渐变 */
+    .width-gradient {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .width-item {
+      flex: 1;
+      text-align: center;
+      padding: 20px 10px;
+      background: #f9fafb;
+      border-radius: 6px;
+    }
+
+    .width-item span {
+      display: block;
+      font-size: 0.75em;
+      color: #6b7280;
+      margin-top: 10px;
+    }
+
+    /* 斜体演示 */
+    .ital-demo {
+      display: flex;
+      gap: 20px;
+    }
+
+    .ital-item {
+      flex: 1;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 6px;
+    }
+
+    .ital-item h4 {
+      margin: 0 0 10px 0;
+      color: #374151;
+      font-size: 0.9em;
+    }
+
+    /* 倾斜演示 */
+    .slnt-demo {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .slnt-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .slnt-item span {
+      display: block;
+      font-size: 0.8em;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    /* 使用 Google Fonts 可变字体 */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,slnt,wdth,wght@8..144,-10..0,75..125,100..1000&display=swap');
+
+    .roboto-flex {
+      font-family: 'Roboto Flex', sans-serif;
+    }
+
+    /* 使用 Inter 可变字体（通过 CDN） */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+    .inter-variable {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* 自定义可变字体示例 */
+    .custom-vf-sample {
+      font-family: 'Roboto Flex', sans-serif;
+    }
+
+    /* 交互式控制面板 */
+    .control-panel {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .control-panel h3 {
+      margin-top: 0;
+      color: #60a5fa;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+    }
+
+    .slider-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+      color: #d1d5db;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+    }
+
+    .slider-row .axis-name {
+      width: 50px;
+      font-family: monospace;
+      font-size: 0.85em;
+      color: #9ca3af;
+    }
+
+    .slider-row .axis-value {
+      width: 60px;
+      text-align: right;
+      font-family: monospace;
+      color: #60a5fa;
+    }
+
+    /* 预设按钮 */
+    .preset-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .preset-btn {
+      padding: 8px 16px;
+      background: #374151;
+      color: #f9fafb;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: background 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: #4b5563;
+    }
+
+    .preset-btn.active {
+      background: #2563eb;
+    }
+
+    /* 动画效果 */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <h1>font-variation-settings 可变字体演示</h1>
+
+  <div class="info-box">
+    <strong>💡 什么是可变字体？</strong>
+    <p style="margin: 10px 0 0 0;">
+      可变字体（Variable Fonts）是 OpenType 字体规范的发展，它允许在单个字体文件中包含多个变体，
+      通过轴（axis）来控制字体的外观。相比传统字体，可变字体文件更小，功能更强大。
+    </p>
+  </div>
+
+  <div class="demo-section">
+    <h2>常用特性轴</h2>
+    <table class="axis-table">
+      <thead>
+        <tr>
+          <th>轴名</th>
+          <th>全称</th>
+          <th>说明</th>
+          <th>典型范围</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="axis-tag">wght</span></td>
+          <td>Weight</td>
+          <td>字重（粗细）</td>
+          <td>100 - 900</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">wdth</span></td>
+          <td>Width</td>
+          <td>字宽（压缩/扩展）</td>
+          <td>75 - 125</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">ital</span></td>
+          <td>Italic</td>
+          <td>斜体（0=正体，1=斜体）</td>
+          <td>0 - 1</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">slnt</span></td>
+          <td>Slant</td>
+          <td>倾斜角度</td>
+          <td>-10 - 0</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">opsz</span></td>
+          <td>Optical Size</td>
+          <td>光学尺寸（字号相关）</td>
+          <td>6 - 144</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">GRAD</span></td>
+          <td>Grade</td>
+          <td>字重等级（不影响布局）</td>
+          <td>-50 - 150</td>
+        </tr>
+        <tr>
+          <td><span class="axis-tag">XTRA</span></td>
+          <td>Contrast</td>
+          <td>轮廓对比度</td>
+          <td>63 - 1000</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="demo-section">
+    <h2>字重轴 (wght) 演示</h2>
+    <p>使用 Roboto Flex 可变字体展示不同字重：</p>
+
+    <div class="weight-gradient roboto-flex">
+      <div class="weight-item" style="font-variation-settings: 'wght' 100;">
+        <div class="weight-label">100 - Thin (极细)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="weight-item" style="font-variation-settings: 'wght' 300;">
+        <div class="weight-label">300 - Light (细体)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="weight-item" style="font-variation-settings: 'wght' 400;">
+        <div class="weight-label">400 - Regular (常规)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="weight-item" style="font-variation-settings: 'wght' 500;">
+        <div class="weight-label">500 - Medium (中等)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="weight-item" style="font-variation-settings: 'wght' 700;">
+        <div class="weight-label">700 - Bold (粗体)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="weight-item" style="font-variation-settings: 'wght' 900;">
+        <div class="weight-label">900 - Black (黑体)</div>
+        The quick brown fox jumps over the lazy dog
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>宽度轴 (wdth) 演示</h2>
+    <p>同一个字体，不同宽度：</p>
+
+    <div class="width-gradient roboto-flex">
+      <div class="width-item" style="font-variation-settings: 'wght' 400, 'wdth' 75;">
+        <div style="font-size: 32px;">Aa</div>
+        <span>wdth: 75</span>
+      </div>
+      <div class="width-item" style="font-variation-settings: 'wght' 400, 'wdth' 87;">
+        <div style="font-size: 32px;">Aa</div>
+        <span>wdth: 87</span>
+      </div>
+      <div class="width-item" style="font-variation-settings: 'wght' 400, 'wdth' 100;">
+        <div style="font-size: 32px;">Aa</div>
+        <span>wdth: 100</span>
+      </div>
+      <div class="width-item" style="font-variation-settings: 'wght' 400, 'wdth' 112;">
+        <div style="font-size: 32px;">Aa</div>
+        <span>wdth: 112</span>
+      </div>
+      <div class="width-item" style="font-variation-settings: 'wght' 400, 'wdth' 125;">
+        <div style="font-size: 32px;">Aa</div>
+        <span>wdth: 125</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>倾斜轴 (slnt) 演示</h2>
+
+    <div class="slnt-demo roboto-flex">
+      <div class="slnt-item">
+        <div class="vf-sample" style="font-variation-settings: 'slnt' 0; font-size: 36px;">
+          Normal
+        </div>
+        <span>slnt: 0</span>
+      </div>
+      <div class="slnt-item">
+        <div class="vf-sample" style="font-variation-settings: 'slnt' -6; font-size: 36px;">
+          Slanted
+        </div>
+        <span>slnt: -6</span>
+      </div>
+      <div class="slnt-item">
+        <div class="vf-sample" style="font-variation-settings: 'slnt' -12; font-size: 36px;">
+          More Slant
+        </div>
+        <span>slnt: -12</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>交互式演示</h2>
+    <p>拖动滑块实时调整可变字体的各个轴：</p>
+
+    <div class="control-panel">
+      <h3>Roboto Flex 可变字体控制</h3>
+
+      <div class="slider-group">
+        <label>字重 (wght): <span id="wghtValue">400</span></label>
+        <div class="slider-row">
+          <span class="axis-name">wght</span>
+          <input type="range" id="wghtSlider" min="100" max="900" value="400" step="1">
+          <span class="axis-value" id="wghtDisplay">400</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <label>字宽 (wdth): <span id="wdthValue">100</span></label>
+        <div class="slider-row">
+          <span class="axis-name">wdth</span>
+          <input type="range" id="wdthSlider" min="75" max="125" value="100" step="1">
+          <span class="axis-value" id="wdthDisplay">100</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <label>倾斜 (slnt): <span id="slntValue">0</span></label>
+        <div class="slider-row">
+          <span class="axis-name">slnt</span>
+          <input type="range" id="slntSlider" min="-10" max="0" value="0" step="0.5">
+          <span class="axis-value" id="slntDisplay">0</span>
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <label>光学尺寸 (opsz): <span id="opszValue">14</span></label>
+        <div class="slider-row">
+          <span class="axis-name">opsz</span>
+          <input type="range" id="opszSlider" min="6" max="144" value="14" step="1">
+          <span class="axis-value" id="opszDisplay">14</span>
+        </div>
+      </div>
+
+      <div class="preset-buttons">
+        <button class="preset-btn" data-wght="100" data-wdth="100" data-slnt="0" data-opsz="14">Thin</button>
+        <button class="preset-btn" data-wght="300" data-wdth="100" data-slnt="0" data-opsz="14">Light</button>
+        <button class="preset-btn" data-wght="400" data-wdth="100" data-slnt="0" data-opsz="14">Regular</button>
+        <button class="preset-btn" data-wght="700" data-wdth="100" data-slnt="0" data-opsz="14">Bold</button>
+        <button class="preset-btn" data-wght="900" data-wdth="100" data-slnt="0" data-opsz="14">Black</button>
+        <button class="preset-btn" data-wght="400" data-wdth="75" data-slnt="0" data-opsz="14">Condensed</button>
+        <button class="preset-btn" data-wght="400" data-wdth="125" data-slnt="0" data-opsz="14">Expanded</button>
+      </div>
+    </div>
+
+    <div class="vf-card" style="margin-top: 20px;">
+      <div class="vf-sample roboto-flex" id="vfSample">
+        可变字体
+      </div>
+      <p style="font-family: monospace; font-size: 0.85em; color: #6b7280; margin-top: 10px;" id="vfSettings">
+        font-variation-settings: 'wght' 400, 'wdth' 100, 'slnt' 0, 'opsz' 14
+      </p>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>CSS 语法</h2>
+    <pre><code>/* 基本语法 */
+.element {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 400;
+}
+
+/* 多个轴同时设置 */
+.heading {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 700, 'wdth' 100;
+  font-size: 48px;
+}
+
+/* 与普通字体属性配合使用 */
+.text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-weight: 500;        /* 标准属性 */
+  font-variation-settings: 'wght' 500, 'wdth' 95;  /* 可变字体轴 */
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>注意事项</h2>
+    <ul>
+      <li><strong>兼容性：</strong>现代浏览器都支持可变字体，但需要使用支持可变字体的字体文件</li>
+      <li><strong>性能：</strong>使用 <code>font-display: optional</code> 可在网络不佳时跳过字体加载</li>
+      <li><strong>回退：</strong>为不支持可变字体的浏览器提供 fallback 字体</li>
+      <li><strong>Google Fonts：</strong>Google Fonts 上的可变字体 URL 包含完整的轴范围</li>
+    </ul>
+  </div>
+
+  <div class="demo-section">
+    <h2>常用可变字体推荐</h2>
+    <ul>
+      <li><strong>Roboto Flex</strong> - Google Fonts，支持 wght, wdth, slnt, opsz</li>
+      <li><strong>Inter</strong> - Google Fonts，支持 wght</li>
+      <li><strong>Recursive</strong> - Google Fonts，支持 wght, slnt, MONO, CASL, CRSV</li>
+      <li><strong>Source Sans 3</strong> - Google Fonts，支持 wght, wdth, ital, slnt, SOFT, ZERO</li>
+      <li><strong>Amstelvar</strong> - Google Fonts，支持 wght, opsz, XTRA, YOPQ 等</li>
+    </ul>
+  </div>
+
+  <script>
+    const wghtSlider = document.getElementById('wghtSlider');
+    const wdthSlider = document.getElementById('wdthSlider');
+    const slntSlider = document.getElementById('slntSlider');
+    const opszSlider = document.getElementById('opszSlider');
+
+    const wghtValue = document.getElementById('wghtValue');
+    const wdthValue = document.getElementById('wdthValue');
+    const slntValue = document.getElementById('slntValue');
+    const opszValue = document.getElementById('opszValue');
+
+    const wghtDisplay = document.getElementById('wghtDisplay');
+    const wdthDisplay = document.getElementById('wdthDisplay');
+    const slntDisplay = document.getElementById('slntDisplay');
+    const opszDisplay = document.getElementById('opszDisplay');
+
+    const vfSample = document.getElementById('vfSample');
+    const vfSettings = document.getElementById('vfSettings');
+
+    function updateFontVariation() {
+      const wght = wghtSlider.value;
+      const wdth = wdthSlider.value;
+      const slnt = slntSlider.value;
+      const opsz = opszSlider.value;
+
+      wghtValue.textContent = wght;
+      wdthValue.textContent = wdth;
+      slntValue.textContent = slnt;
+      opszValue.textContent = opsz;
+
+      wghtDisplay.textContent = wght;
+      wdthDisplay.textContent = wdth;
+      slntDisplay.textContent = slnt;
+      opszDisplay.textContent = opsz;
+
+      const settings = `'wght' ${wght}, 'wdth' ${wdth}, 'slnt' ${slnt}, 'opsz' ${opsz}`;
+      vfSample.style.fontVariationSettings = settings;
+      vfSettings.textContent = `font-variation-settings: ${settings}`;
+    }
+
+    wghtSlider.addEventListener('input', updateFontVariation);
+    wdthSlider.addEventListener('input', updateFontVariation);
+    slntSlider.addEventListener('input', updateFontVariation);
+    opszSlider.addEventListener('input', updateFontVariation);
+
+    // 预设按钮
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        wghtSlider.value = this.dataset.wght;
+        wdthSlider.value = this.dataset.wdth;
+        slntSlider.value = this.dataset.slnt;
+        opszSlider.value = this.dataset.opsz;
+        updateFontVariation();
+
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // 初始化
+    updateFontVariation();
+  </script>
+</body>
+</html>

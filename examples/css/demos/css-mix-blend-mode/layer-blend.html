@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图层混合与隔离 - mix-blend-mode 演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+  }
+
+    h1 {
+      text-align: center;
+      color: #1e293b;
+      margin-bottom: 24px;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    .demo-section p {
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    /* 隔离效果演示 */
+    .isolation-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .isolation-demo .demo-box {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .demo-box-header {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .demo-box-header .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+      margin-left: 8px;
+    }
+
+    .tag-yes {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .tag-no {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .demo-content {
+      position: relative;
+      height: 200px;
+    }
+
+    .layer-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .layer-1, .layer-2 {
+      position: absolute;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .layer-1 {
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 10%;
+      background: #ff6b6b;
+      mix-blend-mode: multiply;
+    }
+
+    .layer-2 {
+      width: 60%;
+      height: 60%;
+      bottom: 20%;
+      right: 10%;
+      top: auto;
+      left: auto;
+      background: #4ecdc4;
+      mix-blend-mode: screen;
+    }
+
+    /* 页面背景影响演示 */
+    .page-bg-demo {
+      position: relative;
+      height: 150px;
+      background: #fbbf24;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    .page-bg-demo .inner-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 100px;
+      background: #ff6b6b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      mix-blend-mode: multiply;
+    }
+
+    /* 多层混合组 */
+    .blend-group {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1e1e1e;
+      margin-bottom: 16px;
+    }
+
+    .blend-layer {
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    .blend-layer.circle-1 {
+      width: 150px;
+      height: 150px;
+      top: 20%;
+      left: 20%;
+      background: #ff6b6b;
+      mix-blend-mode: screen;
+    }
+
+    .blend-layer.circle-2 {
+      width: 150px;
+      height: 150px;
+      top: 20%;
+      right: 20%;
+      background: #4ecdc4;
+      mix-blend-mode: multiply;
+    }
+
+    .blend-layer.circle-3 {
+      width: 150px;
+      height: 150px;
+      bottom: 20%;
+      left: 35%;
+      background: #ffe66d;
+      mix-blend-mode: overlay;
+    }
+
+    .blend-group.isolated {
+      isolation: isolate;
+    }
+
+    /* 文字层叠效果 */
+    .text-stack {
+      position: relative;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #1e1e1e 0%, #2d2d2d 100%);
+      margin-bottom: 16px;
+    }
+
+    .text-stack .word {
+      position: absolute;
+      font-size: 80px;
+      font-weight: 900;
+      color: white;
+    }
+
+    .text-stack .word-1 {
+      top: 20%;
+      left: 10%;
+      mix-blend-mode: multiply;
+      color: #ff6b6b;
+    }
+
+    .text-stack .word-2 {
+      top: 40%;
+      left: 25%;
+      mix-blend-mode: screen;
+      color: #4ecdc4;
+    }
+
+    .text-stack .word-3 {
+      top: 60%;
+      left: 40%;
+      mix-blend-mode: overlay;
+      color: #ffe66d;
+    }
+
+    /* SVG 混合 */
+    .svg-blend-demo {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #764ba2;
+      margin-bottom: 16px;
+    }
+
+    .svg-blend-demo svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .svg-blend-demo .text-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: 900;
+      color: white;
+      mix-blend-mode: multiply;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .code-comment { color: #6a9955; }
+    .code-prop { color: #9cdcfe; }
+    .code-value { color: #ce9178; }
+
+    @media (max-width: 600px) {
+      .isolation-demo {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 图层混合与 isolation 隔离</h1>
+
+  <div class="demo-section">
+    <h2>isolation 的作用</h2>
+    <p>
+      <code>isolation: isolate</code> 创建一个新的层叠上下文，阻止混合模式影响父元素外部的内容。
+      这在需要将混合效果限制在某个区域内时非常有用。
+    </p>
+
+    <div class="isolation-demo">
+      <div>
+        <div class="demo-box-header">
+          无隔离 <span class="tag tag-no">isolation: auto</span>
+        </div>
+        <div class="demo-content" style="background: #fbbf24;">
+          <p style="position:absolute;top:8px;left:8px;font-size:12px;color:#92400e;margin:0;">
+            页面黄色背景参与了混合
+          </p>
+          <div class="layer-1">Multiply</div>
+          <div class="layer-2">Screen</div>
+        </div>
+      </div>
+      <div>
+        <div class="demo-box-header">
+          有隔离 <span class="tag tag-yes">isolation: isolate</span>
+        </div>
+        <div class="demo-content" style="background: #fbbf24;">
+          <p style="position:absolute;top:8px;left:8px;font-size:12px;color:#065f46;margin:0;">
+            混合只在容器内，黄色背景不参与
+          </p>
+          <div class="layer-1">Multiply</div>
+          <div class="layer-2">Screen</div>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="code-comment">/* 无隔离：混合会传播到父元素背景 */</span>
+<span class="code-prop">.outer</span> {
+  <span class="code-prop">background</span>: <span class="code-value">#fbbf24</span>; <span class="code-comment">/* 这会影响混合结果 */</span>
+}
+<span class="code-prop">.inner</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>;
+  <span class="code-prop">background</span>: <span class="code-value">#ff6b6b</span>;
+}
+
+<span class="code-comment">/* 有隔离：混合只在容器内 */</span>
+<span class="code-prop">.container</span> {
+  <span class="code-prop">isolation</span>: <span class="code-value">isolate</span>; <span class="code-comment">/* 创建隔离层 */</span>
+}
+<span class="code-prop">.container .layer</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>多层圆形叠加</h2>
+    <p>三个圆形使用不同的混合模式，在有隔离和无隔离下的效果对比：</p>
+
+    <div class="blend-group" style="margin-bottom: 12px;">
+      <div class="blend-layer circle-1">1</div>
+      <div class="blend-layer circle-2">2</div>
+      <div class="blend-layer circle-3">3</div>
+      <p style="position:absolute;bottom:8px;left:8px;font-size:12px;color:#94a3b8;margin:0;">
+        无隔离：页面背景（深灰色）参与混合
+      </p>
+    </div>
+
+    <div class="blend-group isolated">
+      <div class="blend-layer circle-1">1</div>
+      <div class="blend-layer circle-2">2</div>
+      <div class="blend-layer circle-3">3</div>
+      <p style="position:absolute;bottom:8px;left:8px;font-size:12px;color:#94a3b8;margin:0;">
+        有隔离：混合只在组内，背景不参与
+      </p>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>文字层叠混合</h2>
+    <p>多层文字使用不同的混合模式叠加在一起：</p>
+
+    <div class="text-stack">
+      <span class="word word-1">HELLO</span>
+      <span class="word word-2">CSS</span>
+      <span class="word word-3">BLEND</span>
+    </div>
+    <pre><code><span class="code-comment">/* 文字层叠混合 */</span>
+<span class="code-prop">.text-stack</span> {
+  <span class="code-prop">position</span>: <span class="code-value">relative</span>;
+  <span class="code-prop">background</span>: <span class="code-value">linear-gradient(180deg, #1e1e1e, #2d2d2d)</span>;
+}
+
+<span class="code-prop">.word-1</span> {
+  <span class="code-prop">top</span>: <span class="code-value">20%</span>;
+  <span class="code-prop">left</span>: <span class="code-value">10%</span>;
+  <span class="code-prop">color</span>: <span class="code-value">#ff6b6b</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>;
+}
+
+<span class="code-prop">.word-2</span> {
+  <span class="code-prop">top</span>: <span class="code-value">40%</span>;
+  <span class="code-prop">left</span>: <span class="code-value">25%</span>;
+  <span class="code-prop">color</span>: <span class="code-value">#4ecdc4</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">screen</span>;
+}
+
+<span class="code-prop">.word-3</span> {
+  <span class="code-prop">top</span>: <span class="code-value">60%</span>;
+  <span class="code-prop">left</span>: <span class="code-value">40%</span>;
+  <span class="code-prop">color</span>: <span class="code-value">#ffe66d</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">overlay</span>;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>SVG 与 HTML 混合</h2>
+    <p>SVG 图形与 HTML 内容的混合效果：</p>
+
+    <div class="svg-blend-demo">
+      <svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="svgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#4ecdc4;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="120" cy="125" r="80" fill="url(#svgGrad)" style="mix-blend-mode: screen;" />
+        <circle cx="200" cy="100" r="60" fill="#ffe66d" style="mix-blend-mode: multiply;" />
+        <circle cx="280" cy="150" r="70" fill="#764ba2" style="mix-blend-mode: overlay;" />
+      </svg>
+      <div class="text-overlay">SVG BLEND</div>
+    </div>
+    <pre><code><span class="code-comment">/* SVG 与 HTML 内容的混合 */</span>
+<span class="code-prop">.svg-blend-demo</span> {
+  <span class="code-prop">position</span>: <span class="code-value">relative</span>;
+  <span class="code-prop">background</span>: <span class="code-value">#764ba2</span>;
+}
+
+<span class="code-prop">.svg-blend-demo svg</span> {
+  <span class="code-prop">position</span>: <span class="code-value">absolute</span>;
+  <span class="code-prop">width</span>: <span class="code-value">100%</span>;
+  <span class="code-prop">height</span>: <span class="code-value">100%</span>;
+}
+
+<span class="code-prop">.svg-blend-demo svg circle</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">screen</span>; <span class="code-comment">/* SVG 元素也可使用混合模式 */</span>
+}
+
+<span class="code-prop">.text-overlay</span> {
+  <span class="code-prop">position</span>: <span class="code-value">absolute</span>;
+  <span class="code-prop">top</span>: <span class="code-value">50%</span>;
+  <span class="code-prop">left</span>: <span class="code-value">50%</span>;
+  <span class="code-prop">transform</span>: <span class="code-value">translate(-50%, -50%)</span>;
+  <span class="code-prop">color</span>: <span class="code-value">white</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>实战：制作发光按钮</h2>
+    <p>结合混合模式和发光效果，制作独特的按钮样式：</p>
+
+    <style>
+      .glow-btn-container {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+
+      .glow-btn {
+        position: relative;
+        padding: 12px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .glow-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #ff6b6b, #feca57);
+        mix-blend-mode: multiply;
+        opacity: 0.7;
+      }
+
+      .glow-btn span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .glow-btn.screen::before {
+        mix-blend-mode: screen;
+      }
+
+      .glow-btn.isolated {
+        isolation: isolate;
+      }
+    </style>
+
+    <div class="glow-btn-container">
+      <div>
+        <p style="font-size:12px;color:#64748b;margin:0 0 8px 0;">multiply</p>
+        <button class="glow-btn"><span>Hover Me</span></button>
+      </div>
+      <div>
+        <p style="font-size:12px;color:#64748b;margin:0 0 8px 0;">screen</p>
+        <button class="glow-btn screen"><span>Hover Me</span></button>
+      </div>
+      <div>
+        <p style="font-size:12px;color:#64748b;margin:0 0 8px 0;">screen + isolate</p>
+        <button class="glow-btn screen isolated"><span>Hover Me</span></button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
