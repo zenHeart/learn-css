@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 浮动清除</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .demo-box2 { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; border: 2px dashed #f85149; }
+    .profile-card { border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+    .profile-card .avatar { float: left; width: 60px; height: 60px; background: #58a6ff; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .profile-card .info { overflow: hidden; }
+    .profile-card .name { font-size: 16px; font-weight: bold; color: #f0f6fc; }
+    .profile-card .bio { font-size: 13px; color: #8b949e; margin-top: 4px; }
+    .profile-card .clearfix::after { content: ""; display: block; clear: both; }
+    .gallery { border: 1px solid #30363d; border-radius: 6px; overflow: hidden; }
+    .gallery-item { float: left; width: 25%; padding: 8px; }
+    .gallery-item-inner { background: #21262d; border-radius: 4px; height: 60px; display: flex; align-items: center; justify-content: center; color: #8b949e; font-size: 12px; }
+    .gallery .clearfix::after { content: ""; display: block; clear: both; }
+    .gallery-caption { background: #161b22; padding: 10px; font-size: 13px; color: #8b949e; border-top: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+    .warning { background: #f8514922; border: 1px solid #f85149; border-radius: 4px; padding: 10px; font-size: 13px; color: #f85149; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 浮动清除</h1>
+
+    <div class="section">
+      <h2>基本清除浮动</h2>
+      <div class="demo-box">
+        <div class="profile-card">
+          <div class="avatar">👤</div>
+          <div class="info">
+            <div class="name">张小明</div>
+            <div class="bio">全栈工程师，热爱开源，专注前端技术</div>
+          </div>
+        </div>
+        <div style="color:#8b949e; font-size:13px;">下方内容不受浮动影响</div>
+      </div>
+      <div class="code-block">.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}</div>
+      <p class="desc">使用 ::after 伪元素在浮动容器末尾插入一个空块元素，清除所有浮动</p>
+    </div>
+
+    <div class="section">
+      <h2>图片画廊</h2>
+      <div class="demo-box">
+        <div class="gallery">
+          <div class="gallery-item"><div class="gallery-item-inner">图片 1</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 2</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 3</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 4</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 5</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 6</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 7</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 8</div></div>
+          <div class="clearfix"></div>
+          <div class="gallery-caption">8 张图片 · 2025年摄影作品集</div>
+        </div>
+      </div>
+      <div class="code-block">.gallery-item { float: left; width: 25%; }
+.gallery::after { content: ""; display: block; clear: both; }</div>
+      <p class="desc">在没有 clearfix 类的情况下，下方的 caption 会紧贴着浮动元素</p>
+    </div>
+
+    <div class="section">
+      <h2>没有清除浮动的问题</h2>
+      <div class="demo-box2">
+        <div style="color:#f85149; font-size:13px; margin-bottom:8px;">⚠️ 下方没有使用 clearfix，caption 紧贴着浮动元素</div>
+        <div class="gallery">
+          <div class="gallery-item"><div class="gallery-item-inner">图片 1</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 2</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 3</div></div>
+          <div class="gallery-item"><div class="gallery-item-inner">图片 4</div></div>
+          <div class="gallery-caption" style="border-top:none;">⚠️ 我应该在这里，但被挤到旁边了</div>
+        </div>
+      </div>
+      <div class="warning">注意：如果不使用 ::after 清除浮动，后续元素会紧贴浮动元素排列，导致布局错乱</div>
+    </div>
+  </div>
+</body>
+</html>

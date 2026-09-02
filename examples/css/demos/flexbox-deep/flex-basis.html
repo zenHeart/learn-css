@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox flex-basis 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 100px; display: flex; gap: 8px; width: 100%; }
+    .demo-item { background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 12px; min-height: 60px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .warning { border-left: 3px solid #f78166; padding-left: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>flex-basis 初始尺寸</h1>
+
+    <div class="section">
+      <h2>flex-basis vs width 优先级</h2>
+      <div class="controls">
+        <button class="control-btn active" data-mode="basis">flex-basis 生效</button>
+        <button class="control-btn" data-mode="width">width 生效</button>
+        <button class="control-btn" data-mode="content">内容尺寸</button>
+      </div>
+      <div class="demo-area" style="flex-direction: column;" id="demo">
+        <div class="demo-item" id="item1" style="flex-basis:200px;width:100px;">item</div>
+      </div>
+      <div class="code-block" id="codeBlock">flex-basis: 200px; width: 100px; /* 结果: 200px */</div>
+      <div class="info warning" style="margin-top:8px;">
+        <strong>优先级：</strong>max/min > flex-basis > width/height > 内容尺寸
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>flex-basis: auto vs 0</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;">
+        <div>
+          <h4 style="font-size:13px;color:#f0f6fc;margin-bottom:8px;">flex-basis: auto（默认）</h4>
+          <div style="background:#0d1117;border-radius:6px;padding:12px;display:flex;gap:8px;">
+            <div style="flex:1 1 auto;min-width:60px;height:60px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">auto</div>
+            <div style="flex:1 1 auto;min-width:60px;height:60px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">自适应内容</div>
+            <div style="flex:1 1 auto;min-width:60px;height:60px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">auto</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">使用 width 或内容尺寸作为基础，可正常自适应</div>
+        </div>
+        <div>
+          <h4 style="font-size:13px;color:#f0f6fc;margin-bottom:8px;">flex-basis: 0</h4>
+          <div style="background:#0d1117;border-radius:6px;padding:12px;display:flex;gap:8px;">
+            <div style="flex:1 1 0;min-width:0;height:60px;background:linear-gradient(135deg,#3fb950,#238636);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">0</div>
+            <div style="flex:1 1 0;min-width:0;height:60px;background:linear-gradient(135deg,#3fb950,#238636);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">内容</div>
+            <div style="flex:1 1 0;min-width:0;height:60px;background:linear-gradient(135deg,#3fb950,#238636);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">0</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">初始尺寸为 0，内容被压缩再分配！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>常见用法</h2>
+      <div class="info">
+        flex: 0 0 200px; -> 固定 200px，不伸缩<br><br>
+        flex: 1 1 auto; -> 可伸缩，使用 width/内容<br><br>
+        flex: 1; -> 可伸缩，初始 0（常被误用！）<br><br>
+        flex: none; -> 完全不伸缩 (0 0 auto)
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modes = {
+      basis: { css: 'flex-basis: 200px; width: 100px;', desc: 'flex-basis 200px > width 100px' },
+      width: { css: 'flex-basis: 0; width: 150px;', desc: 'flex-basis 0，但 width 生效' },
+      content: { css: 'flex-basis: auto; width: auto;', desc: '完全由内容决定尺寸' }
+    };
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = modes[btn.dataset.mode];
+        const item = document.getElementById('item1');
+        if (btn.dataset.mode === 'basis') {
+          item.style.flexBasis = '200px';
+          item.style.width = '100px';
+          item.style.minWidth = '0';
+        } else if (btn.dataset.mode === 'width') {
+          item.style.flexBasis = '0';
+          item.style.width = '150px';
+          item.style.minWidth = '0';
+        } else {
+          item.style.flexBasis = 'auto';
+          item.style.width = 'auto';
+          item.style.minWidth = '0';
+        }
+        document.getElementById('codeBlock').textContent = mode.css + ' /* ' + mode.desc + ' */';
+      });
+    });
+  </script>
+</body>
+</html>

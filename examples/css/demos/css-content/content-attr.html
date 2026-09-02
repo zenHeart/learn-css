@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - attr() 函数</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .form-row { margin-bottom: 12px; }
+    .form-row label { display: inline-block; min-width: 80px; }
+    .form-row [data-label]::before { content: attr(data-label) ": "; color: #58a6ff; font-weight: bold; }
+    .form-row { padding: 8px; border: 1px solid #21262d; border-radius: 4px; }
+    .file-list { list-style: none; }
+    .file-list li { padding: 8px 0; border-bottom: 1px solid #21262d; }
+    .file-list li:last-child { border-bottom: none; }
+    .file-list a { color: #58a6ff; text-decoration: none; }
+    .file-list a[href$=".pdf"]::after { content: " (PDF, " attr(data-size) ")"; color: #f85149; font-size: 12px; margin-left: 6px; }
+    .file-list a[href$=".zip"]::after { content: " (ZIP, " attr(data-size) ")"; color: #3fb950; font-size: 12px; margin-left: 6px; }
+    .file-list a[href$=".docx"]::after { content: " (Word, " attr(data-size) ")"; color: #58a6ff; font-size: 12px; margin-left: 6px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+    .print-note { background: #21262d; padding: 8px; border-radius: 4px; font-size: 12px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - attr() 函数</h1>
+
+    <div class="section">
+      <h2>数据标签</h2>
+      <div class="demo-box">
+        <div class="form-row">
+          <span data-label="姓名">张三</span>
+        </div>
+        <div class="form-row">
+          <span data-label="邮箱">zhangsan@example.com</span>
+        </div>
+        <div class="form-row">
+          <span data-label="电话">138-0013-8000</span>
+        </div>
+      </div>
+      <div class="code-block">[data-label]::before {
+  content: attr(data-label) ": ";
+  color: #58a6ff;
+  font-weight: bold;
+}</div>
+      <p class="desc">使用 data-* 属性配合 attr() 读取标签文本</p>
+    </div>
+
+    <div class="section">
+      <h2>文件类型和大小</h2>
+      <div class="demo-box">
+        <ul class="file-list">
+          <li><a href="report.pdf" data-size="2.4 MB">年度报告 2025</a></li>
+          <li><a href="assets.zip" data-size="15.8 MB">设计资源包</a></li>
+          <li><a href="brief.docx" data-size="156 KB">项目简报</a></li>
+        </ul>
+      </div>
+      <div class="code-block">a[href$=".pdf"]::after {
+  content: " (PDF, " attr(data-size) ")";
+  color: #f85149;
+}</div>
+      <p class="desc">根据文件类型显示不同颜色标记，并从 data-size 属性读取文件大小</p>
+    </div>
+
+    <div class="section">
+      <h2>打印样式中的 URL 显示</h2>
+      <div class="demo-box">
+        <p>这是一个外部链接：<a href="https://www.example.com/documentation" style="color:#58a6ff;">查看文档</a></p>
+      </div>
+      <div class="code-block">@media print {
+  a[href^="http://"]::after,
+  a[href^="https://"]::after {
+    content: " (" attr(href) ")";
+    font-size: 10px;
+    color: #666;
+  }
+}</div>
+      <p class="desc">打印时在链接后显示完整 URL，方便读者查找原始资料</p>
+    </div>
+  </div>
+</body>
+</html>

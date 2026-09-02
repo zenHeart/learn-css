@@ -1,0 +1,172 @@
+---
+title: "CSS contrast-color() 色彩对比度函数"
+category: "基础知识"
+tags:
+  - CSS
+  - 色彩
+  - contrast-color
+  - 对比度
+  - CSS Color Level 5
+description: "详解 CSS Color Level 5 新增的 contrast-color() 函数，自动选择具有足够对比度的文本颜色"
+keywords: "CSS, contrast-color, 色彩对比度, 无障碍, WCAG, CSS Color Level 5"
+---
+
+# CSS `contrast-color()` 色彩对比度函数
+
+## 概述
+
+`contrast-color()` 是 CSS Color Module Level 5 规范中新增的颜色函数，用于**根据背景色自动选择具有足够对比度的前景色**。这对于实现无障碍设计尤为重要，因为它能确保文本与其背景之间保持 WCAG 规定的最小对比度要求。
+
+该函数最早在 [CSS Color Level 5 规范](https://drafts.csswg.org/css-color-5/#funcdef-contrast-color) 中定义，由 Chris Lilley、Una Kravets、Lea Verou 和 Adam Argyle 等人共同编辑。
+
+## 语法详解
+
+### 基本语法
+
+```css
+contrast-color(<background-color>, <target-colors>)
+```
+
+**参数说明：**
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `<background-color>` | `<color>` | 背景颜色，函数会根据这个颜色来计算对比度 |
+| `<target-colors>` | `<color>#` | 一个或多个目标颜色列表，函数会选择与背景对比度最高的那个 |
+
+**返回值：** 从目标颜色列表中选出与背景色对比度最高的那个颜色。
+
+### 对比度计算
+
+对比度计算遵循 WCAG 2.1 规范，使用相对亮度（Relative Luminance）公式：
+
+1. 将 RGB 各通道值从 0-255 线性化为 0-1 范围
+2. 对每个通道应用 gamma 校正
+3. 计算相对亮度：L = 0.2126 × R + 0.7152 × G + 0.0722 × B
+4. 对比度 = (L1 + 0.05) / (L2 + 0.05)，其中 L1 > L2
+
+### 使用示例
+
+```css
+/* 最基本用法：从白色和黑色中选择一个与背景对比度高的 */
+color: contrast-color(blue, white, black);  /* 返回 white */
+
+/* 暗黑模式下的自动文本颜色 */
+--text-color: contrast-color(var(--bg-color), #fff, #000);
+
+/* 复杂背景下的品牌色选择 */
+.button-text {
+  color: contrast-color(var(--brand-bg), var(--primary), var(--secondary));
+}
+```
+
+## 实际应用场景
+
+### 1. 暗黑模式与亮色模式自动切换
+
+```css
+/* 定义主题变量 */
+:root {
+  --bg-color: #ffffff;
+  --text-color: contrast-color(var(--bg-color), #1a1a1a, #ffffff);
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: contrast-color(var(--bg-color), #1a1a1a, #ffffff);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+```
+
+### 2. 动态卡片组件
+
+```css
+.card {
+  --card-bg: var(--dynamic-color);
+  background-color: var(--card-bg);
+  color: contrast-color(var(--card-bg), #fff, #000);
+}
+```
+
+### 3. 用户生成内容的可访问性
+
+```css
+/* 用户上传的头像边框自动适配 */
+.avatar-ring {
+  --avatar-bg: var(--user-defined-color);
+  border-color: contrast-color(var(--avatar-bg), rgba(0,0,0,0.5), rgba(255,255,255,0.5));
+}
+```
+
+### 4. 数据可视化自动配色
+
+```css
+.chart-bar {
+  --chart-bg: var(--bar-color);
+  background-color: var(--chart-bg);
+}
+
+/* 条形图标签始终可见 */
+.chart-label {
+  color: contrast-color(var(--chart-bg), #333, #eee);
+}
+```
+
+## 与 `light-dark()` 的区别
+
+| 特性 | `contrast-color()` | `light-dark()` |
+|------|-------------------|----------------|
+| 颜色数量 | 从列表中自动选择 | 只支持两种固定颜色 |
+| 选择依据 | 对比度计算 | 固定的亮/暗主题 |
+| 灵活性 | 高，可指定任意数量颜色 | 低，只有两种选择 |
+| 适用场景 | 动态背景、用户自定义颜色 | 明确的主题切换 |
+
+```css
+/* light-dark 只知道"亮"和"暗" */
+color: light-dark(black, white);
+
+/* contrast-color 知道"哪个颜色更易读" */
+color: contrast-color(dynamic-bg, #fff, #000, #ff0);
+```
+
+## 浏览器兼容性
+
+> ⚠️ `contrast-color()` 目前处于实验性阶段，浏览器支持非常有限。
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| `contrast-color()` | ❌ 不支持 | ❌ 不支持 | ❌ 不支持 | ❌ 不支持 |
+
+### 当前状态
+
+- **规范状态**：`contrast-color()` 是 CSS Color Level 5 Editor's Draft 的一部分
+- **实验性**：函数签名和语法可能在未来版本中发生变化
+- **WPT 测试**：规范中列出了相关的 [Web Platform Tests](https://wpt.fyi/results/css/css-color?label=experimental)
+
+### 渐进增强策略
+
+```css
+/* 使用 @supports 进行特性检测 */
+.button {
+  /* 默认回退方案 */
+  background-color: var(--btn-bg);
+  color: #fff;
+}
+
+@supports (color: contrast-color(red, white, black)) {
+  .button {
+    /* 启用 contrast-color */
+    color: contrast-color(var(--btn-bg), #fff, #000);
+  }
+}
+```
+
+## 参考资料
+
+- [CSS Color Module Level 5 规范](https://drafts.csswg.org/css-color-5/#funcdef-contrast-color)
+- [WCAG 2.1 对比度要求](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
+- [MDN CSS 颜色文档](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors)
