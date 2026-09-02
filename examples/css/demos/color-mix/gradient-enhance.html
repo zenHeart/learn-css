@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS color-mix() 渐变增强演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .demo-item { text-align: center; }
+    .demo-box { height: 120px; border-radius: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.2s; }
+    .demo-box:hover { transform: scale(1.02); }
+    .demo-label { font-size: 13px; color: #8b949e; }
+    .demo-value { font-size: 11px; color: #6e7681; font-family: 'SF Mono', Monaco, monospace; margin-top: 4px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; padding: 12px; background: #0d1117; border-radius: 4px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+
+    /* ===== 渐变示例 ===== */
+    .grad-basic { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .grad-multi {
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, #667eea 100%, #764ba2 0%),
+        color-mix(in oklch, #667eea 66%, #764ba2 34%),
+        color-mix(in oklch, #667eea 33%, #764ba2 67%),
+        color-mix(in oklch, #667eea 0%, #764ba2 100%)
+      );
+    }
+    .grad-soft { background: linear-gradient(135deg, #667eea, #764ba2 30%, #f093fb); }
+    .grad-soft-enhanced {
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, #667eea, white 10%),
+        color-mix(in oklch, #667eea 50%, #764ba2 50%),
+        color-mix(in oklch, #764ba2, #f093fb 20%),
+        color-mix(in oklch, #764ba2, white 10%)
+      );
+    }
+    .grad-radial { background: radial-gradient(circle at 30% 30%, #667eea, #764ba2); }
+    .grad-radial-enhanced {
+      background: radial-gradient(
+        circle at 30% 30%,
+        color-mix(in oklch, #667eea, white 30%),
+        color-mix(in oklch, #667eea 50%, #764ba2 50%),
+        #764ba2
+      );
+    }
+    .grad-conic { background: conic-gradient(from 135deg, #667eea, #764ba2, #f093fb, #667eea); }
+    .grad-conic-enhanced {
+      background: conic-gradient(
+        from 135deg,
+        color-mix(in oklch, #667eea, white 15%),
+        color-mix(in oklch, #667eea 60%, #764ba2 40%),
+        color-mix(in oklch, #764ba2 60%, #f093fb 40%),
+        color-mix(in oklch, #f093fb, white 15%),
+        color-mix(in oklch, #667eea, white 15%)
+      );
+    }
+    .grad-stripe { background: repeating-linear-gradient(45deg, #667eea, #667eea 10px, #764ba2 10px, #764ba2 20px); }
+    .grad-stripe-enhanced {
+      background:
+        repeating-linear-gradient(45deg,
+          color-mix(in oklch, #667eea, white 20%),
+          color-mix(in oklch, #667eea, white 20%) 10px,
+          color-mix(in oklch, #764ba2, white 10%),
+          color-mix(in oklch, #764ba2, white 10%) 20px
+        );
+    }
+    .grad-glass { background: linear-gradient(135deg, rgba(102,126,234,0.4), rgba(118,75,162,0.4)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+    .grad-glass-enhanced {
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, #667eea 40%, transparent),
+        color-mix(in srgb, #764ba2 40%, transparent)
+      );
+      backdrop-filter: blur(10px);
+      border: 1px solid color-mix(in srgb, rgba(255,255,255,0.3), transparent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 color-mix() 渐变增强</h1>
+
+    <div class="section">
+      <h2>普通渐变 vs color-mix() 增强渐变</h2>
+      <div class="demo-grid">
+        <!-- 线性渐变 -->
+        <div class="demo-item">
+          <div class="demo-box grad-basic">Basic</div>
+          <div class="demo-label">基础线性渐变</div>
+          <div class="demo-value">linear-gradient(#667eea, #764ba2)</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-multi">Multi-Stop</div>
+          <div class="demo-label">多段混合渐变</div>
+          <div class="demo-value">color-mix() 4 段过渡</div>
+        </div>
+
+        <!-- 柔和渐变 -->
+        <div class="demo-item">
+          <div class="demo-box grad-soft">Soft</div>
+          <div class="demo-label">普通柔和渐变</div>
+          <div class="demo-value">linear-gradient(#667eea, #764ba2 30%, #f093fb)</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-soft-enhanced">Soft+</div>
+          <div class="demo-label">color-mix 增强</div>
+          <div class="demo-value">每段使用 color-mix 添加白色</div>
+        </div>
+
+        <!-- 径向渐变 -->
+        <div class="demo-item">
+          <div class="demo-box grad-radial">Radial</div>
+          <div class="demo-label">基础径向渐变</div>
+          <div class="demo-value">radial-gradient(circle, #667eea, #764ba2)</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-radial-enhanced">Radial+</div>
+          <div class="demo-label">color-mix 增强</div>
+          <div class="demo-value">中心添加白色高光混合</div>
+        </div>
+
+        <!-- 锥形渐变 -->
+        <div class="demo-item">
+          <div class="demo-box grad-conic">Conic</div>
+          <div class="demo-label">普通锥形渐变</div>
+          <div class="demo-value">conic-gradient(#667eea, #764ba2, #f093fb)</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-conic-enhanced">Conic+</div>
+          <div class="demo-label">color-mix 增强</div>
+          <div class="demo-value">边缘添加白色柔和过渡</div>
+        </div>
+
+        <!-- 条纹渐变 -->
+        <div class="demo-item">
+          <div class="demo-box grad-stripe">Stripe</div>
+          <div class="demo-label">普通条纹</div>
+          <div class="demo-value">repeating-linear-gradient</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-stripe-enhanced">Stripe+</div>
+          <div class="demo-label">color-mix 增强</div>
+          <div class="demo-value">条纹边缘柔和混合</div>
+        </div>
+
+        <!-- 毛玻璃 -->
+        <div class="demo-item">
+          <div class="demo-box grad-glass">Glass</div>
+          <div class="demo-label">普通玻璃效果</div>
+          <div class="demo-value">rgba 透明度 + blur</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grad-glass-enhanced">Glass+</div>
+          <div class="demo-label">color-mix 增强</div>
+          <div class="demo-value">透明色用 color-mix 生成</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>混合技巧说明</h2>
+      <div class="info">
+        <strong>💡 核心技巧：</strong>color-mix() 在渐变中的主要价值是<strong>柔化过渡</strong>和<strong>添加高光/阴影</strong><br><br>
+        <strong>1. 添加白色高光：</strong><code>color-mix(in oklch, &lt;color&gt;, white 20%)</code> — 让渐变边缘更亮<br>
+        <strong>2. 添加黑色阴影：</strong><code>color-mix(in oklch, &lt;color&gt;, black 20%)</code> — 增加深度感<br>
+        <strong>3. 透明混合：</strong><code>color-mix(in srgb, &lt;color&gt; 40%, transparent)</code> — 替代 rgba() 的透明色<br>
+        <strong>4. 推荐使用 oklch：</strong>在 oklch 空间中混合比 srgb 更符合人眼感知，饱和度更自然
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>实战代码</h2>
+      <pre class="info" style="font-family: 'SF Mono', Monaco, monospace; font-size: 12px; white-space: pre-wrap; color: #79c0ff;">
+/* 多段平滑渐变 - 4 段过渡 */
+background: linear-gradient(
+  135deg,
+  color-mix(in oklch, #667eea 100%, #764ba2 0%),
+  color-mix(in oklch, #667eea 66%, #764ba2 34%),
+  color-mix(in oklch, #667eea 33%, #764ba2 67%),
+  color-mix(in oklch, #667eea 0%, #764ba2 100%)
+);
+
+/* 径向渐变中心高光 */
+background: radial-gradient(
+  circle at 30% 30%,
+  color-mix(in oklch, #667eea, white 30%),
+  color-mix(in oklch, #667eea 50%, #764ba2 50%),
+  #764ba2
+);
+
+/* 透明玻璃效果 */
+background: color-mix(in srgb, #667eea 40%, transparent);
+backdrop-filter: blur(10px);</pre>
+    </div>
+  </div>
+</body>
+</html>
