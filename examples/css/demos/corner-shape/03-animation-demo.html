@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS corner-shape 动画示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 40px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .demo-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .demo-card h3 {
+      margin-bottom: 20px;
+      color: #ccc;
+      font-size: 1rem;
+    }
+
+    .anim-box {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+      border: 6px solid #667eea;
+      border-radius: 50px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+    }
+
+    /* 动画1：从 round 到 scoop */
+    @keyframes morphRoundToScoop {
+      0%, 100% {
+        corner-shape: round;
+      }
+      50% {
+        corner-shape: scoop;
+      }
+    }
+
+    .anim-1 {
+      animation: morphRoundToScoop 2s ease-in-out infinite;
+    }
+
+    /* 动画2：从 squircle 到 notch */
+    @keyframes morphSquircleToNotch {
+      0%, 100% {
+        corner-shape: squircle;
+      }
+      50% {
+        corner-shape: notch;
+      }
+    }
+
+    .anim-2 {
+      animation: morphSquircleToNotch 2.5s ease-in-out infinite;
+    }
+
+    /* 动画3：从 bevel 到 round */
+    @keyframes morphBevelToRound {
+      0%, 100% {
+        corner-shape: bevel;
+      }
+      50% {
+        corner-shape: round;
+      }
+    }
+
+    .anim-3 {
+      animation: morphBevelToRound 1.8s ease-in-out infinite;
+    }
+
+    /* 动画4：连续变化多个形状 */
+    @keyframes morphSequence {
+      0% {
+        corner-shape: round;
+      }
+      25% {
+        corner-shape: squircle;
+      }
+      50% {
+        corner-shape: scoop;
+      }
+      75% {
+        corner-shape: notch;
+      }
+      100% {
+        corner-shape: round;
+      }
+    }
+
+    .anim-4 {
+      animation: morphSequence 4s ease-in-out infinite;
+    }
+
+    /* 交互式动画 */
+    .hover-demo {
+      transition: corner-shape 0.5s ease;
+      cursor: pointer;
+    }
+
+    .hover-demo:hover {
+      corner-shape: scoop;
+      animation: none;
+    }
+
+    /* 边框和阴影也跟随动画 */
+    .anim-shadow {
+      animation: morphRoundToScoop 2s ease-in-out infinite;
+    }
+
+    .code {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.8rem;
+      color: #7ee787;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .interactive-section {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .interactive-section h2 {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      color: #667eea;
+    }
+
+    .interactive-section p {
+      color: #888;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS corner-shape 动画效果</h1>
+  <p class="subtitle">不同角形状之间可以平滑过渡动画</p>
+
+  <div class="container">
+    <div class="grid">
+      <div class="demo-card">
+        <h3>round ↔ scoop</h3>
+        <div class="anim-box anim-1"></div>
+        <code class="code">@keyframes round → scoop</code>
+      </div>
+
+      <div class="demo-card">
+        <h3>squircle ↔ notch</h3>
+        <div class="anim-box anim-2"></div>
+        <code class="code">@keyframes squircle → notch</code>
+      </div>
+
+      <div class="demo-card">
+        <h3>bevel ↔ round</h3>
+        <div class="anim-box anim-3"></div>
+        <code class="code">@keyframes bevel → round</code>
+      </div>
+
+      <div class="demo-card">
+        <h3>完整序列动画</h3>
+        <div class="anim-box anim-4"></div>
+        <code class="code">round → squircle → scoop → notch</code>
+      </div>
+    </div>
+
+    <div class="interactive-section">
+      <h2>交互式演示</h2>
+      <p>鼠标悬停在下方方块上查看角形状变化</p>
+      <div class="anim-box anim-shadow hover-demo" style="display: inline-block;"></div>
+      <p style="margin-top: 20px; font-size: 0.9rem;">
+        <code class="code">transition: corner-shape 0.5s ease;</code>
+      </p>
+    </div>
+  </div>
+
+  <p class="info">需要 Chrome 139+ 版本才能看到动画效果</p>
+</body>
+</html>

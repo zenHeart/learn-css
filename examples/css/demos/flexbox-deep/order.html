@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox order 示例</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 100px; display: flex; gap: 8px; width: 100%; }
+    .demo-item { width: 80px; min-height: 80px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 13px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .control-btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .control-btn:hover { background: #30363d; }
+    .control-btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; white-space: pre-wrap; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .warning { border-left: 3px solid #f78166; padding-left: 12px; }
+    .label { font-size: 11px; color: #6e7681; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔢 order 排列顺序</h1>
+
+    <div class="section">
+      <h2>DOM 顺序 vs 视觉顺序</h2>
+      <div class="controls">
+        <button class="control-btn active" data-mode="default">默认顺序</button>
+        <button class="control-btn" data-mode="reverse">反转顺序</button>
+        <button class="control-btn" data-mode="custom">自定义顺序</button>
+      </div>
+      <div class="demo-area" id="demo">
+        <div class="demo-item" data-order="0" style="order:0;">A<br><span style="font-size:10px;opacity:0.7">order=0</span></div>
+        <div class="demo-item" data-order="1" style="order:1;">B<br><span style="font-size:10px;opacity:0.7">order=1</span></div>
+        <div class="demo-item" data-order="2" style="order:2;">C<br><span style="font-size:10px;opacity:0.7">order=2</span></div>
+        <div class="demo-item" data-order="3" style="order:3;">D<br><span style="font-size:10px;opacity:0.7">order=3</span></div>
+        <div class="demo-item" data-order="4" style="order:4;">E<br><span style="font-size:10px;opacity:0.7">order=4</span></div>
+      </div>
+      <div class="code-block" id="codeBlock">/* DOM: A → B → C → D → E */
+/* 视觉: A → B → C → D → E (默认) */</div>
+    </div>
+
+    <div class="section">
+      <h2>典型应用：响应式布局</h2>
+      <div style="background:#0d1117;border-radius:6px;padding:16px;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <div style="flex:0 0 100%;min-height:60px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;order:1;">① 主要内容 (order:1)</div>
+        <div style="flex:0 0 50%;min-height:60px;background:linear-gradient(135deg,#3fb950,#238636);border-radius:6px 0 0 6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;order:2;">② 侧边栏 (order:2)</div>
+        <div style="flex:0 0 50%;min-height:60px;background:linear-gradient(135deg,#d29922,#9e6a03);border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;order:3;">③ 附加信息 (order:3)</div>
+        <div style="flex:0 0 100%;min-height:60px;background:linear-gradient(135deg,#f78166,#da3633);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;order:0;">④ 底部信息 (order:0)</div>
+      </div>
+      <div class="info">💡 移动端优先：可以用 order 把主要内容放到最前面显示</div>
+    </div>
+
+    <div class="section">
+      <div class="info warning">
+        <strong>⚠️ 无障碍警告：</strong>order 只改变视觉顺序，不改变 DOM 顺序！<br><br>
+        屏幕阅读器按 DOM 顺序读取，不会受 order 影响。<br>
+        这会导致视觉顺序与阅读顺序不一致，影响无障碍访问。<br><br>
+        <strong>建议：</strong>尽量通过 HTML 结构调整顺序，order 仅用于视觉微调。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>order 计算规则</h2>
+      <div class="info">
+        <strong>规则：</strong>order 值相同时，按 DOM 顺序排列<br><br>
+        <code>order: 2</code> → 最靠后<br>
+        <code>order: 0</code> → 默认位置<br>
+        <code>order: -1</code> → 最靠前<br><br>
+        可以使用负数让元素排到所有正数元素之前
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modes = {
+      default: {
+        orders: [0, 1, 2, 3, 4],
+        code: '/* DOM: A → B → C → D → E */\n/* 视觉: A → B → C → D → E (默认) */'
+      },
+      reverse: {
+        orders: [-1, 0, 1, 2, 3],
+        code: '/* 反转: A→-1, B→0, C→1, D→2, E→3 */\n/* 视觉: A → B → C → D → E */'
+      },
+      custom: {
+        orders: [3, 0, 4, 1, 2],
+        code: '/* 自定义顺序 */\n/* A:3, B:0, C:4, D:1, E:2 */\n/* 视觉: B → D → E → A → C */'
+      }
+    };
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = modes[btn.dataset.mode];
+        const items = document.querySelectorAll('.demo-item');
+        items.forEach((item, i) => {
+          item.style.order = mode.orders[i];
+          const label = item.querySelector('br').nextSibling;
+          label.textContent = 'order=' + mode.orders[i];
+        });
+        document.getElementById('codeBlock').textContent = mode.code;
+      });
+    });
+  </script>
+</body>
+</html>

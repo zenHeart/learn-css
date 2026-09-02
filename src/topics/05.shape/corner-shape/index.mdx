@@ -1,0 +1,320 @@
+# CSS corner-shape 角形状属性
+
+## 概述
+
+`corner-shape` 是 CSS 背景与边框模块（Level 4）中引入的新属性，它通过扩展 `border-radius` 的功能，允许开发者自定义元素的角形状，而不仅限于传统的圆角效果。
+
+`corner-shape` 属性是以下四个物理属性的简写：
+- `corner-top-left-shape` — 左上角
+- `corner-top-right-shape` — 右上角
+- `corner-bottom-left-shape` — 左下角
+- `corner-bottom-right-shape` — 右下角
+
+**核心特点**：
+- 配合 `border-radius` 一起使用
+- 支持多种预设关键字（round、squircle、scoop、bevel、notch、square）
+- 支持 `superellipse()` 函数自定义曲率
+- 支持平滑动画过渡
+- 边框、阴影、背景等都会跟随角形状变化
+
+## 语法详解
+
+### 基本语法
+
+```css
+/* 单值：四个角相同 */
+corner-shape: bevel;
+
+/* 双值：对角线一组 */
+corner-shape: notch superellipse(0.6);
+
+/* 三值：左上 | 右上左下 | 右下 */
+corner-shape: superellipse(-1.2) square squircle;
+
+/* 四值：左上 | 右上 | 右下 | 左下（顺时针） */
+corner-shape: scoop superellipse(-1.6) superellipse(-2.2) round;
+
+/* 全局值 */
+corner-shape: inherit;
+corner-shape: initial;
+corner-shape: revert;
+corner-shape: revert-layer;
+corner-shape: unset;
+```
+
+### 关键字值
+
+| 值 | 效果 | superellipse 等价 |
+|---|---|---|
+| `round` | 传统圆角（默认值） | `superellipse(1)` |
+| `squircle` | 正方形和圆形之间的平滑过渡 | `superellipse(2)` |
+| `scoop` | 勺形，四分之一凹形曲线 | `superellipse(-1)` |
+| `bevel` | 斜面，连接角点的直线 | `superellipse(0)` |
+| `notch` | 凹口，创建内角 | `superellipse(-infinity)` |
+| `square` | 正方形，保持直角（重置效果） | `superellipse(infinity)` |
+
+### superellipse() 函数
+
+```css
+/* superellipse(k) k 值控制曲率强度 */
+corner-shape: superellipse(1);      /* 标准圆角 */
+corner-shape: superellipse(2);      /* 更接近矩形 */
+corner-shape: superellipse(4);      /* 接近矩形 */
+corner-shape: superellipse(0);       /* 斜面效果 */
+corner-shape: superellipse(-1);      /* 内凹勺形 */
+corner-shape: superellipse(-1.88);   /* 更深的内凹 */
+corner-shape: superellipse(infinity);  /* 正方形 */
+corner-shape: superellipse(-infinity); /* 凹口 */
+```
+
+### 方位指定
+
+```css
+/* 单独设置某个角的形状 */
+corner-top-left-shape: scoop;
+corner-top-right-shape: notch;
+corner-bottom-left-shape: bevel;
+corner-bottom-right-shape: squircle;
+
+/* 侧面简写（设置两个角） */
+corner-top-shape: scoop;      /* 左上 + 右上 */
+corner-bottom-shape: bevel;  /* 左下 + 右下 */
+```
+
+## 与 border-radius 配合使用
+
+### 基本规则
+
+`corner-shape` 必须配合 `border-radius` 才能生效。如果没有应用 `border-radius`，或者 `border-radius` 为 0，则 `corner-shape` 不会有任何效果。
+
+```css
+/* 正确：配合 border-radius 使用 */
+.element {
+  border-radius: 30px;
+  corner-shape: scoop;
+}
+
+/* 错误：没有 border-radius 则无效 */
+.invalid {
+  corner-shape: notch;  /* 不会有任何效果 */
+}
+```
+
+### 视觉效果对比
+
+同样的 `border-radius: 50%` 规则在不同 `corner-shape` 值下的效果：
+
+```css
+.box {
+  width: 200px;
+  height: 200px;
+  border: 8px solid deepskyblue;
+  border-radius: 50%;
+  /* 尝试不同的 corner-shape 值 */
+}
+```
+
+- `round` → 传统圆形圆角
+- `squircle` → 平滑过渡的圆角
+- `scoop` → 凹形圆角（内凹效果）
+- `bevel` → 斜面效果
+- `notch` → 深深的凹口（需配合较大 border-radius）
+- `square` → 保持直角
+
+### 参数值对应关系
+
+| corner-shape | border-radius: 50% 效果 | border-radius: 30px 效果 |
+|---|---|---|
+| `round` | 标准圆形 | 标准圆角 |
+| `squircle` | 超级椭圆 | 平滑圆角 |
+| `scoop` | 内凹圆形 | 内凹圆角 |
+| `bevel` | 斜面圆 | 斜面角 |
+| `notch` | 凹口圆形 | 凹口角 |
+| `square` | 正方形 | 正方形角 |
+
+## 哪些属性跟随角形状
+
+以下属性会自动跟随 `corner-shape` 定义的角形状：
+
+- `background-color` — 背景颜色
+- `background-image` — 背景图片
+- `border` — 边框
+- `outline` — 轮廓
+- `box-shadow` — 阴影
+- `overflow` — 溢出
+- `backdrop-filter` — 背景滤镜
+
+## 动画过渡
+
+`corner-shape` 支持平滑动画，可以通过 `@keyframes` 或 `transition` 实现：
+
+```css
+/* 关键帧动画 */
+@keyframes corner-morph {
+  0% {
+    corner-shape: round;
+  }
+  50% {
+    corner-shape: scoop;
+  }
+  100% {
+    corner-shape: notch;
+  }
+}
+
+.animated-box {
+  border-radius: 40px;
+  animation: corner-morph 3s ease-in-out infinite;
+}
+
+/* 过渡动画 */
+.morphable:hover {
+  corner-shape: squircle;
+  transition: corner-shape 0.5s ease;
+}
+```
+
+**注意**：动画的插值是基于 `superellipse()` 函数的 K 值进行计算的。
+
+## 实战案例
+
+### 案例一：现代卡片设计
+
+利用 `scoop` 创建独特的卡片效果：
+
+```css
+.card {
+  border-radius: 24px;
+  corner-shape: scoop;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  padding: 24px;
+  color: white;
+}
+```
+
+### 案例二：带指向的对话气泡
+
+利用不同角形状组合创建对话气泡：
+
+```css
+.speech-bubble {
+  border-radius: 20px;
+  /* 左上圆角，其他角根据需要设置 */
+  corner-top-left-shape: round;
+  corner-top-right-shape: round;
+  corner-bottom-left-shape: round;
+  /* 右下角用 notch 创造指向效果 */
+  corner-bottom-right-shape: notch;
+  background: #4ecdc4;
+  padding: 16px 24px;
+  color: white;
+}
+```
+
+### 案例三：六边形按钮
+
+配合 `border-radius: 0` 和 `corner-shape: bevel` 创建六边形：
+
+```css
+.hexagon {
+  border-radius: 0;
+  corner-shape: bevel;
+  /* 配合 clip-path 实现完整六边形 */
+  clip-path: polygon(
+    25% 0%, 75% 0%, 100% 50%,
+    75% 100%, 25% 100%, 0% 50%
+  );
+  background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+  padding: 12px 32px;
+  color: white;
+}
+```
+
+### 案例四：可交互的形状切换
+
+使用 `:hover` 实现悬停时角形状变化：
+
+```css
+.interactive-shape {
+  border-radius: 40px;
+  corner-shape: round;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  transition: corner-shape 0.4s ease;
+}
+
+.interactive-shape:hover {
+  corner-shape: scoop;
+}
+```
+
+### 案例五：组合多个角形状
+
+```css
+.fancy-box {
+  border-radius: 30px;
+  /* 四个角分别设置不同形状 */
+  corner-shape: scoop round round notch;
+  background: white;
+  border: 4px solid #667eea;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+  padding: 24px;
+}
+```
+
+### 案例六：配合 backdrop-filter 使用
+
+```css
+.glass-effect {
+  border-radius: 20px;
+  corner-shape: squircle;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 24px;
+}
+```
+
+## 浏览器兼容性
+
+`corner-shape` 是非常新的 CSS 属性，目前兼容性有限：
+
+| 浏览器 | 版本要求 | 支持状态 |
+|---|---|---|
+| Chrome | 139+ | ✅ 已支持 |
+| Edge | 139+ | ✅ 已支持 |
+| Firefox | — | ❌ 实验中 |
+| Safari | — | ❌ 实验中 |
+
+**说明**：截至 2025 年，`corner-shape` 仅在 Chrome 139 及以上版本中正式支持。
+
+### 兼容处理建议
+
+```css
+/* 渐进增强 */
+.compatible-card {
+  /* 无 corner-shape 时的后备样式 */
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* 启用 corner-shape */
+@supports (corner-shape: scoop) {
+  .compatible-card {
+    corner-shape: scoop;
+  }
+}
+```
+
+## 相关属性
+
+- [border-radius](/topics/01.border-radius) — 圆角
+- [box-shadow](/topics/02.box-model/box-shadow) — 阴影
+- [clip-path](/topics/05.shape/css-shape-functions) — 裁剪路径
+- [background](/topics/03.background) — 背景
+
+## 参考资料
+
+- [MDN: corner-shape](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/corner-shape)
+- [张鑫旭：CSS corner-shape 属性详解](https://www.zhangxinxu.com/wordpress/2025/08/css-corner-shape/)
+- [CSS Borders and Box Decorations Module Level 4](https://drafts.csswg.org/css-borders/)

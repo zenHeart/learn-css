@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设计系统组件 - Design System Components</title>
+  <style>
+    :root {
+      --color-bg: #ffffff; --color-surface: #f9fafb; --color-surface-elevated: #ffffff;
+      --color-text: #111827; --color-text-muted: #6b7280; --color-text-inverse: #ffffff;
+      --color-border: #e5e7eb; --color-primary: #3b82f6; --color-primary-hover: #2563eb;
+      --color-primary-subtle: #eff6ff; --color-success: #10b981; --color-success-subtle: #ecfdf5;
+      --color-warning: #f59e0b; --color-warning-subtle: #fffbeb; --color-error: #ef4444; --color-error-subtle: #fef2f2;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-family-mono: 'JetBrains Mono', monospace;
+      --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+      --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-2xl: 1.5rem;
+      --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-semibold: 600; --font-weight-bold: 700;
+      --line-height-normal: 1.5;
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+      --radius-sm: 0.25rem; --radius-md: 0.375rem; --radius-lg: 0.5rem; --radius-xl: 0.75rem; --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05); --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-family); background: var(--color-bg); color: var(--color-text); padding: 2rem; line-height: var(--line-height-normal); }
+    .demo-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2); }
+    .demo-subtitle { color: var(--color-text-muted); margin-bottom: var(--space-8); }
+    .demo-section { margin-bottom: var(--space-8); }
+    .demo-section-title { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-4); }
+    .demo-section-desc { color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--space-4); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); font-family: var(--font-family); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); line-height: 1.5; border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer; transition: all 0.15s ease; text-decoration: none; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--color-surface-elevated); }
+    .btn-success { background: var(--color-success); color: var(--color-text-inverse); }
+    .btn-error { background: var(--color-error); color: var(--color-text-inverse); }
+    .btn-lg { padding: var(--space-3) var(--space-6); font-size: var(--font-size-base); }
+    .btn-sm { padding: var(--space-1) var(--space-3); font-size: var(--font-size-xs); }
+    .btn-group { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; }
+    .form-group { margin-bottom: var(--space-4); }
+    .form-label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); margin-bottom: var(--space-2); }
+    .form-error { font-size: var(--font-size-xs); color: var(--color-error); margin-top: var(--space-1); }
+    .input { width: 100%; padding: var(--space-2) var(--space-3); font-family: var(--font-family); font-size: var(--font-size-sm); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text); transition: border-color 0.15s, box-shadow 0.15s; }
+    .input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+    .input-error { border-color: var(--color-error); }
+    .input-success { border-color: var(--color-success); }
+    .card { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6); box-shadow: var(--shadow-sm); }
+    .card-sm { padding: var(--space-4); }
+    .card-title { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-2); }
+    .card-text { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); }
+    .badge { display: inline-flex; align-items: center; padding: var(--space-1) var(--space-2); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); border-radius: var(--radius-full); }
+    .badge-primary { background: var(--color-primary-subtle); color: var(--color-primary); }
+    .badge-success { background: var(--color-success-subtle); color: var(--color-success); }
+    .badge-warning { background: var(--color-warning-subtle); color: var(--color-warning); }
+    .badge-error { background: var(--color-error-subtle); color: var(--color-error); }
+    .alert { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid; font-size: var(--font-size-sm); }
+    .alert-success { background: var(--color-success-subtle); border-color: var(--color-success); color: #065f46; }
+    .alert-warning { background: var(--color-warning-subtle); border-color: var(--color-warning); color: #92400e; }
+    .alert-error { background: var(--color-error-subtle); border-color: var(--color-error); color: #991b1b; }
+    .alert-info { background: var(--color-primary-subtle); border-color: var(--color-primary); color: #1e40af; }
+    .alert-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+    @media (max-width: 768px) { .grid-3 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="demo-title">设计系统组件</div>
+  <p class="demo-subtitle">使用 Design Token 构建的一致性 UI 组件</p>
+
+  <div class="demo-section">
+    <div class="demo-section-title">Button 按钮</div>
+    <p class="demo-section-desc">通过 Token 统一管理按钮的尺寸、圆角、间距和颜色状态。</p>
+    <div class="btn-group">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-secondary">次要按钮</button>
+      <button class="btn btn-success">成功</button>
+      <button class="btn btn-error">错误</button>
+      <button class="btn btn-primary" disabled>禁用</button>
+    </div>
+    <div class="btn-group" style="margin-top: 1rem;">
+      <button class="btn btn-primary btn-lg">大按钮</button>
+      <button class="btn btn-primary">默认</button>
+      <button class="btn btn-primary btn-sm">小按钮</button>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-section-title">Input 输入框</div>
+    <p class="demo-section-desc">输入框样式通过 Token 定义，支持多种状态反馈。</p>
+    <div style="max-width: 400px;">
+      <div class="form-group">
+        <label class="form-label">默认状态</label>
+        <input type="text" class="input" placeholder="请输入...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">成功状态</label>
+        <input type="text" class="input input-success" value="输入正确">
+      </div>
+      <div class="form-group">
+        <label class="form-label">错误状态</label>
+        <input type="text" class="input input-error" value="格式错误">
+        <div class="form-error">请输入有效的邮箱地址</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-section-title">Card 卡片</div>
+    <p class="demo-section-desc">卡片组件使用统一的间距和圆角 Token。</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">卡片标题</div>
+        <div class="card-text">卡片内容使用语义化间距令牌，保持与其他组件的比例协调。</div>
+        <span class="badge badge-primary">标签</span>
+      </div>
+      <div class="card card-sm">
+        <div class="card-title" style="font-size: var(--font-size-base);">小卡片</div>
+        <div class="card-text" style="font-size: var(--font-size-xs);">紧凑布局，适用于列表项。</div>
+        <span class="badge badge-success">完成</span>
+      </div>
+      <div class="card">
+        <div class="card-title">卡片标题</div>
+        <div class="card-text">支持多种内容组合方式。</div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm">操作</button>
+          <button class="btn btn-secondary btn-sm">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-section-title">Badge 徽标</div>
+    <div class="btn-group">
+      <span class="badge badge-primary">主要</span>
+      <span class="badge badge-success">成功</span>
+      <span class="badge badge-warning">警告</span>
+      <span class="badge badge-error">错误</span>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-section-title">Alert 提示</div>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 500px;">
+      <div class="alert alert-success">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span>操作成功完成，数据已保存。</span>
+      </div>
+      <div class="alert alert-warning">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <span>此操作不可撤销，请确认后再继续。</span>
+      </div>
+      <div class="alert alert-error">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        <span>网络连接失败，请检查网络设置。</span>
+      </div>
+      <div class="alert alert-info">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>系统将于今晚 22:00 进行维护升级。</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
