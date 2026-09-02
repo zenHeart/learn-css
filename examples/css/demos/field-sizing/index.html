@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS field-sizing 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #6e7681; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-area { display: flex; gap: 16px; min-height: 80px; padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .box { background: #21262d; border: 1px solid #30363d; border-radius: 4px; padding: 12px; color: #c9d1d9; font-size: 14px; }
+    .demo-label { font-size: 13px; color: #6e7681; min-width: 80px; }
+    .info { font-size: 12px; color: #6e7681; margin-top: 12px; }
+    .warning { font-size: 12px; color: #d29922; margin-top: 8px; padding: 8px; background: #d299220d; border-radius: 4px; }
+
+    /* field-sizing: content 演示样式 */
+    .demo-input {
+      field-sizing: content;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #58a6ff;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-width: 80px;
+      max-width: 300px;
+    }
+    .demo-textarea {
+      field-sizing: content;
+      width: 300px;
+      max-height: 200px;
+      padding: 12px;
+      font-size: 14px;
+      border: 2px solid #a371f7;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #c9d1d9;
+      resize: none;
+    }
+    .demo-select {
+      field-sizing: content;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 2px solid #3fb950;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-width: 100px;
+    }
+
+    /* 对比样式 - fixed (默认) */
+    .demo-input-fixed {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #6e7681;
+      width: 150px;
+    }
+    .demo-textarea-fixed {
+      width: 300px;
+      height: 60px;
+      padding: 12px;
+      font-size: 14px;
+      border: 2px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #6e7681;
+      resize: none;
+    }
+    .demo-select-fixed {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 2px solid #30363d;
+      border-radius: 4px;
+      background: #0d1117;
+      color: #6e7681;
+      width: 150px;
+    }
+
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    /* 标签输入示例 */
+    .tag-input-container { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-top: 12px; }
+    .tag-input-wrapper { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #30363d; border-radius: 4px; min-height: 44px; align-items: center; }
+    .tag { display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: #388bfd33; border: 1px solid #58a6ff; border-radius: 4px; font-size: 13px; color: #58a6ff; }
+    .tag .remove { cursor: pointer; opacity: 0.7; }
+    .tag .remove:hover { opacity: 1; }
+    .tag-input-wrapper input { field-sizing: content; min-width: 60px; border: none; outline: none; padding: 4px 8px; background: transparent; color: #c9d1d9; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS field-sizing 交互演示</h1>
+    <p class="subtitle">表单元素根据内容自动调整尺寸，无需 JavaScript（需 Chrome 123+ 或 Chromium 内核浏览器）</p>
+
+    <!-- Input 演示 -->
+    <div class="section">
+      <h2>Input 自动宽度</h2>
+      <div class="controls">
+        <button class="btn" onclick="setInputValue('短')">短文本</button>
+        <button class="btn" onclick="setInputValue('中等长度文字')">中等</button>
+        <button class="btn" onclick="setInputValue('这是一段很长的文本内容')">长文本</button>
+        <button class="btn" onclick="setInputValue('CSS Grid Layout 是 CSS 的二维布局系统')">超长文本</button>
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: content</span>
+        <input type="text" class="demo-input" id="demo-input" value="短文本" />
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: fixed（默认）</span>
+        <input type="text" class="demo-input-fixed" value="短文本" readonly />
+      </div>
+      <div class="code-block">input {
+  field-sizing: content;
+  min-width: 80px;
+  max-width: 300px;
+}</div>
+    </div>
+
+    <!-- Textarea 演示 -->
+    <div class="section">
+      <h2>Textarea 自动高度</h2>
+      <div class="controls">
+        <button class="btn" onclick="setTextareaLines(1)">1 行</button>
+        <button class="btn" onclick="setTextareaLines(3)">3 行</button>
+        <button class="btn" onclick="setTextareaLines(5)">5 行</button>
+        <button class="btn" onclick="setTextareaLines(10)">10 行</button>
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: content</span>
+        <textarea class="demo-textarea" id="demo-textarea">一行文本</textarea>
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: fixed（默认）</span>
+        <textarea class="demo-textarea-fixed" readonly>一行文本</textarea>
+      </div>
+      <div class="code-block">textarea {
+  field-sizing: content;
+  width: 300px;
+  max-height: 200px;
+  resize: none;
+}</div>
+    </div>
+
+    <!-- Select 演示 -->
+    <div class="section">
+      <h2>Select 自动宽度</h2>
+      <div class="controls">
+        <button class="btn" onclick="setSelectOption(0)">短选项</button>
+        <button class="btn" onclick="setSelectOption(1)">中等长度选项</button>
+        <button class="btn" onclick="setSelectOption(2)">较长的选项文字内容</button>
+        <button class="btn" onclick="setSelectOption(3)">超长选项文字会撑开宽度</button>
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: content</span>
+        <select class="demo-select" id="demo-select">
+          <option>短选项</option>
+          <option>中等长度选项</option>
+          <option>较长的选项文字内容</option>
+          <option selected>超长选项文字会撑开宽度</option>
+        </select>
+      </div>
+      <div class="demo-area">
+        <span class="demo-label">field-sizing: fixed（默认）</span>
+        <select class="demo-select-fixed" id="demo-select-fixed">
+          <option>短选项</option>
+          <option>中等长度选项</option>
+          <option>较长的选项文字内容</option>
+          <option selected>超长选项文字会撑开宽度</option>
+        </select>
+      </div>
+      <div class="code-block">select {
+  field-sizing: content;
+  min-width: 100px;
+}</div>
+    </div>
+
+    <!-- 标签输入框示例 -->
+    <div class="section">
+      <h2>实际应用：标签输入框</h2>
+      <p class="info">聊天工具、邮件客户端中常见的标签输入框，标签数量不固定</p>
+      <div class="tag-input-container">
+        <div class="tag-input-wrapper" id="tag-wrapper">
+          <span class="tag">CSS <span class="remove" onclick="removeTag(this)">×</span></span>
+          <span class="tag">JavaScript <span class="remove" onclick="removeTag(this)">×</span></span>
+          <input type="text" placeholder="添加标签..." id="tag-input" onkeydown="handleTagInput(event)" />
+        </div>
+      </div>
+      <div class="code-block">.tag-input-wrapper input {
+  field-sizing: content;
+  min-width: 60px;
+  border: none;
+  outline: none;
+  padding: 4px 8px;
+}</div>
+    </div>
+
+    <div class="warning">
+      ⚠️ field-sizing 目前为 Chromium 123+ 实验性功能。如浏览器不支持，演示中的 content 版本会回退为 fixed 行为。
+    </div>
+  </div>
+
+  <script>
+    // Input 演示
+    function setInputValue(text) {
+      document.getElementById('demo-input').value = text;
+    }
+
+    // Textarea 演示
+    function setTextareaLines(lines) {
+      const textarea = document.getElementById('demo-textarea');
+      const texts = ['一行文本', '第一行\n第二行\n第三行', '第一行\n第二行\n第三行\n第四行\n第五行', '第一行\n第二行\n第三行\n第四行\n第五行\n第六行\n第七行\n第八行\n第九行\n第十行'];
+      textarea.value = texts[lines - 1] || texts[0];
+    }
+
+    // Select 演示
+    function setSelectOption(index) {
+      const select = document.getElementById('demo-select');
+      const selectFixed = document.getElementById('demo-select-fixed');
+      select.selectedIndex = index;
+      selectFixed.selectedIndex = index;
+    }
+
+    // 标签输入框
+    function handleTagInput(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const input = document.getElementById('tag-input');
+        const value = input.value.trim().replace(',', '');
+        if (value) {
+          addTag(value);
+          input.value = '';
+        }
+      }
+    }
+
+    function addTag(text) {
+      const wrapper = document.getElementById('tag-wrapper');
+      const input = document.getElementById('tag-input');
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.innerHTML = `${text} <span class="remove" onclick="removeTag(this)">×</span>`;
+      wrapper.insertBefore(tag, input);
+    }
+
+    function removeTag(el) {
+      el.parentElement.remove();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+---
+title: "CSS field-sizing 表单字段尺寸"
+category: "表单"
+tags:
+  - field-sizing
+  - 表单
+  - 自动尺寸
+  - input
+  - textarea
+  - select
+description: "深入讲解 field-sizing 属性，让 input、textarea、select 根据内容自动调整尺寸"
+keywords: "CSS field-sizing, 表单自动尺寸, input 自动宽度, textarea 自动高度, select 自动宽度"
+---
+
+# CSS field-sizing 表单字段尺寸
+
+> field-sizing 是 CSS Basic User Interface Module Level 4 中的新属性，让表单元素根据内容自动调整尺寸，无需 JavaScript。
+
+## 语法详解
+
+```css
+.field-scaling {
+  field-sizing: fixed | content;
+}
+```
+
+### 属性值
+
+| 值 | 说明 |
+|---|---|
+| `fixed` | 默认行为，表单元素具有固定尺寸，不随内容变化（传统浏览器行为） |
+| `content` | 元素尺寸根据内容自动调整：input/select 调整宽度，textarea 调整高度 |
+
+### 工作原理
+
+- **input / select**：应用 `field-sizing: content` 后，宽度会根据内容自动扩展
+- **textarea**：应用 `field-sizing: content` 后，高度会根据内容自动扩展（行数变化时）
+- **placeholder 支持**：即使清空输入框，也会根据 placeholder 调整尺寸
+
+## 基础示例
+
+### 1. Input 自动宽度
+
+```html
+<input type="text" value="自动调整宽度" />
+```
+
+```css
+input {
+  field-sizing: content;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+```
+
+### 2. Textarea 自动高度
+
+```html
+<textarea>多行文本框会根据内容自动调整高度</textarea>
+```
+
+```css
+textarea {
+  field-sizing: content;
+  width: 300px;  /* 固定宽度 */
+  max-height: 200px; /* 限制最大高度 */
+}
+```
+
+### 3. Select 自动宽度
+
+```html
+<select>
+  <option>短选项</option>
+  <option>较长的选项文字</option>
+  <option>超长选项文字会撑开宽度</option>
+</select>
+```
+
+```css
+select {
+  field-sizing: content;
+}
+```
+
+## 实际应用场景
+
+### 1. 标签输入框（Tag Input）
+
+聊天工具、邮件客户端中常见的标签输入框，标签数量不固定：
+
+```html
+<div class="tag-input">
+  <span class="tag">CSS <span class="remove">×</span></span>
+  <span class="tag">JavaScript <span class="remove">×</span></span>
+  <input type="text" placeholder="添加标签..." />
+</div>
+```
+
+```css
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.tag-input input {
+  field-sizing: content;
+  min-width: 80px;
+  border: none;
+  outline: none;
+  padding: 4px;
+}
+```
+
+### 2. 即时搜索框
+
+搜索建议列表随输入内容动态调整：
+
+```html
+<input type="text" class="search-input" placeholder="搜索..." value="CSS" />
+```
+
+```css
+.search-input {
+  field-sizing: content;
+  min-width: 120px;
+  max-width: 300px;
+  padding: 8px 12px;
+}
+```
+
+### 3. 多行评论输入框
+
+评论框根据内容行数自动扩展，避免出现滚动条：
+
+```html
+<textarea class="auto-expand" placeholder="写下你的评论...">这是初始内容，会自动调整高度</textarea>
+```
+
+```css
+.auto-expand {
+  field-sizing: content;
+  width: 100%;
+  max-height: 300px;
+  min-height: 60px;
+  padding: 12px;
+  resize: none; /* 禁用手动调整大小 */
+}
+```
+
+### 4. 尺寸标注面板
+
+Polypane 浏览器的 UI 设计，用于显示元素尺寸：
+
+```html
+<div class="dimension-label">
+  <span class="label">尺寸：</span>
+  <input type="text" value="320 × 568 px" />
+</div>
+```
+
+```css
+.dimension-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dimension-label input {
+  field-sizing: content;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+}
+```
+
+## 约束与限制
+
+### 必须设置边界
+
+如果不设置最大尺寸，元素会无限增长：
+
+```css
+/* 防止过宽或过高 */
+input, select {
+  field-sizing: content;
+  max-width: 300px;  /* 限制最大宽度 */
+}
+
+textarea {
+  field-sizing: content;
+  max-height: 200px; /* 限制最大高度 */
+}
+```
+
+### 设置最小宽度
+
+防止收缩到仅显示一个字符：
+
+```css
+input, select {
+  field-sizing: content;
+  min-width: 100px; /* 防止过窄 */
+}
+```
+
+## 浏览器支持
+
+| 特性 | 支持情况 |
+|---|---|
+| `field-sizing: content` | Chromium 123+（Chrome 123+, Edge 123+） |
+| `field-sizing: fixed` | 所有浏览器（默认行为） |
+
+> ⚠️ 目前为 Chromium only，Safari 已给出积极信号，Firefox 预计后续支持。
+
+## 与传统方案的对比
+
+### JavaScript 方案（react-input-autosize / react-autosize-textarea）
+
+通过监听输入事件，动态设置元素尺寸：
+
+- 渲染隐藏的测量元素
+- 或监听 scrollHeight / scrollWidth 变化
+- 需要维护额外的事件监听器
+
+### Grid 伪元素方案
+
+利用 Grid 自动布局特性：
+
+```css
+.container {
+  display: grid;
+}
+textarea, .container::after {
+  grid-area: 1/1/2/2;
+}
+.container::after {
+  content: attr(data-value) ' ';
+  visibility: hidden;
+  white-space: pre-wrap;
+}
+```
+
+### field-sizing 方案
+
+一行 CSS 解决所有问题：
+
+```css
+textarea {
+  field-sizing: content;
+}
+```
+
+## 相关资料
+
+- [CSS Basic User Interface Module Level 4 - Editor Draft](https://drafts.csswg.org/css-ui/#field-sizing)
+- [Polypane Blog - Field-sizing just works!](https://polypane.app/blog/field-sizing-just-works/)
+- [Can I Use - field-sizing](https://caniuse.com/css-field-sizing)

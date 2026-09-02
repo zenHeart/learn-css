@@ -1,0 +1,327 @@
+---
+title: CSS Flexbox 深入解析
+category: 布局进阶
+tags: [flexbox, flex, layout, css, 布局]
+description: 深入理解 Flexbox 一维布局机制，系统掌握 flex container 和 flex item 属性，理解常见布局场景与兼容性问题。
+keywords: [CSS Flexbox, flex-grow, flex-shrink, flex-basis, align-items, justify-content, flex-wrap]
+---
+
+# CSS Flexbox 深入解析
+
+Flexbox 是 CSS 弹性布局模块，设计目标是**在一维方向上高效分配空间和对齐元素**。与二维布局模型 Grid 不同，Flexbox 专注于单轴（主轴或交叉轴）上的排列控制。
+
+## 深入理解 Flexbox 一维布局
+
+### 核心概念
+
+- **主轴（main axis）**：Flex item 排列的主要方向，由 `flex-direction` 决定
+- **交叉轴（cross axis）**：垂直于主轴的方向
+- **主尺寸（main size）**：item 在主轴方向上的尺寸
+- **交叉尺寸（cross size）**：item 在交叉轴方向上的尺寸
+
+### Flex 格式化上下文
+
+当元素变成 flex container 时，会建立新的 **flex formatting context**：
+
+```css
+.container {
+  display: flex;          /* 触发 flex 格式化上下文 */
+  /* 或 display: inline-flex */
+}
+```
+
+**与普通块级盒的关键差异：**
+- `margin: auto` 在 flex item 上会正确居中（不再折叠）
+- `float` 对 flex item **无效**
+- `vertical-align` 对 flex item **无效**
+- Flex item 成为 **block 化容器**
+
+> 演示：[flex-context.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-context.html)
+
+---
+
+## flex container 属性详解
+
+### display: flex | inline-flex
+
+| 值 | 行为 |
+|---|---|
+| `flex` | 块级 flex container |
+| `inline-flex` | 行内级 flex container |
+
+> 演示：[display-flex.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/display-flex.html)
+
+### flex-direction
+
+定义主轴方向，即 flex item 的排列方向。
+
+| 值 | 效果 |
+|---|---|
+| `row` (默认) | 左 → 右 |
+| `row-reverse` | 右 → 左 |
+| `column` | 上 → 下 |
+| `column-reverse` | 下 → 上 |
+
+> 演示：[flex-direction.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-direction.html)
+
+### flex-wrap
+
+控制 flex item 是单行还是多行排列。
+
+| 值 | 行为 |
+|---|---|
+| `nowrap` (默认) | 单行，item 会被压缩 |
+| `wrap` | 多行，换行方向与 cross axis 一致 |
+| `wrap-reverse` | 多行，换行方向与 cross axis 相反 |
+
+> 演示：[flex-wrap.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-wrap.html)
+
+### flex-flow
+
+`flex-direction` 和 `flex-wrap` 的简写。
+
+```css
+.container { flex-flow: <flex-direction> <flex-wrap>; }
+```
+
+### justify-content
+
+定义 item 在主轴上的对齐方式。
+
+| 值 | 效果 |
+|---|---|
+| `flex-start` | 靠主轴起点对齐 |
+| `flex-end` | 靠主轴终点对齐 |
+| `center` | 居中对齐 |
+| `space-between` | 两端对齐，item 之间等间距 |
+| `space-around` | 每个 item 两侧间距相等 |
+| `space-evenly` | 所有间距（含边缘）完全相等 |
+
+> 演示：[justify-content.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/justify-content.html)
+
+### align-items
+
+定义 item 在交叉轴上的对齐方式（单行有效）。
+
+| 值 | 效果 |
+|---|---|
+| `stretch` (默认) | 拉伸至填满容器 |
+| `flex-start` | 靠交叉轴起点对齐 |
+| `flex-end` | 靠交叉轴终点对齐 |
+| `center` | 居中对齐 |
+| `baseline` | 按文字 baseline 对齐 |
+
+> 演示：[align-items.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/align-items.html)
+
+### align-content
+
+定义**多行**时 item 在交叉轴上的对齐方式（单行无效）。
+
+> 演示：[align-content.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/align-content.html)
+
+---
+
+## flex item 属性详解
+
+### flex-grow
+
+定义 item 的**放大比例**，当主轴有剩余空间时如何分配。
+
+```css
+.item { flex-grow: <number>; /* 默认 0 */ }
+```
+
+**计算公式：**
+```
+实际宽度 = 自身基础尺寸 + 剩余空间 × (grow / 总grow)
+```
+
+> 演示：[flex-grow.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-grow.html)
+
+### flex-shrink
+
+定义 item 的**缩小比例**，当主轴空间不足时如何收缩。
+
+```css
+.item { flex-shrink: <number>; /* 默认 1 */ }
+```
+
+> 注意： `flex-shrink: 0` 会导致溢出而非收缩！
+> 演示：[flex-shrink.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-shrink.html)
+
+### flex-basis
+
+定义 item 在分配剩余空间前的**初始主尺寸**。
+
+```css
+.item { flex-basis: <length> | auto; /* 默认 auto */ }
+```
+
+**优先级链：**
+```
+max-width/max-height > flex-basis > width/height > 内容尺寸
+```
+
+> 演示：[flex-basis.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-basis.html)
+
+### flex 简写
+
+```css
+.item { flex: <flex-grow> <flex-shrink> <flex-basis>; }
+```
+
+| 简写 | 等价于 | 用途 |
+|---|---|---|
+| `flex: 0 0 100px` | - | 固定尺寸，不可伸缩 |
+| `flex: 1` | `1 1 0%` | 可伸缩，初始尺寸 0 |
+| `flex: auto` | `1 1 auto` | 可伸缩，使用 auto 尺寸 |
+| `flex: none` | `0 0 auto` | 完全不可伸缩 |
+
+> 注意：常见错误是 `flex: 1` 的初始尺寸是 0，会导致内容被压缩！需要保持内容尺寸时用 `flex: auto`。
+
+> 演示：[flex-shorthand.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-shorthand.html)
+
+### align-self
+
+覆盖 container 的 `align-items`，控制单个 item 在交叉轴上的对齐。
+
+> 演示：[flex-shorthand.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/flex-shorthand.html)
+
+### order
+
+控制 item 的排列顺序（数值越小越靠前）。
+
+> 注意： order 仅改变视觉顺序，不改变 DOM 顺序，屏幕阅读器仍按 DOM 顺序读取。
+
+> 演示：[order.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/order.html)
+
+---
+
+## 常见布局场景
+
+### 场景一：水平居中
+
+```css
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+```
+
+### 场景二：两端对齐，最后一行左对齐
+
+```css
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.container::after {
+  content: '';
+  flex: 9999999999;
+}
+```
+
+> 演示：[两端对齐.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/两端对齐.html)
+
+### 场景三：Sticky Footer（粘性页脚）
+
+```css
+body {
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1; /* 占据剩余空间 */
+}
+```
+
+> 演示：[sticky-footer.html](https://github.com/zenHeart/learn-css/tree/main/examples/css/demos/flexbox-deep/sticky-footer.html)
+
+### 场景四：等高列
+
+```css
+.container { display: flex; }
+.column { flex: 1; }
+```
+
+### 场景五：圣杯布局
+
+```css
+.container { display: flex; flex-direction: column; }
+.header, .footer { flex: 0 0 auto; }
+.main { flex: 1; display: flex; }
+.sidebar { flex: 0 0 200px; }
+.content { flex: 1; }
+```
+
+### 场景六：输入框 + 按钮组合
+
+```css
+.input-group { display: flex; }
+.input-group input { flex: 1; border-radius: 4px 0 0 4px; }
+.input-group button { flex: 0 0 auto; border-radius: 0 4px 4px 0; }
+```
+
+### 场景七：媒体对象（Media Object）
+
+```css
+.media { display: flex; align-items: flex-start; }
+.media-figure { flex: 0 0 80px; margin-right: 1em; }
+.media-body { flex: 1; }
+```
+
+---
+
+## 兼容性与坑点
+
+### 浏览器兼容性
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|---|---|---|---|---|
+| `display: flex` | 29+ | 28+ | 9+ | 12+ |
+| `flex-wrap` | 29+ | 28+ | 9+ | 12+ |
+| `flex-grow/shrink` | 29+ | 28+ | 9+ | 12+ |
+| `flex-basis` | 29+ | 28+ | 9+ | 12+ |
+| `align-content` | 29+ | 28+ | 9+ | 12+ |
+
+> 注意： IE 11 有部分支持，但存在大量 bug。如需兼容，请使用 Autoprefixer。
+
+### 常见坑点
+
+#### 坑点 1：flex-basis 与 width 的优先级
+
+**优先级：** `max-width/min-width` > `flex-basis` > `width/height` > 内容尺寸
+
+#### 坑点 2：flex-shrink 为 0 时的溢出
+
+`flex-shrink: 0` 会导致溢出而非收缩！
+
+#### 坑点 3：flex-grow: 1 导致内容被压缩
+
+```css
+/* 问题 */
+input { flex: 1; }  /* flex-basis 默认是 0% */
+/* 解决 */
+input { flex: 1 1 auto; }
+```
+
+#### 坑点 4：align-content 对单行无效
+
+必须配合 `flex-wrap: wrap` 且 items 确实换行。
+
+#### 坑点 5：flex-direction: column 时的 height 问题
+
+在 `flex-direction: column` 时，`flex-grow` 控制的是**高度**而非宽度。
+
+#### 坑点 6：min-width/min-height 与 flex
+
+Flex item 的 `min-width`（默认 `auto`）会限制 `flex-basis`。
+
+### 推荐阅读
+
+- [CSS Flexbox 完整指南（英文）](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+- [Flexbox 完全指南 - 中文](https://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
+- [flex-grow 秘密](https://css-tricks.com/understanding-flex-grow/)
+- [flex-shrink 详解](https://css-tricks.com/flexbox-shrinking/)

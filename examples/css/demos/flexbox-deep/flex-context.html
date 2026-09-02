@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox 格式化上下文特性</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .warning { border-left: 3px solid #f78166; padding-left: 12px; }
+    .ok { border-left: 3px solid #3fb950; padding-left: 12px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compare-box { background: #21262d; border-radius: 6px; padding: 12px; }
+    .compare-box h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Flex 格式化上下文特性</h1>
+
+    <div class="section">
+      <h2>margin: auto 居中</h2>
+      <div class="comparison">
+        <div class="compare-box">
+          <h4>块级布局 margin:auto 不居中</h4>
+          <div style="background:#0d1117;padding:16px;border-radius:4px;text-align:center;">
+            <div style="width:100px;height:60px;background:#f78166;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">block</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">margin: 0 auto 让块级元素居中，但不支持垂直居中</div>
+        </div>
+        <div class="compare-box">
+          <h4>Flex margin:auto 双向居中</h4>
+          <div style="background:#0d1117;padding:16px;border-radius:4px;display:flex;height:80px;">
+            <div style="margin:auto;width:100px;height:60px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">flex item</div>
+          </div>
+          <div class="info" style="margin-top:8px;font-size:11px;">flex item 上 margin: auto 会同时在主轴和交叉轴方向居中</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>float 对 flex item 无效</h2>
+      <div style="background:#0d1117;padding:16px;border-radius:4px;display:flex;gap:8px;margin-bottom:12px;">
+        <div style="float:left;width:60px;height:60px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">float:left</div>
+        <div style="float:left;width:60px;height:60px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">float:left</div>
+        <div style="width:60px;height:60px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">flex item</div>
+      </div>
+      <div class="info warning">float 对 flex item 无效！flex item 会无视 float 属性，按 flex 规则排列</div>
+    </div>
+
+    <div class="section">
+      <h2>vertical-align 对 flex item 无效</h2>
+      <div style="background:#0d1117;padding:16px;border-radius:4px;display:flex;align-items:flex-end;gap:8px;height:80px;margin-bottom:12px;">
+        <div style="vertical-align:bottom;width:60px;height:60px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">v-align</div>
+        <div style="width:60px;height:40px;background:#d29922;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;">normal</div>
+      </div>
+      <div class="info warning">vertical-align 对 flex item 无效！改用 align-items 控制垂直对齐</div>
+    </div>
+
+    <div class="section">
+      <h2>Flex item 变成块级容器</h2>
+      <div style="background:#0d1117;padding:16px;border-radius:4px;display:flex;gap:8px;margin-bottom:12px;">
+        <div style="width:80px;height:80px;background:#58a6ff;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;gap:4px;">
+          <div style="width:30px;height:30px;background:#fff;border-radius:4px;"></div>
+          <span>子flex</span>
+        </div>
+      </div>
+      <div class="info ok">flex item 会变成块级容器，可以嵌套 flex 布局（column-* 属性不生效）</div>
+    </div>
+
+    <div class="section">
+      <h2>绝对定位子元素</h2>
+      <div style="background:#0d1117;padding:16px;border-radius:4px;display:flex;height:80px;position:relative;margin-bottom:12px;">
+        <div style="width:80px;height:60px;background:#58a6ff;border-radius:4px;position:relative;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;">
+          父 flex
+          <div style="position:absolute;bottom:-20px;right:-10px;width:40px;height:40px;background:#f78166;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:600;z-index:1;">abs</div>
+        </div>
+      </div>
+      <div class="info">flex item 的绝对定位子元素会以 flex item 为定位参照（不是 flex container）</div>
+    </div>
+  </div>
+</body>
+</html>
