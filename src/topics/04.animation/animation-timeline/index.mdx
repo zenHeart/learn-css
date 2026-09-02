@@ -1,0 +1,173 @@
+---
+title: "CSS animation-timeline 动画时间线"
+category: "动画"
+tags:
+  - CSS
+  - animation-timeline
+  - 动画时间线
+  - 滚动驱动
+  - CSS Animation
+description: "详解CSS animation-timeline属性控制动画时间线的方法"
+keywords: "animation-timeline, 动画时间线, scroll-driven animations, CSS Animation"
+---
+
+# CSS animation-timeline 动画时间线
+
+## 概述
+
+`animation-timeline` 属性指定 CSS 动画的时间线来源，可以是滚动进度、视图进度或默认的时间轴。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+```css
+.element {
+  animation: my-animation linear;
+  animation-timeline: scroll(root);
+}
+```
+
+## 属性值
+
+### 1. auto（默认）
+
+使用动画的默认时间线（从 0 到 1 的时间进度）：
+
+```css
+.timeline-auto {
+  animation-timeline: auto;
+}
+```
+
+### 2. scroll()
+
+使用滚动容器的时间线：
+
+```css
+.timeline-scroll {
+  animation-timeline: scroll();
+}
+```
+
+### 3. view()
+
+使用元素在视口中的可见性进度：
+
+```css
+.timeline-view {
+  animation-timeline: view();
+}
+```
+
+## 详细用法
+
+### scroll() 参数
+
+```css
+/* 根元素滚动 */
+animation-timeline: scroll(root);
+
+/* 最近的可滚动祖先 */
+animation-timeline: scroll(self);
+
+/* 指定滚动容器 */
+animation-timeline: scroll(nearest);
+
+/* 指定滚动轴 */
+animation-timeline: scroll(block);  /* 垂直（默认） */
+animation-timeline: scroll(inline);  /* 水平 */
+```
+
+### view() 参数
+
+```css
+/* 元素进入视口时动画开始 */
+animation-timeline: view();
+
+/* 指定轴向 */
+animation-timeline: view(block);
+animation-timeline: view(inline);
+```
+
+## 使用场景
+
+### 1. 滚动驱动动画
+
+```css
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.progress {
+  animation: progress linear;
+  animation-timeline: scroll(root block);
+}
+```
+
+### 2. 视图进入动画
+
+```css
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  animation: fade-in linear;
+  animation-timeline: view();
+  animation-range: entry 0% entry 100%;
+}
+```
+
+### 3. 固定效果
+
+```css
+@keyframes pin {
+  from { transform: scale(1); }
+  to { transform: scale(0.9); }
+}
+
+.header {
+  animation: pin linear;
+  animation-timeline: scroll();
+}
+```
+
+## animation-range
+
+控制动画应用的滚动范围：
+
+```css
+.element {
+  animation: my-animation linear;
+  animation-timeline: view();
+  animation-range: entry 0% entry 100%;
+}
+```
+
+### 范围值
+
+| 值 | 说明 |
+|---|------|
+| `entry 0%` | 元素开始进入视口 |
+| `entry 100%` | 元素完全进入视口 |
+| `exit 0%` | 元素开始离开视口 |
+| `exit 100%` | 元素完全离开视口 |
+| `cover 0%` | 元素开始覆盖视口 |
+| `cover 100%` | 元素完全覆盖视口 |
+
+## 浏览器兼容性
+
+`animation-timeline` 是较新的 CSS 功能：
+
+- Chrome 115+（实验性）
+- Firefox: 不支持
+- Safari: 不支持
+- Edge 115+
+
+## 参考资料
+
+- [Scroll-Driven Animations - Chrome](https://developer.chrome.com/blog/scroll-driven-animations/)
+- [animation-timeline - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline)
