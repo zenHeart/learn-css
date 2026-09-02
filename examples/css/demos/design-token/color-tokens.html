@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>颜色令牌 - Color Tokens</title>
+  <style>
+    :root {
+      --palette-blue-50: #eff6ff; --palette-blue-100: #dbeafe; --palette-blue-200: #bfdbfe; --palette-blue-300: #93c5fd; --palette-blue-400: #60a5fa; --palette-blue-500: #3b82f6; --palette-blue-600: #2563eb; --palette-blue-700: #1d4ed8; --palette-blue-800: #1e40af; --palette-blue-900: #1e3a8a;
+      --palette-gray-50: #f9fafb; --palette-gray-100: #f3f4f6; --palette-gray-200: #e5e7eb; --palette-gray-300: #d1d5db; --palette-gray-400: #9ca3af; --palette-gray-500: #6b7280; --palette-gray-600: #4b5563; --palette-gray-700: #374151; --palette-gray-800: #1f2937; --palette-gray-900: #111827;
+      --color-primary: var(--palette-blue-500); --color-primary-hover: var(--palette-blue-600);
+      --color-surface: var(--palette-gray-50); --color-surface-elevated: #ffffff;
+      --color-text: var(--palette-gray-900); --color-text-muted: var(--palette-gray-500); --color-border: var(--palette-gray-200);
+      --color-success: #10b981; --color-warning: #f59e0b; --color-error: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, sans-serif; background: var(--color-surface); color: var(--color-text); padding: 2rem; line-height: 1.6; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--color-text-muted); margin-bottom: 2rem; }
+    .section { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; }
+    .swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); }
+    .swatch-color { height: 60px; }
+    .swatch-label { padding: 0.5rem; font-size: 0.75rem; font-family: monospace; background: var(--color-surface-elevated); text-align: center; }
+    .color-demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .color-card { border-radius: 8px; padding: 1rem; border: 1px solid var(--color-border); }
+    .color-card .label { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+    .color-card .value { font-size: 0.75rem; font-family: monospace; color: var(--color-text-muted); background: rgba(0,0,0,0.05); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block; }
+    .card-primary { background: var(--color-primary); color: #fff; }
+    .card-primary-hover { background: var(--color-primary-hover); color: #fff; }
+    .card-surface { background: var(--color-surface); border: 1px solid var(--color-border); }
+    .card-text { background: var(--color-text); color: #fff; }
+    .card-text-muted { background: var(--color-text-muted); color: #fff; }
+    .card-border { background: var(--color-surface-elevated); border: 1px solid var(--color-border); }
+    .card-success { background: var(--color-success); color: #fff; }
+    .card-warning { background: var(--color-warning); color: #fff; }
+    .card-error { background: var(--color-error); color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>颜色令牌 - Color Tokens</h1>
+  <p class="subtitle">Option Token 定义原始色板 &rarr; Decision Token 定义语义化颜色</p>
+  <div class="section">
+    <div class="section-title">Option Token - 蓝色色板</div>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-50)"></div><div class="swatch-label">blue-50</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-100)"></div><div class="swatch-label">blue-100</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-200)"></div><div class="swatch-label">blue-200</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-300)"></div><div class="swatch-label">blue-300</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-400)"></div><div class="swatch-label">blue-400</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-500)"></div><div class="swatch-label">blue-500</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-600)"></div><div class="swatch-label">blue-600</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-700)"></div><div class="swatch-label">blue-700</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-800)"></div><div class="swatch-label">blue-800</div></div>
+      <div class="swatch"><div class="swatch-color" style="background: var(--palette-blue-900)"></div><div class="swatch-label">blue-900</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Decision Token - 语义化颜色</div>
+    <div class="color-demo-grid">
+      <div class="color-card card-primary"><div class="label">Primary</div><div class="value">var(--color-primary)</div></div>
+      <div class="color-card card-primary-hover"><div class="label">Primary Hover</div><div class="value">var(--color-primary-hover)</div></div>
+      <div class="color-card card-surface"><div class="label">Surface</div><div class="value">var(--color-surface)</div></div>
+      <div class="color-card card-text"><div class="label">Text</div><div class="value">var(--color-text)</div></div>
+      <div class="color-card card-text-muted"><div class="label">Text Muted</div><div class="value">var(--color-text-muted)</div></div>
+      <div class="color-card card-border"><div class="label">Border</div><div class="value">var(--color-border)</div></div>
+      <div class="color-card card-success"><div class="label">Success</div><div class="value">var(--color-success)</div></div>
+      <div class="color-card card-warning"><div class="label">Warning</div><div class="value">var(--color-warning)</div></div>
+      <div class="color-card card-error"><div class="label">Error</div><div class="value">var(--color-error)</div></div>
+    </div>
+  </div>
+</body>
+</html>

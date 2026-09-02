@@ -1,0 +1,336 @@
+---
+title: 滚动行为 overscroll-behavior
+tags: [overscroll-behavior, scroll, mobile]
+description: 掌握 CSS overscroll-behavior 属性，控制滚动链和边界效果
+---
+
+## 学习目标
+
+通过本章学习，你将：
+
+1. **理解问题** — 掌握滚动链（Scroll Chaining）带来的体验问题
+2. **掌握属性** — 熟练运用 `overscroll-behavior` 的三个核心值
+3. **实际应用** — 能够解决弹窗滚动、嵌套滚动、边界效果等常见场景
+
+## 核心概念
+
+### 滚动链（Scroll Chaining）
+
+滚动链是指当一个滚动容器的边界到达后，继续滚动会带动**父级容器**滚动的一种行为。
+
+典型场景：一个弹窗内有可滚动内容，当弹窗滚动到底部后，继续滚动会带动页面背景滚动。这种体验在 modal、抽屉、对话气泡等场景中经常出现，用户体验较差。
+
+```
+┌─────────────────────────┐  ← 页面（父容器）
+│  ┌───────────────────┐  │
+│  │   弹窗内容区      │  │  ← 子容器
+│  │   （可滚动）      │  │
+│  └───────────────────┘  │
+│                         │
+│    背景页面内容...      │  ← 滚动链会带动这里
+└─────────────────────────┘
+```
+
+### overscroll 触发时机
+
+当滚动容器的内容到达边界（顶部/底部/左/右）时，继续滚动会触发 overscroll。浏览器默认行为包括：
+
+- **弹性效果（Bounce）**：iOS Safari 的"橡皮筋"效果
+- **刷新手势**：Chrome Android 的下拉刷新
+- **页面导航**：水平滑动时的页面切换（历史记录）
+
+### 与 touch-action 的区别
+
+| 特性 | `touch-action` | `overscroll-behavior` |
+|------|---------------|----------------------|
+| **作用层面** | 控制触摸手势本身 | 控制边界滚动行为 |
+| **典型用途** | 禁用/启用触摸滚动、缩放 | 阻止滚动链、禁用弹性效果 |
+| **手势影响** | 完全禁用手势 | 允许手势，修饰边界行为 |
+| **刷新控制** | ❌ 无法控制下拉刷新 | ✅ 可禁用下拉刷新 |
+
+简单记忆：**`touch-action` 决定能不能滚，`overscroll-behavior` 决定滚到边界后怎么办**。
+
+## 属性详解
+
+`overscroll-behavior` 是 `overscroll-behavior-x` 和 `overscroll-behavior-y` 的简写，支持 1-2 个值。
+
+```css
+/* 单值：x 和 y 相同 */
+overscroll-behavior: contain;
+
+/* 双值：分别指定 x 和 y */
+overscroll-behavior: auto contain;
+
+/* 分别控制 */
+overscroll-behavior-x: auto;
+overscroll-behavior-y: contain;
+```
+
+### 三个核心值
+
+#### `auto`（默认值）
+
+- 滚动链正常发生
+- 边界弹性效果正常显示
+- 刷新手势正常触发
+
+```css
+/* 默认行为：不做任何限制 */
+.scroll-container {
+  overscroll-behavior: auto;
+}
+```
+
+#### `contain`
+
+**核心特性**：阻止滚动链，但**保留**边界弹性效果。
+
+- 父容器不会被带动滚动
+- 子容器到达边界时仍显示弹性效果
+- 可滚动容器的下拉刷新/水平导航手势**会被禁用**
+
+```css
+/* 弹窗内容使用 contain，阻止背景页面滚动 */
+.dialog-content {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+```
+
+#### `none`
+
+**核心特性**：阻止滚动链，**禁止**边界弹性效果。
+
+- 父容器不会被带动滚动
+- 子容器到达边界时**没有**弹性效果
+- 滚动体验更"硬"，适合全屏滚动游戏等场景
+
+```css
+/* 彻底禁用边界效果 */
+.scroll-area {
+  overscroll-behavior: none;
+}
+```
+
+### 值对比速查表
+
+| 场景 | `auto` | `contain` | `none` |
+|------|--------|-----------|--------|
+| 滚动链传递到父容器 | ✅ 会传递 | ❌ 阻止 | ❌ 阻止 |
+| 边界弹性效果 | ✅ 保留 | ✅ 保留 | ❌ 禁用 |
+| 下拉刷新 | ✅ 启用 | ❌ 禁用 | ❌ 禁用 |
+| 水平页面导航 | ✅ 启用 | ❌ 禁用 | ❌ 禁用 |
+
+## 实战案例
+
+### 案例一：弹窗防止背景滚动
+
+**问题**：打开弹窗后，在弹窗内滚动，背景页面也会跟着滚动，体验很差。
+
+**解决方案**：使用 `overscroll-behavior: contain` 阻止滚动链。
+
+```css
+/* 弹窗内容区 */
+.dialog-content {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* 背景遮罩也需要处理，防止点击遮罩时背景滚动 */
+.dialog-backdrop {
+  overflow: hidden; /* 变成非滚动容器 */
+  overscroll-behavior: contain;
+}
+```
+
+**进阶（Chrome 144+）**：对于 `<dialog>` 元素，可直接在 dialog 和 ::backdrop 上设置：
+
+```css
+dialog {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+```
+
+{/* @playground id="dialog-scroll" mode="demo" */}
+
+> **提示**：只有当元素本身是滚动容器时，`overscroll-behavior` 才会生效。如果内容不足以滚动（overflow < 1px），需要添加 `overflow: auto` 或 `overflow: hidden` 使其成为滚动容器。
+
+### 案例二：移动端横向滚动与垂直锁定
+
+**问题**：在横向滚动的轮播组件中，斜向滑动容易触发垂直滚动或页面导航。
+
+**解决方案**：横向容器使用 `overscroll-behavior-x: contain` 锁定垂直方向。
+
+```css
+/* 轮播容器：横向滚动，禁用垂直滚动链 */
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden; /* 明确垂直方向不滚动 */
+  overscroll-behavior-x: contain;
+  /* 配合 touch-action 优化触摸体验 */
+  touch-action: pan-x;
+}
+
+/* 垂直方向的嵌套滚动区域 */
+.carousel-item {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+```
+
+{/* @playground id="horizontal-scroll" mode="demo" */}
+
+### 案例三：可滚动区域边界控制
+
+**问题**：列表组件滚动到边界时，出现弹性效果或触发页面刷新，影响体验。
+
+**场景**：聊天消息列表、商品列表、长文章阅读器。
+
+```css
+/* 聊天消息列表：禁用下拉刷新，保留弹性但不传递 */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  /* 配合 touch-action 精确控制手势 */
+  touch-action: pan-y;
+}
+
+/* 页面根容器：彻底禁用全局弹性效果 */
+html {
+  overscroll-behavior: none;
+}
+```
+
+**效果说明**：
+- 消息列表滚动到顶部，继续下拉 → 弹性效果保留，但不会触发页面刷新
+- 消息列表滚动到底部，继续上拉 → 弹性效果保留，但不会传递到页面
+
+{/* @playground id="boundary-control" mode="demo" */}
+
+### 案例四：聊天对话气泡（进阶）
+
+**问题**：聊天应用中有多个可滚动区域（消息列表、表情面板、输入框），需要精确控制每个区域的滚动行为。
+
+**解决方案**：分层的 `overscroll-behavior` 控制。
+
+```css
+/* 主消息区域：contain 防止影响外部 */
+.messages-container {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* 表情选择器：none 彻底禁用边界效果 */
+.emoji-picker {
+  overflow-x: auto;
+  overscroll-behavior-x: none;
+}
+
+/* 页面容器：auto 保持默认，保持页面可刷新 */
+.page-wrapper {
+  overscroll-behavior: auto;
+}
+```
+
+## 兼容性与坑点
+
+### 浏览器支持
+
+| 浏览器 | 支持版本 | 备注 |
+|--------|---------|------|
+| Chrome | 63+ | 完整支持 |
+| Firefox | 59+ | 完整支持 |
+| Safari | 16+ | 16 之前支持度有限 |
+| iOS Safari | 16+ | 16 之前存在 bug |
+| Edge | 79+ | 与 Chrome 一致 |
+
+### iOS Safari 坑点
+
+#### 1. 非滚动容器不生效
+
+**问题**：在 iOS Safari 上，如果容器没有实际滚动内容（overflow < 1px），`overscroll-behavior` 可能完全不生效。
+
+**解决**：确保容器有至少 1px 的溢出。
+
+```css
+/* ❌ 可能不生效 */
+.dialog {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+/* ✅ 确保有滚动 */
+.dialog {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* 或强制创建滚动容器 */
+.dialog {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  /* 触发滚动容器创建 */
+  content-visibility: auto;
+}
+```
+
+#### 2. Chrome 144+ 之前 dialog 限制
+
+**问题**：在 Chrome 144 之前，`overscroll-behavior` 只对**可滚动的滚动容器**生效。非滚动容器（如 `overflow: hidden` 的 dialog）上设置无效。
+
+**解决**：升级到 Chrome 144+，或使用 `overflow: hidden` + `overscroll-behavior: contain` 的组合。
+
+#### 3. 组合手势失效
+
+**问题**：在 iOS Safari 上，`overscroll-behavior: contain` 会禁用下拉刷新，但可能同时影响正常的滚动恢复。
+
+**解决**：测试是关键。iOS 16+ 改善较大，早期版本需要额外注意。
+
+### 检测与降级策略
+
+```javascript
+// 检测 overscroll-behavior 支持
+const supportsOverscroll = CSS.supports('overscroll-behavior', 'contain');
+
+if (!supportsOverscroll) {
+  // 降级方案：使用 JavaScript 监听 touchmove 阻止滚动传递
+  document.querySelector('.dialog-content').addEventListener('touchmove', (e) => {
+    const el = e.currentTarget;
+    const isAtTop = el.scrollTop === 0;
+    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 1;
+
+    if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+}
+```
+
+### 常见误区
+
+1. **误用 `touch-action` 代替 `overscroll-behavior`**
+   - `touch-action: none` 会完全禁用触摸滚动，而 `overscroll-behavior` 只是控制边界行为
+
+2. **在非滚动容器上使用**
+   - 必须确保元素有 `overflow: auto/scroll/hidden` 等使其成为滚动容器
+
+3. **只设置子元素，忘记父元素**
+   - 滚动链是双向的，需要在子元素和父元素上都设置才能完全控制
+
+4. **iOS Safari 不生效**
+   - 确认 iOS 版本，16 以下存在已知问题，考虑降级方案
+
+## 延伸阅读
+
+- [MDN: overscroll-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/overscroll-behavior)
+- [Chrome Blog: Take control of your scroll](https://developer.chrome.com/blog/overscroll-behavior)
+- [bram.us: overscroll-behavior: contain 详解](https://www.bram.us/2025/11/25/use-overscroll-behavior-contain-to-prevent-a-page-from-scrolling-while-a-dialog-is-open/)
+- [CSS Overscroll Behavior Module Level 1](https://drafts.csswg.org/css-overscroll/)

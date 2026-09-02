@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flexbox display:flex vs display:inline-flex</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; min-height: 100px; display: flex; gap: 8px; }
+    .demo-item { width: 60px; height: 60px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 13px; }
+    .inline-demo { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; display: inline-flex; gap: 8px; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compare-box { background: #21262d; border-radius: 6px; padding: 12px; }
+    .compare-box h4 { font-size: 13px; color: #f0f6fc; margin-bottom: 8px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; }
+    .sibling { width: 60px; height: 60px; background: #30363d; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8b949e; font-size: 11px; }
+    .parent-box { background: #21262d; border-radius: 6px; padding: 16px; margin-bottom: 12px; }
+    .outside-text { background: #d29922; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 display: flex vs inline-flex</h1>
+
+    <div class="section">
+      <h2>display: flex（块级容器）</h2>
+      <div class="parent-box">
+        <div class="demo-area" style="display: flex;">
+          <div class="demo-item">1</div>
+          <div class="demo-item">2</div>
+          <div class="demo-item">3</div>
+        </div>
+      </div>
+      <div class="info">💡 <strong>display: flex</strong>：容器是块级元素，会独自占据一行</div>
+    </div>
+
+    <div class="section">
+      <h2>display: inline-flex（行内容器）</h2>
+      <div class="parent-box">
+        <span style="color:#8b949e;font-size:12px;margin-right:8px;">前面文字：</span>
+        <div class="inline-demo">
+          <div class="demo-item">1</div>
+          <div class="demo-item">2</div>
+          <div class="demo-item">3</div>
+        </div>
+        <span style="color:#8b949e;font-size:12px;margin-left:8px;">：后面文字</span>
+      </div>
+      <div class="info">💡 <strong>display: inline-flex</strong>：容器是行内元素，不会独占一行</div>
+    </div>
+
+    <div class="section">
+      <h2>对比</h2>
+      <div class="comparison">
+        <div class="compare-box">
+          <h4>display: flex</h4>
+          <div style="background:#0d1117;padding:12px;border-radius:4px;">
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <div style="width:60px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">flex</div>
+              <div style="width:60px;height:40px;background:#58a6ff;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">flex</div>
+            </div>
+            <div style="width:60px;height:40px;background:#30363d;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#8b949e;font-size:11px;">block</div>
+          </div>
+          <div class="code-block">display: flex;</div>
+          <div class="info" style="margin-top:8px;font-size:11px;">独占一行，后续元素换行</div>
+        </div>
+        <div class="compare-box">
+          <h4>display: inline-flex</h4>
+          <div style="background:#0d1117;padding:12px;border-radius:4px;display:flex;gap:8px;align-items:flex-start;">
+            <div style="display:inline-flex;gap:8px;">
+              <div style="width:60px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">inline</div>
+              <div style="width:60px;height:40px;background:#3fb950;border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;">inline</div>
+            </div>
+            <div style="width:60px;height:40px;background:#30363d;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#8b949e;font-size:11px;">inline</div>
+          </div>
+          <div class="code-block">display: inline-flex;</div>
+          <div class="info" style="margin-top:8px;font-size:11px;">不独占一行，后续元素并排</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

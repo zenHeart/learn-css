@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>主题切换 - Theme Switching</title>
+  <style>
+    :root {
+      --color-bg: #ffffff; --color-surface: #f3f4f6;
+      --color-surface-elevated: #ffffff; --color-text: #111827;
+      --color-text-muted: #6b7280; --color-border: #e5e7eb;
+      --color-primary: #3b82f6; --color-primary-hover: #2563eb;
+      --color-success: #10b981; --color-warning: #f59e0b; --color-error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #0f172a; --color-surface: #1e293b;
+      --color-surface-elevated: #334155; --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8; --color-border: #334155;
+      --color-primary: #60a5fa; --color-primary-hover: #3b82f6;
+      --color-success: #34d399; --color-warning: #fbbf24; --color-error: #f87171;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); padding: 2rem; transition: background 0.3s, color 0.3s; min-height: 100vh; }
+    h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--color-text-muted); margin-bottom: 2rem; }
+    .theme-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 1rem 1.5rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border); }
+    .theme-bar label { font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted); }
+    .theme-switch { position: relative; width: 52px; height: 28px; background: var(--color-border); border-radius: 14px; cursor: pointer; transition: background 0.3s; }
+    .theme-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    [data-theme="dark"] .theme-switch { background: var(--color-primary); }
+    [data-theme="dark"] .theme-switch::after { transform: translateX(24px); }
+    .theme-label { font-size: 0.875rem; font-family: monospace; color: var(--color-text-muted); min-width: 50px; }
+    .card { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); transition: background 0.3s, border-color 0.3s; }
+    .card-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .card-text { color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1rem; }
+    .input-field { width: 100%; padding: 0.625rem 0.875rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.875rem; color: var(--color-text); margin-bottom: 1rem; transition: background 0.3s, border-color 0.3s; }
+    .input-field:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-success { background: var(--color-success); color: #fff; }
+    .btn-warning { background: var(--color-warning); color: #fff; }
+    .btn-error { background: var(--color-error); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--color-border); color: var(--color-text); }
+    .color-chips { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .chip { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--color-border); transition: transform 0.2s, border-color 0.3s; }
+    .chip:hover { transform: scale(1.1); }
+    .chip-primary { background: var(--color-primary); }
+    .chip-success { background: var(--color-success); }
+    .chip-warning { background: var(--color-warning); }
+    .chip-error { background: var(--color-error); }
+  </style>
+</head>
+<body>
+  <h1>主题切换 - Theme Switching</h1>
+  <p class="subtitle">使用 Design Token 实现亮色/暗色主题切换</p>
+
+  <div class="theme-bar">
+    <label>主题切换</label>
+    <div class="theme-switch" id="theme-switch" role="switch" aria-checked="false" tabindex="0"></div>
+    <span class="theme-label" id="theme-label">light</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">表单组件</div>
+    <div class="card-text">输入框在亮色和暗色主题下都有良好的对比度和可读性。</div>
+    <input type="text" class="input-field" placeholder="输入框示例...">
+    <input type="email" class="input-field" placeholder="邮箱地址...">
+    <div class="btn-group">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-success">成功按钮</button>
+      <button class="btn btn-warning">警告按钮</button>
+      <button class="btn btn-error">错误按钮</button>
+      <button class="btn btn-outline">描边按钮</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">语义化颜色</div>
+    <div class="card-text">通过决策令牌（Decision Token）定义语义化颜色，主题切换时自动响应。</div>
+    <div class="color-chips">
+      <div class="chip chip-primary" title="Primary"></div>
+      <div class="chip chip-success" title="Success"></div>
+      <div class="chip chip-warning" title="Warning"></div>
+      <div class="chip chip-error" title="Error"></div>
+    </div>
+  </div>
+
+  <script>
+    const themeSwitch = document.getElementById('theme-switch');
+    const themeLabel = document.getElementById('theme-label');
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      themeLabel.textContent = theme;
+      themeSwitch.setAttribute('aria-checked', theme === 'dark');
+      localStorage.setItem('theme', theme);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) { setTheme(saved); }
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) { setTheme('dark'); }
+    themeSwitch.addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme || 'light';
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+    themeSwitch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); themeSwitch.click(); }
+    });
+  </script>
+</body>
+</html>
