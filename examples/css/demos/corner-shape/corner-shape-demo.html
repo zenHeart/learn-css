@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS corner-shape 角形状属性演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    h2 { font-size: 16px; margin-bottom: 12px; color: #f0f6fc; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+    .demo-item { text-align: center; }
+    .demo-box { width: 120px; height: 80px; margin: 0 auto 12px; background: #58a6ff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+    .demo-label { font-size: 13px; color: #8b949e; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #161b22; padding: 2px 6px; border-radius: 3px; }
+    .supported { background: #238636; }
+    .unsupported { background: #6e7681; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px; }
+
+    /* circle 形状 */
+    .shape-circle {
+      corner-shape: circle;
+      border-radius: 50%;
+    }
+
+    /* ellipse 形状 */
+    .shape-ellipse {
+      corner-shape: ellipse;
+      border-radius: 50%;
+    }
+
+    /* clip 形状 */
+    .shape-clip {
+      corner-shape: clip;
+      border-radius: 20px;
+    }
+
+    /* bevel 形状 */
+    .shape-bevel {
+      corner-shape: bevel;
+      border-radius: 20px;
+    }
+
+    /* notch 形状 */
+    .shape-notch {
+      corner-shape: notch;
+      border-radius: 20px;
+    }
+
+    /* 单独控制各角 - 使用 border-radius 的fallback */
+    .corner-individual {
+      border-radius: 30px 10px 30px 10px;
+    }
+
+    /* 聊天气泡效果 */
+    .chat-bubble {
+      border-radius: 20px;
+      padding: 16px 24px;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    /* 卡片效果 */
+    .card-demo {
+      width: 160px;
+      height: 100px;
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    /* 按钮效果 */
+    .button-demo {
+      padding: 12px 32px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS corner-shape 角形状属性演示</h1>
+
+    <!-- 基本形状展示 -->
+    <div class="section">
+      <h2>基本形状选项</h2>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box shape-circle">圆形</div>
+          <div class="demo-label">circle</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box shape-ellipse">椭圆</div>
+          <div class="demo-label">ellipse</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box shape-clip">clip</div>
+          <div class="demo-label">clip</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box shape-bevel">bevel</div>
+          <div class="demo-label">bevel</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box shape-notch">notch</div>
+          <div class="demo-label">notch</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box corner-individual">各角不同</div>
+          <div class="demo-label">border-radius</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 实战案例 -->
+    <div class="section">
+      <h2>实战案例</h2>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box chat-bubble">聊天气泡效果</div>
+          <div class="demo-label">chat-bubble</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box card-demo" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
+            卡片效果
+          </div>
+          <div class="demo-label">card</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box button-demo" style="background: #58a6ff; color: #fff;">
+            按钮
+          </div>
+          <div class="demo-label">button</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;">
+            不规则圆角
+          </div>
+          <div class="demo-label">irregular</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="border-bottom: 1px solid #30363d;">
+            <th style="text-align: left; padding: 8px; color: #8b949e;">浏览器</th>
+            <th style="text-align: left; padding: 8px; color: #8b949e;">支持情况</th>
+            <th style="text-align: left; padding: 8px; color: #8b949e;">备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #30363d;">
+            <td style="padding: 8px;">Chrome</td>
+            <td style="padding: 8px;"><span class="badge unsupport">不支持</span></td>
+            <td style="padding: 8px; color: #8b949e;">需要开启实验特性</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #30363d;">
+            <td style="padding: 8px;">Firefox</td>
+            <td style="padding: 8px;"><span class="badge unsupport">不支持</span></td>
+            <td style="padding: 8px; color: #8b949e;">考虑使用 SVG</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #30363d;">
+            <td style="padding: 8px;">Safari</td>
+            <td style="padding: 8px;"><span class="badge supported">部分支持</span></td>
+            <td style="padding: 8px; color: #8b949e;">WebKit 内核</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">Edge</td>
+            <td style="padding: 8px;"><span class="badge unsupport">不支持</span></td>
+            <td style="padding: 8px; color: #8b949e;">依赖 Chromium</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block">/* 基本用法 */
+.element {
+  corner-shape: circle;
+  border-radius: 50%;
+}
+
+/* 单独控制各角 */
+.card {
+  border-top-start-radius: 30px;
+  border-top-end-radius: 10px;
+  border-bottom-end-radius: 30px;
+  border-bottom-start-radius: 10px;
+}
+
+/* 兼容性处理 */
+.fallback {
+  border-radius: 20px; /* 所有浏览器支持 */
+}
+
+@supports (corner-shape: circle) {
+  .fallback {
+    corner-shape: circle;
+    border-radius: 50%;
+  }
+}</div>
+    </div>
+
+    <!-- 提示信息 -->
+    <div class="info">
+      <strong>提示：</strong>corner-shape 属性目前浏览器支持有限。演示中的效果使用了 border-radius 作为降级方案。在生产环境中使用时，请确保提供适当的降级样式。
+    </div>
+  </div>
+</body>
+</html>
