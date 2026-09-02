@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Alignment 盒对齐模块 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    /* Flex 演示容器 */
+    .flex-demo {
+      display: flex;
+      height: 200px;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    
+    .flex-item {
+      width: 60px;
+      height: 60px;
+      background: #388bfd33;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #58a6ff;
+    }
+    
+    .flex-item:nth-child(2) { background: #a371f733; color: #a371f7; }
+    .flex-item:nth-child(3) { background: #3fb95033; color: #3fb950; }
+    
+    .flex-item.tall { height: 100px; }
+    
+    /* Grid 演示容器 */
+    .grid-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 80px);
+      gap: 8px;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    
+    .grid-item {
+      background: #388bfd33;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #58a6ff;
+    }
+    
+    .grid-item:nth-child(2) { background: #a371f733; color: #a371f7; }
+    .grid-item:nth-child(3) { background: #3fb95033; color: #3fb950; }
+    .grid-item:nth-child(4) { background: #f0883e33; color: #f0883e; }
+    .grid-item:nth-child(5) { background: #f8514933; color: #f85149; }
+    .grid-item:nth-child(6) { background: #7ee78733; color: #7ee787; }
+    
+    .grid-item.special {
+      background: #ffa65733;
+      color: #ffa657;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Box Alignment 盒对齐模块</h1>
+    <p class="subtitle">justify-content | align-items | place-items | 交互演示</p>
+
+    <!-- Flexbox justify-content -->
+    <div class="section">
+      <h2>Flexbox justify-content（主轴对齐）</h2>
+      <div class="controls">
+        <button class="btn active" data-justify="flex-start">flex-start</button>
+        <button class="btn" data-justify="center">center</button>
+        <button class="btn" data-justify="flex-end">flex-end</button>
+        <button class="btn" data-justify="space-between">space-between</button>
+        <button class="btn" data-justify="space-around">space-around</button>
+        <button class="btn" data-justify="space-evenly">space-evenly</button>
+      </div>
+      <div class="flex-demo" id="justify-demo" style="justify-content: flex-start;">
+        <div class="flex-item">1</div>
+        <div class="flex-item">2</div>
+        <div class="flex-item">3</div>
+      </div>
+      <div class="code-block" id="justify-code">justify-content: flex-start;</div>
+    </div>
+
+    <!-- Flexbox align-items -->
+    <div class="section">
+      <h2>Flexbox align-items（交叉轴对齐）</h2>
+      <div class="controls">
+        <button class="btn active" data-align="stretch">stretch</button>
+        <button class="btn" data-align="flex-start">flex-start</button>
+        <button class="btn" data-align="center">center</button>
+        <button class="btn" data-align="flex-end">flex-end</button>
+        <button class="btn" data-align="baseline">baseline</button>
+      </div>
+      <div class="flex-demo" id="align-demo" style="align-items: stretch;">
+        <div class="flex-item">1</div>
+        <div class="flex-item tall">2</div>
+        <div class="flex-item">3</div>
+      </div>
+      <div class="code-block" id="align-code">align-items: stretch;</div>
+    </div>
+
+    <!-- Flexbox align-self -->
+    <div class="section">
+      <h2>Flexbox align-self（单个项目对齐）</h2>
+      <div class="controls">
+        <button class="btn" data-self="flex-start">flex-start</button>
+        <button class="btn active" data-self="center">center</button>
+        <button class="btn" data-self="flex-end">flex-end</button>
+        <button class="btn" data-self="stretch">stretch</button>
+      </div>
+      <div class="flex-demo" id="self-demo" style="align-items: stretch;">
+        <div class="flex-item">1</div>
+        <div class="flex-item special" id="self-item" style="align-self: center;">2</div>
+        <div class="flex-item">3</div>
+      </div>
+      <div class="code-block" id="self-code">align-self: center;</div>
+    </div>
+
+    <!-- Grid align-items -->
+    <div class="section">
+      <h2>Grid align-items / justify-items</h2>
+      <div class="controls">
+        <button class="btn active" data-grid="stretch">stretch</button>
+        <button class="btn" data-grid="start">start</button>
+        <button class="btn" data-grid="center">center</button>
+        <button class="btn" data-grid="end">end</button>
+      </div>
+      <div class="grid-demo" id="grid-demo" style="align-items: stretch; justify-items: stretch;">
+        <div class="grid-item">1</div>
+        <div class="grid-item">2</div>
+        <div class="grid-item">3</div>
+        <div class="grid-item">4</div>
+        <div class="grid-item">5</div>
+        <div class="grid-item">6</div>
+      </div>
+      <div class="code-block" id="grid-code">align-items: stretch; justify-items: stretch;</div>
+    </div>
+
+    <!-- place-items 简写 -->
+    <div class="section">
+      <h2>place-items 简写</h2>
+      <div class="controls">
+        <button class="btn" data-place="start center">start center</button>
+        <button class="btn active" data-place="center center">center center</button>
+        <button class="btn" data-place="end end">end end</button>
+        <button class="btn" data-place="stretch stretch">stretch stretch</button>
+      </div>
+      <div class="flex-demo" id="place-demo" style="place-items: center center;">
+        <div class="flex-item">1</div>
+        <div class="flex-item">2</div>
+        <div class="flex-item">3</div>
+      </div>
+      <div class="code-block" id="place-code">place-items: center center;</div>
+    </div>
+
+    <!-- 浏览器兼容性 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 57+ ✓</li>
+          <li>Firefox 52+ ✓</li>
+          <li>Safari 10.1+ ✓</li>
+          <li>Edge 16+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // justify-content 切换
+    document.querySelectorAll('[data-justify]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-justify]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const value = btn.dataset.justify;
+        document.getElementById('justify-demo').style.justifyContent = value;
+        document.getElementById('justify-code').textContent = `justify-content: ${value};`;
+      });
+    });
+    
+    // align-items 切换
+    document.querySelectorAll('[data-align]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-align]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const value = btn.dataset.align;
+        document.getElementById('align-demo').style.alignItems = value;
+        document.getElementById('align-code').textContent = `align-items: ${value};`;
+      });
+    });
+    
+    // align-self 切换
+    document.querySelectorAll('[data-self]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-self]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const value = btn.dataset.self;
+        document.getElementById('self-item').style.alignSelf = value;
+        document.getElementById('self-code').textContent = `align-self: ${value};`;
+      });
+    });
+    
+    // Grid align/justify-items 切换
+    document.querySelectorAll('[data-grid]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-grid]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const value = btn.dataset.grid;
+        document.getElementById('grid-demo').style.alignItems = value;
+        document.getElementById('grid-demo').style.justifyItems = value;
+        document.getElementById('grid-code').textContent = `align-items: ${value}; justify-items: ${value};`;
+      });
+    });
+    
+    // place-items 切换
+    document.querySelectorAll('[data-place]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-place]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const value = btn.dataset.place;
+        document.getElementById('place-demo').style.placeItems = value;
+        document.getElementById('place-code').textContent = `place-items: ${value};`;
+      });
+    });
+  </script>
+</body>
+</html>
