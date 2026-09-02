@@ -1,0 +1,243 @@
+---
+title: "CSS @property 自定义属性进阶"
+category: "基础知识"
+tags:
+  - CSS Houdini
+  - @property
+  - 自定义属性
+  - CSS动画
+description: "深入理解 CSS @property 规则，掌握自定义属性的类型定义、继承控制与动画能力"
+keywords: "CSS @property, CSS Houdini, 自定义属性动画, CSS变量, registerProperty"
+---
+
+# CSS @property 自定义属性进阶
+
+## @property 是什么
+
+`@property` 是 CSS Houdini API 的一部分，允许开发者在样式表中**显式注册**自定义属性（CSS 变量），从而获得：
+
+- **类型检查** — 约束属性可接受的值类型
+- **初始值** — 定义属性的默认值
+- **继承控制** — 决定属性是否可继承
+- **可动画化** — 让原本无法过渡的自定义属性产生平滑动画
+
+在此之前，实现以上能力需要借助 JavaScript 调用 `CSS.registerProperty()`。`@property` 让我们可以纯 CSS 完成注册。
+
+## 基本语法
+
+```css
+@property --myProperty {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rebeccapurple;
+}
+```
+
+**必填项**：`syntax` 和 `inherits` 必须同时提供，否则整条规则无效并被忽略。
+
+**可选项**：`initial-value` 在以下情况可省略：
+- `syntax: "*"`（通用语法）时必须省略
+- 其他情况若省略则整条规则无效
+
+### syntax 语法描述符
+
+| 写法 | 含义 |
+|------|------|
+| `"<length>"` | 单一类型 |
+| `"<length> \| <percentage>"` | 多选类型 |
+| `"<color>#"` | 带 `#` 表示多个（空格分隔） |
+| `"*"` | 任意有效 token（无初始值） |
+
+常用类型标识符：`<length>`、`<number>`、`<percentage>`、`<color>`、`<angle>`、`<time>`、`<transform-list>`、`<image>` 等。
+
+### inherits 继承控制
+
+- `inherits: true` — 子元素继承父元素的计算值（默认行为）
+- `inherits: false` — 每个元素独立使用初始值，不走继承链
+
+### initial-value 初始值
+
+必须是**计算独立的值**（computationally independent），即不依赖其他 CSS 属性即可计算出结果。
+
+- ✅ `10px`、`2in`、`45deg`、`#ff0000` — 计算独立
+- ❌ `3em`、`2rem` — 依赖 `font-size`，非计算独立
+
+## 核心能力一：类型约束
+
+未注册的自定义属性值以字符串形式存在，任何期望类型的 CSS 属性都无法正确解读它：
+
+```css
+/* 未注册：background-color 接收到的是字符串 "--bg" 而非颜色值 */
+.box { background-color: var(--bg); } /* 无效 */
+
+@property --bg {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #3498db;
+}
+
+.box { background-color: var(--bg); } /* ✅ 正常工作 */
+```
+
+类型约束还会在浏览器 DevTools 中提供更友好的提示。
+
+## 核心能力二：初始值与继承控制
+
+```css
+/* 全局进度条：初始25%，不继承，子元素各自独立 */
+@property --progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 25%;
+}
+
+/* 主题色：可继承，子元素会跟随父元素变化 */
+@property --theme-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #3498db;
+}
+```
+
+## 核心能力三：可动画化（最重要！）
+
+这是 `@property` 最有价值的能力。**未注册的自定义属性无法做动画过渡**，因为浏览器不知道它的值是什么类型：
+
+```css
+/* ❌ 无效：--size 没有注册，动画无法工作 */
+.el { width: var(--size); transition: --size 0.5s; }
+.el:hover { --size: 300px; }
+```
+
+注册后，浏览器知道 `--size` 是 `<length>` 类型，就能自动计算中间值：
+
+```css
+/* ✅ 有效：注册后支持平滑过渡 */
+@property --size {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 100px;
+}
+
+.el {
+  width: var(--size);
+  transition: width 0.5s ease;
+}
+.el:hover {
+  width: 300px; /* 或者设置 --size: 300px，配合 var() 使用 */
+}
+```
+
+### 从无到有的过渡（opacity 示例）
+
+```css
+/* 注册 --opacity，明确类型为 <number>（0-1），初始值 0 */
+@property --opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.modal {
+  --opacity: 0;
+  opacity: calc(var(--opacity));
+  transition: --opacity 0.4s ease;
+}
+
+.modal.visible {
+  --opacity: 1;
+}
+```
+
+> **注意**：这里直接对 `opacity` 做 transition 不生效（opacity 本身是标准属性），而是利用 `--opacity` 配合 `calc(var(--opacity))` 或直接在实际动画属性中引用注册过的自定义属性来实现从 0→1 的平滑过渡。
+
+## 实际应用：进度条动画
+
+`@property` 让自定义属性在 `@keyframes` 中直接设置关键帧值成为可能：
+
+```css
+@property --progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 25%;
+}
+
+.bar {
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(
+    to right,
+    #00d230 var(--progress),
+    #1a1a1a var(--progress)
+  );
+  animation: progressAnim 2.5s ease infinite;
+}
+
+@keyframes progressAnim {
+  to { --progress: 100%; }
+}
+```
+
+未注册的情况下，`--progress` 从 `25%` 到 `100%` 的过渡无法产生平滑动画；注册后，浏览器将直接插值计算每一帧的颜色停止位置。
+
+## 实际应用：颜色渐变动画
+
+```css
+@property --color-start {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #3498db;
+}
+
+@property --color-end {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #e74c3c;
+}
+
+.gradient-box {
+  background: linear-gradient(45deg, var(--color-start), var(--color-end));
+  animation: colorShift 3s ease infinite alternate;
+}
+
+@keyframes colorShift {
+  to {
+    --color-start: #e74c3c;
+    --color-end: #9b59b6;
+  }
+}
+```
+
+## Houdini 生态关联
+
+`@property` 是 CSS Houdini 的 **Properties & Values API** 的 CSS 书写形式。与之关联的 Houdini API 包括：
+
+| API | 作用 |
+|-----|------|
+| **CSS Properties & Values API** | 注册自定义属性（`@property` / `registerProperty()`） |
+| **CSS Typed OM** | 将 CSS 值暴露为类型化对象，提升操作性能 |
+| **Worklets** | 在浏览器主线程外运行渲染代码 |
+
+`@property` 是 Houdini 中**支持最广泛**的特性（Chromium 85+、Firefox 128+、Safari 16.4+）。
+
+## 与 JavaScript `registerProperty()` 的关系
+
+两者效果完全一致，JavaScript 注册优先级更高：
+
+```js
+// 等价于 @property --rotation { syntax: "<angle>"; inherits: false; initial-value: 45deg; }
+CSS.registerProperty({
+  name: '--rotation',
+  syntax: '<angle>',
+  inherits: false,
+  initialValue: '45deg'
+});
+```
+
+## 注意事项
+
+1. **缺少必填描述符则规则无效**：只有 `syntax` + `inherits` 同时存在时 `@property` 才生效
+2. **初始值必须计算独立**：`3em`、`calc()` 等依赖其他值的写法通常无效
+3. **JavaScript 注册优先级更高**：同名的 JS 注册会覆盖 CSS `@property`
+4. **同名校规后者胜出**：多个同名的 `@property` 规则，按文档顺序最后一个生效
+5. **浏览器兼容性**：目前主流浏览器已广泛支持，但仍需留意兼容表

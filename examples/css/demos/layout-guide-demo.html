@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 布局方案对比演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; padding: 20px; background: #f8f9fa; }
+    h1, h2, h3 { margin-bottom: 10px; color: #333; }
+    section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .demo-label { font-size: 12px; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .demo-box { background: #e9ecef; border-radius: 4px; padding: 12px; min-height: 60px; margin-bottom: 16px; }
+
+    /* Flex 演示 */
+    .flex-nav { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; border-radius: 6px; padding: 0 16px; }
+    .flex-nav .logo { color: #fff; font-weight: 700; font-size: 18px; }
+    .flex-nav .links { display: flex; gap: 16px; }
+    .flex-nav a { color: #ecf0f1; text-decoration: none; font-size: 14px; }
+
+    .flex-cards { display: flex; gap: 12px; flex-wrap: wrap; }
+    .card { flex: 1; min-width: 140px; background: #3498db; color: #fff; border-radius: 6px; padding: 16px; text-align: center; }
+
+    /* Grid 演示 */
+    .grid-page { display: grid; grid-template-columns: 200px 1fr 200px; grid-template-rows: 60px 1fr 40px; gap: 12px; min-height: 280px; }
+    .grid-header { grid-column: 1 / -1; background: #2c3e50; color: #fff; border-radius: 6px; display: flex; align-items: center; padding: 0 16px; }
+    .grid-sidebar { background: #3498db; color: #fff; border-radius: 6px; padding: 16px; }
+    .grid-content { background: #ecf0f1; border-radius: 6px; padding: 16px; }
+    .grid-aside { background: #9b59b6; color: #fff; border-radius: 6px; padding: 16px; }
+    .grid-footer { grid-column: 1 / -1; background: #34495e; color: #fff; border-radius: 6px; display: flex; align-items: center; padding: 0 16px; font-size: 13px; }
+
+    /* auto-fit grid */
+    .grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .grid-auto .card { background: #27ae60; color: #fff; border-radius: 6px; padding: 20px; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+
+    /* Subgrid 对齐 */
+    .subgrid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+    .subgrid-card { grid-column: span 3; display: grid; grid-template-columns: subgrid; gap: 12px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; }
+    .subgrid-item { background: #3498db; color: #fff; border-radius: 4px; padding: 10px; font-size: 13px; text-align: center; }
+
+    /* clamp 响应式 */
+    .clamp-box { width: clamp(200px, 50%, 500px); background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 8px; padding: 20px; text-align: center; margin: 0 auto; }
+    .clamp-text { font-size: clamp(14px, 3vw, 24px); }
+
+    /* 对比表 */
+    .compare-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .compare-table th, .compare-table td { border: 1px solid #dee2e6; padding: 10px 12px; text-align: left; font-size: 14px; }
+    .compare-table th { background: #f8f9fa; font-weight: 600; }
+    .compare-table tr:nth-child(even) { background: #f8f9fa; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .tag-flex { background: #e8f4fd; color: #3498db; }
+    .tag-grid { background: #e8f8f0; color: #27ae60; }
+    .tag-old { background: #fde8e8; color: #e74c3c; }
+  </style>
+</head>
+<body>
+
+<section>
+  <h2>Flexbox vs Grid vs Table 方案对比</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th>方案</th><th>维度</th><th>最佳用例</th><th>局限性</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="tag tag-flex">Flexbox</span></td><td>一维（主轴/交叉轴）</td><td>导航栏、卡片组、垂直居中</td><td>不擅长多行多列复杂结构</td></tr>
+      <tr><td><span class="tag tag-grid">CSS Grid</span></td><td>二维（行/列）</td><td>页面整体布局、响应式网格</td><td>学习曲线稍陡</td></tr>
+      <tr><td><span class="tag tag-old">Table</span></td><td>行/列固定结构</td><td>纯数据表格（报表）</td><td>不响应式、语义差</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="demo-label">Flexbox — 导航栏（space-between）</div>
+  <div class="demo-box">
+    <nav class="flex-nav">
+      <div class="logo">Logo</div>
+      <div class="links">
+        <a href="#">首页</a>
+        <a href="#">产品</a>
+        <a href="#">关于</a>
+        <a href="#">联系</a>
+      </div>
+    </nav>
+  </div>
+  <div class="demo-label">Flexbox — 卡片组（flex-wrap）</div>
+  <div class="demo-box">
+    <div class="flex-cards">
+      <div class="card">卡片一</div>
+      <div class="card">卡片二</div>
+      <div class="card">卡片三</div>
+      <div class="card">卡片四</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="demo-label">CSS Grid — 经典三栏布局</div>
+  <div class="demo-box">
+    <div class="grid-page">
+      <div class="grid-header">Header（grid-column: 1 / -1）</div>
+      <div class="grid-sidebar">Sidebar 左侧</div>
+      <div class="grid-content">Main Content</div>
+      <div class="grid-aside">Sidebar 右侧</div>
+      <div class="grid-footer">Footer（grid-column: 1 / -1）</div>
+    </div>
+  </div>
+  <div class="demo-label">CSS Grid — auto-fit 自适应列数</div>
+  <div class="demo-box">
+    <div class="grid-auto">
+      <div class="card">项目一</div>
+      <div class="card">项目二</div>
+      <div class="card">项目三</div>
+      <div class="card">项目四</div>
+      <div class="card">项目五</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="demo-label">clamp() — 无媒体查询自适应（调整窗口宽度查看）</div>
+  <div class="demo-box">
+    <div class="clamp-box">
+      <div class="clamp-text">clamp(200px, 50%, 500px)</div>
+      <div style="font-size:13px; margin-top:8px; color:rgba(255,255,255,0.8)">宽度随窗口自动调整</div>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:12px;">
+    <div style="background:#e74c3c; color:#fff; border-radius:6px; padding:16px; text-align:center;">
+      <div style="font-size:clamp(12px, 2vw, 18px);">clamp 字号</div>
+      <div style="font-size:12px; opacity:0.8; margin-top:4px;">响应式文本</div>
+    </div>
+    <div style="background:#3498db; color:#fff; border-radius:6px; padding:16px; display:flex; align-items:center; justify-content:center;">
+      <div style="width:clamp(60px, 30%, 120px); height:60px; background:rgba(255,255,255,0.3); border-radius:50%;"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="demo-label">Subgrid — 卡片内部对齐（Chrome 117+, Safari 16+）</div>
+  <div class="demo-box">
+    <div class="subgrid-demo">
+      <div class="subgrid-card">
+        <div class="subgrid-item">标题对齐</div>
+        <div class="subgrid-item">描述文字</div>
+        <div class="subgrid-item">按钮</div>
+      </div>
+      <div class="subgrid-card">
+        <div class="subgrid-item">更长的标题内容</div>
+        <div class="subgrid-item">更短的描述</div>
+        <div class="subgrid-item">按钮</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
