@@ -1,0 +1,176 @@
+---
+title: "CSS style observer 样式观察器"
+category: "进阶知识"
+tags:
+  - CSS
+  - style observer
+  - Houdini
+  - 样式观察器
+description: "详解CSS style observer API的使用方法和应用场景"
+keywords: "style observer, CSS Houdini, registerProperty, styleMap"
+---
+
+# CSS style observer 样式观察器
+
+## 什么是 style observer
+
+Style Observer 是 CSS Houdini API 的一部分，允许 JavaScript 监听和响应 CSS 样式变化。通过 `CSS.styleMap` 和相关的 Houdini API，开发者可以在样式变化时执行自定义逻辑。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本概念
+
+### 1. CSS.registerProperty()
+
+在 Houdini 中，首先需要使用 `CSS.registerProperty()` 注册自定义属性：
+
+```javascript
+CSS.registerProperty({
+  name: '--my-color',
+  syntax: '<color>',
+  inherits: false,
+  initialValue: '#ff0000',
+});
+```
+
+### 2. 使用 styleMap
+
+获取元素的样式映射：
+
+```javascript
+const element = document.querySelector('.my-element');
+const styleMap = element.attributeStyleMap;
+```
+
+### 3. 观察样式变化
+
+通过 `ComputedEffect` 接口来观察样式变化：
+
+```javascript
+const effect = new CSSStyleEffect();
+effect.observe(element, 'background-color');
+effect.addEventListener('stylechange', (event) => {
+  console.log('Style changed:', event.target, event.type, event.value);
+});
+```
+
+{/* @playground id="demo" mode="demo" */}
+
+## 实际应用场景
+
+### 1. 监听 CSS 变量变化
+
+```javascript
+// 注册 CSS 变量
+CSS.registerProperty({
+  name: '--progress',
+  syntax: '<number>',
+  inherits: false,
+  initialValue: '0',
+});
+
+// 监听变化
+const element = document.querySelector('.progress-bar');
+const styleMap = element.styleMap;
+
+styleMap.addEventListener('change', (e) => {
+  if (e.property === '--progress') {
+    updateProgress(e.value);
+  }
+});
+```
+
+### 2. 动态主题切换
+
+```javascript
+const root = document.documentElement;
+const rootStyleMap = root.attributeStyleMap;
+
+rootStyleMap.addEventListener('change', (e) => {
+  console.log(`主题变量 ${e.property} 变为 ${e.value}`);
+  if (e.property.startsWith('--theme-')) {
+    applyTheme(e.property, e.value);
+  }
+});
+```
+
+### 3. 动画与交互同步
+
+```javascript
+const interactive = document.querySelector('.interactive-element');
+
+// 监听 transform 变化来同步其他元素
+interactive.attributeStyleMap.addEventListener('change', (e) => {
+  if (e.property === 'transform') {
+    updateMirrorTransform(e.value);
+  }
+});
+```
+
+## 浏览器兼容性
+
+Style Observer API 依赖于 CSS Houdini，目前支持有限：
+
+- Chrome 73+ (部分支持)
+- Edge 79+
+- Firefox: 不支持
+- Safari: 不支持
+
+## 替代方案
+
+由于浏览器支持有限，通常使用以下替代方案：
+
+### 1. MutationObserver
+
+```javascript
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+      console.log('Style changed!');
+    }
+  });
+});
+
+observer.observe(element, { attributes: true, attributeFilter: ['style'] });
+```
+
+### 2. CSS 变量 + requestAnimationFrame
+
+```javascript
+function pollStyle(element, property, callback) {
+  let lastValue = getComputedStyle(element).getPropertyValue(property);
+  
+  function check() {
+    const currentValue = getComputedStyle(element).getPropertyValue(property);
+    if (currentValue !== lastValue) {
+      lastValue = currentValue;
+      callback(currentValue);
+    }
+    requestAnimationFrame(check);
+  }
+  
+  check();
+}
+```
+
+### 3. Proxy 包装 CSS 变量
+
+```javascript
+function createCSSVariableProxy(element) {
+  return new Proxy({}, {
+    set(target, property, value) {
+      element.style.setProperty(property, value);
+      return true;
+    },
+    get(target, property) {
+      return getComputedStyle(element).getPropertyValue(property);
+    }
+  });
+}
+```
+
+## 参考资料
+
+- [Lea Verou - Style Observer](https://lea.verou.me/blog/2025/style-observer/)
+- [CSS Houdini API - MDN](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Houdini)
+- [CSS Typed OM - MDN](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Typed_OM)

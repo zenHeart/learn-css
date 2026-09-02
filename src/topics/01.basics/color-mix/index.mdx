@@ -1,0 +1,164 @@
+---
+title: "CSS color-mix() 颜色混合函数"
+category: "基础知识"
+tags:
+  - CSS颜色
+  - color-mix
+  - 颜色混合
+  - CSS3
+description: "详解CSS color-mix()函数的使用方法、语法和应用场景"
+keywords: "color-mix, CSS颜色, 颜色混合, CSS颜色函数"
+---
+
+# CSS color-mix() 颜色混合函数
+
+## 什么是 color-mix()
+
+`color-mix()` 是 CSS 颜色函数，用于将两种颜色按指定比例混合生成新颜色。这是 CSS Color Level 5 规范中引入的功能。
+
+## 基本语法
+
+```css
+color-mix(in <colorspace>, <color> <percentage>, <color> [<percentage>])
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `<colorspace>` | 颜色空间，如 `srgb`、`srgb-linear`、`lab`、`oklch`、`lch`、`hsl`、`hwb`、`xyz`、`display-p3` |
+| `<color>` | 要混合的颜色 |
+| `<percentage>` | 混合比例，第一个颜色在结果中的占比 |
+
+### 简单的百分比语法
+
+```css
+/* 默认使用 srgb 颜色空间 */
+color-mix(in srgb, red 30%, blue);
+/* 结果：约 70% 蓝色 + 30% 红色的混合色 */
+```
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 使用示例
+
+### 1. 基础颜色混合
+
+```css
+/* 将蓝色和红色混合 */
+.my-element {
+  background-color: color-mix(in srgb, blue 50%, red);
+}
+
+/* 调整混合比例 */
+.lighter {
+  background-color: color-mix(in srgb, blue 80%, red);
+}
+
+.darker {
+  background-color: color-mix(in srgb, blue 20%, red);
+}
+```
+
+{/* @playground id="ratio-adjust" mode="demo" */}
+
+### 2. 使用 HSL 颜色空间
+
+```css
+/* 使用 hsl 颜色空间混合 */
+.hsl-mix {
+  background-color: color-mix(in hsl, hsl(200 80% 50%) 50%, hsl(20 80% 50%));
+}
+```
+
+{/* @playground id="hsl-space" mode="demo" */}
+
+### 3. 使用 OKLCH（感知均匀颜色空间）
+
+```css
+/* 使用 oklch 获得更自然的混合效果 */
+.oklch-mix {
+  background-color: color-mix(in oklch, oklch(45% 0.25 250) 50%, oklch(70% 0.25 30));
+}
+```
+
+{/* @playground id="oklch-space" mode="demo" */}
+
+## 实际应用场景
+
+### 1. 主题色生成
+
+```css
+:root {
+  --primary: #007bff;
+  --primary-lighter: color-mix(in srgb, var(--primary) 70%, white);
+  --primary-darker: color-mix(in srgb, var(--primary) 70%, black);
+}
+
+.button:hover {
+  background-color: var(--primary-lighter);
+}
+
+.button:active {
+  background-color: var(--primary-darker);
+}
+```
+
+### 2. 悬停状态颜色变化
+
+```css
+.card {
+  background-color: color-mix(in srgb, var(--theme-color) 90%, white);
+  border: 1px solid color-mix(in srgb, var(--theme-color) 70%, white);
+}
+
+.card:hover {
+  background-color: color-mix(in srgb, var(--theme-color) 85%, white);
+  border-color: color-mix(in srgb, var(--theme-color) 60%, white);
+}
+```
+
+### 3. 语义化颜色系统
+
+```css
+:root {
+  --success-base: #22c55e;
+  --warning-base: #f59e0b;
+  --error-base: #ef4444;
+  
+  /* 生成浅色变体 */
+  --success-light: color-mix(in srgb, var(--success-base) 20%, white);
+  --warning-light: color-mix(in srgb, var(--warning-base) 20%, white);
+  --error-light: color-mix(in srgb, var(--error-base) 20%, white);
+}
+```
+
+## 浏览器兼容性
+
+`color-mix()` 在现代浏览器中获得支持：
+
+- Chrome 111+
+- Firefox 113+
+- Safari 16.2+
+- Edge 111+
+
+对于不支持的浏览器，可以使用回退方案：
+
+```css
+.button {
+  background-color: #007bff; /* 回退 */
+  background-color: color-mix(in srgb, #007bff 50%, white); /* 现代浏览器 */
+}
+```
+
+## 最佳实践
+
+1. **选择合适的颜色空间**：不同颜色空间混合效果不同，OKLCH 和 LAB 通常更符合人眼感知
+2. **设置默认混合比例**：50% 是最常见的设置
+3. **考虑辅助功能**：确保混合后的颜色对比度足够
+4. **使用透明通道**：可以混合带透明度的颜色
+
+## 参考资料
+
+- [CSS Color Level 5 - W3C](https://www.w3.org/TR/css-color-5/)
+- [color-mix() - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color-mix)
