@@ -1,0 +1,185 @@
+---
+title: CSS font-display 字体显示策略
+category: CSS 字体
+tags: [css, font, font-display, web-fonts, foit, fout]
+description: 详细介绍 font-display 属性如何控制 Web 字体加载时的显示策略，包括 swap、optional、block、fallback、auto 等值的行为和适用场景。
+keywords: font-display, web fonts, FOIT, FOUT, @font-face, 字体加载, 字体显示
+---
+
+font-display 属性控制 Web 字体加载过程中的文本显示行为。理解这个属性对于优化用户体验至关重要。
+
+## 基本概念
+
+### FOIT 和 FOUT
+
+- **FOIT (Flash of Invisible Text)**：字体加载期间文本不可见，造成闪烁问题
+- **FOUT (Flash of Unstyled Text)**：先用后备字体显示，加载后切换到自定义字体
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: swap;  /* 控制加载策略 */
+}
+```
+
+## font-display 取值
+
+### auto - 浏览器默认
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: auto;
+}
+```
+
+使用浏览器的默认字体加载策略，通常表现为 FOIT（文本在加载期间不可见）。
+
+### block - 短暂阻塞
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: block;
+}
+```
+
+- 阻塞时间约 **3 秒**
+- 超过则使用后备字体
+- 适合：希望保持视觉一致性，但愿意等待的情况
+
+### swap - 立即显示后备
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: swap;
+}
+```
+
+- **无阻塞**，立即显示后备字体
+- 字体加载完成后立即切换
+- 适合：图标字体、标题文字
+
+### fallback - 快速超时
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: fallback;
+}
+```
+
+- 阻塞时间极短（约 **100ms**）
+- 超时后使用后备字体
+- 如果字体未加载，下次访问时可能使用
+- 适合：正文文本，追求阅读体验
+
+### optional - 优先缓存
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: optional;
+}
+```
+
+- 如果字体已在缓存中使用，否则使用后备字体
+- 永远不会产生 FOUT
+- 适合：追求整体体验，不想文字跳动
+
+## 行为对比
+
+| 值 | 阻塞时间 | FOUT | 适用场景 |
+|---|---|---|---|
+| auto | 浏览器决定 | 可能 | 默认行为 |
+| block | ~3秒 | 是 | 视觉一致性优先 |
+| swap | 无 | 是 | 标题、图标 |
+| fallback | ~100ms | 是 | 正文文本 |
+| optional | 无/极短 | 否 | 最佳用户体验 |
+
+## 实际应用
+
+### 图标字体
+
+```css
+@font-face {
+  font-family: 'IconFont';
+  src: url('icons.woff2') format('woff2');
+  font-display: swap;  /* 图标需要立即显示 */
+}
+```
+
+### 正文文本
+
+```css
+@font-face {
+  font-family: 'BodyFont';
+  src: url('body.woff2') format('woff2');
+  font-display: optional;  /* 不希望文字跳动 */
+}
+```
+
+### 标题文字
+
+```css
+@font-face {
+  font-family: 'HeadingFont';
+  src: url('heading.woff2') format('woff2');
+  font-display: swap;  /* 允许轻微跳动但要显示 */
+}
+```
+
+## 性能优化
+
+### 结合预加载
+
+```html
+<!-- 预加载字体但不阻塞渲染 -->
+<link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin>
+```
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('font.woff2') format('woff2');
+  font-display: swap;
+}
+```
+
+### 最佳实践
+
+1. 使用 **woff2** 格式，兼容性最好且压缩率高
+2. 图标字体使用 `swap`，正文使用 `optional`
+3. 考虑使用 `font-display: optional` 减少网络请求
+4. 为不同字符集定义不同字体以减小文件
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF;
+  font-display: swap;
+}
+```
+
+## 浏览器支持
+
+所有现代浏览器都支持 `font-display` 属性。
+
+## 交互式演示
+
+{/* @playground id="css-font-display" mode="demo" */}
+
+## 总结
+
+- `swap` 适合需要立即显示的内容（标题、图标）
+- `optional` 适合正文，追求无跳动的阅读体验
+- `fallback` 是两者的折中方案
+- 选择合适的策略可以显著提升用户体验
