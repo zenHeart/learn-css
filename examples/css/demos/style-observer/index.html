@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS style observer 样式观察器 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { display: flex; gap: 16px; min-height: 120px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .log-container { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; max-height: 200px; overflow-y: auto; margin-top: 12px; }
+    .log-entry { font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: #7ee787; margin-bottom: 4px; }
+    .log-entry .property { color: #79c0ff; }
+    .log-entry .value { color: #ffa657; }
+    
+    .demo-box { width: 100px; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: all 0.3s; }
+    .progress-bar { width: 100%; height: 30px; background: #21262d; border-radius: 4px; overflow: hidden; position: relative; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #a371f7); transition: width 0.3s ease; }
+    
+    .support-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .support-badge.supported { background: #3fb95033; color: #3fb950; }
+    .support-badge.unsupported { background: #f8514933; color: #f85149; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS style observer 样式观察器</h1>
+    <p class="subtitle">CSS Houdini API | 交互演示</p>
+
+    <!-- Houdini 支持检测 -->
+    <div class="section">
+      <h2>浏览器支持检测</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+        <div>
+          <span class="support-badge" id="css-registerproperty">检测中...</span>
+          <span style="font-size: 12px; color: #8b949e; margin-left: 8px;">CSS.registerProperty</span>
+        </div>
+        <div>
+          <span class="support-badge" id="css-stylemap">检测中...</span>
+          <span style="font-size: 12px; color: #8b949e; margin-left: 8px;">Element.attributeStyleMap</span>
+        </div>
+        <div>
+          <span class="support-badge" id="css-styleeffect">检测中...</span>
+          <span style="font-size: 12px; color: #8b949e; margin-left: 8px;">CSSStyleEffect</span>
+        </div>
+      </div>
+      <p class="desc"><span class="tag">注意</span> Style Observer API 目前仅在 Chromium 内核浏览器中得到部分支持。</p>
+    </div>
+
+    <!-- MutationObserver 替代方案 -->
+    <div class="section">
+      <h2>MutationObserver 替代方案演示</h2>
+      <p class="desc" style="margin-bottom: 16px;">由于 Houdini 支持有限，以下演示使用 MutationObserver 监听 style 属性变化：</p>
+      <div class="demo-area">
+        <div class="demo-box" id="observed-box" style="background: #3b82f6;">可观察的盒子</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="change-color">改变颜色</button>
+        <button class="btn" id="change-size">改变大小</button>
+        <button class="btn" id="change-border">改变边框</button>
+        <button class="btn" id="clear-log">清空日志</button>
+      </div>
+      <div class="log-container" id="log-container">
+        <div style="font-size: 11px; color: #6e7681;">等待样式变化...</div>
+      </div>
+    </div>
+
+    <!-- CSS 变量监听 -->
+    <div class="section">
+      <h2>CSS 变量变化监听</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: stretch; gap: 16px;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <input type="range" id="progress-slider" min="0" max="100" value="0" style="flex: 1;">
+          <span id="progress-value" style="font-size: 12px; color: #79c0ff; min-width: 40px;">0%</span>
+        </div>
+      </div>
+      <div class="code-block">const element = document.querySelector('.progress-bar');
+const styleMap = element.styleMap;
+
+// CSS 变量变化会触发 change 事件
+styleMap.addEventListener('change', (e) => {
+  console.log(`变量 ${e.property} 变为 ${e.value}`);
+});</div>
+      <p class="desc"><span class="tag">提示</span> 拖动滑块改变 CSS 变量 --progress 的值，下方的日志会显示变化。</p>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+      <h2>完整代码示例</h2>
+      <div class="code-block">// 1. 注册 CSS 变量
+CSS.registerProperty({
+  name: '--my-progress',
+  syntax: '<number>',
+  inherits: false,
+  initialValue: '0',
+});
+
+// 2. 获取样式映射
+const element = document.querySelector('.progress');
+const styleMap = element.attributeStyleMap;
+
+// 3. 设置变量
+element.style.setProperty('--my-progress', '50');
+
+// 4. 监听变化 (MutationObserver 替代)
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+      console.log('Style changed via inline style');
+    }
+  });
+});
+
+observer.observe(element, { attributes: true });</div>
+    </div>
+  </div>
+
+  <script>
+    // 检测 Houdini 支持
+    function checkSupport() {
+      // CSS.registerProperty
+      const regBadge = document.getElementById('css-registerproperty');
+      if (typeof CSS !== 'undefined' && 'registerProperty' in CSS) {
+        regBadge.textContent = '支持';
+        regBadge.className = 'support-badge supported';
+      } else {
+        regBadge.textContent = '不支持';
+        regBadge.className = 'support-badge unsupported';
+      }
+      
+      // attributeStyleMap
+      const mapBadge = document.getElementById('css-stylemap');
+      const testEl = document.createElement('div');
+      if (testEl.attributeStyleMap) {
+        mapBadge.textContent = '支持';
+        mapBadge.className = 'support-badge supported';
+      } else {
+        mapBadge.textContent = '不支持';
+        mapBadge.className = 'support-badge unsupported';
+      }
+      
+      // CSSStyleEffect
+      const effectBadge = document.getElementById('css-styleeffect');
+      if (typeof CSSStyleEffect !== 'undefined') {
+        effectBadge.textContent = '支持';
+        effectBadge.className = 'support-badge supported';
+      } else {
+        effectBadge.textContent = '不支持';
+        effectBadge.className = 'support-badge unsupported';
+      }
+    }
+    
+    checkSupport();
+    
+    // MutationObserver 替代方案
+    const observedBox = document.getElementById('observed-box');
+    const logContainer = document.getElementById('log-container');
+    let logCount = 0;
+    
+    function addLog(property, value) {
+      logCount++;
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `[${logCount}] <span class="property">${property}</span>: <span class="value">${value}</span>`;
+      
+      if (logCount === 1) {
+        logContainer.innerHTML = '';
+      }
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    // 使用 MutationObserver 监听 style 属性变化
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const style = mutation.target.style;
+          // 简化显示
+          addLog('inline-style', 'changed');
+        }
+      });
+    });
+    
+    observer.observe(observedBox, { attributes: true, attributeFilter: ['style'] });
+    
+    // 按钮事件
+    const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#a855f7'];
+    const sizes = ['100px', '120px', '80px', '150px', '60px'];
+    const borders = ['3px solid #fff', '5px dashed #3b82f6', '2px dotted #ef4444'];
+    let colorIndex = 0;
+    let sizeIndex = 0;
+    let borderIndex = 0;
+    
+    document.getElementById('change-color').addEventListener('click', () => {
+      colorIndex = (colorIndex + 1) % colors.length;
+      observedBox.style.background = colors[colorIndex];
+      addLog('background-color', colors[colorIndex]);
+    });
+    
+    document.getElementById('change-size').addEventListener('click', () => {
+      sizeIndex = (sizeIndex + 1) % sizes.length;
+      observedBox.style.width = sizes[sizeIndex];
+      observedBox.style.height = sizes[sizeIndex];
+      addLog('width/height', sizes[sizeIndex]);
+    });
+    
+    document.getElementById('change-border').addEventListener('click', () => {
+      borderIndex = (borderIndex + 1) % borders.length;
+      observedBox.style.border = borders[borderIndex];
+      addLog('border', borders[borderIndex]);
+    });
+    
+    document.getElementById('clear-log').addEventListener('click', () => {
+      logContainer.innerHTML = '<div style="font-size: 11px; color: #6e7681;">等待样式变化...</div>';
+      logCount = 0;
+    });
+    
+    // CSS 变量进度条演示
+    const progressSlider = document.getElementById('progress-slider');
+    const progressFill = document.getElementById('progress-fill');
+    const progressValue = document.getElementById('progress-value');
+    
+    progressSlider.addEventListener('input', (e) => {
+      const value = e.target.value;
+      progressFill.style.width = value + '%';
+      progressValue.textContent = value + '%';
+    });
+    
+    // 实际应用中，可以监听 CSS 变量的变化
+    // 这需要 MutationObserver 监听 style 属性或使用 requestAnimationFrame 轮询
+  </script>
+</body>
+</html>

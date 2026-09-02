@@ -1,0 +1,171 @@
+---
+title: "CSS transform 3D 变换详解"
+category: "动画"
+tags:
+  - CSS
+  - transform
+  - 3D变换
+  - perspective
+  - 3D效果
+description: "详解CSS transform属性实现3D变换的方法"
+keywords: "transform, 3D变换, perspective, rotate3d, translate3d"
+---
+
+# CSS transform 3D 变换详解
+
+## 概述
+
+CSS `transform` 属性支持 3D 变换，可以对元素进行旋转、缩放、倾斜和平移等操作，创造出丰富的 3D 视觉效果。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 3D 变换函数
+
+### 1. rotateX(), rotateY(), rotateZ()
+
+沿 X、Y、Z 轴旋转：
+
+```css
+.rotate-x { transform: rotateX(45deg); }
+.rotate-y { transform: rotateY(45deg); }
+.rotate-z { transform: rotateZ(45deg); }
+```
+
+### 2. rotate3d()
+
+沿任意轴旋转：
+
+```css
+.rotate-3d {
+  transform: rotate3d(1, 1, 0, 45deg);
+  /* rotate3d(x, y, z, angle) */
+}
+```
+
+### 3. translateZ(), translate3d()
+
+沿 Z 轴或 3D 空间平移：
+
+```css
+.translate-z { transform: translateZ(100px); }
+.translate-3d { transform: translate3d(50px, 50px, 100px); }
+```
+
+### 4. scaleZ(), scale3d()
+
+沿 Z 轴或 3D 空间缩放：
+
+```css
+.scale-z { transform: scaleZ(2); }
+.scale-3d { transform: scale3d(1, 1, 2); }
+```
+
+## perspective 属性
+
+定义透视距离，创造 3D 效果：
+
+```css
+.scene {
+  perspective: 500px;
+  /* 值越小，透视效果越强 */
+}
+```
+
+## preserve-3d
+
+保留 3D 变换空间：
+
+```css
+.parent {
+  transform-style: preserve-3d;
+}
+```
+
+## 实际应用
+
+### 1. 3D 卡片翻转
+
+```css
+.card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+```
+
+### 2. 3D 立方体
+
+```css
+.cube {
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg) rotateY(30deg);
+}
+
+.face {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+}
+
+.front { transform: translateZ(50px); }
+.back { transform: rotateY(180deg) translateZ(50px); }
+.left { transform: rotateY(-90deg) translateZ(50px); }
+.right { transform: rotateY(90deg) translateZ(50px); }
+.top { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+```
+
+### 3. 3D 菜单
+
+```css
+.menu-item {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.menu-item:hover {
+  transform: translateZ(20px) rotateX(-10deg);
+}
+```
+
+## 性能优化
+
+1. **使用 transform 和 opacity**：避免触发重排
+2. **使用 will-change**：
+
+```css
+.animated {
+  will-change: transform;
+}
+```
+
+3. **减少 3D 嵌套**：过深的嵌套会影响性能
+
+## 浏览器兼容性
+
+`transform` 3D 功能兼容性良好：
+
+- Chrome 36+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 参考资料
+
+- [transform - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
+- [transform-function - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function)
+- [CSS Transforms - CSS-Tricks](https://css-tricks.com/almanac/properties/t/transform/)

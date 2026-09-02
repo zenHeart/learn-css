@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS backface-visibility - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 24px; min-height: 200px; padding: 40px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; perspective: 600px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    
+    /* 卡片翻转 */
+    .card-container { width: 200px; height: 130px; perspective: 1000px; }
+    .card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+    .card.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .card-front { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .card-back { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; transform: rotateY(180deg); }
+    
+    /* 背面可见对比 */
+    .flip-box { width: 120px; height: 120px; perspective: 500px; }
+    .flip-box-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; }
+    .flip-box.flipped .flip-box-inner { transform: rotateY(180deg); }
+    .flip-box-front, .flip-box-back { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 8px; }
+    .flip-box-front { background: #388bfd; color: white; }
+    .flip-box-back { background: #f85149; color: white; transform: rotateY(180deg); }
+    
+    /* hidden vs visible */
+    .flip-box.hidden .flip-box-back { backface-visibility: hidden; }
+    .flip-box.visible .flip-box-back { backface-visibility: visible; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS backface-visibility</h1>
+    <p class="subtitle">背面可见性控制 | 3D翻转 | 交互演示</p>
+
+    <div class="section">
+      <h2>backface-visibility: hidden vs visible</h2>
+      <div class="controls">
+        <button class="btn active" id="hidden-btn">hidden（背面不可见）</button>
+        <button class="btn" id="visible-btn">visible（背面可见）</button>
+      </div>
+      <div class="demo-area">
+        <div class="flip-box hidden" id="flip-box">
+          <div class="flip-box-inner">
+            <div class="flip-box-front">正面</div>
+            <div class="flip-box-back">背面</div>
+          </div>
+        </div>
+      </div>
+      <div class="code-block" id="backface-code">backface-visibility: hidden; /* 背面不可见 */</div>
+      <p class="desc"><span class="tag">提示</span> 点击方块查看翻转效果，对比两种模式的区别。</p>
+    </div>
+
+    <div class="section">
+      <h2>3D 卡片翻转</h2>
+      <div class="demo-area">
+        <div class="card-container">
+          <div class="card" id="flip-card">
+            <div class="card-face card-front">正面<br><span style="font-size: 11px; font-weight: normal;">点击翻转</span></div>
+            <div class="card-face card-back">背面<br><span style="font-size: 11px; font-weight: normal;">backface-visibility: hidden</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">.card { transform-style: preserve-3d; transition: transform 0.6s; }
+.card.flipped { transform: rotateY(180deg); }
+.card-front, .card-back { backface-visibility: hidden; }
+.card-back { transform: rotateY(180deg); }</div>
+    </div>
+
+    <div class="section">
+      <h2>对比说明</h2>
+      <div class="code-block">/* 背面不可见 - 常用 */
+.flip { backface-visibility: hidden; }
+/* 当元素翻转 90 度时，完全看不到背面 */
+
+/* 背面可见 - 特殊效果 */
+.flip { backface-visibility: visible; }
+/* 当元素翻转 90 度时，可以看到背面的镜像 */</div>
+      <p class="desc"><span class="tag">建议</span> 大多数 3D 翻转效果使用 <code>hidden</code>。</p>
+    </div>
+
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 36+ ✓</li>
+          <li>Firefox 16+ ✓</li>
+          <li>Safari 9+ ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 翻转盒对比
+    const flipBox = document.getElementById('flip-box');
+    const hiddenBtn = document.getElementById('hidden-btn');
+    const visibleBtn = document.getElementById('visible-btn');
+    const backfaceCode = document.getElementById('backface-code');
+    
+    flipBox.addEventListener('click', () => {
+      flipBox.classList.toggle('flipped');
+    });
+    
+    hiddenBtn.addEventListener('click', () => {
+      flipBox.classList.remove('visible');
+      flipBox.classList.add('hidden');
+      hiddenBtn.classList.add('active');
+      visibleBtn.classList.remove('active');
+      backfaceCode.textContent = 'backface-visibility: hidden; /* 背面不可见 */';
+    });
+    
+    visibleBtn.addEventListener('click', () => {
+      flipBox.classList.remove('hidden');
+      flipBox.classList.add('visible');
+      visibleBtn.classList.add('active');
+      hiddenBtn.classList.remove('active');
+      backfaceCode.textContent = 'backface-visibility: visible; /* 背面可见 */';
+    });
+    
+    // 卡片翻转
+    const flipCard = document.getElementById('flip-card');
+    flipCard.addEventListener('click', () => {
+      flipCard.classList.toggle('flipped');
+    });
+  </script>
+</body>
+</html>

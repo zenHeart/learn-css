@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS scroll-timeline 滚动驱动动画 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    .tag.red { background: #f8514933; color: #f85149; }
+    
+    /* 滚动演示容器 */
+    .scroll-demo {
+      height: 300px;
+      overflow-y: auto;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 20px;
+      position: relative;
+    }
+    
+    /* 进度条动画 */
+    @keyframes progress-bar {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    
+    .progress-demo {
+      position: sticky;
+      top: 0;
+      height: 8px;
+      background: #21262d;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #007bff, #00d4ff);
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+    
+    /* 滚动指示器 */
+    @keyframes slide-in {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .scroll-indicator {
+      position: sticky;
+      top: 0;
+      padding: 12px;
+      background: #388bfd;
+      color: white;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    
+    /* 旋转元素 */
+    @keyframes rotate-element {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .rotate-demo {
+      width: 60px;
+      height: 60px;
+      background: #a371f7;
+      border-radius: 8px;
+      margin: 20px auto;
+      transform: rotate(0deg);
+    }
+    
+    /* 内容区域 */
+    .demo-content {
+      padding: 20px;
+      background: #21262d;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .demo-content h3 {
+      color: #f0f6fc;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .demo-content p {
+      color: #8b949e;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    /* 支持状态 */
+    .support-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .support-badge.supported { background: #3fb95033; color: #3fb950; }
+    .support-badge.unsupported { background: #f8514933; color: #f85149; }
+    .support-badge.partial { background: #f0883e33; color: #f0883e; }
+    
+    .warning-box {
+      background: #f0883e33;
+      border: 1px solid #f0883e;
+      border-radius: 4px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    
+    .warning-box p {
+      font-size: 12px;
+      color: #ffa657;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS scroll-timeline 滚动驱动动画</h1>
+    <p class="subtitle">滚动驱动动画时间线 | 交互演示</p>
+
+    <!-- 浏览器支持 -->
+    <div class="section">
+      <h2>浏览器支持状态</h2>
+      <div class="desc">
+        <p><span class="support-badge partial">实验性</span> <strong>Chrome 115+</strong>（需要启用实验性功能）</p>
+        <p><span class="support-badge unsupported">不支持</span> <strong>Firefox / Safari / Edge</strong></p>
+      </div>
+      <div class="warning-box">
+        <p><strong>注意：</strong>scroll-timeline 是实验性功能，需要在 Chrome 中启用 "Experimental Web Platform Features" 标志才能使用。</p>
+        <p>地址栏输入: chrome://flags → 搜索 "Experimental Web Platform Features" → 启用</p>
+      </div>
+    </div>
+
+    <!-- 进度条演示 -->
+    <div class="section">
+      <h2>滚动进度条</h2>
+      <div class="scroll-demo" id="scroll-demo-1">
+        <div class="progress-demo">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="scroll-indicator" id="scroll-indicator">滚动阅读</div>
+        <div class="demo-content">
+          <h3>滚动查看效果</h3>
+          <p>向下滚动查看进度条动画效果。进度条会随着滚动位置变化而变化。</p>
+        </div>
+        <div class="demo-content">
+          <h3>CSS scroll-timeline</h3>
+          <p>scroll-timeline 允许动画与滚动位置关联，实现滚动触发的动画效果。</p>
+        </div>
+        <div class="demo-content">
+          <h3>动画时间线</h3>
+          <p>animation-timeline 属性指定动画的时间线来源，可以是滚动容器或根元素。</p>
+        </div>
+        <div class="demo-content">
+          <h3>实际应用</h3>
+          <p>滚动驱动动画常用于阅读进度指示器、视差效果、滚动淡入等场景。</p>
+        </div>
+        <div class="demo-content">
+          <h3>浏览器兼容</h3>
+          <p>目前只有 Chrome 115+ 支持此功能，其他浏览器尚未实现。</p>
+        </div>
+      </div>
+      <div class="code-block">/* CSS scroll-timeline 示例 */
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.progress-fill {
+  animation: progress linear;
+  animation-timeline: scroll(root block);
+  transform-origin: left;
+}</div>
+    </div>
+
+    <!-- 旋转演示 -->
+    <div class="section">
+      <h2>滚动旋转动画</h2>
+      <div class="scroll-demo" id="scroll-demo-2">
+        <div class="rotate-demo" id="rotate-demo"></div>
+        <div class="demo-content">
+          <h3>滚动触发旋转</h3>
+          <p>向下滚动，紫色方块会随着滚动而旋转。</p>
+        </div>
+        <div class="demo-content">
+          <h3>animation-timeline</h3>
+          <p>通过 animation-timeline: scroll() 将动画与滚动关联。</p>
+        </div>
+        <div class="demo-content">
+          <h3>线性动画</h3>
+          <p>使用 linear 时间函数让旋转与滚动同步。</p>
+        </div>
+        <div class="demo-content">
+          <h3>完整示例</h3>
+          <p>这个演示展示了滚动驱动动画的基本概念。</p>
+        </div>
+      </div>
+      <div class="code-block">@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.element {
+  animation: rotate linear;
+  animation-timeline: scroll();
+}</div>
+    </div>
+
+    <!-- JavaScript 回退方案 -->
+    <div class="section">
+      <h2>JavaScript 回退方案</h2>
+      <div class="code-block">// 使用 Intersection Observer 检测滚动位置
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+// 或者使用 scroll 事件
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrolled / maxScroll;
+  
+  // 更新进度
+  document.querySelector('.progress-fill').style.transform = `scaleX(${progress})`;
+});</div>
+      <p class="desc"><span class="tag">提示</span> 在不支持 scroll-timeline 的浏览器中，可以使用 JavaScript 实现类似效果。</p>
+    </div>
+
+    <!-- 完整代码示例 -->
+    <div class="section">
+      <h2>完整代码示例</h2>
+      <div class="code-block">/* 1. 定义关键帧动画 */
+@keyframes reading-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* 2. 应用滚动时间线 */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #007bff, #00d4ff);
+  transform-origin: left;
+  
+  /* 3. 关联动画和时间线 */
+  animation: reading-progress linear;
+  animation-timeline: scroll(root block);
+}
+
+/* 4. 指定滚动轴（可选） */
+/* block: 垂直滚动（默认） */
+/* inline: 水平滚动 */</div>
+    </div>
+  </div>
+
+  <script>
+    // 检测浏览器支持
+    const supportsScrollTimeline = CSS.supports('animation-timeline', 'scroll()');
+    
+    // 如果支持，使用 CSS scroll-timeline
+    if (supportsScrollTimeline) {
+      document.querySelector('.progress-fill').style.animation = 'progress-bar linear';
+      document.querySelector('.progress-fill').style.animationTimeline = 'scroll(root block)';
+      
+      document.querySelector('.scroll-indicator').style.animation = 'slide-in ease-out';
+      document.querySelector('.scroll-indicator').style.animationTimeline = 'scroll(root block)';
+      
+      document.querySelector('.rotate-demo').style.animation = 'rotate-element linear';
+      document.querySelector('.rotate-demo').style.animationTimeline = 'scroll()';
+    } else {
+      // 回退方案：使用 JavaScript 模拟
+      const scrollDemo1 = document.getElementById('scroll-demo-1');
+      const progressFill = document.getElementById('progress-fill');
+      const scrollIndicator = document.getElementById('scroll-indicator');
+      
+      const scrollDemo2 = document.getElementById('scroll-demo-2');
+      const rotateDemo = document.getElementById('rotate-demo');
+      
+      // 为演示容器添加滚动事件监听
+      scrollDemo1.addEventListener('scroll', () => {
+        const scrollHeight = scrollDemo1.scrollHeight - scrollDemo1.clientHeight;
+        const progress = scrollDemo1.scrollTop / scrollHeight;
+        
+        // 更新进度条
+        progressFill.style.transform = `scaleX(${progress})`;
+        
+        // 更新指示器
+        if (progress > 0.05) {
+          scrollIndicator.style.opacity = '1';
+          scrollIndicator.style.transform = 'translateY(0)';
+        } else {
+          scrollIndicator.style.opacity = '0';
+          scrollIndicator.style.transform = 'translateY(-100%)';
+        }
+      });
+      
+      scrollDemo2.addEventListener('scroll', () => {
+        const scrollHeight = scrollDemo2.scrollHeight - scrollDemo2.clientHeight;
+        const progress = scrollDemo2.scrollTop / scrollHeight;
+        
+        // 更新旋转
+        rotateDemo.style.transform = `rotate(${progress * 360}deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
