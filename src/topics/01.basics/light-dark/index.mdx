@@ -1,0 +1,226 @@
+---
+title: "CSS light-dark() 暗色模式切换"
+category: "基础知识"
+tags:
+  - CSS颜色
+  - light-dark
+  - 暗色模式
+  - CSS3
+description: "详解CSS light-dark()函数实现暗色模式切换的方法"
+keywords: "light-dark, CSS颜色, 暗色模式, CSS颜色函数"
+---
+
+# CSS light-dark() 暗色模式切换
+
+## 什么是 light-dark()
+
+`light-dark()` 是 CSS 颜色函数，用于根据当前的色彩方案（color scheme）自动选择浅色或深色值。这是 CSS Color Level 5 规范中引入的功能，专门用于简化暗色模式（Dark Mode）的实现。
+
+## 基本语法
+
+```css
+light-dark(<light-color>, <dark-color>)
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `<light-color>` | 亮色模式下的颜色值 |
+| `<dark-color>` | 暗色模式下的颜色值 |
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 使用示例
+
+### 1. 基础用法
+
+```css
+/* 根据系统配色方案自动选择颜色 */
+.element {
+  color: light-dark(#333, #f5f5f5);
+  background-color: light-dark(#fff, #1a1a1a);
+}
+```
+
+{/* @playground id="basic-demo" mode="demo" */}
+
+### 2. 与自定义属性结合
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+:root {
+  --text-primary: light-dark(#1a1a1a, #f5f5f5);
+  --bg-primary: light-dark(#ffffff, #121212);
+  --border-color: light-dark(#e0e0e0, #333333);
+}
+
+body {
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+.card {
+  border-color: var(--border-color);
+}
+```
+
+{/* @playground id="with-css-variables" mode="demo" */}
+
+### 3. 与 color-mix() 结合
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+.button {
+  --button-bg: light-dark(#007bff, #0056b3);
+  --button-hover: light-dark(
+    color-mix(in srgb, #007bff 80%, white),
+    color-mix(in srgb, #007bff 80%, black)
+  );
+  
+  background-color: var(--button-bg);
+}
+
+.button:hover {
+  background-color: var(--button-hover);
+}
+```
+
+### 4. 完整的暗色模式主题
+
+```css
+:root {
+  color-scheme: light dark;
+}
+
+:root {
+  /* 文字颜色 */
+  --text-primary: light-dark(#1a1a1a, #e5e5e5);
+  --text-secondary: light-dark(#666666, #a0a0a0);
+  
+  /* 背景颜色 */
+  --bg-primary: light-dark(#ffffff, #121212);
+  --bg-secondary: light-dark(#f5f5f5, #1e1e1e);
+  --bg-elevated: light-dark(#ffffff, #252525);
+  
+  /* 边框颜色 */
+  --border-default: light-dark(#e0e0e0, #333333);
+  --border-strong: light-dark(#c0c0c0, #555555);
+  
+  /* 交互颜色 */
+  --link-color: light-dark(#0066cc, #66b3ff);
+  --focus-ring: light-dark(rgba(0, 102, 204, 0.5), rgba(102, 179, 255, 0.5));
+}
+
+body {
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+```
+
+## color-scheme 属性
+
+要让 `light-dark()` 正常工作，需要在 `:root` 或 `html` 上设置 `color-scheme` 属性：
+
+```css
+:root {
+  /* 声明支持的配色方案 */
+  color-scheme: light dark;
+}
+```
+
+`color-scheme` 属性的作用：
+- 告诉浏览器页面支持 light 和 dark 两种模式
+- 浏览器会根据用户系统设置自动应用对应的配色方案
+- 影响浏览器默认的表单控件、滚动条等样式
+
+## 实际应用场景
+
+### 1. 组件库主题适配
+
+```css
+/* 定义组件变量 */
+.component {
+  --bg: light-dark(white, black);
+  --text: light-dark(black, white);
+  --border: light-dark(#ddd, #444);
+  
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+```
+
+### 2. 图片和阴影适配
+
+```css
+.card {
+  background: light-dark(white, #1a1a1a);
+  box-shadow: light-dark(
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5)
+  );
+}
+
+.logo {
+  filter: light-dark(
+    none,
+    brightness(0) invert(1)
+  );
+}
+```
+
+### 3. 代码高亮适配
+
+```css
+pre, code {
+  background: light-dark(#f5f5f5, #1e1e1e);
+  color: light-dark(#333333, #d4d4d4);
+}
+```
+
+## 浏览器兼容性
+
+`light-dark()` 在现代浏览器中获得支持：
+
+- Chrome 123+
+- Firefox 120+
+- Safari 17.5+
+- Edge 123+
+
+对于不支持的浏览器，可以使用回退方案：
+
+```css
+.element {
+  color: #333; /* 回退 */
+  color: light-dark(#333, #f5f5f5); /* 现代浏览器 */
+}
+```
+
+## 与 prefers-color-scheme 的对比
+
+| 特性 | `light-dark()` | `prefers-color-scheme` |
+|------|---------------|----------------------|
+| 语法 | 内联颜色函数 | 媒体查询 |
+| 灵活性 | 可以在任何颜色属性中使用 | 只能用于整个块 |
+| 可组合性 | 可与其他颜色函数组合 | 独立使用 |
+| 浏览器支持 | 较新 | 广泛支持 |
+
+## 最佳实践
+
+1. **声明 color-scheme**：在使用 `light-dark()` 前，先声明 `color-scheme: light dark;`
+2. **结合 CSS 自定义属性**：使用变量管理颜色，便于维护
+3. **提供降级方案**：为不支持的浏览器提供备选颜色
+4. **测试两种模式**：确保浅色和深色模式下的可读性和对比度都符合要求
+
+## 参考资料
+
+- [CSS Color Level 5 - W3C](https://www.w3.org/TR/css-color-5/)
+- [light-dark() - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark)
+- [color-scheme - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme)
