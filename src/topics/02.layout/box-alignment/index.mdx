@@ -1,0 +1,338 @@
+---
+title: "CSS Box Alignment 盒模型对齐详解"
+category: "布局基础"
+tags:
+  - CSS
+  - Box Alignment
+  - Flexbox
+  - Grid
+  - 对齐
+description: "详解CSS Box Alignment模块，涵盖justify-content、align-items、align-content等属性在Block、Flexbox、Grid中的应用"
+keywords: "CSS Box Alignment, justify-content, align-items, align-content, CSS布局"
+---
+
+# CSS Box Alignment 盒模型对齐
+
+## 概述
+
+CSS Box Alignment 模块统一了 CSS 中各种布局模型的对齐方式，包括 Block 布局、Flexbox、Grid 和 Table 布局。该模块定义了一套一致的对齐属性，使得开发者可以用相同的方式在不同的布局系统中实现对齐。
+
+## 核心概念
+
+### 两轴系统
+
+Box Alignment 使用两个轴进行对齐：
+
+- **主轴（Main Axis）**：沿着你设置 `flex-direction` 或布局的主要方向延伸的轴
+- **交叉轴（Cross Axis）**：垂直于主轴的轴
+
+### 对齐容器与对齐主体
+
+- **对齐容器（Alignment Container）**：包含需要对齐的内容的父元素
+- **对齐主体（Alignment Subject）**：需要被对齐的实际元素
+
+### 逻辑方向
+
+Box Alignment 基于**逻辑方向**而非物理方向工作。这意味着对齐会考虑文档的书写模式（writing mode），如从左到右（LTR）或从右到左（RTL）。
+
+## 主要属性
+
+### align-content
+
+控制 **flex/grid** 容器中多行或多列在交叉轴上的对齐方式。
+
+| 值 | 说明 |
+|----|------|
+| `normal` | 默认值，效果等同于 `stretch` |
+| `start` | 堆叠到交叉轴起点 |
+| `end` | 堆叠到交叉轴终点 |
+| `center` | 居中对齐 |
+| `space-between` | 均匀分布，首尾贴边 |
+| `space-around` | 均匀分布，间距相等（含边距） |
+| `space-evenly` | 完全均匀分布 |
+| `stretch` | 拉伸填满容器 |
+| `baseline` | 基线对齐 |
+
+```css
+.container {
+  align-content: center;    /* 多行内容居中 */
+  align-content: space-between;  /* 首行贴顶，末行贴底 */
+}
+```
+
+### justify-content
+
+控制内容在 **主轴** 上的对齐方式。
+
+| 值 | 说明 |
+|----|------|
+| `normal` | 默认值，效果因布局类型而异 |
+| `start` | 贴向主轴起点 |
+| `end` | 贴向主轴终点 |
+| `center` | 居中对齐 |
+| `space-between` | 均匀分布 |
+| `space-around` | 均匀分布（含边距） |
+| `space-evenly` | 完全均匀分布 |
+| `stretch` | 拉伸填满 |
+
+```css
+.container {
+  justify-content: center;     /* 主轴居中 */
+  justify-content: space-between; /* 两端对齐 */
+}
+```
+
+### align-items
+
+控制 **单行** 内容在交叉轴上的对齐方式（适用于 flex/grid）。
+
+| 值 | 说明 |
+|----|------|
+| `normal` | 默认值，效果因布局类型而异 |
+| `stretch` | 拉伸填满交叉轴 |
+| `start` | 交叉轴起点对齐 |
+| `end` | 交叉轴终点对齐 |
+| `center` | 交叉轴居中 |
+| `baseline` | 基线对齐 |
+
+```css
+.container {
+  align-items: center;  /* 所有项目交叉轴居中 */
+}
+```
+
+### justify-items
+
+控制 **grid** 容器中所有项目在主轴上的默认对齐方式。
+
+```css
+.container {
+  justify-items: center;  /* 所有单元格内容居中 */
+}
+```
+
+### align-self
+
+控制单个项目在交叉轴上的对齐（覆盖容器的 align-items）。
+
+```css
+.item-special {
+  align-self: end;  /* 这个项目在交叉轴末端对齐 */
+}
+```
+
+### justify-self
+
+控制单个 grid 项目在主轴上的对齐。
+
+```css
+.item-special {
+  justify-self: center;  /* 这个项目在主轴居中 */
+}
+```
+
+### place-items
+
+`align-items` 和 `justify-items` 的简写。
+
+```css
+.container {
+  place-items: center;      /* 两个方向都居中 */
+  place-items: start end;   /* align-items: start; justify-items: end */
+}
+```
+
+### place-content
+
+`align-content` 和 `justify-content` 的简写。
+
+```css
+.container {
+  place-content: center;      /* 两个方向都居中 */
+  place-content: space-between center;  /* 主轴space-between，交叉轴center */
+}
+```
+
+### place-self
+
+`align-self` 和 `justify-self` 的简写。
+
+```css
+.item {
+  place-self: center;  /* 两个方向都居中 */
+}
+```
+
+## 不同布局系统中的对齐
+
+### Block 布局
+
+Block 布局主要使用 `justify-self` 和 `align-self` 来对齐单个块级元素：
+
+```css
+.block-item {
+  justify-self: center;  /* 水平居中（如果宽度有限制） */
+  align-self: center;     /* 垂直居中 */
+}
+```
+
+### Flexbox 对齐
+
+Flexbox 是 Box Alignment 最常见的应用场景：
+
+```css
+.flex-container {
+  display: flex;
+  flex-direction: row;  /* 主轴水平 */
+  justify-content: space-between;  /* 主轴两端对齐 */
+  align-items: center;   /* 交叉轴垂直居中 */
+}
+```
+
+#### Flexbox 特殊行为
+
+- `justify-content` 在主轴上对齐
+- `align-items` 在交叉轴上对齐
+- `align-content` 在交叉轴上对齐**多行**内容（需要 `flex-wrap: wrap`）
+- `align-self` 覆盖单个项目的 `align-items`
+
+### Grid 布局
+
+Grid 布局提供更丰富的对齐选项：
+
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;   /* 单元格内容水平居中 */
+  align-items: center;      /* 单元格内容垂直居中 */
+  justify-content: center;  /* 整个网格水平居中 */
+  align-content: center;    /* 整个网格垂直居中 */
+}
+```
+
+### Table 布局
+
+Table 布局的对齐支持有限，主要依赖单元格内容本身的对齐。
+
+## 基线对齐 (Baseline Alignment)
+
+基线对齐确保文本内容的基线对齐，是排版中非常重要的特性：
+
+```css
+.flex-container {
+  align-items: baseline;  /* 所有项目按文字基线对齐 */
+}
+```
+
+适用于：
+- 混合使用不同字体大小的标签
+- 让图标与文字基线对齐
+- 表单的 label 和 input 对齐
+
+## 分布对齐 (Distributed Alignment)
+
+`space-between`、`space-around`、`space-evenly` 用于均匀分布元素：
+
+| 值 | 元素间距 | 边距 |
+|----|---------|------|
+| `space-between` | 相等 | 0 |
+| `space-around` | 相等 | 间距的一半 |
+| `space-evenly` | 相等 | 相等 |
+
+```css
+.flex-container {
+  display: flex;
+  justify-content: space-evenly;  /* 完全均匀分布 */
+}
+```
+
+## 实际应用示例
+
+### 1. 水平垂直居中
+
+```css
+/* Flexbox 方案 */
+.center-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Grid 方案 */
+.center-box {
+  display: grid;
+  place-items: center;
+}
+```
+
+### 2. 圣杯布局
+
+```css
+.holy-grail {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.holy-grail > header,
+.holy-grail > footer {
+  flex: 0 0 auto;
+}
+
+.holy-grail > nav,
+.holy-grail > aside {
+  flex: 0 0 200px;
+}
+
+.holy-grail > main {
+  flex: 1;
+}
+```
+
+### 3. 网格系统
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  align-content: space-between;
+}
+```
+
+### 4. 表单对齐
+
+```css
+.form-row {
+  display: flex;
+  align-items: baseline;  /* label 和 input 基线对齐 */
+  gap: 16px;
+}
+
+.form-row label {
+  flex: 0 0 120px;
+}
+
+.form-row input {
+  flex: 1;
+}
+```
+
+## 浏览器兼容性
+
+Box Alignment 模块已获得所有主流浏览器的良好支持：
+
+| 属性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| justify-content | 52+ | 20+ | 9+ | 12+ |
+| align-items | 52+ | 20+ | 9+ | 12+ |
+| align-content | 52+ | 20+ | 9+ | 12+ |
+| justify-items | 52+ | 20+ | 16+ | 12+ |
+| place-items | 59+ | 45+ | 16+ | 79+ |
+
+## 参考资料
+
+- [CSS Box Alignment Module Level 3 - W3C](https://www.w3.org/TR/css-align-3/)
+- [MDN - CSS Box Alignment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Alignment)
+- [Box Alignment Cheatsheet - Rachel Andrew](https://www.smashingmagazine.com/2018/08/flexbox-alignment-center/)
