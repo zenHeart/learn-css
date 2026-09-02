@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Mask 遮罩技术演示 - 多遮罩叠加</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 24px; color: #f0f6fc; }
+    h2 { font-size: 16px; margin-bottom: 12px; color: #f0f6fc; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
+    .demo-item { text-align: center; }
+    .demo-box { 
+      width: 200px; 
+      height: 200px; 
+      margin: 0 auto 12px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 14px; 
+      color: #fff;
+    }
+    .demo-label { font-size: 13px; color: #8b949e; margin-top: 8px; }
+    .code-snippet { 
+      font-size: 11px; 
+      color: #8b949e; 
+      margin-top: 8px; 
+      padding: 8px; 
+      background: #0d1117; 
+      border-radius: 4px;
+      text-align: left;
+      font-family: 'SF Mono', Monaco, monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #161b22; padding: 2px 6px; border-radius: 3px; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 8px; padding: 12px; background: #0d1117; border-radius: 4px; }
+
+    /* 单层遮罩 - 参考 */
+    .single-mask {
+      -webkit-mask-image: radial-gradient(circle 80px at center, black 0%, transparent 100%);
+      mask-image: radial-gradient(circle 80px at center, black 0%, transparent 100%);
+    }
+
+    /* 两层遮罩 - add (默认) */
+    .two-mask-add {
+      -webkit-mask-image: 
+        radial-gradient(circle 60px at 35% 40%, black 0%, transparent 100%),
+        radial-gradient(circle 60px at 65% 60%, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 60px at 35% 40%, black 0%, transparent 100%),
+        radial-gradient(circle 60px at 65% 60%, black 0%, transparent 100%);
+      -webkit-mask-composite: source-over;
+      mask-composite: add;
+    }
+
+    /* 两层遮罩 - subtract */
+    .two-mask-subtract {
+      -webkit-mask-image: 
+        radial-gradient(circle 80px at center, black 0%, transparent 100%),
+        radial-gradient(circle 50px at center, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 80px at center, black 0%, transparent 100%),
+        radial-gradient(circle 50px at center, black 0%, transparent 100%);
+      -webkit-mask-composite: source-out;
+      mask-composite: subtract;
+    }
+
+    /* 两层遮罩 - intersect */
+    .two-mask-intersect {
+      -webkit-mask-image: 
+        radial-gradient(circle 60px at 40% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 80px at 60% 50%, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 60px at 40% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 80px at 60% 50%, black 0%, transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+    }
+
+    /* 两层遮罩 - exclude */
+    .two-mask-exclude {
+      -webkit-mask-image: 
+        radial-gradient(circle 60px at 40% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 80px at 60% 50%, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 60px at 40% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 80px at 60% 50%, black 0%, transparent 100%);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    /* 复杂图形 - 圆角矩形 */
+    .complex-rounded {
+      -webkit-mask-image: 
+        radial-gradient(circle 30px at 30px 30px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 170px 30px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 170px 170px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 30px 170px, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 30px at 30px 30px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 170px 30px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 170px 170px, black 0%, transparent 100%),
+        radial-gradient(circle 30px at 30px 170px, black 0%, transparent 100%);
+      mask-composite: add;
+    }
+
+    /* 月牙效果 */
+    .crescent {
+      -webkit-mask-image: 
+        radial-gradient(circle 70px at 50% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 55px at 60% 50%, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 70px at 50% 50%, black 0%, transparent 100%),
+        radial-gradient(circle 55px at 60% 50%, black 0%, transparent 100%);
+      -webkit-mask-composite: source-out;
+      mask-composite: subtract;
+    }
+
+    /* 蜂窝效果 */
+    .honeycomb {
+      -webkit-mask-image: 
+        radial-gradient(circle 50px at 50px 28px, black 0%, transparent 100%),
+        radial-gradient(circle 50px at 150px 28px, black 0%, transparent 100%),
+        radial-gradient(circle 50px at 100px 86px, black 0%, transparent 100%);
+      mask-image: 
+        radial-gradient(circle 50px at 50px 28px, black 0%, transparent 100%),
+        radial-gradient(circle 50px at 150px 28px, black 0%, transparent 100%),
+        radial-gradient(circle 50px at 100px 86px, black 0%, transparent 100%);
+      mask-composite: add;
+    }
+
+    /* 条纹遮罩 */
+    .stripe-mask {
+      -webkit-mask-image: 
+        linear-gradient(90deg, black 0%, transparent 20%, transparent 80%, black 100%);
+      mask-image: linear-gradient(90deg, black 0%, transparent 20%, transparent 80%, black 100%);
+    }
+
+    /* 网格遮罩 */
+    .grid-mask {
+      -webkit-mask-image: 
+        linear-gradient(90deg, black 48%, transparent 48%, transparent 52%, black 52%),
+        linear-gradient(0deg, black 48%, transparent 48%, transparent 52%, black 52%);
+      mask-image: 
+        linear-gradient(90deg, black 48%, transparent 48%, transparent 52%, black 52%),
+        linear-gradient(0deg, black 48%, transparent 48%, transparent 52%, black 52%);
+      mask-composite: add;
+    }
+
+    /* 对角线遮罩 */
+    .diagonal-mask {
+      -webkit-mask-image: 
+        linear-gradient(45deg, black 0%, transparent 40%, transparent 60%, black 100%);
+      mask-image: linear-gradient(45deg, black 0%, transparent 40%, transparent 60%, black 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Mask 多遮罩叠加演示</h1>
+    
+    <div class="section">
+      <h2>mask-composite 模式对比</h2>
+      <p class="info">
+        <code>mask-composite</code> 属性控制多层遮罩之间的合成方式：<br>
+        • <strong>add</strong>: 叠加（默认）<br>
+        • <strong>subtract</strong>: 从底层减去顶层<br>
+        • <strong>intersect</strong>: 只显示重叠部分<br>
+        • <strong>exclude</strong>: 排除重叠部分
+      </p>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box single-mask">单层遮罩</div>
+          <div class="demo-label">参考 - 单个圆形</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box two-mask-add">add 叠加</div>
+          <div class="demo-label">两层叠加</div>
+          <div class="code-snippet">mask-composite: add</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box two-mask-subtract">subtract 减去</div>
+          <div class="demo-label">外圆减内圆</div>
+          <div class="code-snippet">mask-composite: subtract</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box two-mask-intersect">intersect 交集</div>
+          <div class="demo-label">重叠部分</div>
+          <div class="code-snippet">mask-composite: intersect</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box two-mask-exclude">exclude 排除</div>
+          <div class="demo-label">非重叠部分</div>
+          <div class="code-snippet">mask-composite: exclude</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>复杂图形组合</h2>
+      <div class="demo-grid">
+        <div class="demo-item">
+          <div class="demo-box complex-rounded">圆角矩形</div>
+          <div class="demo-label">四角圆化</div>
+          <div class="code-snippet">4个圆角遮罩组合</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box crescent">月牙形状</div>
+          <div class="demo-label">subtract 实现</div>
+          <div class="code-snippet">两个偏心圆相减</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box honeycomb">蜂窝效果</div>
+          <div class="demo-label">三点圆叠加</div>
+          <div class="code-snippet">3个圆叠加</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box stripe-mask">边缘虚化</div>
+          <div class="demo-label">渐变边缘</div>
+          <div class="code-snippet">线性渐变遮罩</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box grid-mask">网格图案</div>
+          <div class="demo-label">双重渐变</div>
+          <div class="code-snippet">水平和垂直线</div>
+        </div>
+        <div class="demo-item">
+          <div class="demo-box diagonal-mask">对角渐隐</div>
+          <div class="demo-label">45度渐变</div>
+          <div class="code-snippet">对角线渐变遮罩</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>实际应用示例</h2>
+      <div class="info">
+        <strong>应用场景：</strong><br>
+        • <strong>图片处理</strong>: 实现圆形头像、圆角图片<br>
+        • <strong>文字效果</strong>: 渐变文字、光晕效果<br>
+        • <strong>图案背景</strong>: 网格、条纹、蜂窝等图案<br>
+        • <strong>过渡动画</strong>: 元素的淡入淡出、滑动消失<br>
+        • <strong>复杂裁剪</strong>: 不规则形状的裁剪和遮罩
+      </div>
+    </div>
+  </div>
+</body>
+</html>

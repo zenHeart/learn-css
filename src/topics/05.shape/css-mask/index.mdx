@@ -1,0 +1,273 @@
+---
+title: CSS Mask 遮罩技术
+category: 形状（Shape）
+tags: [css, mask,遮罩,裁剪,渐变]
+description: 详细介绍 CSS Mask 遮罩技术，用于创建复杂的遮罩效果，实现图片渐变、文字渐变、圆形裁剪等各种视觉效果。
+keywords: CSS Mask, mask-image, mask-mode, mask-composite, 遮罩, 裁剪
+---
+
+## 基本概念
+
+CSS Mask 是一种强大的遮罩技术，通过遮罩图像的透明度来控制元素的可见部分。遮罩图像中透明（或亮度低）的区域会使元素不可见，而不透明（或亮度高）的区域则显示元素内容。
+
+### 与 clip-path 的区别
+
+| 特性 | CSS Mask | clip-path |
+|------|----------|-----------|
+| 透明度支持 | ✅ 支持渐变透明度 | ❌ 仅支持硬边界 |
+| 边缘过渡 | ✅ 可平滑过渡 | ❌ 锐利边缘 |
+| 图像遮罩 | ✅ 支持图片遮罩 | ❌ 仅支持几何形状 |
+| 性能 | 略低 | 更好 |
+| 动画支持 | ✅ 良好 | ✅ 良好 |
+
+## mask-image 属性
+
+定义遮罩图像的来源。
+
+### 使用 URL 引用图像
+
+```css
+.mask-image-url {
+  mask-image: url('mask.png');
+}
+```
+
+### 使用渐变作为遮罩
+
+```css
+/* 线性渐变遮罩 - 实现渐隐效果 */
+.mask-linear-gradient {
+  mask-image: linear-gradient(to right, black 0%, transparent 100%);
+}
+
+/* 径向渐变遮罩 - 实现圆形渐变 */
+.mask-radial-gradient {
+  mask-image: radial-gradient(circle, black 30%, transparent 70%);
+}
+
+/* 锥形渐变遮罩 */
+.mask-conic-gradient {
+  mask-image: conic-gradient(from 0deg at 50% 50%, black 0deg, transparent 90deg);
+}
+```
+
+### 无遮罩
+
+```css
+.no-mask {
+  mask-image: none;
+}
+```
+
+### 多层遮罩
+
+```css
+.multi-mask {
+  mask-image: url('mask1.png'), url('mask2.png'), linear-gradient(to bottom, black, transparent);
+}
+```
+
+## mask-mode 属性
+
+定义遮罩的混合模式。
+
+### alpha 模式
+
+基于遮罩图像的 alpha（透明度）通道：
+
+```css
+.alpha-mode {
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+  mask-mode: alpha;
+}
+```
+
+### luminance 模式
+
+基于遮罩图像的亮度值（灰度）：
+
+```css
+.luminance-mode {
+  mask-image: linear-gradient(to bottom, white, black);
+  mask-mode: luminance;
+}
+```
+
+### match-source 模式
+
+根据遮罩图像类型自动选择：
+
+```css
+.match-source-mode {
+  mask-image: url('image-mask.png');
+  mask-mode: match-source; /* 自动匹配 */
+}
+```
+
+## mask-repeat 属性
+
+控制遮罩图像的重复方式。
+
+```css
+.repeat-x { mask-repeat: repeat-x; }
+.repeat-y { mask-repeat: repeat-y; }
+.repeat { mask-repeat: repeat; }
+.space { mask-repeat: space; }
+.round { mask-repeat: round; }
+.no-repeat { mask-repeat: no-repeat; }
+```
+
+## mask-position 属性
+
+控制遮罩图像的位置。
+
+```css
+.position-center { mask-position: center; }
+.position-top { mask-position: top; }
+.position-custom { mask-position: 25% 75%; }
+.position-px { mask-position: 20px 40px; }
+```
+
+## mask-size 属性
+
+控制遮罩图像的尺寸。
+
+```css
+.size-auto { mask-size: auto; }
+.size-cover { mask-size: cover; }
+.size-contain { mask-size: contain; }
+.size-custom { mask-size: 50px 100px; }
+.size-percent { mask-size: 50% 80%; }
+```
+
+## mask-composite 属性
+
+定义多层遮罩之间的合成操作。
+
+### add（默认值）
+
+叠加遮罩层：
+
+```css
+.composite-add {
+  mask-image: url('mask1.svg'), url('mask2.svg');
+  mask-composite: add;
+}
+```
+
+### subtract
+
+从底层减去顶层：
+
+```css
+.composite-subtract {
+  mask-image: url('mask1.svg'), url('mask2.svg');
+  mask-composite: subtract;
+}
+```
+
+### intersect
+
+只显示重叠部分：
+
+```css
+.composite-intersect {
+  mask-image: url('mask1.svg'), url('mask2.svg');
+  mask-composite: intersect;
+}
+```
+
+### exclude
+
+排除重叠部分：
+
+```css
+.composite-exclude {
+  mask-image: url('mask1.svg'), url('mask2.svg');
+  mask-composite: exclude;
+}
+```
+
+## 实战案例
+
+### 案例一：使用 CSS Mask 实现圆形裁剪
+
+利用径向渐变遮罩实现图片的圆形裁剪效果：
+
+```css
+.circular-image {
+  width: 200px;
+  height: 200px;
+  mask-image: radial-gradient(circle 100px at center, black 0%, transparent 100%);
+  mask-size: cover;
+  -webkit-mask-image: radial-gradient(circle 100px at center, black 0%, transparent 100%);
+}
+```
+
+### 案例二：使用渐变遮罩实现文字渐变效果
+
+利用渐变遮罩配合背景实现文字渐变：
+
+```css
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  mask-mode: luminance;
+}
+```
+
+### 案例三：多遮罩叠加实现复杂图形
+
+结合多个遮罩层和 mask-composite 创建复杂形状：
+
+```css
+.complex-shape {
+  mask-image: 
+    radial-gradient(circle 80px at 30% 40%, black 0%, transparent 100%),
+    radial-gradient(circle 60px at 70% 60%, black 0%, transparent 100%);
+  mask-composite: intersect;
+}
+```
+
+## 浏览器兼容性
+
+| 浏览器 | 支持版本 | 备注 |
+|--------|----------|------|
+| Chrome  | ✅ 1+ | 需要 -webkit- 前缀（早期版本） |
+| Firefox | ✅ 53+ | 无前缀 |
+| Safari  | ✅ 9.1+ | 需要 -webkit- 前缀 |
+| Edge    | ✅ 79+ | Chromium 内核 |
+
+### 前缀处理
+
+```css
+.element {
+  -webkit-mask-image: url('mask.png');
+  -webkit-mask-mode: alpha;
+  -webkit-mask-repeat: repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: cover;
+  
+  mask-image: url('mask.png');
+  mask-mode: alpha;
+  mask-repeat: repeat;
+  mask-position: center;
+  mask-size: cover;
+}
+```
+
+## 性能优化建议
+
+1. **使用简单图形**：相比复杂图像，渐变和简单形状性能更好
+2. **避免大尺寸遮罩**：尽量使用 cover/contain 而非精确尺寸
+3. **慎用多层遮罩**：每增加一层都会增加渲染成本
+4. **GPU 加速**：可添加 `will-change: mask-image` 提示浏览器优化
+
+## 交互式演示
+
+下面是 CSS Mask 的交互式演示：
+
+{/* @playground id="css-mask" mode="demo" */}

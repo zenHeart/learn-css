@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll Snap — 水平轮播图</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { background: #0d1117; border-radius: 4px; overflow: hidden; padding: 20px 0; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    .tag.green { background: #3fb95033; color: #3fb950; }
+    .tag.orange { background: #f0883e33; color: #f0883e; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+
+    /* ========== 轮播图核心样式 ========== */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 12px;
+      padding: 0 20px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel { scrollbar-width: none; }
+    .carousel { -ms-overflow-style: none; }
+
+    .carousel__item {
+      flex: 0 0 75%;
+      height: 280px;
+      scroll-snap-align: center;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, filter 0.2s;
+      user-select: none;
+    }
+    .carousel__item:hover { filter: brightness(1.05); transform: scale(1.02); }
+    .carousel__item .sub { font-size: 12px; font-weight: 400; opacity: 0.8; margin-top: 8px; }
+
+    /* 指示器 */
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #30363d;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dot.active {
+      background: #58a6ff;
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* 卡片样式 */
+    .card-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .card-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .card-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .card-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .card-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+    .card-6 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+
+    /* scroll-padding 演示 */
+    .carousel-padded {
+      scroll-padding: 60px;
+    }
+
+    /* 不同尺寸卡片 */
+    .card-s { height: 200px; }
+    .card-m { height: 280px; }
+    .card-l { height: 340px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>水平轮播图 Snap 演示</h1>
+    <p class="subtitle">scroll-snap-type: x + scroll-snap-align: center | 移动端轮播图最佳实践</p>
+
+    <div class="section">
+      <h2>基础轮播图（居中对齐）</h2>
+      <div class="demo-area">
+        <div class="carousel" id="carousel">
+          <div class="carousel__item card-1">🌅 晨间冥想<span class="sub">每日 10 分钟，开启元气一天</span></div>
+          <div class="carousel__item card-2">🎯 专注工作<span class="sub">番茄工作法，效率翻倍</span></div>
+          <div class="carousel__item card-3">📖 深度阅读<span class="sub">每周一本书，充实自我</span></div>
+          <div class="carousel__item card-4">🏃 夜跑计划<span class="sub">跑步 5 公里，释放压力</span></div>
+          <div class="carousel__item card-5">🎨 创意写作<span class="sub">每天 500 字，记录生活</span></div>
+          <div class="carousel__item card-6">🧘 睡前拉伸<span class="sub">缓解疲劳，提升睡眠质量</span></div>
+        </div>
+        <div class="dots" id="dots">
+          <span class="dot active" data-index="0"></span>
+          <span class="dot" data-index="1"></span>
+          <span class="dot" data-index="2"></span>
+          <span class="dot" data-index="3"></span>
+          <span class="dot" data-index="4"></span>
+          <span class="dot" data-index="5"></span>
+        </div>
+      </div>
+      <div class="code-block">.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;  /* iOS 惯性滚动 */
+}
+.carousel::-webkit-scrollbar { display: none; } /* 隐藏滚动条 */
+
+.carousel__item {
+  flex: 0 0 75%;     /* 每项占 75% 宽度，露出下一张提示可滑动 */
+  scroll-snap-align: center;  /* 居中对齐 */
+}</div>
+      <p class="desc">
+        <span class="tag">flex: 0 0 75%</span>：每张卡片占 75% 宽度，两侧各露出部分下一张/上一张 |
+        <span class="tag">center</span>：吸附到视口中央，视觉焦点明确 |
+        <span class="tag">-webkit-overflow-scrolling: touch</span>：iOS 设备惯性滚动
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>scroll-padding 控制吸附位置</h2>
+      <div class="controls">
+        <button class="btn active" data-padding="0">padding: 0（贴边吸附）</button>
+        <button class="btn" data-padding="60px">padding: 60px（左偏吸附）</button>
+        <button class="btn" data-padding="120px">padding: 120px（居中效果）</button>
+      </div>
+      <div class="demo-area">
+        <div class="carousel" id="paddedCarousel">
+          <div class="carousel__item card-1">🌅 晨间冥想</div>
+          <div class="carousel__item card-2">🎯 专注工作</div>
+          <div class="carousel__item card-3">📖 深度阅读</div>
+          <div class="carousel__item card-4">🏃 夜跑计划</div>
+          <div class="carousel__item card-5">🎨 创意写作</div>
+          <div class="carousel__item card-6">🧘 睡前拉伸</div>
+        </div>
+      </div>
+      <p class="desc">
+        <span class="tag">scroll-padding</span>：调整容器内边距，使吸附点偏离容器边缘。常用于留出固定导航/广告位。
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>不同对齐方式对比</h2>
+      <div class="controls">
+        <button class="btn active" id="align-start-demo">start（左对齐）</button>
+        <button class="btn" id="align-center-demo">center（居中）</button>
+        <button class="btn" id="align-end-demo">end（右对齐）</button>
+      </div>
+      <div class="demo-area">
+        <div class="carousel" id="alignDemoCarousel">
+          <div class="carousel__item card-1" style="flex: 0 0 60%;">🌅 晨间冥想（60%）</div>
+          <div class="carousel__item card-2" style="flex: 0 0 80%;">🎯 专注工作（80%）</div>
+          <div class="carousel__item card-3" style="flex: 0 0 70%;">📖 深度阅读（70%）</div>
+          <div class="carousel__item card-4" style="flex: 0 0 90%;">🏃 夜跑计划（90%）</div>
+          <div class="carousel__item card-5" style="flex: 0 0 65%;">🎨 创意写作（65%）</div>
+          <div class="carousel__item card-6" style="flex: 0 0 75%;">🧘 睡前拉伸（75%）</div>
+        </div>
+      </div>
+      <p class="desc">
+        不同对齐方式会影响吸附后的视觉效果。居中对齐适合轮播图，左对齐适合列表浏览。
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>核心代码模板</h2>
+      <div class="code-block">/* 1. 容器：水平滚动 + 强制吸附 */
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;  /* iOS 惯性滚动 */
+  gap: 12px;
+  padding: 0 20px;
+}
+.carousel::-webkit-scrollbar { display: none; }
+
+/* 2. 子元素：非整除宽度 + 居中对齐 */
+.carousel__item {
+  flex: 0 0 75%;        /* 非 100%，露出下一张 */
+  height: 280px;
+  scroll-snap-align: center;  /* 吸附到视口中央 */
+  border-radius: 16px;
+}
+
+/* 3. 配合 scroll-padding 调整吸附区域（可选） */
+.carousel {
+  scroll-padding: 20px;
+}</div>
+      <p class="desc">推荐配置：<span class="tag">flex: 0 0 75%~85%</span> + <span class="tag">scroll-snap-align: center</span> + <span class="tag">gap: 12px</span></p>
+    </div>
+
+    <p class="info">完整示例见仓库：<strong>examples/css/demos/css-scroll-snap/</strong></p>
+  </div>
+
+  <script>
+    // 分页指示器同步
+    const carousel = document.getElementById('carousel');
+    const dots = document.querySelectorAll('.dot');
+
+    carousel.addEventListener('scroll', () => {
+      const itemWidth = carousel.offsetWidth * 0.75 + 12; // 75% width + gap
+      const index = Math.round(carousel.scrollLeft / itemWidth);
+      dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    });
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const index = parseInt(dot.dataset.index);
+        const itemWidth = carousel.offsetWidth * 0.75 + 12;
+        carousel.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
+      });
+    });
+
+    // scroll-padding 切换
+    document.querySelectorAll('.section:nth-child(3) .btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.section:nth-child(3) .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('paddedCarousel').style.scrollPaddingInline = btn.dataset.padding;
+      });
+    });
+
+    // 对齐方式切换
+    document.getElementById('align-start-demo').addEventListener('click', function() {
+      document.querySelectorAll('.section:nth-child(4) .btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('#alignDemoCarousel .carousel__item').forEach(el => el.style.scrollSnapAlign = 'start');
+    });
+    document.getElementById('align-center-demo').addEventListener('click', function() {
+      document.querySelectorAll('.section:nth-child(4) .btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('#alignDemoCarousel .carousel__item').forEach(el => el.style.scrollSnapAlign = 'center');
+    });
+    document.getElementById('align-end-demo').addEventListener('click', function() {
+      document.querySelectorAll('.section:nth-child(4) .btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('#alignDemoCarousel .carousel__item').forEach(el => el.style.scrollSnapAlign = 'end');
+    });
+  </script>
+</body>
+</html>
