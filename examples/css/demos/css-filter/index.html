@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS filter 滤镜效果演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: #3b82f6;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Demo Area */
+    .demo-area {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .demo-area {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Checkered background for transparency demo */
+    .preview-panel.has-bg {
+      background-image:
+        linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-color: white;
+    }
+
+    .preview-box {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: filter 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    /* SVG logo for better filter demo */
+    .preview-box svg {
+      width: 120px;
+      height: 120px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .control-panel h3 {
+      margin: 0 0 16px 0;
+      font-size: 1rem;
+      color: #3b82f6;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    .slider-value {
+      font-family: monospace;
+      font-weight: 600;
+      color: #3b82f6;
+      background: #eff6ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Color picker for drop-shadow */
+    .color-group {
+      margin-bottom: 16px;
+    }
+
+    .color-label {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    /* Code Output */
+    .code-output {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .code-output pre {
+      margin: 0;
+      color: #d4d4d4;
+      font-family: "Fira Code", Consolas, monospace;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+
+    .code-prop { color: #9cdcfe; }
+    .code-fn { color: #dcdcaa; }
+    .code-value { color: #ce9178; }
+
+    /* Preset Buttons */
+    .preset-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .preset-section h4 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .preset-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      padding: 5px 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #475569;
+      transition: all 0.2s ease;
+    }
+
+    .preset-btn:hover {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-box strong {
+      color: #1e40af;
+    }
+
+    .info-box p {
+      margin: 8px 0 0 0;
+      color: #1e40af;
+    }
+
+    /* Combo Section */
+    .combo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-top: 24px;
+    }
+
+    .combo-section h2 {
+      margin: 0 0 16px 0;
+      color: #3b82f6;
+      font-size: 1.2em;
+    }
+
+    .combo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .combo-item {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .combo-item .preview-box {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .combo-item .label {
+      font-size: 12px;
+      color: #64748b;
+      font-family: monospace;
+    }
+
+    .combo-item .desc {
+      font-size: 13px;
+      color: #475569;
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 CSS filter 滤镜效果演示</h1>
+  <p class="subtitle">交互式体验 10 种 CSS 滤镜函数</p>
+
+  <div class="info-box">
+    <strong>💡 关于 CSS filter</strong>
+    <p>
+      CSS filter 属性为元素应用图形效果，如模糊、亮度调整、对比度调整等。
+      可以组合多个滤镜函数，按从左到右的顺序依次应用。
+    </p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs" id="tabNav">
+    <button class="tab-btn active" data-tab="blur">blur</button>
+    <button class="tab-btn" data-tab="brightness">brightness</button>
+    <button class="tab-btn" data-tab="contrast">contrast</button>
+    <button class="tab-btn" data-tab="drop-shadow">drop-shadow</button>
+    <button class="tab-btn" data-tab="grayscale">grayscale</button>
+    <button class="tab-btn" data-tab="hue-rotate">hue-rotate</button>
+    <button class="tab-btn" data-tab="invert">invert</button>
+    <button class="tab-btn" data-tab="opacity">opacity</button>
+    <button class="tab-btn" data-tab="saturate">saturate</button>
+    <button class="tab-btn" data-tab="sepia">sepia</button>
+    <button class="tab-btn" data-tab="combo">组合效果</button>
+  </div>
+
+  <!-- Tab Contents -->
+  <div id="tabContents">
+    <!-- blur -->
+    <div class="tab-content active" data-tab="blur">
+      <div class="demo-area">
+        <div class="preview-panel">
+          <div class="preview-box" id="previewBlur">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>blur() 高斯模糊</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>模糊半径</span>
+              <span class="slider-value" id="blurVal">5px</span>
+            </div>
+            <input type="range" id="blurSlider" min="0" max="20" value="5" step="0.5">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">blur</span>(<span class="code-value" id="blurCode">5px</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="blur(0)">0px</button>
+              <button class="preset-btn" data-filter="blur(2px)">2px</button>
+              <button class="preset-btn" data-filter="blur(5px)">5px</button>
+              <button class="preset-btn" data-filter="blur(10px)">10px</button>
+              <button class="preset-btn" data-filter="blur(15px)">15px</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- brightness -->
+    <div class="tab-content" data-tab="brightness">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewBrightness">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>brightness() 亮度调整</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>亮度</span>
+              <span class="slider-value" id="brightnessVal">100%</span>
+            </div>
+            <input type="range" id="brightnessSlider" min="0" max="200" value="100" step="5">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">brightness</span>(<span class="code-value" id="brightnessCode">100%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="brightness(0%)">0%</button>
+              <button class="preset-btn" data-filter="brightness(50%)">50%</button>
+              <button class="preset-btn" data-filter="brightness(100%)">100%</button>
+              <button class="preset-btn" data-filter="brightness(150%)">150%</button>
+              <button class="preset-btn" data-filter="brightness(200%)">200%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- contrast -->
+    <div class="tab-content" data-tab="contrast">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewContrast">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>contrast() 对比度调整</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>对比度</span>
+              <span class="slider-value" id="contrastVal">100%</span>
+            </div>
+            <input type="range" id="contrastSlider" min="0" max="200" value="100" step="5">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">contrast</span>(<span class="code-value" id="contrastCode">100%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="contrast(0%)">0%</button>
+              <button class="preset-btn" data-filter="contrast(50%)">50%</button>
+              <button class="preset-btn" data-filter="contrast(100%)">100%</button>
+              <button class="preset-btn" data-filter="contrast(150%)">150%</button>
+              <button class="preset-btn" data-filter="contrast(200%)">200%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- drop-shadow -->
+    <div class="tab-content" data-tab="drop-shadow">
+      <div class="demo-area">
+        <div class="preview-panel">
+          <div class="preview-box" id="previewDropShadow" style="filter: drop-shadow(5px 5px 8px rgba(0,0,0,0.4));">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>drop-shadow() 投影</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>水平偏移</span>
+              <span class="slider-value" id="shadowXVal">5px</span>
+            </div>
+            <input type="range" id="shadowXSlider" min="-20" max="20" value="5" step="1">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>垂直偏移</span>
+              <span class="slider-value" id="shadowYVal">5px</span>
+            </div>
+            <input type="range" id="shadowYSlider" min="-20" max="20" value="5" step="1">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>模糊半径</span>
+              <span class="slider-value" id="shadowBlurVal">8px</span>
+            </div>
+            <input type="range" id="shadowBlurSlider" min="0" max="30" value="8" step="1">
+          </div>
+          <div class="color-group">
+            <label class="color-label">投影颜色</label>
+            <input type="color" id="shadowColor" value="#000000">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">drop-shadow</span>(<span class="code-value" id="shadowCode">5px 5px 8px rgba(0,0,0,0.4)</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设效果</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="drop-shadow(3px 3px 5px rgba(0,0,0,0.3))">柔和</button>
+              <button class="preset-btn" data-filter="drop-shadow(5px 5px 8px rgba(0,0,0,0.4))">中等</button>
+              <button class="preset-btn" data-filter="drop-shadow(0 8px 16px rgba(0,0,0,0.5))">强烈</button>
+              <button class="preset-btn" data-filter="drop-shadow(0 0 10px rgba(102,126,234,0.8))">发光</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- grayscale -->
+    <div class="tab-content" data-tab="grayscale">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewGrayscale">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>grayscale() 灰度转换</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>灰度</span>
+              <span class="slider-value" id="grayscaleVal">50%</span>
+            </div>
+            <input type="range" id="grayscaleSlider" min="0" max="100" value="50" step="1">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">grayscale</span>(<span class="code-value" id="grayscaleCode">50%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="grayscale(0%)">0%</button>
+              <button class="preset-btn" data-filter="grayscale(25%)">25%</button>
+              <button class="preset-btn" data-filter="grayscale(50%)">50%</button>
+              <button class="preset-btn" data-filter="grayscale(75%)">75%</button>
+              <button class="preset-btn" data-filter="grayscale(100%)">100%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- hue-rotate -->
+    <div class="tab-content" data-tab="hue-rotate">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewHueRotate">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>hue-rotate() 色相旋转</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>旋转角度</span>
+              <span class="slider-value" id="hueRotateVal">90deg</span>
+            </div>
+            <input type="range" id="hueRotateSlider" min="0" max="360" value="90" step="5">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">hue-rotate</span>(<span class="code-value" id="hueRotateCode">90deg</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="hue-rotate(0deg)">0°</button>
+              <button class="preset-btn" data-filter="hue-rotate(90deg)">90°</button>
+              <button class="preset-btn" data-filter="hue-rotate(180deg)">180°</button>
+              <button class="preset-btn" data-filter="hue-rotate(270deg)">270°</button>
+              <button class="preset-btn" data-filter="hue-rotate(360deg)">360°</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- invert -->
+    <div class="tab-content" data-tab="invert">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewInvert">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>invert() 反相</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>反相程度</span>
+              <span class="slider-value" id="invertVal">50%</span>
+            </div>
+            <input type="range" id="invertSlider" min="0" max="100" value="50" step="1">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">invert</span>(<span class="code-value" id="invertCode">50%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="invert(0%)">0%</button>
+              <button class="preset-btn" data-filter="invert(25%)">25%</button>
+              <button class="preset-btn" data-filter="invert(50%)">50%</button>
+              <button class="preset-btn" data-filter="invert(75%)">75%</button>
+              <button class="preset-btn" data-filter="invert(100%)">100%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- opacity -->
+    <div class="tab-content" data-tab="opacity">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewOpacity">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>opacity() 透明度</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>透明度</span>
+              <span class="slider-value" id="opacityVal">50%</span>
+            </div>
+            <input type="range" id="opacitySlider" min="0" max="100" value="50" step="1">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">opacity</span>(<span class="code-value" id="opacityCode">50%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="opacity(0%)">0%</button>
+              <button class="preset-btn" data-filter="opacity(25%)">25%</button>
+              <button class="preset-btn" data-filter="opacity(50%)">50%</button>
+              <button class="preset-btn" data-filter="opacity(75%)">75%</button>
+              <button class="preset-btn" data-filter="opacity(100%)">100%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- saturate -->
+    <div class="tab-content" data-tab="saturate">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewSaturate">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>saturate() 饱和度</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>饱和度</span>
+              <span class="slider-value" id="saturateVal">100%</span>
+            </div>
+            <input type="range" id="saturateSlider" min="0" max="200" value="100" step="5">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">saturate</span>(<span class="code-value" id="saturateCode">100%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="saturate(0%)">0%</button>
+              <button class="preset-btn" data-filter="saturate(50%)">50%</button>
+              <button class="preset-btn" data-filter="saturate(100%)">100%</button>
+              <button class="preset-btn" data-filter="saturate(150%)">150%</button>
+              <button class="preset-btn" data-filter="saturate(200%)">200%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- sepia -->
+    <div class="tab-content" data-tab="sepia">
+      <div class="demo-area">
+        <div class="preview-panel has-bg">
+          <div class="preview-box" id="previewSepia">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+              <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+              <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+              <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="control-panel">
+          <h3>sepia() 棕褐色</h3>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>棕褐色</span>
+              <span class="slider-value" id="sepiaVal">50%</span>
+            </div>
+            <input type="range" id="sepiaSlider" min="0" max="100" value="50" step="1">
+          </div>
+          <div class="code-output">
+            <pre><code><span class="code-prop">filter</span>: <span class="code-fn">sepia</span>(<span class="code-value" id="sepiaCode">50%</span>);</code></pre>
+          </div>
+          <div class="preset-section">
+            <h4>预设值</h4>
+            <div class="preset-buttons">
+              <button class="preset-btn" data-filter="sepia(0%)">0%</button>
+              <button class="preset-btn" data-filter="sepia(25%)">25%</button>
+              <button class="preset-btn" data-filter="sepia(50%)">50%</button>
+              <button class="preset-btn" data-filter="sepia(75%)">75%</button>
+              <button class="preset-btn" data-filter="sepia(100%)">100%</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- combo -->
+    <div class="tab-content" data-tab="combo">
+      <div class="combo-section">
+        <h2>🎨 滤镜组合效果</h2>
+        <p style="color:#64748b; margin-bottom:16px;">多个滤镜函数可以链式组合，创造丰富的视觉效果</p>
+        <div class="combo-grid">
+          <div class="combo-item">
+            <div class="preview-box" style="filter: contrast(175%) brightness(3%);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">contrast + brightness</div>
+            <div class="desc">增强对比与亮度</div>
+          </div>
+          <div class="combo-item">
+            <div class="preview-box" style="filter: grayscale(100%) contrast(150%);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">grayscale + contrast</div>
+            <div class="desc">高对比黑白</div>
+          </div>
+          <div class="combo-item">
+            <div class="preview-box" style="filter: sepia(40%) contrast(110%) brightness(90%);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">sepia + contrast + brightness</div>
+            <div class="desc">复古风格</div>
+          </div>
+          <div class="combo-item">
+            <div class="preview-box" style="filter: saturate(140%) hue-rotate(180deg);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">saturate + hue-rotate</div>
+            <div class="desc">冷色调风格</div>
+          </div>
+          <div class="combo-item">
+            <div class="preview-box" style="filter: saturate(120%) brightness(105%) sepia(20%);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">saturate + brightness + sepia</div>
+            <div class="desc">暖色调风格</div>
+          </div>
+          <div class="combo-item">
+            <div class="preview-box" style="filter: blur(2px) brightness(110%) contrast(90%);">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" fill="#fbbf24"/>
+                <circle cx="35" cy="40" r="8" fill="#1e293b"/>
+                <circle cx="65" cy="40" r="8" fill="#1e293b"/>
+                <path d="M 30 65 Q 50 80 70 65" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="label">blur + brightness + contrast</div>
+            <div class="desc">柔焦效果</div>
+          </div>
+        </div>
+        <div class="code-output" style="margin-top:20px;">
+          <pre><code><span class="code-comment">/* 常用组合示例 */</span>
+
+<span class="code-comment">/* 高对比黑白 */</span>
+<span class="code-prop">filter</span>: <span class="code-fn">grayscale</span>(<span class="code-value">100%</span>) <span class="code-fn">contrast</span>(<span class="code-value">150%</span>);
+
+<span class="code-comment">/* 复古风格 */</span>
+<span class="code-prop">filter</span>: <span class="code-fn">sepia</span>(<span class="code-value">40%</span>) <span class="code-fn">contrast</span>(<span class="code-value">110%</span>) <span class="code-fn">brightness</span>(<span class="code-value">90%</span>);
+
+<span class="code-comment">/* 冷色调 */</span>
+<span class="code-prop">filter</span>: <span class="code-fn">saturate</span>(<span class="code-value">140%</span>) <span class="code-fn">hue-rotate</span>(<span class="code-value">180deg</span>);
+
+<span class="code-comment">/* 柔焦 */</span>
+<span class="code-prop">filter</span>: <span class="code-fn">blur</span>(<span class="code-value">2px</span>) <span class="code-fn">brightness</span>(<span class="code-value">110%</span>) <span class="code-fn">contrast</span>(<span class="code-value">90%</span>);</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>更多 CSS 滤镜技巧，请访问 <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/filter" target="_blank" style="color:#3b82f6;">MDN CSS filter</a></p>
+  </div>
+
+  <script>
+    // Tab Navigation
+    const tabNav = document.getElementById('tabNav');
+    const tabContents = document.getElementById('tabContents');
+
+    tabNav.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-btn')) {
+        const tabName = e.target.dataset.tab;
+
+        // Update active tab button
+        tabNav.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Update active tab content
+        tabContents.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+          if (content.dataset.tab === tabName) {
+            content.classList.add('active');
+          }
+        });
+      }
+    });
+
+    // Filter configs
+    const filterConfigs = {
+      blur: {
+        slider: 'blurSlider',
+        val: 'blurVal',
+        code: 'blurCode',
+        preview: 'previewBlur',
+        getFilter: (v) => `blur(${v}px)`
+      },
+      brightness: {
+        slider: 'brightnessSlider',
+        val: 'brightnessVal',
+        code: 'brightnessCode',
+        preview: 'previewBrightness',
+        getFilter: (v) => `brightness(${v}%)`
+      },
+      contrast: {
+        slider: 'contrastSlider',
+        val: 'contrastVal',
+        code: 'contrastCode',
+        preview: 'previewContrast',
+        getFilter: (v) => `contrast(${v}%)`
+      },
+      grayscale: {
+        slider: 'grayscaleSlider',
+        val: 'grayscaleVal',
+        code: 'grayscaleCode',
+        preview: 'previewGrayscale',
+        getFilter: (v) => `grayscale(${v}%)`
+      },
+      hueRotate: {
+        slider: 'hueRotateSlider',
+        val: 'hueRotateVal',
+        code: 'hueRotateCode',
+        preview: 'previewHueRotate',
+        getFilter: (v) => `hue-rotate(${v}deg)`
+      },
+      invert: {
+        slider: 'invertSlider',
+        val: 'invertVal',
+        code: 'invertCode',
+        preview: 'previewInvert',
+        getFilter: (v) => `invert(${v}%)`
+      },
+      opacity: {
+        slider: 'opacitySlider',
+        val: 'opacityVal',
+        code: 'opacityCode',
+        preview: 'previewOpacity',
+        getFilter: (v) => `opacity(${v}%)`
+      },
+      saturate: {
+        slider: 'saturateSlider',
+        val: 'saturateVal',
+        code: 'saturateCode',
+        preview: 'previewSaturate',
+        getFilter: (v) => `saturate(${v}%)`
+      },
+      sepia: {
+        slider: 'sepiaSlider',
+        val: 'sepiaVal',
+        code: 'sepiaCode',
+        preview: 'previewSepia',
+        getFilter: (v) => `sepia(${v}%)`
+      }
+    };
+
+    // Initialize filter controls
+    Object.entries(filterConfigs).forEach(([key, config]) => {
+      const slider = document.getElementById(config.slider);
+      const valEl = document.getElementById(config.val);
+      const codeEl = document.getElementById(config.code);
+      const preview = document.getElementById(config.preview);
+
+      if (slider && valEl && codeEl && preview) {
+        slider.addEventListener('input', () => {
+          const value = slider.value;
+          valEl.textContent = key === 'blur' ? `${value}px` : `${value}%`;
+          codeEl.textContent = key === 'blur' ? `${value}px` : `${value}%`;
+          preview.style.filter = config.getFilter(value);
+        });
+      }
+    });
+
+    // Drop-shadow special handling
+    const shadowX = document.getElementById('shadowXSlider');
+    const shadowY = document.getElementById('shadowYSlider');
+    const shadowBlur = document.getElementById('shadowBlurSlider');
+    const shadowColor = document.getElementById('shadowColor');
+    const shadowXVal = document.getElementById('shadowXVal');
+    const shadowYVal = document.getElementById('shadowYVal');
+    const shadowBlurVal = document.getElementById('shadowBlurVal');
+    const shadowCode = document.getElementById('shadowCode');
+    const previewShadow = document.getElementById('previewDropShadow');
+
+    function updateShadow() {
+      const x = shadowX.value;
+      const y = shadowY.value;
+      const blur = shadowBlur.value;
+      const color = shadowColor.value;
+      const alpha = 0.4;
+
+      shadowXVal.textContent = `${x}px`;
+      shadowYVal.textContent = `${y}px`;
+      shadowBlurVal.textContent = `${blur}px`;
+
+      const rgba = color.replace('#', '').match(/.{2}/g).map(c => parseInt(c, 16)).join(', ');
+      shadowCode.textContent = `${x}px ${y}px ${blur}px rgba(${rgba}, ${alpha})`;
+      previewShadow.style.filter = `drop-shadow(${x}px ${y}px ${blur}px rgba(${rgba}, ${alpha}))`;
+    }
+
+    [shadowX, shadowY, shadowBlur, shadowColor].forEach(el => {
+      if (el) el.addEventListener('input', updateShadow);
+    });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        const tab = btn.closest('.tab-content');
+        if (tab) {
+          const preview = tab.querySelector('.preview-box');
+          if (preview) {
+            preview.style.filter = filter;
+
+            // Update code display
+            const codeEl = tab.querySelector('.code-output .code-value');
+            if (codeEl) {
+              codeEl.textContent = filter.match(/\(([^)]+)\)/)?.[1] || filter;
+            }
+
+            // Update slider if applicable
+            const match = filter.match(/\(([^)]+)\)/)?.[1];
+            if (match) {
+              const sliderId = Object.entries(filterConfigs).find(([key, config]) => filter.startsWith(key))[1]?.slider;
+              if (sliderId) {
+                const slider = document.getElementById(sliderId);
+                if (slider) {
+                  slider.value = parseFloat(match);
+                  slider.dispatchEvent(new Event('input'));
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
