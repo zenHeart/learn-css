@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>相对固定定位 — 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif; 
+      background: #0d1117; 
+      color: #c9d1d9; 
+      min-height: 100vh; 
+      padding: 24px; 
+    }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    /* Section styling */
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; display: flex; align-items: center; gap: 8px; }
+    .section h2::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #58a6ff; border-radius: 2px; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    
+    /* Demo viewport */
+    .demo-viewport { 
+      background: #21262d; 
+      border: 1px solid #30363d; 
+      border-radius: 6px; 
+      overflow: hidden; 
+      margin-bottom: 12px;
+    }
+    .demo-header {
+      background: #30363d;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-header span { font-size: 12px; color: #8b949e; }
+    .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .demo-dot.red { background: #ff5f56; }
+    .demo-dot.yellow { background: #ffbd2e; }
+    .demo-dot.green { background: #27c93f; }
+    .demo-content { padding: 16px; position: relative; }
+    
+    /* Buttons */
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { 
+      padding: 6px 12px; 
+      background: #21262d; 
+      border: 1px solid #30363d; 
+      border-radius: 4px; 
+      color: #c9d1d9; 
+      font-size: 12px; 
+      cursor: pointer; 
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    
+    /* Code blocks */
+    .code-block { 
+      background: #0d1117; 
+      border: 1px solid #30363d; 
+      border-radius: 4px; 
+      padding: 12px; 
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; 
+      font-size: 12px; 
+      overflow-x: auto; 
+      white-space: pre-wrap; 
+      word-break: break-all; 
+      color: #79c0ff; 
+    }
+    
+    /* Description */
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.5; }
+    .info { font-size: 12px; color: #8b949e; margin-top: 12px; padding: 12px; background: #161b22; border-radius: 4px; border-left: 3px solid #58a6ff; }
+    
+    /* Demo-specific elements */
+    .outer-box {
+      width: 100%;
+      height: 280px;
+      background: #0d1117;
+      border: 2px dashed #30363d;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .middle-box {
+      width: 70%;
+      height: 220px;
+      background: #161b22;
+      border: 2px dashed #58a6ff;
+      border-radius: 4px;
+      margin: 30px auto;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .middle-box.transform-applied {
+      transform: translateX(0);
+    }
+    
+    .middle-box.scale-applied {
+      transform: scale(1);
+    }
+    
+    .middle-box.relative-applied {
+      position: relative;
+    }
+    
+    .middle-box.perspective-applied {
+      perspective: 1000px;
+    }
+    
+    .fixed-element {
+      position: fixed;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .fixed-element:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5);
+    }
+    
+    .fixed-element.in-middle {
+      top: 10px;
+      left: 10px;
+    }
+    
+    .fixed-element.in-viewport {
+      top: 10px;
+      right: 10px;
+    }
+    
+    .label-marker {
+      position: absolute;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      color: white;
+    }
+    
+    .label-marker.viewport-label {
+      top: 4px;
+      left: 4px;
+      background: #f0883e;
+    }
+    
+    .label-marker.middle-label {
+      top: 4px;
+      right: 4px;
+      background: #58a6ff;
+    }
+    
+    /* Interactive playground */
+    .playground {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .playground-left, .playground-right {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 16px;
+    }
+    
+    .playground-left h4, .playground-right h4 {
+      font-size: 13px;
+      color: #8b949e;
+      margin-bottom: 12px;
+    }
+    
+    .css-input {
+      width: 100%;
+      min-height: 100px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: #79c0ff;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    
+    .css-input:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+    
+    /* Scrollable container demo */
+    .scroll-demo-container {
+      width: 100%;
+      height: 300px;
+      background: #21262d;
+      border: 2px dashed #58a6ff;
+      border-radius: 4px;
+      overflow: auto;
+      position: relative;
+    }
+    
+    .scroll-content {
+      height: 600px;
+      padding: 16px;
+      position: relative;
+    }
+    
+    .scroll-inner-box {
+      width: 200px;
+      height: 400px;
+      background: #161b22;
+      border: 2px dashed #3fb950;
+      border-radius: 4px;
+      margin: 0 auto;
+      position: relative;
+      transform: translateX(0);
+    }
+    
+    .scroll-fixed {
+      position: fixed;
+      background: #3fb950;
+      color: #0d1117;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(63, 185, 80, 0.4);
+      z-index: 50;
+    }
+    
+    /* Scenario cards */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .scenario-card {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .scenario-card:hover {
+      border-color: #58a6ff;
+      transform: translateY(-2px);
+    }
+    
+    .scenario-card h4 {
+      font-size: 14px;
+      color: #f0f6fc;
+      margin-bottom: 8px;
+    }
+    
+    .scenario-card p {
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.5;
+    }
+    
+    /* Animation demo */
+    .anim-target {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+      font-weight: 600;
+      position: relative;
+      transform: translateX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .anim-target:hover {
+      transform: translateX(150px);
+    }
+    
+    /* Status indicator */
+    .status-bar {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px;
+      background: #21262d;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .status-dot.active { background: #3fb950; }
+    .status-dot.inactive { background: #f85149; }
+    
+    .status-label { color: #8b949e; }
+    .status-value { color: #f0f6fc; font-weight: 500; }
+    
+    /* Tab styles */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #30363d; }
+    .tab { padding: 8px 16px; font-size: 13px; color: #8b949e; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab:hover { color: #c9d1d9; }
+    .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .comparison-table th {
+      background: #21262d;
+      color: #f0f6fc;
+      font-weight: 600;
+    }
+    
+    .comparison-table td { color: #c9d1d9; }
+    .comparison-table tr:hover td { background: #161b22; }
+    
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .tag-red { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    .tag-green { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+    .tag-blue { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
+    .tag-yellow { background: rgba(210, 168, 69, 0.2); color: #d2a869; }
+    
+    @media (max-width: 768px) {
+      .playground { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>相对固定定位 — 交互演示</h1>
+    <p class="subtitle">理解 transform 如何改变 fixed 定位上下文，实现"相对于父元素固定"效果</p>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-dot active"></span>
+        <span class="status-label">视口定位上下文</span>
+        <span class="status-value" id="viewport-status">激活</span>
+      </div>
+      <div class="status-item">
+        <span class="status-dot inactive" id="transform-indicator"></span>
+        <span class="status-label">Transform 上下文</span>
+        <span class="status-value" id="transform-status">未激活</span>
+      </div>
+    </div>
+    
+    <!-- Section 1: Basic Demo -->
+    <div class="section">
+      <h2>基础演示</h2>
+      <p class="desc">点击按钮切换父容器的 transform 状态，观察红色 fixed 元素的位置变化。</p>
+      
+      <div class="controls" id="transform-controls">
+        <button class="btn active" data-transform="none">无 transform</button>
+        <button class="btn" data-transform="translateX(0)">transform: translateX(0)</button>
+        <button class="btn" data-transform="scale(1)">transform: scale(1)</button>
+        <button class="btn" data-transform="perspective(1000px)">transform: perspective()</button>
+        <button class="btn" data-transform="relative">position: relative</button>
+      </div>
+      
+      <div class="demo-viewport">
+        <div class="demo-header">
+          <span class="demo-dot red"></span>
+          <span class="demo-dot yellow"></span>
+          <span class="demo-dot green"></span>
+          <span style="margin-left: auto; font-size: 11px; color: #6e7681;">视口边界</span>
+        </div>
+        <div class="demo-content">
+          <div class="outer-box" id="outer-box">
+            <div class="middle-box" id="middle-box">
+              <span class="label-marker middle-label">中间容器</span>
+              <div class="fixed-element in-middle" id="fixed-red">Fixed 元素</div>
+            </div>
+            <span class="label-marker viewport-label">外层容器</span>
+            <div class="fixed-element in-viewport" id="fixed-green">视口固定</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="code-block" id="current-css">/* 当前状态 */
+.middle-box {
+  transform: none;
+}</div>
+      
+      <div class="info" id="behavior-note">
+        <strong>预期行为：</strong>当 transform 为 none 时，红色 Fixed 元素应该相对于视口定位（显示在右上角）。点击按钮应用 transform 后，红色元素会移动到中间容器的左上角。
+      </div>
+    </div>
+    
+    <!-- Section 2: Interactive Playground -->
+    <div class="section">
+      <h2>CSS Playground</h2>
+      <p class="desc">在左侧输入 CSS 规则，右侧实时预览效果。</p>
+      
+      <div class="playground">
+        <div class="playground-left">
+          <h4>CSS 规则</h4>
+          <textarea class="css-input" id="css-input" spellcheck="false">/* 修改父容器样式 */
+.parent-transform {
+  transform: translateX(0);
+  background: #1a1f26;
+  padding: 20px;
+}
+
+/* 修改 Fixed 子元素样式 */
+.my-fixed {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #e74c3c;
+  padding: 12px 20px;
+  color: white;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}</textarea>
+          <button class="btn" id="apply-css" style="width: 100%; padding: 10px;">应用 CSS</button>
+        </div>
+        <div class="playground-right">
+          <h4>预览区域</h4>
+          <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 4px; height: 200px; position: relative; overflow: hidden;">
+            <div class="parent-transform" id="playground-parent" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: 70%; background: #161b22; border: 2px dashed #58a6ff; border-radius: 4px;">
+              <div class="my-fixed" id="playground-fixed">Fixed</div>
+            </div>
+          </div>
+          <div class="code-block" id="applied-code" style="margin-top: 12px;">/* 等待应用... */</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 3: Scroll Demo -->
+    <div class="section">
+      <h2>滚动容器中的 Fixed</h2>
+      <p class="desc">当 transform 创建了新的定位上下文后，滚动父容器时 fixed 元素不会跟随滚动，而是相对于该容器固定。</p>
+      
+      <div class="scroll-demo-container" id="scroll-container">
+        <div class="scroll-content">
+          <div class="scroll-inner-box" id="scroll-inner">
+            <div class="scroll-fixed" id="scroll-fixed" style="top: 20px; left: 20px;">滚动固定元素</div>
+            <p style="color: #8b949e; font-size: 12px; padding: 60px 16px; text-align: center;">向下滚动查看效果<br>绿色方块内的固定元素会保持位置</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="controls" style="margin-top: 12px;">
+        <button class="btn" id="scroll-info">滚动位置: 0</button>
+      </div>
+    </div>
+    
+    <!-- Section 4: Scenarios -->
+    <div class="section">
+      <h2>典型使用场景</h2>
+      
+      <div class="scenario-grid">
+        <div class="scenario-card" data-scenario="sticky-header">
+          <h4>🎯 吸顶导航</h4>
+          <p>导航栏在滚动到顶部时固定，滚动时保持在视口顶部。</p>
+        </div>
+        <div class="scenario-card" data-scenario="fab">
+          <h4>🔘 浮动操作按钮</h4>
+          <p>固定在视口某个位置，常用于主操作如"新建"、"分享"。</p>
+        </div>
+        <div class="scenario-card" data-scenario="badge">
+          <h4>🏷️ 卡片角标</h4>
+          <p>固定在父容器的角落，如"新品"、"热门"等标签。</p>
+        </div>
+        <div class="scenario-card" data-scenario="sidebar">
+          <h4>📌 吸附侧边栏</h4>
+          <p>侧边栏固定在视口，但相对于某个内容区域定位。</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section 5: Comparison -->
+    <div class="section">
+      <h2>定位方式对比</h2>
+      
+      <div class="tabs">
+        <div class="tab active" data-tab="position-table">定位属性对比</div>
+        <div class="tab" data-tab="containing-block">包含块规则</div>
+        <div class="tab" data-tab="common-pitfalls">常见坑点</div>
+      </div>
+      
+      <div class="tab-content active" id="position-table">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>定位方式</th>
+              <th>定位上下文</th>
+              <th>随滚动移动</th>
+              <th>适用场景</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-blue">static</span></td>
+              <td>正常文档流</td>
+              <td><span class="tag tag-green">是</span></td>
+              <td>默认布局</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">relative</span></td>
+              <td>自身原始位置</td>
+              <td><span class="tag tag-green">是</span></td>
+              <td>微调位置、创建子元素定位上下文</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">absolute</span></td>
+              <td>最近已定位祖先</td>
+              <td><span class="tag tag-green">是</span></td>
+              <td>绝对定位浮层、下拉菜单</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-red">fixed</span></td>
+              <td>视口（无 transform 祖先）</td>
+              <td><span class="tag tag-red">否</span></td>
+              <td>固定导航、浮动按钮、模态框</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-yellow">fixed + transform</span></td>
+              <td>transform 祖先</td>
+              <td><span class="tag tag-red">否</span>（相对于祖先固定）</td>
+              <td>相对父容器固定、吸附效果</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">sticky</span></td>
+              <td>最近滚动容器</td>
+              <td><span class="tag tag-yellow">条件</span></td>
+              <td>表头吸附、分类导航</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="tab-content" id="containing-block">
+        <div class="code-block" position: relative;
+  width: 300px;
+  height: 200px;
+  background: #161b22;
+  border: 2px solid #58a6ff;
+}
+
+/* transform 创建新的包含块 */
+.transform-parent {
+  transform: translateX(0);
+  /* 或 scale(1), perspective(), filter() */
+}
+
+/* fixed 相对于 .transform-parent 定位 */
+.fixed-child {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* 不再相对于视口，而是相对于 .transform-parent */
+}
+</div>
+        <p class="desc" style="margin-top: 12px;">注意：transform、perspective、filter 属性会改变 absolute 和 fixed 的定位上下文。</p>
+      </div>
+      
+      <div class="tab-content" id="common-pitfalls">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>坑点</th>
+              <th>问题描述</th>
+              <th>解决方案</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>性能问题</td>
+              <td>过多 transform 导致合成层爆炸</td>
+              <td>限制使用，合理分层</td>
+            </tr>
+            <tr>
+              <td>文字模糊</td>
+              <td>transform 触发亚像素渲染</td>
+              <td>使用 translateZ(0) 强制 GPU</td>
+            </tr>
+            <tr>
+              <td>滚动越界</td>
+              <td>fixed 元素随滚动"跑出"父容器</td>
+              <td>JS 动态计算位置</td>
+            </tr>
+            <tr>
+              <td>z-index 层叠</td>
+              <td>transform 创建独立层叠上下文</td>
+              <td>统一规划 z-index 层级</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Section 6: Animation Demo -->
+    <div class="section">
+      <h2>动画中的 Transform</h2>
+      <p class="desc">hover 下面的元素，观察 transform 动画效果。保持 transform 状态同时实现 fixed 定位。</p>
+      
+      <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 40px; display: flex; align-items: center; justify-content: center; gap: 40px;">
+        <div class="anim-target" style="position: relative;">
+          <span>Hover Me</span>
+        </div>
+        <div style="position: relative; transform: translateX(0);">
+          <div class="anim-target" style="position: fixed; top: 0; left: 0; background: linear-gradient(135deg, #3fb950 0%, #2d8a3e 100%);">
+            <span>Fixed + Transform</span>
+          </div>
+          <div style="width: 200px; height: 100px; background: #161b22; border: 2px dashed #3fb950; border-radius: 4px; margin-left: 80px; margin-top: 40px;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <p class="info">
+      <strong>总结：</strong>transform 属性会改变 fixed 的定位上下文，使其相对于应用了 transform 的祖先元素定位，而非视口。这允许我们实现"相对父元素固定"的布局效果，是现代前端实现吸附、浮动等交互的重要技术。
+    </p>
+  </div>
+
+  <script>
+    // ===== Transform Controls =====
+    const transformControls = document.getElementById('transform-controls');
+    const middleBox = document.getElementById('middle-box');
+    const fixedRed = document.getElementById('fixed-red');
+    const fixedGreen = document.getElementById('fixed-green');
+    const currentCss = document.getElementById('current-css');
+    const behaviorNote = document.getElementById('behavior-note');
+    const viewportStatus = document.getElementById('viewport-status');
+    const transformStatus = document.getElementById('transform-status');
+    const transformIndicator = document.getElementById('transform-indicator');
+    
+    transformControls.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn')) {
+        // Update active button
+        transformControls.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        const transformValue = e.target.dataset.transform;
+        
+        // Apply transform to middle box
+        if (transformValue === 'none') {
+          middleBox.className = 'middle-box';
+          behaviorNote.innerHTML = '<strong>预期行为：</strong>当 transform 为 none 时，红色 Fixed 元素应该相对于视口定位（显示在右上角）。点击按钮应用 transform 后，红色元素会移动到中间容器的左上角。';
+          transformIndicator.className = 'status-dot inactive';
+          transformStatus.textContent = '未激活';
+        } else if (transformValue === 'relative') {
+          middleBox.className = 'middle-box relative-applied';
+          behaviorNote.innerHTML = '<strong>预期行为：</strong>position: relative 只是创建了定位上下文，不影响 fixed 的视口定位。';
+          transformIndicator.className = 'status-dot inactive';
+          transformStatus.textContent = '未激活（relative）';
+        } else {
+          middleBox.style.transform = transformValue;
+          behaviorNote.innerHTML = `<strong>预期行为：</strong>transform: ${transformValue} 创建了新的定位上下文，红色 Fixed 元素现在相对于中间容器定位！`;
+          transformIndicator.className = 'status-dot active';
+          transformStatus.textContent = '已激活';
+        }
+        
+        currentCss.textContent = `/* 当前状态 */
+.middle-box {
+  transform: ${transformValue};
+}`;
+      }
+    });
+    
+    // ===== CSS Playground =====
+    const cssInput = document.getElementById('css-input');
+    const applyCssBtn = document.getElementById('apply-css');
+    const playgroundParent = document.getElementById('playground-parent');
+    const playgroundFixed = document.getElementById('playground-fixed');
+    const appliedCode = document.getElementById('applied-code');
+    
+    applyCssBtn.addEventListener('click', () => {
+      try {
+        const css = cssInput.value;
+        // Extract rules for parent and fixed
+        const parentMatch = css.match(/\.parent-transform\s*\{([^}]+)\}/);
+        const fixedMatch = css.match(/\.my-fixed\s*\{([^}]+)\}/);
+        
+        if (parentMatch) {
+          const rules = parentMatch[1].trim();
+          playgroundParent.style.cssText += rules;
+        }
+        
+        if (fixedMatch) {
+          const rules = fixedMatch[1].trim();
+          playgroundFixed.style.cssText += rules;
+        }
+        
+        appliedCode.textContent = css;
+      } catch (err) {
+        appliedCode.textContent = 'CSS 解析错误: ' + err.message;
+      }
+    });
+    
+    // ===== Scroll Demo =====
+    const scrollContainer = document.getElementById('scroll-container');
+    const scrollFixed = document.getElementById('scroll-fixed');
+    const scrollInfo = document.getElementById('scroll-info');
+    
+    scrollContainer.addEventListener('scroll', () => {
+      const scrollTop = scrollContainer.scrollTop;
+      scrollInfo.textContent = `滚动位置: ${scrollTop}px`;
+      
+      // The fixed element stays in place because it has its own containing block
+    });
+    
+    // ===== Tabs =====
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.dataset.tab;
+        
+        // Update active tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show correct content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+    
+    // ===== Scenarios =====
+    document.querySelectorAll('.scenario-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const scenario = card.dataset.scenario;
+        alert(`场景: ${scenario}\n\n这是一个演示卡片，点击可跳转到对应的完整示例。`);
+      });
+    });
+    
+    // ===== Initial State =====
+    console.log('相对固定定位演示已加载');
+    console.log('提示: 尝试点击 "transform: translateX(0)" 按钮观察 fixed 元素的位置变化');
+  </script>
+</body>
+</html>
