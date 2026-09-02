@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS transform 3D 变换详解 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 24px; min-height: 200px; padding: 40px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; perspective: 500px; flex-wrap: wrap; }
+    
+    .box { width: 100px; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; cursor: pointer; transition: transform 0.5s ease; }
+    
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    
+    /* 卡片翻转 */
+    .card-container { perspective: 1000px; width: 200px; height: 140px; }
+    .card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+    .card.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .card-front { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .card-back { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; transform: rotateY(180deg); }
+    
+    /* 3D 立方体 */
+    .cube-container { perspective: 500px; width: 120px; height: 120px; }
+    .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(30deg); transition: transform 0.5s ease; }
+    .cube-face { position: absolute; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; font-weight: 600; border: 2px solid; opacity: 0.9; }
+    .cube-face.front { background: #388bfd33; border-color: #58a6ff; transform: translateZ(60px); color: #58a6ff; }
+    .cube-face.back { background: #f8514933; border-color: #f85149; transform: rotateY(180deg) translateZ(60px); color: #f85149; }
+    .cube-face.left { background: #3fb95033; border-color: #3fb950; transform: rotateY(-90deg) translateZ(60px); color: #3fb950; }
+    .cube-face.right { background: #ffa65733; border-color: #ffa657; transform: rotateY(90deg) translateZ(60px); color: #ffa657; }
+    .cube-face.top { background: #a371f733; border-color: #a371f7; transform: rotateX(90deg) translateZ(60px); color: #a371f7; }
+    .cube-face.bottom { background: #7ee78733; border-color: #7ee787; transform: rotateX(-90deg) translateZ(60px); color: #7ee787; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS transform 3D 变换详解</h1>
+    <p class="subtitle">rotateX | rotateY | rotateZ | 3D变换 | 交互演示</p>
+
+    <div class="section">
+      <h2>3D 轴旋转</h2>
+      <div class="controls">
+        <button class="btn" data-transform="rotateX(45deg)">rotateX(45deg)</button>
+        <button class="btn" data-transform="rotateY(45deg)">rotateY(45deg)</button>
+        <button class="btn" data-transform="rotateZ(45deg)">rotateZ(45deg)</button>
+        <button class="btn" data-transform="rotate3d(1, 1, 0, 45deg)">rotate3d(1,1,0,45deg)</button>
+        <button class="btn" data-transform="none">重置</button>
+      </div>
+      <div class="demo-area">
+        <div class="box" id="rotate-box">3D 旋转</div>
+      </div>
+      <div class="code-block" id="rotate-code">transform: none;</div>
+    </div>
+
+    <div class="section">
+      <h2>3D 卡片翻转</h2>
+      <div class="demo-area">
+        <div class="card-container">
+          <div class="card" id="flip-card">
+            <div class="card-face card-front">正面</div>
+            <div class="card-face card-back">背面</div>
+          </div>
+        </div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 点击卡片查看翻转效果。</p>
+      <div class="code-block">.card { transform-style: preserve-3d; transition: transform 0.6s; }
+.card.flipped { transform: rotateY(180deg); }
+.card-front, .card-back { backface-visibility: hidden; }
+.card-back { transform: rotateY(180deg); }</div>
+    </div>
+
+    <div class="section">
+      <h2>3D 立方体</h2>
+      <div class="demo-area" style="perspective: 600px;">
+        <div class="cube-container">
+          <div class="cube" id="cube">
+            <div class="cube-face front">前</div>
+            <div class="cube-face back">后</div>
+            <div class="cube-face left">左</div>
+            <div class="cube-face right">右</div>
+            <div class="cube-face top">上</div>
+            <div class="cube-face bottom">下</div>
+          </div>
+        </div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 使用鼠标拖动旋转立方体。</p>
+    </div>
+
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block">/* 3D 旋转 */
+.rotate-x { transform: rotateX(45deg); }
+.rotate-y { transform: rotateY(45deg); }
+.rotate-z { transform: rotateZ(45deg); }
+
+/* 3D 透视 */
+.scene { perspective: 500px; }
+
+/* 保留 3D 空间 */
+.parent { transform-style: preserve-3d; }
+
+/* 3D 立方体 */
+.cube { transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(30deg); }
+.face { position: absolute; }
+.front { transform: translateZ(50px); }</div>
+    </div>
+
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 36+ ✓</li>
+          <li>Firefox 16+ ✓</li>
+          <li>Safari 9+ ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 旋转控制
+    const rotateBox = document.getElementById('rotate-box');
+    document.querySelectorAll('[data-transform]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const transform = btn.dataset.transform;
+        rotateBox.style.transform = transform;
+        document.getElementById('rotate-code').textContent = `transform: ${transform};`;
+      });
+    });
+    
+    // 卡片翻转
+    const flipCard = document.getElementById('flip-card');
+    flipCard.addEventListener('click', () => {
+      flipCard.classList.toggle('flipped');
+    });
+    
+    // 立方体拖动
+    const cube = document.getElementById('cube');
+    let isDragging = false;
+    let startX, startY, currentX = 30, currentY = -20;
+    
+    cube.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      cube.style.transform = `rotateX(${currentY + deltaY * 0.5}deg) rotateY(${currentX + deltaX * 0.5}deg)`;
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        currentX += (cube.style.transform.match(/rotateY\(([-\d.]+)deg\)/)?.[1] || 30) - currentX;
+        currentY += (cube.style.transform.match(/rotateX\(([-\d.]+)deg\)/)?.[1] || -20) - currentY;
+        isDragging = false;
+      }
+    });
+  </script>
+</body>
+</html>
