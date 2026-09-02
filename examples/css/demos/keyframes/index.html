@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @keyframes 动画关键帧详解 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 24px; min-height: 150px; padding: 40px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    
+    .box { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; cursor: pointer; }
+    
+    /* 动画定义 */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideIn { from { transform: translateX(-100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes colorShift { 0% { background-color: #667eea; } 50% { background-color: #764ba2; } 100% { background-color: #667eea; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }
+    @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    
+    /* 动画类 */
+    .anim-fadeIn { animation: fadeIn 1s ease forwards; }
+    .anim-slideIn { animation: slideIn 0.8s ease forwards; }
+    .anim-pulse { animation: pulse 1s ease-in-out infinite; }
+    .anim-spin { animation: spin 1s linear infinite; }
+    .anim-colorShift { animation: colorShift 2s ease-in-out infinite; }
+    .anim-bounce { animation: bounce 0.6s ease-in-out infinite; }
+    .anim-flash { animation: flash 1s linear infinite; }
+    
+    .box.blue { background: #388bfd; }
+    .box.purple { background: #a371f7; }
+    .box.green { background: #3fb950; }
+    .box.orange { background: #f0883e; }
+    
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS @keyframes 动画关键帧详解</h1>
+    <p class="subtitle">@keyframes | animation | 动画关键帧 | 交互演示</p>
+
+    <div class="section">
+      <h2>基本动画类型</h2>
+      <div class="demo-area">
+        <div class="box blue anim-fadeIn">淡入</div>
+        <div class="box purple anim-pulse">脉冲</div>
+        <div class="box green anim-spin">旋转</div>
+        <div class="box orange anim-bounce">弹跳</div>
+      </div>
+      <div class="code-block">@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</div>
+    </div>
+
+    <div class="section">
+      <h2>滑入动画</h2>
+      <div class="demo-area" style="justify-content: flex-start;">
+        <div class="box blue anim-slideIn">滑入</div>
+      </div>
+      <div class="code-block">@keyframes slideIn {
+  from { transform: translateX(-100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>颜色渐变动画</h2>
+      <div class="demo-area">
+        <div class="box" style="width: 120px; height: 60px; animation: colorShift 2s ease-in-out infinite;">颜色渐变</div>
+      </div>
+      <div class="code-block">@keyframes colorShift {
+  0% { background-color: #667eea; }
+  50% { background-color: #764ba2; }
+  100% { background-color: #667eea; }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>闪烁动画</h2>
+      <div class="demo-area">
+        <div class="box blue anim-flash">闪烁</div>
+      </div>
+      <div class="code-block">@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>animation-fill-mode 对比</h2>
+      <div class="demo-area">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <div class="box blue" id="fill-none">none</div>
+          <div class="box blue" id="fill-forwards">forwards</div>
+          <div class="box blue" id="fill-both">both</div>
+        </div>
+      </div>
+      <p class="desc"><span class="tag">提示</span> 点击按钮触发动画，观察动画结束后元素的最终状态。</p>
+    </div>
+
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block">/* 定义关键帧 */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 使用动画 */
+.element {
+  animation: slideIn 0.5s ease-out forwards;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 43+ ✓</li>
+          <li>Firefox 16+ ✓</li>
+          <li>Safari 9+ ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 动画演示
+    const demoStates = {
+      'fill-none': { x: -100, y: 0 },
+      'fill-forwards': { x: -100, y: 0 },
+      'fill-both': { x: -100, y: 0 }
+    };
+    
+    Object.keys(demoStates).forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('click', () => {
+        el.style.animation = 'none';
+        el.offsetHeight; // 强制重绘
+        el.style.animation = '';
+        
+        switch(id) {
+          case 'fill-none':
+            el.style.animation = 'slideIn 0.5s ease forwards';
+            setTimeout(() => el.style.animation = 'none', 500);
+            break;
+          case 'fill-forwards':
+            el.style.animation = 'slideIn 0.5s ease forwards';
+            break;
+          case 'fill-both':
+            el.style.animation = 'slideIn 0.5s ease forwards';
+            break;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

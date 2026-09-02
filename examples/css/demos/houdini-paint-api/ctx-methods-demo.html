@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Paint API — ctx 绘图方法演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .section h3 { font-size: 14px; color: #8b949e; margin: 16px 0 8px; }
+    .demo-canvas { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .canvas-item { flex: 1; min-width: 200px; }
+    .canvas-box { height: 150px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 8px; position: relative; }
+    .canvas-label { font-size: 12px; color: #8b949e; text-align: center; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    th { color: #58a6ff; font-weight: 600; }
+    td:first-child { color: #f0883e; font-family: monospace; }
+    tr:hover { background: rgba(88,166,255,0.05); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+    .badge-no { background: #da3633; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Paint API — ctx 绘图方法详解</h1>
+    <p class="subtitle">paint(ctx, geom, properties) 回调中 ctx 绘图上下文支持的常用方法</p>
+
+    <div class="info">
+      <strong>浏览器支持：</strong>
+      <span class="badge badge-yes">Chrome 65+</span>
+      <span class="badge badge-yes">Edge 79+</span>
+      <span class="badge badge-no">Firefox ❌</span>
+      <span class="badge badge-no">Safari ❌</span>
+      &nbsp;|&nbsp; 需要 HTTP 服务器或 localhost 访问
+    </div>
+
+    <!-- 矩形操作 -->
+    <div class="section">
+      <h2>1. 矩形操作方法</h2>
+      <div class="demo-canvas" id="rect-demos">
+        <div class="canvas-item">
+          <div class="canvas-box" id="rect-fill"></div>
+          <p class="canvas-label">fillRect — 填充矩形</p>
+        </div>
+        <div class="canvas-item">
+          <div class="canvas-box" id="rect-stroke"></div>
+          <p class="canvas-label">strokeRect — 描边矩形</p>
+        </div>
+        <div class="canvas-item">
+          <div class="canvas-box" id="rect-clear"></div>
+          <p class="canvas-label">clearRect — 清除区域</p>
+        </div>
+      </div>
+      <div class="code-block">paint(ctx, geom) {
+  // 填充矩形
+  ctx.fillStyle = '#6366f1';
+  ctx.fillRect(10, 10, 80, 50);
+
+  // 描边矩形
+  ctx.strokeStyle = '#ec4899';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(10, 70, 80, 50);
+
+  // 清除区域（透明）
+  ctx.clearRect(30, 30, 40, 40);
+}</div>
+    </div>
+
+    <!-- 渐变 -->
+    <div class="section">
+      <h2>2. 渐变方法</h2>
+      <div class="demo-canvas" id="gradient-demos">
+        <div class="canvas-item">
+          <div class="canvas-box" id="gradient-linear"></div>
+          <p class="canvas-label">createLinearGradient</p>
+        </div>
+        <div class="canvas-item">
+          <div class="canvas-box" id="gradient-radial"></div>
+          <p class="canvas-label">createRadialGradient</p>
+        </div>
+      </div>
+      <div class="code-block">// 线性渐变
+const linear = ctx.createLinearGradient(0, 0, geom.width, geom.height);
+linear.addColorStop(0, '#f97316');
+linear.addColorStop(0.5, '#eab308');
+linear.addColorStop(1, '#22c55e');
+ctx.fillStyle = linear;
+ctx.fillRect(0, 0, geom.width, geom.height);
+
+// 径向渐变
+const radial = ctx.createRadialGradient(
+  geom.width/2, geom.height/2, 0,
+  geom.width/2, geom.height/2, geom.width/2
+);
+radial.addColorStop(0, '#fff');
+radial.addColorStop(1, '#000');
+ctx.fillStyle = radial;
+ctx.fillRect(0, 0, geom.width, geom.height);</div>
+    </div>
+
+    <!-- 路径绘制 -->
+    <div class="section">
+      <h2>3. 路径绘制方法</h2>
+      <div class="demo-canvas" id="path-demos">
+        <div class="canvas-item">
+          <div class="canvas-box" id="path-circle"></div>
+          <p class="canvas-label">arc — 圆弧</p>
+        </div>
+        <div class="canvas-item">
+          <div class="canvas-box" id="path-polygon"></div>
+          <p class="canvas-label">lineTo — 多边形</p>
+        </div>
+        <div class="canvas-item">
+          <div class="canvas-box" id="path-heart"></div>
+          <p class="canvas-label">bezierCurveTo — 爱心</p>
+        </div>
+      </div>
+      <div class="code-block">// 圆弧
+ctx.beginPath();
+ctx.arc(geom.width/2, geom.height/2, 40, 0, Math.PI * 2);
+ctx.fillStyle = '#f97316';
+ctx.fill();
+
+// 多边形
+ctx.beginPath();
+ctx.moveTo(geom.width/2, 10);
+ctx.lineTo(geom.width - 10, geom.height - 10);
+ctx.lineTo(10, geom.height - 10);
+ctx.closePath();
+ctx.fillStyle = '#8b5cf6';
+ctx.fill();
+
+// 贝塞尔曲线
+ctx.beginPath();
+ctx.moveTo(geom.width/2, geom.height);
+ctx.bezierCurveTo(0, geom.height*0.7, 0, geom.height*0.3, geom.width/2, geom.height*0.3);
+ctx.bezierCurveTo(geom.width, geom.height*0.3, geom.width, geom.height*0.7, geom.width/2, geom.height);
+ctx.fillStyle = '#ec4899';
+ctx.fill();</div>
+    </div>
+
+    <!-- 方法对照表 -->
+    <div class="section">
+      <h2>4. ctx 方法速查表</h2>
+      <table>
+        <thead>
+          <tr><th>方法</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>fillRect(x,y,w,h)</td><td>填充矩形区域</td></tr>
+          <tr><td>strokeRect(x,y,w,h)</td><td>描边矩形区域</td></tr>
+          <tr><td>clearRect(x,y,w,h)</td><td>清除矩形区域（变透明）</td></tr>
+          <tr><td>createLinearGradient(x0,y0,x1,y1)</td><td>创建线性渐变</td></tr>
+          <tr><td>createRadialGradient(x0,y0,r0,x1,y1,r1)</td><td>创建径向渐变</td></tr>
+          <tr><td>beginPath()</td><td>开始新路径</td></tr>
+          <tr><td>moveTo(x,y)</td><td>移动画笔到坐标</td></tr>
+          <tr><td>lineTo(x,y)</td><td>画线到坐标</td></tr>
+          <tr><td>arc(x,y,r,start,end)</td><td>画圆弧</td></tr>
+          <tr><td>bezierCurveTo(cp1x,cp1y,cp2x,cp2y,x,y)</td><td>贝塞尔曲线</td></tr>
+          <tr><td>quadraticCurveTo(cpx,cpy,x,y)</td><td>二次贝塞尔曲线</td></tr>
+          <tr><td>closePath()</td><td>闭合路径</td></tr>
+          <tr><td>fill()</td><td>填充路径</td></tr>
+          <tr><td>stroke()</td><td>描边路径</td></tr>
+          <tr><td>clip()</td><td>裁剪后续绘制区域</td></tr>
+          <tr><td>save()</td><td>保存绘图状态</td></tr>
+          <tr><td>restore()</td><td>恢复绘图状态</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- inputProperties 示例 -->
+    <div class="section">
+      <h2>5. inputProperties 自定义属性</h2>
+      <div class="demo-canvas" id="props-demo">
+        <div class="canvas-item">
+          <div class="canvas-box" id="props-box"></div>
+          <p class="canvas-label">--custom-color / --custom-size</p>
+        </div>
+      </div>
+      <div class="code-block">class CustomPaint {
+  // 声明要监听的自定义属性
+  static get inputProperties() {
+    return ['--custom-color', '--custom-size'];
+  }
+
+  paint(ctx, geom, properties) {
+    // 读取自定义属性值
+    const color = properties.get('--custom-color')?.toString() || '#6366f1';
+    const size = parseFloat(properties.get('--custom-size')) || 20;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(geom.width/2, geom.height/2, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+registerPaint('custom-circle', CustomPaint);
+
+/* CSS 使用 */
+.element {
+  --custom-color: #ec4899;
+  --custom-size: 30;
+  background-image: paint(custom-circle);
+}</div>
+    </div>
+
+  </div>
+
+  <script>
+    // 模拟 paint() 方法的 Canvas 渲染
+    // 注：在真实 Houdini 中，这些需要 worklet 文件和 CSS.paintWorklet.addModule()
+    // 这里用 Canvas 2D API 直接渲染来演示 ctx 方法
+
+    function simulatePaint(demoId, paintFn) {
+      const el = document.getElementById(demoId);
+      const canvas = document.createElement('canvas');
+      canvas.width = el.offsetWidth;
+      canvas.height = el.offsetHeight;
+      el.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const geom = { width: canvas.width, height: canvas.height };
+      paintFn(ctx, geom);
+    }
+
+    // 1. 矩形操作
+    simulatePaint('rect-fill', (ctx, geom) => {
+      ctx.fillStyle = '#6366f1';
+      ctx.fillRect(10, 10, 80, 50);
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fillRect(50, 30, 80, 50);
+    });
+
+    simulatePaint('rect-stroke', (ctx, geom) => {
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(10, 10, 80, 50);
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(50, 30, 80, 50);
+    });
+
+    simulatePaint('rect-clear', (ctx, geom) => {
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(0, 0, geom.width, geom.height);
+      ctx.clearRect(30, 30, geom.width - 60, geom.height - 60);
+    });
+
+    // 2. 渐变
+    simulatePaint('gradient-linear', (ctx, geom) => {
+      const grad = ctx.createLinearGradient(0, 0, geom.width, geom.height);
+      grad.addColorStop(0, '#f97316');
+      grad.addColorStop(0.5, '#eab308');
+      grad.addColorStop(1, '#22c55e');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, geom.width, geom.height);
+    });
+
+    simulatePaint('gradient-radial', (ctx, geom) => {
+      const grad = ctx.createRadialGradient(
+        geom.width/2, geom.height/2, 5,
+        geom.width/2, geom.height/2, geom.width/2
+      );
+      grad.addColorStop(0, '#fff');
+      grad.addColorStop(0.5, '#fbbf24');
+      grad.addColorStop(1, '#000');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, geom.width, geom.height);
+    });
+
+    // 3. 路径
+    simulatePaint('path-circle', (ctx, geom) => {
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(geom.width/2, geom.height/2, 40, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    simulatePaint('path-polygon', (ctx, geom) => {
+      const cx = geom.width/2, cy = geom.height/2, r = 50, sides = 6;
+      ctx.fillStyle = '#8b5cf6';
+      ctx.beginPath();
+      for (let i = 0; i <= sides; i++) {
+        const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + r * Math.cos(angle);
+        const y = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    simulatePaint('path-heart', (ctx, geom) => {
+      const cx = geom.width/2, cy = geom.height/2, scale = Math.min(geom.width, geom.height) / 150;
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 30 * scale);
+      ctx.bezierCurveTo(cx - 40*scale, cy - 10*scale, cx - 60*scale, cy + 20*scale, cx, cy + 50*scale);
+      ctx.bezierCurveTo(cx + 60*scale, cy + 20*scale, cx + 40*scale, cy - 10*scale, cx, cy + 30*scale);
+      ctx.fill();
+    });
+
+    // 5. 自定义属性（模拟）
+    simulatePaint('props-box', (ctx, geom) => {
+      const color = '#ec4899';
+      const size = 30;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(geom.width/2, geom.height/2, size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  </script>
+</body>
+</html>

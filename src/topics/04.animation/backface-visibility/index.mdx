@@ -1,0 +1,180 @@
+---
+title: "CSS backface-visibility"
+category: "动画"
+tags:
+  - CSS
+  - backface-visibility
+  - 背面可见性
+  - 3D变换
+description: "详解CSS backface-visibility属性控制元素背面可见性"
+keywords: "backface-visibility, 背面可见, 3D翻转, CSS动画"
+---
+
+# CSS backface-visibility
+
+## 概述
+
+`backface-visibility` 属性用于控制元素在 3D 空间中进行旋转变换时，背面是否可见。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本语法
+
+```css
+.element {
+  backface-visibility: visible | hidden;
+}
+```
+
+### 属性值
+
+| 值 | 说明 |
+|---|------|
+| `visible` | 背面可见（默认） |
+| `hidden` | 背面不可见 |
+
+{/* @playground id="demo" mode="demo" */}
+
+## 使用场景
+
+### 1. 3D 卡片翻转
+
+```css
+.card {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.card-front {
+  /* 默认显示正面 */
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  /* 翻转到背面时，正面隐藏，显示背面 */
+}
+```
+
+### 2. 3D 按钮点击效果
+
+```css
+.button {
+  backface-visibility: hidden;
+  transition: transform 0.2s;
+}
+
+.button:active {
+  transform: rotateX(90deg);
+}
+```
+
+### 3. 照片画廊
+
+```css
+.photo {
+  backface-visibility: hidden;
+  transition: transform 0.4s;
+}
+
+.photo:hover {
+  transform: rotateY(15deg) scale(1.05);
+}
+```
+
+## 实际应用
+
+### 1. 翻转名片
+
+```css
+.business-card {
+  width: 300px;
+  height: 180px;
+  position: relative;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.side {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.front {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.back {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.business-card.flipped {
+  transform: rotateY(180deg);
+}
+```
+
+### 2. 3D 立方体
+
+```css
+.cube-face {
+  backface-visibility: hidden;
+}
+```
+
+### 3. 头像翻转效果
+
+```css
+.avatar-container {
+  perspective: 500px;
+}
+
+.avatar {
+  transition: transform 0.5s;
+  backface-visibility: hidden;
+}
+
+.avatar:hover {
+  transform: rotateY(180deg);
+}
+```
+
+## 与 visibility 的区别
+
+| 属性 | 作用 | 说明 |
+|------|------|------|
+| `backface-visibility` | 仅在 3D 变换时生效 | 控制背面是否可见 |
+| `visibility` | 始终生效 | 控制元素是否可见 |
+
+## 浏览器兼容性
+
+`backface-visibility` 兼容性良好：
+
+- Chrome 36+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 性能注意事项
+
+1. **GPU 加速**：`backface-visibility: hidden` 会启用 GPU 加速
+2. **合理使用**：仅在需要 3D 翻转效果时使用
+3. **避免过度使用**：每个使用该属性的元素都会增加 GPU 负担
+
+## 参考资料
+
+- [backface-visibility - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/backface-visibility)
+- [CSS Transforms - CSS-Tricks](https://css-tricks.com/almanac/properties/b/backface-visibility/)
