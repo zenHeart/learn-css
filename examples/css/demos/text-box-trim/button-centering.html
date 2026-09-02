@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>按钮垂直居中 - text-box-trim</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 30px;
+    }
+
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #16213e;
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #e94560;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    .comparison {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* 传统方式：手动调整 padding */
+    .btn-traditional {
+      padding-block: 5px; /* 手动减少上下 padding 补偿半行距 */
+      padding-inline: 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    /* 使用 text-box-trim */
+    .btn-trimmed {
+      text-box: trim-both cap alphabetic;
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    /* 背景条，便于观察对齐 */
+    .btn-wrapper {
+      position: relative;
+    }
+
+    .btn-traditional-wrapper,
+    .btn-trimmed-wrapper {
+      display: inline-block;
+      background: rgba(233, 69, 96, 0.3);
+      border: 1px dashed #e94560;
+      padding: 5px;
+      margin: 10px;
+    }
+
+    .label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    /* 文字说明 */
+    .description {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 20px;
+    }
+
+    code {
+      background: #0f3460;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .highlight {
+      color: #e94560;
+    }
+  </style>
+</head>
+<body>
+  <h1>text-box-trim: 按钮垂直居中</h1>
+
+  <div class="demo-section">
+    <h2>对比：传统 padding vs text-box-trim</h2>
+    <div class="comparison">
+      <div>
+        <div class="btn-traditional-wrapper">
+          <button class="btn-traditional">按钮文本</button>
+        </div>
+        <span class="label">传统方式 padding-block: 5px</span>
+      </div>
+
+      <div>
+        <div class="btn-trimmed-wrapper">
+          <button class="btn-trimmed">按钮文本</button>
+        </div>
+        <span class="label">text-box: trim-both cap alphabetic</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="description">
+    <p>左侧红色虚线边框显示元素实际占据的空间。</p>
+    <p>使用 <code>text-box: trim-both cap alphabetic</code> 后，<span class="highlight">padding: 10px</span> 在四个方向上真正相等，</p>
+    <p>无需手动调整上下 padding 来补偿半行距。</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>不同字体的效果</h2>
+    <p class="description">每种字体的半行距不同，但 text-box-trim 可以统一修剪效果</p>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
+      <div class="btn-trimmed-wrapper" style="font-family: 'Times New Roman', serif;">
+        <button class="btn-trimmed" style="font-family: 'Times New Roman', serif;">Serif</button>
+      </div>
+      <div class="btn-trimmed-wrapper" style="font-family: 'Arial', sans-serif;">
+        <button class="btn-trimmed" style="font-family: 'Arial', sans-serif;">Sans-serif</button>
+      </div>
+      <div class="btn-trimmed-wrapper" style="font-family: 'Courier New', monospace;">
+        <button class="btn-trimmed" style="font-family: 'Courier New', monospace;">Monospace</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>浏览器兼容性</h2>
+    <p class="description">
+      <span style="color: #4ade80;">✓ Chrome 133+</span> &nbsp;
+      <span style="color: #4ade80;">✓ Safari 18.2+</span> &nbsp;
+      <span style="color: #f87171;">✗ Firefox (不支持)</span>
+    </p>
+  </div>
+</body>
+</html>

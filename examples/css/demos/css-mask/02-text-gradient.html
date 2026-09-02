@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Mask - 文字渐变效果</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 50px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .demo-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+    }
+
+    .demo-section {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .demo-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 400;
+    }
+
+    /* ========== 案例1：横向渐变遮罩文字 ========== */
+    .text-gradient-h {
+      font-size: 64px;
+      font-weight: 900;
+      display: inline-block;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f64f59, #f64f59, #764ba2, #667eea);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      mask-image: linear-gradient(
+        90deg,
+        black 0%,
+        black 20%,
+        transparent 40%,
+        transparent 60%,
+        black 80%,
+        black 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        black 0%,
+        black 20%,
+        transparent 40%,
+        transparent 60%,
+        black 80%,
+        black 100%
+      );
+    }
+
+    /* ========== 案例2：扫描线动画效果 ========== */
+    .text-scan {
+      font-size: 72px;
+      font-weight: 900;
+      display: inline-block;
+      position: relative;
+      background: linear-gradient(180deg, #11998e 0%, #38ef7d 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-scan::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: linear-gradient(90deg, #38ef7d, #11998e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 30%,
+        black 70%,
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 30%,
+        black 70%,
+        transparent 100%
+      );
+      animation: scan 2s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+    }
+
+    /* ========== 案例3：多色渐变文字 ========== */
+    .text-multi {
+      font-size: 56px;
+      font-weight: 900;
+      display: inline-block;
+      background: linear-gradient(
+        135deg,
+        #ff6b6b 0%,
+        #feca57 25%,
+        #48dbfb 50%,
+        #ff9ff3 75%,
+        #ff6b6b 100%
+      );
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+      );
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+      );
+      animation: gradientMove 3s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ========== 案例4：遮罩 Reveal 动画 ========== */
+    .text-reveal-container {
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .text-reveal {
+      font-size: 48px;
+      font-weight: 700;
+      display: block;
+      background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: translateY(100%);
+      animation: revealUp 1s ease forwards;
+    }
+
+    .text-reveal-mask {
+      position: absolute;
+      inset: 0;
+      background: #0f0f1a;
+      animation: revealMask 1s ease forwards;
+    }
+
+    @keyframes revealUp {
+      to { transform: translateY(0); }
+    }
+
+    @keyframes revealMask {
+      to { transform: translateY(-100%); }
+    }
+
+    /* ========== 案例5：光晕文字 ========== */
+    .text-glow {
+      font-size: 64px;
+      font-weight: 900;
+      display: inline-block;
+      position: relative;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+    }
+
+    .text-glow::before {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: linear-gradient(45deg, #ff6b6b, #feca57, #ff6b6b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      mask-image: radial-gradient(
+        ellipse at center,
+        black 0%,
+        black 30%,
+        transparent 60%
+      );
+      -webkit-mask-image: radial-gradient(
+        ellipse at center,
+        black 0%,
+        black 30%,
+        transparent 60%
+      );
+      opacity: 0.8;
+    }
+
+    .desc {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Mask 案例二：文字渐变效果</h1>
+
+  <div class="demo-container">
+    <!-- 案例1：横向渐变遮罩 -->
+    <div class="demo-section">
+      <h2>1. 横向渐变遮罩</h2>
+      <div class="row">
+        <span class="text-gradient-h">GRADIENT</span>
+      </div>
+      <p class="desc">
+        使用 linear-gradient 遮罩实现左右两端透明过渡的效果<br>
+        mask-image 控制文字只在中间 20%-80% 区域可见
+      </p>
+    </div>
+
+    <!-- 案例2：扫描线动画 -->
+    <div class="demo-section">
+      <h2>2. 扫描线动画</h2>
+      <div class="row">
+        <span class="text-scan" data-text="SCAN">SCAN</span>
+      </div>
+      <p class="desc">
+        利用 mask 的半透明特性实现光束扫过文字的动画效果<br>
+        通过 ::after 伪元素叠加，并使用 mask 控制可见区域
+      </p>
+    </div>
+
+    <!-- 案例3：多色渐变动画 -->
+    <div class="demo-section">
+      <h2>3. 多色渐变 + 动态背景</h2>
+      <div class="row">
+        <span class="text-multi">RAINBOW</span>
+      </div>
+      <p class="desc">
+        背景渐变 + mask 遮罩 + background-position 动画<br>
+        实现彩虹渐变流动穿过文字的效果
+      </p>
+    </div>
+
+    <!-- 案例4：遮罩 Reveal 动画 -->
+    <div class="demo-section">
+      <h2>4. 遮罩 Reveal 入场动画</h2>
+      <div class="row">
+        <div class="text-reveal-container">
+          <div class="text-reveal-mask"></div>
+          <span class="text-reveal">REVEAL</span>
+        </div>
+      </div>
+      <p class="desc">
+        文字上方覆盖遮罩层，动画移除遮罩的同时文字上移入场<br>
+        遮罩层下移消失，文字从下方渐入
+      </p>
+    </div>
+
+    <!-- 案例5：光晕文字 -->
+    <div class="demo-section">
+      <h2>5. 光晕中心渐变</h2>
+      <div class="row">
+        <span class="text-glow" data-text="GLOW">GLOW</span>
+      </div>
+      <p class="desc">
+        使用 radial-gradient 遮罩实现中心亮、边缘暗的光晕效果<br>
+        结合 text-shadow 增强氛围感
+      </p>
+    </div>
+  </div>
+</body>
+</html>
