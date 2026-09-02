@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视差滚动效果 — CSS Houdini Animation Worklet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; overflow-x: hidden; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-bottom: 24px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .unsupported { background: rgba(240,136,62,0.1); border: 1px solid #f0883e; border-radius: 6px; padding: 16px; margin-bottom: 24px; color: #f0883e; font-size: 14px; display: none; }
+    .unsupported.show { display: block; }
+
+    /* 视差容器 */
+    .parallax-wrapper {
+      position: relative;
+      height: 200vh; /* 确保有足够滚动空间 */
+      overflow: hidden;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    /* 背景星空层 */
+    .parallax-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 50%, #2d1b4e 100%);
+      z-index: 0;
+    }
+
+    /* 星星 */
+    .stars { position: absolute; width: 100%; height: 100%; }
+    .star { position: absolute; background: #fff; border-radius: 50%; }
+    .star:nth-child(1) { width: 2px; height: 2px; top: 10%; left: 20%; opacity: 0.8; }
+    .star:nth-child(2) { width: 3px; height: 3px; top: 25%; left: 60%; opacity: 0.6; }
+    .star:nth-child(3) { width: 2px; height: 2px; top: 40%; left: 35%; opacity: 0.9; }
+    .star:nth-child(4) { width: 4px; height: 4px; top: 15%; left: 80%; opacity: 0.5; }
+    .star:nth-child(5) { width: 2px; height: 2px; top: 55%; left: 15%; opacity: 0.7; }
+    .star:nth-child(6) { width: 3px; height: 3px; top: 70%; left: 75%; opacity: 0.8; }
+    .star:nth-child(7) { width: 2px; height: 2px; top: 85%; left: 45%; opacity: 0.6; }
+    .star:nth-child(8) { width: 5px; height: 5px; top: 30%; left: 50%; opacity: 0.4; box-shadow: 0 0 6px 2px rgba(255,255,255,0.3); }
+
+    /* 中间云层 */
+    .parallax-cloud {
+      position: absolute; width: 100%; height: 200px;
+      z-index: 1; opacity: 0.4;
+    }
+    .cloud { position: absolute; background: rgba(255,255,255,0.1); border-radius: 50px; }
+    .cloud-1 { width: 200px; height: 60px; top: 30%; left: -50px; }
+    .cloud-2 { width: 150px; height: 40px; top: 50%; left: 60%; }
+    .cloud-3 { width: 180px; height: 50px; top: 65%; left: 20%; }
+
+    /* 前景山峦 */
+    .parallax-mountain {
+      position: absolute; bottom: 0; width: 100%; height: 300px;
+      z-index: 2;
+    }
+    .mountain-back {
+      position: absolute; bottom: 0; width: 100%;
+      height: 200px;
+      background: linear-gradient(180deg, transparent 0%, #1e3a5f 100%);
+      clip-path: polygon(0% 100%, 0% 60%, 20% 30%, 40% 50%, 60% 20%, 80% 45%, 100% 35%, 100% 100%);
+    }
+    .mountain-front {
+      position: absolute; bottom: 0; width: 100%;
+      height: 150px;
+      background: linear-gradient(180deg, transparent 0%, #0f1f33 100%);
+      clip-path: polygon(0% 100%, 0% 50%, 15% 70%, 30% 40%, 50% 65%, 70% 35%, 85% 55%, 100% 30%, 100% 100%);
+    }
+
+    /* 内容层 */
+    .parallax-content {
+      position: relative; z-index: 3; padding: 100px 20px;
+      text-align: center;
+    }
+    .content-title { font-size: 36px; color: #fff; margin-bottom: 16px; text-shadow: 0 2px 20px rgba(0,0,0,0.5); }
+    .content-text { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+    /* 滚动指示 */
+    .scroll-hint {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #161b22; border: 1px solid #30363d; border-radius: 20px;
+      padding: 8px 16px; font-size: 12px; color: #8b949e; z-index: 100;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    /* 说明区域 */
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 40px 0; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 12px; }
+    .section p { font-size: 13px; color: #8b949e; line-height: 1.6; }
+    code { background: #21262d; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #79c0ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>视差滚动效果</h1>
+    <p class="subtitle">使用 ScrollTimeline + Animation Worklet 实现多图层不同速度的视差效果</p>
+
+    <div class="warning">
+      ⚠️ 需要通过 HTTP 服务器访问。滚动页面查看视差效果。
+    </div>
+
+    <div class="unsupported" id="unsupported">
+      ⚠️ 您的浏览器不支持 Animation Worklet。请使用 Chrome 85+ 或 Edge 85+。
+    </div>
+
+    <div class="info">
+      <strong>原理：</strong>不同图层绑定不同 speed 参数的 animator。
+      星星层 speed=0.3（慢），云层 speed=0.6（中），山峦层 speed=1.0（快）。
+      通过 <code>currentTime * speed</code> 控制每个图层的 translateY。
+    </div>
+
+    <!-- 视差演示区域 -->
+    <div class="parallax-wrapper" id="parallax-wrapper">
+      <!-- 背景星空 -->
+      <div class="parallax-bg" id="layer-bg">
+        <div class="stars">
+          <div class="star"></div><div class="star"></div><div class="star"></div>
+          <div class="star"></div><div class="star"></div><div class="star"></div>
+          <div class="star"></div><div class="star"></div>
+        </div>
+      </div>
+
+      <!-- 云层 -->
+      <div class="parallax-cloud" id="layer-cloud">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+      </div>
+
+      <!-- 山峦 -->
+      <div class="parallax-mountain" id="layer-mountain">
+        <div class="mountain-back"></div>
+        <div class="mountain-front"></div>
+      </div>
+
+      <!-- 内容 -->
+      <div class="parallax-content">
+        <div class="content-title">滚动探索</div>
+        <div class="content-text">
+          星空以 0.3 倍速度移动，云层以 0.6 倍速度移动，山峦随页面同步滚动。
+          所有动画完全由滚动驱动，运行在独立线程。
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">↓ 滚动页面查看视差效果 ↓</div>
+
+    <div class="section">
+      <h2>核心实现</h2>
+      <p>
+        每个图层对应一个 <code>ParallaxLayerAnimator</code> 实例，通过不同的 <code>speed</code> 参数实现不同滚动速度。
+        <code>currentTime</code> 来自 <code>ScrollTimeline</code>，范围 0~1。
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>公式：</strong><code>translateY = scrollProgress * windowHeight * speed</code>
+      </p>
+      <p style="margin-top: 12px;">
+        这种方式的优点：所有视差计算都在 Worklet 线程完成，主线程上的 JS 任务（如按钮点击、DOM 更新）完全不受影响。
+      </p>
+    </div>
+  </div>
+
+  <!-- Worklet 代码 -->
+  <script>
+    // ============================================================
+    // 视差图层动画器
+    // 每个实例根据 speed 参数控制不同的滚动速度
+    // ============================================================
+
+    class ParallaxLayerAnimator {
+      constructor(params) {
+        // speed 控制视差速度：0.3=慢速层，0.6=中速层，1.0=同步层
+        this.speed = params.speed ?? 1.0;
+        this.windowHeight = params.windowHeight ?? window.innerHeight;
+      }
+
+      animate(currentTime, effect) {
+        if (!effect.target) return;
+        // 视差位移 = 滚动进度 * 窗口高度 * 速度系数
+        const translateY = currentTime * this.windowHeight * (this.speed - 1);
+        effect.target.style.transform = `translateY(${translateY}px)`;
+      }
+    }
+
+    registerAnimator('parallax-layer', ParallaxLayerAnimator);
+  </script>
+
+  <script>
+    // ============================================================
+    // 主脚本：初始化视差动画
+    // ============================================================
+
+    if (!('animationWorklet' in CSS)) {
+      document.getElementById('unsupported').classList.add('show');
+    } else {
+      async function initParallax() {
+        const wrapper = document.getElementById('parallax-wrapper');
+        const wrapperHeight = wrapper.offsetHeight;
+        const windowHeight = window.innerHeight;
+
+        // 创建 ScrollTimeline，滚动范围只在本容器内
+        const scrollTimeline = new ScrollTimeline({
+          scrollSource: document.documentElement,
+          orientation: 'block',
+          startScrollOffset: wrapper.offsetTop,
+          endScrollOffset: wrapper.offsetTop + wrapperHeight - windowHeight
+        });
+
+        // 定义各图层及其速度
+        const layers = [
+          { id: 'layer-bg', speed: 0.3 },      // 星星层，最慢
+          { id: 'layer-cloud', speed: 0.6 },   // 云层，中速
+          { id: 'layer-mountain', speed: 1.0 } // 山峦层，同步
+        ];
+
+        // 为每个图层创建 WorkletAnimation
+        layers.forEach(({ id, speed }) => {
+          const elem = document.getElementById(id);
+          const anim = new WorkletAnimation(
+            'parallax-layer',
+            elem,
+            scrollTimeline,
+            { speed: speed, windowHeight: windowHeight }
+          );
+          anim.play();
+        });
+      }
+
+      initParallax();
+    }
+  </script>
+</body>
+</html>

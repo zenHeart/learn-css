@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Animation Worklet — 示例总览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .demo-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; transition: all 0.15s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .demo-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .demo-card h3 { font-size: 15px; color: #f0f6fc; margin-bottom: 8px; }
+    .demo-card p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+    .demo-card .tag { display: inline-block; padding: 2px 8px; background: #21262d; border-radius: 4px; font-size: 11px; color: #58a6ff; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+    .badge-no { background: #da3633; color: #fff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; margin-bottom: 24px; }
+    .note { font-size: 13px; color: #8b949e; margin-top: 24px; padding: 12px; background: rgba(88,166,255,0.05); border-radius: 4px; border-left: 3px solid #30363d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Animation Worklet</h1>
+    <p class="subtitle">通过 registerAnimator 注册自定义动画控制器，在独立线程运行的高性能动画</p>
+
+    <div class="warning">
+      ⚠️ Animation Worklet 需要通过 <strong>HTTP 服务器</strong> 访问才能运行。<br>
+      启动方式：<code>python -m http.server 8080</code> 或 <code>npx serve .</code>
+    </div>
+
+    <div class="info">
+      <strong>浏览器支持：</strong>
+      <span class="badge badge-yes">Chrome 85+</span>
+      <span class="badge badge-yes">Edge 85+</span>
+      <span class="badge badge-no">Firefox ❌</span>
+      <span class="badge badge-no">Safari ❌</span>
+    </div>
+
+    <div class="demo-grid">
+      <a class="demo-card" href="scroll-driven-demo.html">
+        <h3>滚动驱动动画</h3>
+        <p>演示 ScrollTimeline 驱动的工作原理。滚动页面查看动画效果，完全独立于主线程运行。</p>
+        <span class="tag">核心功能</span>
+      </a>
+
+      <a class="demo-card" href="timeline-demo.html">
+        <h3>时间线驱动动画</h3>
+        <p>使用 DocumentTimeline 驱动动画。包含滑动进入、渐变效果、数字计数等多种动画模式。</p>
+        <span class="tag">基础</span>
+      </a>
+
+      <a class="demo-card" href="parallax-demo.html">
+        <h3>视差滚动效果</h3>
+        <p>多个图层以不同速度滚动，创建深度感。纯滚动驱动，无 JavaScript 动画回调。</p>
+        <span class="tag">实战</span>
+      </a>
+    </div>
+
+    <div class="note">
+      <strong>注意：</strong>Animation Worklet 与 <code>CSS.scroll-driven-animations</code> 不同之处在于它使用 JavaScript Worklet，
+      可以实现更复杂的动画逻辑，但目前仅 Chromium 浏览器支持。
+    </div>
+  </div>
+</body>
+</html>
