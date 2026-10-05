@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>will-change 基础示例</title>
+  <style>
+    .box {
+      width: 100px;
+      height: 100px;
+      background: #4caf50;
+      transition: transform 0.5s;
+      /* 提示浏览器即将发生 transform 变化，提前优化渲染 */
+      /* will-change: transform; */
+    }
+    .box:hover {
+      transform: rotate(20deg) scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <h2>will-change 基础示例</h2>
+  <p>鼠标悬停在方块上，触发 transform 动画。<br>
+    <code>will-change: transform;</code> 提示浏览器提前优化渲染。</p>
+  <div class="box"></div>
+</body>
+</html>
