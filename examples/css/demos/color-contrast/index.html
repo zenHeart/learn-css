@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS color-contrast() 函数演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.6; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #f0883e; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin: 12px 0; }
+    
+    /* 基础演示卡片 */
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .color-card { background: #0d1117; border-radius: 8px; overflow: hidden; }
+    .color-swatch { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .color-label { padding: 8px 12px; font-size: 11px; color: #8b949e; font-family: 'SF Mono', Monaco, monospace; }
+    
+    /* 对比度计算器 */
+    .contrast-calc { display: flex; flex-direction: column; gap: 16px; }
+    .color-inputs { display: flex; gap: 16px; flex-wrap: wrap; }
+    .input-group { flex: 1; min-width: 200px; }
+    .input-group label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 6px; }
+    .input-group input[type="color"] { width: 100%; height: 40px; border: 1px solid #30363d; border-radius: 4px; background: #0d1117; cursor: pointer; }
+    .input-group input[type="text"] { width: 100%; height: 36px; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; padding: 0 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; }
+    
+    .contrast-result { display: flex; gap: 24px; align-items: center; padding: 16px; background: #0d1117; border-radius: 6px; }
+    .contrast-preview { width: 100px; height: 60px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .contrast-info { flex: 1; }
+    .contrast-ratio { font-size: 28px; font-weight: 600; color: #f0f6fc; }
+    .contrast-level { font-size: 13px; margin-top: 4px; }
+    .level-aaa { color: #3fb950; }
+    .level-aa { color: #a371f7; }
+    .level-fail { color: #f85149; }
+    
+    /* WCAG 标准说明 */
+    .wcag-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .wcag-table th, .wcag-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    .wcag-table th { color: #8b949e; font-weight: 500; }
+    .wcag-table td:first-child { font-weight: 500; color: #f0f6fc; }
+    
+    /* 自动文字颜色演示 */
+    .auto-text-demo { display: flex; flex-direction: column; gap: 12px; }
+    .text-card { padding: 16px 20px; border-radius: 8px; font-size: 14px; }
+    
+    /* 滑块控制 */
+    .slider-group { margin-bottom: 16px; }
+    .slider-group label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 6px; }
+    .slider-group input[type="range"] { width: 100%; height: 6px; -webkit-appearance: none; background: #30363d; border-radius: 3px; outline: none; }
+    .slider-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS color-contrast() 函数</h1>
+    <p class="subtitle">基于 WCAG 标准自动计算对比度颜色的 CSS 函数</p>
+
+    <!-- WCAG 标准说明 -->
+    <div class="section">
+      <h2>WCAG 对比度标准</h2>
+      <table class="wcag-table">
+        <thead>
+          <tr>
+            <th>级别</th>
+            <th>最小对比度</th>
+            <th>适用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AA</td>
+            <td>4.5:1</td>
+            <td>正常文字（小于18pt或14pt粗体）</td>
+          </tr>
+          <tr>
+            <td>AAA</td>
+            <td>7:1</td>
+            <td>增强对比度要求</td>
+          </tr>
+          <tr>
+            <td>AA 大字</td>
+            <td>3:1</td>
+            <td>大字（大于等于18pt或14pt粗体）</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="code-block">/* 语法 */
+color-contrast(&lt;基础颜色&gt; [&lt;候选颜色&gt;#])
+
+/* 示例 */
+color-contrast(#ffcc00, white, black, #333)
+/* 返回候选列表中第一个与 #ffcc00 对比度 >= 4.5:1 的颜色 */</div>
+    </div>
+
+    <!-- 对比度计算器 -->
+    <div class="section">
+      <h2>对比度计算器</h2>
+      <p class="info">输入两个颜色查看它们之间的 WCAG 对比度等级</p>
+      <div class="contrast-calc">
+        <div class="color-inputs">
+          <div class="input-group">
+            <label>背景颜色</label>
+            <input type="color" id="bg-color" value="#1a1a2e">
+            <input type="text" id="bg-hex" value="#1a1a2e" style="margin-top: 6px;">
+          </div>
+          <div class="input-group">
+            <label>文字颜色</label>
+            <input type="color" id="text-color" value="#ffffff">
+            <input type="text" id="text-hex" value="#ffffff" style="margin-top: 6px;">
+          </div>
+        </div>
+        <div class="contrast-result">
+          <div class="contrast-preview" id="contrast-preview">预览文字</div>
+          <div class="contrast-info">
+            <div class="contrast-ratio" id="contrast-ratio">21:1</div>
+            <div class="contrast-level" id="contrast-level">AAA 优秀</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 基础演示 -->
+    <div class="section">
+      <h2>基础演示</h2>
+      <p class="info">color-contrast() 从候选颜色列表中选择第一个满足 WCAG AA 标准（4.5:1）的颜色</p>
+      <div class="demo-grid">
+        <div class="color-card">
+          <div class="color-swatch" id="demo1-bg" style="background: #3498db;">白色文字</div>
+          <div class="color-label" id="demo1-label">#3498db</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" id="demo2-bg" style="background: #e74c3c;">白色文字</div>
+          <div class="color-label" id="demo2-label">#e74c3c</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" id="demo3-bg" style="background: #2ecc71;">白色文字</div>
+          <div class="color-label" id="demo3-label">#2ecc71</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" id="demo4-bg" style="background: #9b59b6;">白色文字</div>
+          <div class="color-label" id="demo4-label">#9b59b6</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" id="demo5-bg" style="background: #f39c12;">白色文字</div>
+          <div class="color-label" id="demo5-label">#f39c12</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" id="demo6-bg" style="background: #1abc9c;">白色文字</div>
+          <div class="color-label" id="demo6-label">#1abc9c</div>
+        </div>
+      </div>
+      <div class="code-block">/* CSS 中的使用方式（目前浏览器支持有限） */
+.card {
+  background: var(--brand-color);
+  color: color-contrast(var(--brand-color) white, black);
+}
+
+/* 实际渲染结果由浏览器计算得出 */</div>
+    </div>
+
+    <!-- 动态主题演示 -->
+    <div class="section">
+      <h2>动态主题适配</h2>
+      <p class="info">调整背景色的亮度，观察文字颜色如何自动适应</p>
+      <div class="slider-group">
+        <label>背景亮度 (L from oklch): <span id="l-value">0.70</span></label>
+        <input type="range" id="bg-luminance" min="0.1" max="0.95" step="0.01" value="0.70">
+      </div>
+      <div class="auto-text-demo">
+        <div class="text-card" id="dynamic-card" style="background: oklch(70% 0.15 250);">
+          自动选择的文字颜色示例
+        </div>
+      </div>
+      <div class="code-block">/* 根据背景亮度自动选择黑色或白色文字 */
+color: color-contrast(var(--bg) white, black);</div>
+    </div>
+
+    <!-- 颜色候选项演示 -->
+    <div class="section">
+      <h2>多级候选项</h2>
+      <p class="info">提供多个候选颜色，函数按顺序选择第一个满足对比度的</p>
+      <div class="demo-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #fff; color: #333;">浅色背景</div>
+          <div class="color-label">#fff → #333</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #333; color: #fff;">深色背景</div>
+          <div class="color-label">#333 → #fff</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #007bff; color: #fff;">蓝色背景</div>
+          <div class="color-label">#007bff → #fff</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #ffc107; color: #333;">黄色背景</div>
+          <div class="color-label">#ffc107 → #333</div>
+        </div>
+      </div>
+      <div class="code-block">/* 候选项按顺序检查，直到找到满足对比度的 */
+color: color-contrast(#ffc107, #1a1a1a, #333, #666, #999);
+/* #1a1a1a (对比度 ~14:1) 即满足，无需检查后续 */</div>
+    </div>
+
+    <!-- 兼容性说明 -->
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <table class="wcag-table">
+        <thead>
+          <tr>
+            <th>浏览器</th>
+            <th>支持状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chrome</td>
+            <td style="color: #f85149;">不支持（需要实验性标志）</td>
+          </tr>
+          <tr>
+            <td>Firefox</td>
+            <td style="color: #f85149;">不支持</td>
+          </tr>
+          <tr>
+            <td>Safari</td>
+            <td style="color: #a371f7;">技术预览版支持</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="info" style="margin-top: 12px;">🔧 建议使用 PostCSS 插件进行降级处理，或使用 @supports 检测。</p>
+    </div>
+
+  </div>
+
+  <script>
+    // 相对亮度计算（WCAG 标准）
+    function sRGBtoLinear(value) {
+      const v = value / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    }
+
+    function getLuminance(hex) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return 0.2126 * sRGBtoLinear(r) + 0.7152 * sRGBtoLinear(g) + 0.0722 * sRGBtoLinear(b);
+    }
+
+    function getContrastRatio(l1, l2) {
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function getWCAGLevel(ratio) {
+      if (ratio >= 7) return { name: 'AAA 优秀', class: 'level-aaa' };
+      if (ratio >= 4.5) return { name: 'AA 达标', class: 'level-aa' };
+      if (ratio >= 3) return { name: 'AA 大字', class: 'level-aa' };
+      return { name: '不达标', class: 'level-fail' };
+    }
+
+    // 对比度计算器
+    const bgColorInput = document.getElementById('bg-color');
+    const textColorInput = document.getElementById('text-color');
+    const bgHexInput = document.getElementById('bg-hex');
+    const textHexInput = document.getElementById('text-hex');
+    const contrastPreview = document.getElementById('contrast-preview');
+    const contrastRatio = document.getElementById('contrast-ratio');
+    const contrastLevel = document.getElementById('contrast-level');
+
+    function updateContrast() {
+      const bg = bgHexInput.value;
+      const text = textHexInput.value;
+      
+      const l1 = getLuminance(bg);
+      const l2 = getLuminance(text);
+      const ratio = getContrastRatio(l1, l2);
+      const level = getWCAGLevel(ratio);
+      
+      contrastPreview.style.background = bg;
+      contrastPreview.style.color = text;
+      contrastRatio.textContent = ratio.toFixed(2) + ':1';
+      contrastLevel.textContent = level.name;
+      contrastLevel.className = 'contrast-level ' + level.class;
+    }
+
+    bgColorInput.addEventListener('input', (e) => {
+      bgHexInput.value = e.target.value;
+      updateContrast();
+    });
+    
+    textColorInput.addEventListener('input', (e) => {
+      textHexInput.value = e.target.value;
+      updateContrast();
+    });
+    
+    bgHexInput.addEventListener('change', (e) => {
+      if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+        bgColorInput.value = e.target.value;
+        updateContrast();
+      }
+    });
+    
+    textHexInput.addEventListener('change', (e) => {
+      if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+        textColorInput.value = e.target.value;
+        updateContrast();
+      }
+    });
+
+    // 基础演示 - 模拟 color-contrast 结果
+    function simulateColorContrast(bgHex) {
+      const bgL = getLuminance(bgHex);
+      const whiteL = getLuminance('#ffffff');
+      const blackL = getLuminance('#000000');
+      
+      const whiteContrast = getContrastRatio(bgL, whiteL);
+      const blackContrast = getContrastRatio(bgL, blackL);
+      
+      return whiteContrast >= 4.5 ? '#ffffff' : '#000000';
+    }
+
+    const demoColors = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12', '#1abc9c'];
+    demoColors.forEach((color, i) => {
+      const textColor = simulateColorContrast(color);
+      const swatch = document.getElementById(`demo${i+1}-bg`);
+      const label = document.getElementById(`demo${i+1}-label`);
+      if (swatch) {
+        swatch.style.background = color;
+        swatch.style.color = textColor;
+        swatch.textContent = textColor === '#ffffff' ? '白色' : '黑色';
+      }
+      if (label) {
+        label.textContent = color + ' → ' + textColor;
+      }
+    });
+
+    // 动态主题滑块
+    const luminanceSlider = document.getElementById('bg-luminance');
+    const lValueDisplay = document.getElementById('l-value');
+    const dynamicCard = document.getElementById('dynamic-card');
+
+    luminanceSlider.addEventListener('input', (e) => {
+      const l = parseFloat(e.target.value);
+      lValueDisplay.textContent = l.toFixed(2);
+      dynamicCard.style.background = `oklch(${l} 0.15 250)`;
+      
+      // 模拟 color-contrast
+      // oklch(0.70 0.15 250) 对应大约 #6366f1
+      const bgColor = `oklch(${l} 0.15 250)`;
+      // 简化模拟：L > 0.5 用黑色，否则用白色
+      const textColor = l > 0.5 ? '#1a1a1a' : '#ffffff';
+      dynamicCard.style.color = textColor;
+    });
+
+    // 初始化
+    updateContrast();
+  </script>
+</body>
+</html>

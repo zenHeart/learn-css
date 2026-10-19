@@ -1,0 +1,202 @@
+---
+title: "CSS color-contrast() 函数"
+category: "基础知识"
+tags:
+  - CSS颜色
+  - color-contrast
+  - WCAG
+  - 对比度
+  - 无障碍
+description: "详解CSS color-contrast()函数的语法和使用场景，基于WCAG标准自动计算对比度颜色"
+keywords: "CSS color-contrast, WCAG对比度, 相对亮度, CSS颜色函数"
+---
+
+# CSS color-contrast() 函数
+
+## 概述
+
+`color-contrast()` 是 CSS Color Level 5 引入的实验性颜色函数，用于自动计算满足 WCAG 对比度标准的颜色值。这个函数接受一个基础颜色和一个对比度目标值，然后从候选颜色列表中选出第一个满足对比度要求的颜色。
+
+## 为什么需要 color-contrast()
+
+在设计无障碍界面时，确保文字与背景之间有足够的对比度是至关重要的。传统的做法是手动计算对比度或使用外部工具，而 `color-contrast()` 函数让我们可以在 CSS 中直接声明式地解决这个问题。
+
+## 基础语法
+
+```css
+color-contrast(<color> [<color>#] )
+```
+
+### 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `<color>` | 基础颜色，用于计算相对亮度 |
+| `[<color>#]` | 候选颜色列表，从中选出第一个满足对比度要求的颜色 |
+
+### 返回值
+
+函数返回候选颜色列表中第一个相对亮度与基础颜色对比度不低于 WCAG AA（4.5:1）或 AAA（7:1）标准的颜色。
+
+## 相对亮度与对比度计算
+
+### 相对亮度 (Relative Luminance)
+
+WCAG 定义的相对亮度计算公式：
+
+```css
+L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+```
+
+其中 R、G、B 需要先转换为线性 sRGB 值：
+
+```css
+if RsRGB <= 0.03928:
+  R = RsRGB / 12.92
+else:
+  R = ((RsRGB + 0.055) / 1.055) ^ 2.4
+
+/* G 和 B 同理 */
+```
+
+### 对比度 Ratio
+
+两个颜色之间的对比度计算：
+
+```css
+Contrast = (L1 + 0.05) / (L2 + 0.05)
+```
+
+其中 L1 是较亮颜色的相对亮度，L2 是较暗颜色的相对亮度。
+
+## WCAG 对比度标准
+
+| 级别 | 最小对比度 | 适用场景 |
+|------|-----------|---------|
+| AA | 4.5:1 | 正常文字、图标 |
+| AAA | 7:1 | 增强对比度要求 |
+
+```css
+/* 满足 AA 级别（4.5:1） */
+color-contrast(wheat, tan, sienna, darkbrown)
+
+/* 满足 AAA 级别（7:1） */
+color-contrast(wheat, tan, sienna)
+```
+
+## 实际应用场景
+
+### 1. 自动选择文字颜色
+
+根据背景色自动选择可读性最好的文字颜色：
+
+```css
+.card {
+  background: var(--brand-color);
+  color: color-contrast(var(--brand-color) white, black);
+}
+```
+
+### 2. 动态主题色适配
+
+在主题切换时自动保证文字可读性：
+
+```css
+.button {
+  background: var(--primary);
+  color: color-contrast(var(--primary) white, black, #333, #666);
+}
+
+@media (prefers-color-scheme: dark) {
+  .button {
+    --primary: oklch(70% 0.15 245);
+  }
+}
+```
+
+### 3. 渐进式颜色变体
+
+生成符合对比度要求的颜色变体：
+
+```css
+.card {
+  --bg: oklch(85% 0.1 200);
+  --text: color-contrast(var(--bg) #1a1a1a, #333, #666, #999);
+  --muted: color-contrast(var(--bg) #666, #888, #aaa);
+}
+```
+
+### 4. 图表配色自动对比
+
+在数据可视化中自动确保标签文字可读：
+
+```css
+.chart-bar {
+  background: var(--data-color);
+}
+.chart-label {
+  color: color-contrast(var(--data-color) white, black);
+}
+```
+
+## 浏览器兼容性
+
+`color-contrast()` 是一个实验性功能，目前支持度有限：
+
+- Chrome: 不支持（需要标志）
+- Firefox: 不支持
+- Safari: 技术预览版支持
+
+> **提示**：建议使用 [PostCSS 插件](https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-color-functional-notation) 进行降级处理，或使用 `@supports` 检测。
+
+```css
+/* 降级方案 */
+.button {
+  background: var(--primary);
+  color: var(--primary-text, white); /* 回退颜色 */
+}
+
+@supports (color: color-contrast(red sienna)) {
+  .button {
+    color: color-contrast(var(--primary) white, black);
+  }
+}
+```
+
+## 完整示例
+
+```css
+:root {
+  /* 品牌色 */
+  --primary: oklch(55% 0.2 245);
+  
+  /* 自动计算对比色 */
+  --primary-text: color-contrast(var(--primary) white, black);
+  --primary-subtle: color-contrast(var(--primary) #f5f5f5, #1a1a1a);
+}
+
+.card {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.card-muted {
+  background: var(--primary);
+  color: color-contrast(var(--primary) oklch(70% 0.1 245), oklch(40% 0.1 245));
+}
+```
+
+## 与其他颜色函数的对比
+
+| 函数 | 用途 | 典型场景 |
+|------|------|---------|
+| `color-contrast()` | 自动选择满足对比度的颜色 | 无障碍设计 |
+| `light-dark()` | 根据主题切换颜色 | 明暗模式 |
+| `oklch()` | 人眼感知一致的颜色空间 | 颜色渐变 |
+| `relative-color()` | 基于现有颜色计算新颜色 | 主题系统 |
+
+## 参考资料
+
+- [WCAG 2.1 对比度要求](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
+- [CSS Color Level 5 规范](https://drafts.csswg.org/css-color-5/)
+- [CSS color-contrast() - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-contrast)
