@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2px line-height 空行问题 — 行内格式化上下文</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; background: #f5f5f5; }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 14px; margin: 20px 0 10px; color: #555; }
+    .container { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .note { font-size: 13px; color: #666; margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #667eea; }
+    .warning { background: #fff3cd; border-left-color: #ffc107; }
+    .success { background: #d4edda; border-left-color: #28a745; }
+
+    .inline-demo {
+      background: #f0f0f0;
+      border: 1px dashed #ccc;
+      margin: 16px 0;
+      padding: 20px;
+    }
+    .line-box {
+      background: #e8f4e8;
+      border: 1px solid #27ae60;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .inline-text {
+      background: #667eea;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 16px;
+      /* line-height: 2px 会出现问题 */
+    }
+    .problem { line-height: 2px; }
+    .solution1 { line-height: 2px; font-size: 1px; /* 子元素设小 font-size */ }
+    .solution2 { font-size: 2px; line-height: 2px; /* 父元素设小 font-size */ }
+
+    .diagram {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 6px;
+      margin: 16px 0;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      color: #d4d4d4;
+    }
+    .diagram .label { color: #6a9955; font-size: 12px; }
+    .diagram .box { display: inline-block; vertical-align: middle; }
+    .diagram .line-box { background: #2d2; border: 1px solid #0f0; padding: 4px; margin: 2px; }
+    .diagram .inline-box { background: #667eea; color: #fff; padding: 3px 6px; border-radius: 2px; font-size: 14px; }
+    .diagram .content { background: #27ae60; color: #fff; padding: 2px 4px; border-radius: 2px; font-size: 14px; }
+
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare-table th { text-align: left; padding: 10px; background: #f5f5f5; border-bottom: 2px solid #ddd; }
+    .compare-table td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .tag-bad { background: #f8d7da; color: #721c24; }
+    .tag-good { background: #d4edda; color: #155724; }
+    .tag-neutral { background: #cce5ff; color: #004085; }
+
+    .visual-demo { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+    .visual-item { flex: 1; min-width: 200px; }
+    .visual-box { background: #f0f0f0; border: 1px solid #ddd; padding: 12px; border-radius: 4px; }
+    .visual-label { font-size: 11px; color: #888; margin-bottom: 8px; font-family: 'Consolas', monospace; }
+    .visual-text { font-size: 16px; line-height: 2px; background: #ddd; padding: 4px; }
+    .visual-text span { background: #667eea; color: #fff; padding: 2px 4px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <h1>2px line-height 空行问题 — 行内格式化上下文详解</h1>
+
+  <!-- 问题描述 -->
+  <div class="container">
+    <div class="label">问题现象</div>
+    <p style="font-size:14px;color:#333;line-height:1.6;">
+      当 <code>line-height</code> 设置为很小的值（如 <code>2px</code>）而 <code>font-size</code> 保持正常（如 <code>16px</code>）时，
+      文本会「溢出」行框，产生看似「空行」的效果。奇怪的是，给父元素或子元素设置一个很小的 <code>font-size</code> 就能解决这个问题。
+    </p>
+    <div class="note warning">
+      <strong>核心矛盾</strong>：line-height 控制<strong>行框</strong>的高度，但实际渲染高度还受 <code>font-size</code> 决定的<strong>内容区</strong>影响
+    </div>
+  </div>
+
+  <!-- 核心概念图解 -->
+  <div class="container">
+    <div class="label">核心概念：行框（Line Box）模型</div>
+    <div class="diagram">
+      <div class="label">// 行内格式化上下文（Inline Formatting Context）</div>
+      <br>
+      <div class="box line-box">
+        <span style="color:#888">行框 Line Box</span>
+        <br>
+        <div class="box inline-box" style="font-size:16px; line-height:2px;">
+          <div class="box content">内容区（由 font-size:16px 决定）</div>
+          ↑ 溢出！
+        </div>
+      </div>
+      <br>
+      <div class="label">// 当 line-height < font-size 时</div>
+      <div style="color:#e74c3c;">• 内容区高度 ≈ font-size（16px）</div>
+      <div style="color:#e74c3c;">• 行框高度 = line-height（2px）</div>
+      <div style="color:#e74c3c;">• 16px > 2px → 内容溢出行框 → 「空行」</div>
+    </div>
+
+    <h2>关键概念区分</h2>
+    <table class="compare-table">
+      <thead><tr><th>概念</th><th>决定因素</th><th>作用</th></tr></thead>
+      <tbody style="color:#333;">
+        <tr>
+          <td><strong>内容区（Content Area）</strong></td>
+          <td>font-size + line-height 的计算</td>
+          <td>文本实际占据的高度，基于 em box</td>
+        </tr>
+        <tr>
+          <td><strong>行内盒（Inline Box）</strong></td>
+          <td>line-height</td>
+          <td>包裹内容区的盒子，影响 line box 高度</td>
+        </tr>
+        <tr>
+          <td><strong>行框（Line Box）</strong></td>
+          <td>子行内盒的最高点～最低点</td>
+          <td>真正决定换行和布局的高度</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 视觉对比 -->
+  <div class="container">
+    <div class="label">视觉效果对比</div>
+    <div class="visual-demo">
+      <div class="visual-item">
+        <div class="visual-label">问题：line-height: 2px; font-size: 16px;</div>
+        <div class="visual-box">
+          <div class="visual-text" style="line-height:2px;">
+            <span>文字</span> <span>溢出</span>
+          </div>
+        </div>
+        <div class="note tag-bad" style="margin-top:8px;">⚠️ 文字明显溢出，产生「空行」</div>
+      </div>
+      <div class="visual-item">
+        <div class="visual-label">解决1：子元素 font-size: 1px;</div>
+        <div class="visual-box">
+          <div style="font-size:16px;line-height:2px;">
+            <span style="font-size:1px;background:#27ae60;">字</span>
+          </div>
+        </div>
+        <div class="note tag-good" style="margin-top:8px;">✅ 子元素 font-size 缩小，inline box 也缩小</div>
+      </div>
+      <div class="visual-item">
+        <div class="visual-label">解决2：父元素 font-size: 2px;</div>
+        <div class="visual-box">
+          <div style="font-size:2px;line-height:2px;">
+            <span style="background:#27ae60;">文字</span>
+          </div>
+        </div>
+        <div class="note tag-good" style="margin-top:8px;">✅ 父 font-size 影响 line-height 计算基准</div>
+      </div>
+      <div class="visual-item">
+        <div class="visual-label">正确：line-height: 16px;</div>
+        <div class="visual-box">
+          <div class="visual-text" style="line-height:16px;">
+            <span>正常</span> <span>显示</span>
+          </div>
+        </div>
+        <div class="note tag-neutral" style="margin-top:8px;">💡 line-height ≥ font-size 时正常</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 交互演示 -->
+  <div class="container">
+    <div class="label">交互演示</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+      <button onclick="setDemo('problem')" style="padding:8px 16px;background:#667eea;color:#fff;border:none;border-radius:6px;cursor:pointer;">问题演示</button>
+      <button onclick="setDemo('solution-child')" style="padding:8px 16px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;">子元素 font-size 解决</button>
+      <button onclick="setDemo('solution-parent')" style="padding:8px 16px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;">父元素 font-size 解决</button>
+      <button onclick="setDemo('correct')" style="padding:8px 16px;background:#3498db;color:#fff;border:none;border-radius:6px;cursor:pointer;">正确写法</button>
+    </div>
+    <div class="inline-demo" id="inlineDemo">
+      <div class="line-box">
+        <span class="inline-text problem-demo">这是一段测试文字</span>
+      </div>
+      <div class="line-box">
+        <span class="inline-text problem-demo">第二行文字</span>
+      </div>
+    </div>
+    <div class="code-block" id="codeBlock" style="margin-top:12px;">
+<span class="keyword">.text</span> {
+  <span class="prop">font-size</span>: <span class="value">16px</span>;
+  <span class="prop">line-height</span>: <span class="value">2px</span>;  <span class="comment">/* 问题！line-height < font-size */</span>
+}</div>
+  </div>
+
+  <!-- 为什么子元素 font-size 能解决 -->
+  <div class="container">
+    <div class="label">为什么子元素设 font-size 能解决？</div>
+    <div class="code-block"><span class="comment">// 原理：行内盒的高度由 line-height 决定</span>
+<span class="comment">// 但行内盒的「内容区」由自身 font-size 决定</span>
+
+<span class="comment">// 子元素 span 设置 font-size: 1px</span>
+<span class="keyword">.child</span> {
+  <span class="prop">font-size</span>: <span class="value">1px</span>;   <span class="comment">// ← 内容区缩小到 1px</span>
+  <span class="prop">line-height</span>: <span class="value">2px</span>;  <span class="comment">// 行内盒 2px，包裹 1px 内容区</span>
+}
+<span class="comment">// 结果：2px 行内盒包裹 1px 内容区 → 不溢出</span>
+
+<span class="comment">// 但文字会非常小看不清！</span></div>
+    <div class="note warning">
+      这种「解决」其实是视觉欺骗 — 文字缩小到看不清。正确做法是确保 <code>line-height</code> ≥ <code>font-size</code>
+    </div>
+  </div>
+
+  <!-- 为什么父元素 font-size 能解决 -->
+  <div class="container">
+    <div class="label">为什么父元素设 font-size 能解决？</div>
+    <div class="code-block"><span class="comment">// 原理：line-height 的 number 值是相对于父元素 font-size 的倍数</span>
+
+<span class="comment">// 父元素设置 font-size: 2px; line-height: 1</span>
+<span class="keyword">.parent</span> {
+  <span class="prop">font-size</span>: <span class="value">2px</span>;     <span class="comment">// ← 基准变成 2px</span>
+  <span class="prop">line-height</span>: <span class="value">1</span>;       <span class="comment">// 1 × 2px = 2px（实际 line-height）</span>
+}
+
+<span class="comment">// 子元素继承时的 computed value：</span>
+<span class="comment">// line-height: 1 → computed: 2px</span>
+<span class="comment">// 子元素自己的 font-size 如果是 16px...</span>
+
+<span class="comment">// 关键：子元素 font-size 不继承，是独立值</span>
+<span class="comment">// 但 line-height 如果是 normal/number，会重新计算</span></div>
+    <div class="note">
+      <strong>line-height 的继承机制</strong>：<br>
+      • <code>line-height: normal</code> → 继承时重新计算（基于子元素 font-size）<br>
+      • <code>line-height: 数值</code>（如 1.5）→ 继承的是倍数值，子元素乘以自己的 font-size<br>
+      • <code>line-height: 固定值</code>（如 16px）→ 直接继承，不变
+    </div>
+  </div>
+
+  <!-- 正确做法 -->
+  <div class="container">
+    <div class="label">正确做法</div>
+    <table class="compare-table">
+      <thead><tr><th>场景</th><th>正确写法</th><th>说明</th></tr></thead>
+      <tbody style="color:#333;">
+        <tr>
+          <td>需要紧凑行高</td>
+          <td><code>line-height: 1.2</code>（倍数）</td>
+          <td>相对于 font-size 自动计算，确保不小于 font-size</td>
+        </tr>
+        <tr>
+          <td>图标 + 文字对齐</td>
+          <td><code>line-height: 0</code> + <code>vertical-align: middle</code></td>
+          <td>消除行框对图标高度的影响</td>
+        </tr>
+        <tr>
+          <td>按钮/标签</td>
+          <td><code>line-height</code> 等于容器高度</td>
+          <td>单行文字垂直居中</td>
+        </tr>
+        <tr>
+          <td>多行文字</td>
+          <td><code>line-height</code> 推荐 1.5～1.8</td>
+          <td>可读性最佳的行高</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 总结 -->
+  <div class="container">
+    <div class="label">核心要点</div>
+    <div class="note">
+      <strong>公式</strong>：行框高度 = 子行内盒的「最高点～最低点」<br>
+      <br>
+      <strong>当 line-height &lt; font-size 时</strong>：<br>
+      • 内容区高度 ≈ font-size<br>
+      • 行内盒高度 = line-height<br>
+      • line-height &lt; font-size → 内容溢出 → 「空行」视觉<br>
+      <br>
+      <strong>「解决」的本质</strong>：<br>
+      • 子元素 font-size: 1px → 缩小内容区，但文字看不清<br>
+      • 父元素 font-size: 2px → line-height: 1 计算基准变成 2px<br>
+      <br>
+      <strong>正确做法</strong>：line-height ≥ font-size，或使用倍数（1.2/1.5 等）
+    </div>
+  </div>
+
+  <script>
+    function setDemo(type) {
+      const demo = document.getElementById('inlineDemo');
+      const code = document.getElementById('codeBlock');
+
+      if (type === 'problem') {
+        demo.innerHTML = `
+          <div class="line-box">
+            <span class="inline-text problem-demo">这是一段测试文字</span>
+          </div>
+          <div class="line-box">
+            <span class="inline-text problem-demo">第二行文字</span>
+          </div>`;
+        document.querySelector('.problem-demo').style.cssText = 'font-size:16px;line-height:2px;';
+        code.innerHTML = `<span class="keyword">.text</span> { <span class="prop">font-size</span>: <span class="value">16px</span>; <span class="prop">line-height</span>: <span class="value">2px</span>; } <span class="comment">/* line-height < font-size → 内容溢出 */</span>`;
+      } else if (type === 'solution-child') {
+        demo.innerHTML = `
+          <div class="line-box">
+            <span style="font-size:16px;line-height:2px;display:inline;">
+              <span style="font-size:1px;background:#27ae60;padding:2px 4px;">文字缩小</span>
+            </span>
+          </div>`;
+        code.innerHTML = `<span class="keyword">.child</span> { <span class="prop">font-size</span>: <span class="value">1px</span>; <span class="prop">line-height</span>: <span class="value">2px</span>; } <span class="comment">/* 子元素 font-size 1px → 内容区 1px，不溢出 */</span>`;
+      } else if (type === 'solution-parent') {
+        demo.innerHTML = `
+          <div class="line-box">
+            <span style="font-size:2px;line-height:1;display:inline;padding:0 4px;">
+              <span style="font-size:16px;background:#27ae60;padding:2px 4px;">文字正常</span>
+            </span>
+          </div>`;
+        code.innerHTML = `<span class="keyword">.parent</span> { <span class="prop">font-size</span>: <span class="value">2px</span>; <span class="prop">line-height</span>: <span class="value">1</span>; } <span class="comment">/* line-height: 1 → 1 × 2px = 2px */</span>`;
+      } else if (type === 'correct') {
+        demo.innerHTML = `
+          <div class="line-box">
+            <span class="inline-text" style="font-size:16px;line-height:16px;">这是一段测试文字</span>
+          </div>
+          <div class="line-box">
+            <span class="inline-text" style="font-size:16px;line-height:16px;">第二行文字</span>
+          </div>`;
+        code.innerHTML = `<span class="keyword">.text</span> { <span class="prop">font-size</span>: <span class="value">16px</span>; <span class="prop">line-height</span>: <span class="value">16px</span>; } <span class="comment">/* ✅ line-height >= font-size，正常渲染 */</span>`;
+      }
+    }
+
+    // 默认显示问题
+    setDemo('problem');
+  </script>
+
+</body>
+</html>
