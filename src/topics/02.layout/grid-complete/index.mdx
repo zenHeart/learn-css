@@ -1,0 +1,272 @@
+---
+title: CSS Grid 完整指南 — 三大经典布局
+category: 布局进阶
+tags: [grid, layout, responsive, holy-grail]
+description: 通过圣杯布局、响应式网格、杂志排版三大经典案例，系统掌握 CSS Grid 的 grid-template-areas、auto-fit/auto-fill、subgrid 等核心技能。
+keywords: CSS Grid, 圣杯布局, 响应式网格, 杂志排版, auto-fit, auto-fill, subgrid, grid-template-areas
+---
+
+本篇是 CSS Grid 的进阶指南，假设你已掌握 [Grid 基础](/topics/02.layout/06.grid) 中的核心概念（网格容器、网格线、轨道、单元格、gap）。我们将通过三个真实场景的布局范式，深入掌握 Grid 的高级用法。
+
+## 圣杯布局（Holy Grail Layout）
+
+圣杯布局是经典的 Web 页面结构：两侧侧栏固定宽度，中间主内容区自适应。无论侧栏多宽，主内容区始终填满剩余空间。
+
+### 核心思路
+
+1. 使用 `grid-template-columns: 左侧 固定 中间 1fr 右侧 固定` 定义三栏
+2. 使用 `grid-template-areas` 为每个区域命名，代码即布局
+3. 媒体查询中重新定义 `grid-template-areas` 实现移动端堆叠
+
+```css
+.holy-grail {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;  /* 中间列自动填满 */
+  grid-template-rows: 60px 1fr 40px;       /* 头 / 内容 / 底 */
+  grid-template-areas:
+    "header  header  header"
+    "left    main    right"
+    "footer  footer  footer";
+  gap: 12px;
+  min-height: 100vh;
+}
+
+/* 移动端：单列堆叠 */
+@media (max-width: 600px) {
+  .holy-grail {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "left"
+      "main"
+      "right"
+      "footer";
+  }
+}
+```
+
+```html
+<div class="holy-grail">
+  <header class="hg-header">Header</header>
+  <aside  class="hg-left">左侧栏</aside>
+  <main   class="hg-main">主内容 — 1fr 自适应</main>
+  <aside  class="hg-right">右侧栏</aside>
+  <footer class="hg-footer">Footer</footer>
+</div>
+```
+
+> **关键点**：`grid-template-areas` 要求每个区域必须是矩形（不能 L 形）。`1fr` 使中间列吞噬侧栏之外的全部剩余空间，比百分比更可靠，因为不受固定列宽度影响。
+
+### 与 Flexbox 对比
+
+| 维度 | Flexbox 方案 | Grid 方案 |
+|------|-------------|-----------|
+| DOM 顺序要求 | 必须 header → main → footer 顺序 | 可以任意顺序排放 |
+| 中间栏优先渲染 | 需要额外处理 | `grid-area` 直接控制 |
+| 代码可读性 | 需要 mental model | 所见即所得 |
+
+查看完整示例：
+
+{/* @playground id="grid-complete-holy" mode="demo" */}
+
+---
+
+## 响应式网格（Responsive Grid）
+
+传统的响应式需要写多个媒体查询来调整列数。Grid 的 `auto-fit` / `auto-fill` + `minmax()` 彻底改变了这一局面——**只需一行 CSS，浏览器自动计算列数**。
+
+### auto-fit vs auto-fill
+
+```css
+/* auto-fit：项目拉伸填满整行（最常用）*/
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+/* auto-fill：项目保持自身尺寸，不拉伸填满 */
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+```
+
+两者在项目数量刚好填满整行时表现一致。区别在于**当项目不足以填满整行时**：
+
+- **auto-fit**：项目被拉伸（`1fr` 生效），填满整行
+- **auto-fill**：项目保持 `minmax(200px)` 的最小宽度，空白保留在右侧
+
+### minmax() 的魔力
+
+```css
+/* 每列不小于 200px，不大于 1fr（平分剩余空间）*/
+/* 当容器宽度 < 200px 时，自动换行 */
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+```
+
+当容器宽度为 900px 时：
+- 4 列 × 200px = 800px，余 100px → 每列分到 25px → 实际每列 225px ✓
+
+当容器宽度为 1600px 时：
+- 8 列 × 200px = 1600px，刚好填满 ✓
+
+### 典型应用场景
+
+- **卡片网格**：产品列表、特性展示、相册
+- **Dashboard 面板**：多个指标卡片的自适应排列
+- **等高卡片组**：配合 `align-items: stretch` 实现天然等高
+
+查看完整示例：
+
+{/* @playground id="grid-complete-responsive" mode="demo" */}
+
+---
+
+## 杂志排版（Magazine Layout）
+
+杂志排版利用 Grid 的 **12 列轨道系统**，通过 `grid-column` / `grid-row` 跨越实现复杂的不规则图文混排。
+
+### 12 列网格系统
+
+12 列是排版中最灵活的数字，因为它能被 1、2、3、4、6、12 整除，方便做各种合并：
+
+```css
+.magazine {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr); /* 12 列等宽 */
+  gap: 16px;
+}
+
+/* 头条占 7 列 (1-8) */
+.hero     { grid-column: 1 / 8;  grid-row: 1 / 3; }
+/* 侧栏占 5 列 (8-13) */
+.sidebar  { grid-column: 8 / 13; grid-row: 1 / 3; }
+/* CTA 占前 4 列 */
+.cta      { grid-column: 1 / 5; }
+/* 新闻占中间 4 列 */
+.news     { grid-column: 5 / 9; }
+/* 引用占后 4 列 */
+.quote    { grid-column: 9 / 13; }
+```
+
+### grid-column / grid-row 语法
+
+```css
+/* 完整写法 */
+.item { grid-column-start: 1; grid-column-end: 8; }
+
+/* 简写 span 跨越 */
+.item { grid-column: 1 / span 7; }   /* 从第1条线开始，跨7列 */
+.item { grid-column: span 2 / 5; }    /* 倒数第5条线结束，跨2列 */
+
+/* 简写 / 分隔 */
+.item { grid-column: 1 / 8; }         /* 从第1到第8条线 */
+.item { grid-column: 1 / -1; }        /* 从第1到倒数第1条线（整行）*/
+```
+
+> **负编号仅作用于显式网格**。如果项目超出 `grid-template-columns` 定义的列数，超出部分属于隐式网格，负编号不会命中。
+
+### Subgrid — 嵌套网格与父对齐
+
+Subgrid 是 Grid Level 2 的核心特性，让嵌套元素继承父网格的轨道定义，实现**跨组件的列对齐**。
+
+**场景**：一个卡片网格，每张卡片有标题、描述、按钮三部分。无论标题多长，三个部分的列都要对齐。
+
+```css
+/* 父：3 列网格 */
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* 子：跨 3 列的卡片内部 */
+.card { grid-column: span 3; display: grid; grid-template-columns: subgrid; gap: 16px; }
+
+/* 卡片内部每项对齐到父网格对应列 */
+.card-title   { grid-column: 1; }
+.card-desc     { grid-column: 2; }
+.card-action   { grid-column: 3; }
+```
+
+```html
+<div class="card-grid">
+  <div class="card">
+    <div class="card-title">标题 A</div>
+    <div class="card-desc">描述文本</div>
+    <div class="card-action">按钮</div>
+  </div>
+  <!-- 每张卡片的 3 列自动对齐，无论内容长短 -->
+</div>
+```
+
+> **浏览器支持**：Chrome 117+、Safari 16+、Firefox 71+。移动端 Safari 16.5+ 支持。如需兼容旧版，可考虑使用 `grid-template-columns: repeat(3, 1fr)` 作为退化方案。
+
+查看完整示例：
+
+{/* @playground id="grid-complete-magazine" mode="demo" */}
+
+---
+
+## 对齐综合运用
+
+Grid 的对齐属性分为两个维度：
+
+### 容器级对齐（justify/align + items/content）
+
+| 属性 | 作用 | 类似 |
+|------|------|------|
+| `justify-items` | 所有项目在单元格内**水平**对齐 | — |
+| `align-items` | 所有项目在单元格内**垂直**对齐 | Flexbox `align-items` |
+| `justify-content` | 整个网格在容器内**水平**分布 | Flexbox `justify-content` |
+| `align-content` | 整个网格在容器内**垂直**分布 | Flexbox `align-items`（轴不同）|
+
+```css
+.container {
+  justify-items: stretch; /* 默认，项目拉宽填满单元格 */
+  align-items: center;    /* 垂直居中 */
+}
+```
+
+### 项目级对齐（justify/align + self）
+
+覆盖容器设置，精确控制单个项目：
+
+```css
+.card-action { justify-self: end; align-self: end; }
+```
+
+---
+
+## 三大范式对比
+
+| 范式 | 核心属性 | 适用场景 |
+|------|---------|---------|
+| **圣杯布局** | `grid-template-areas` + 三栏 `1fr` | 整体页面骨架 |
+| **响应式网格** | `auto-fit/fill` + `minmax()` | 卡片组/列表/仪表盘 |
+| **杂志排版** | `repeat(12, 1fr)` + `grid-column/row` 跨越 | 图文混排/专题页 |
+
+---
+
+## 调试技巧
+
+Chrome DevTools 提供了强大的 Grid 调试能力：
+
+1. **高亮网格线**：Elements 面板 → Layout 侧边栏 → 勾选 "Show grid line numbers"
+2. **覆盖网格区域**：勾选 "Display area names" 直接在页面上标注 `header`、`main` 等区域名
+3. **查看隐式网格**：未显示的隐式行/列会以虚线标注
+
+![Grid DevTools 调试面板](https://developer.chrome.com/docs/devtools/css/grid/grid-overlay.png)
+
+---
+
+## 知识点速查
+
+| 技能 | 关键语法 |
+|------|---------|
+| 命名区域布局 | `grid-template-areas: "header header" "left main right"` |
+| 列跨越 | `grid-column: 1 / 3` 或 `grid-column: span 2` |
+| 行跨越 | `grid-row: 1 / -1`（整行）|
+| 响应式列 | `repeat(auto-fit, minmax(200px, 1fr))` |
+| Subgrid 对齐 | `grid-template-columns: subgrid` |
+| 单元格对齐 | `justify-items` / `align-items` |
+| 整格对齐 | `justify-content` / `align-content` |
+
+---
+
+## 参考资料
+
+- [MDN CSS Grid Layout](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_grid_layout)
+- [Grid by Example](https://gridbyexample.com/)
+- [CSS Tricks — A Complete Guide to Grid](https://css-tricks.com/snippets/css/complete-guide-grid/)
+- [Chrome DevTools Grid Debugging](https://developer.chrome.com/docs/devtools/css/grid)
