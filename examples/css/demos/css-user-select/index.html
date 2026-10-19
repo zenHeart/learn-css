@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>user-select CSS 属性演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    .demo-box {
+      padding: 15px;
+      border: 2px dashed #ccc;
+      border-radius: 6px;
+      margin: 10px 0;
+      background: #fafafa;
+    }
+
+    .demo-box p {
+      margin: 5px 0;
+    }
+
+    /* none - 完全禁用选择 */
+    .select-none {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* text - 只允许文本选择 */
+    .select-text {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* all - 单击全选 */
+    .select-all {
+      user-select: all;
+      -webkit-user-select: all;
+    }
+
+    /* 可编辑区域 */
+    .editable {
+      user-select: text;
+      -webkit-user-select: text;
+      outline: none;
+      min-height: 100px;
+    }
+
+    /* 工具栏不可选择 */
+    .toolbar {
+      user-select: none;
+      -webkit-user-select: none;
+      background: #e5e7eb;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .toolbar button {
+      padding: 5px 12px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+
+    /* 混合选择示例 */
+    .mixed-select .protected {
+      user-select: none;
+      -webkit-user-select: none;
+      background: #fee2e2;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .mixed-select .allowed {
+      user-select: text;
+      -webkit-user-select: text;
+      background: #d1fae5;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    /* 点击全选提示 */
+    .hint {
+      background: #fef3c7;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+    }
+
+    /* 复制提示 */
+    .copy-notice {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .copy-notice.show {
+      opacity: 1;
+    }
+
+    /* 代码块样式 */
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .demo-area {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>user-select CSS 属性演示</h1>
+
+  <!-- 示例 1: none - 完全禁用选择 -->
+  <div class="demo-section">
+    <h2>1. user-select: none - 完全禁用选择</h2>
+    <p class="hint">👆 尝试用鼠标选择下面的文字，你会发现无法选中</p>
+    <div class="demo-box select-none">
+      <p>这是一段受保护的内容。</p>
+      <p>你无法通过鼠标选中文本。</p>
+      <p>适用于版权保护、验证码、游戏界面等场景。</p>
+    </div>
+    <pre><code>.protected {
+  user-select: none;
+  -webkit-user-select: none;
+}</code></pre>
+  </div>
+
+  <!-- 示例 2: text - 只允许文本选择 -->
+  <div class="demo-section">
+    <h2>2. user-select: text - 只允许文本选择</h2>
+    <p class="hint">👆 只能选中文本，图标和装饰元素无法选中</p>
+    <div class="demo-box select-text">
+      <p>📝 这段文字可以选中</p>
+      <p>🔒 这个图标无法选中</p>
+      <p>✨ 纯文本内容都可以选择</p>
+    </div>
+    <pre><code>.text-only {
+  user-select: text;
+  -webkit-user-select: text;
+}</code></pre>
+  </div>
+
+  <!-- 示例 3: all - 单击全选 -->
+  <div class="demo-section">
+    <h2>3. user-select: all - 单击全选</h2>
+    <p class="hint">👆 只需单击一次，整个元素就会被选中</p>
+    <div class="demo-box select-all">
+      <p>单击这里，所有文字都会被选中！非常适合「全选」场景。</p>
+    </div>
+    <pre><code>.click-select-all {
+  user-select: all;
+  -webkit-user-select: all;
+}</code></pre>
+  </div>
+
+  <!-- 示例 4: 混合选择 -->
+  <div class="demo-section">
+    <h2>4. 混合选择 - 部分可选择</h2>
+    <p class="hint">👆 绿色部分可选择，红色部分不可选择</p>
+    <div class="demo-box mixed-select">
+      <p class="allowed">✅ 这段文字可以自由选择复制</p>
+      <p class="protected">🚫 这段文字受保护，无法选择</p>
+      <p class="allowed">✅ 这段也可以正常选择</p>
+    </div>
+    <pre><code>.allowed {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.protected {
+  user-select: none;
+  -webkit-user-select: none;
+}</code></pre>
+  </div>
+
+  <!-- 示例 5: 可编辑区域保护 -->
+  <div class="demo-section">
+    <h2>5. 可编辑区域 - 工具栏不可选择</h2>
+    <p class="hint">👆 工具栏无法选择，但编辑器内可以正常选中文本</p>
+    <div class="demo-area">
+      <div class="toolbar">
+        <button>加粗</button>
+        <button>斜体</button>
+        <button>下划线</button>
+      </div>
+      <div class="demo-box editable" contenteditable="true">
+        在这里输入文本... 用鼠标选中文本试试，工具栏的文字不会被选中。
+      </div>
+    </div>
+    <pre><code>.toolbar {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.editor {
+  user-select: text;
+  -webkit-user-select: text;
+}</code></pre>
+  </div>
+
+  <!-- 示例 6: 移动端适配 -->
+  <div class="demo-section">
+    <h2>6. 移动端适配 - iOS Safari</h2>
+    <p class="hint">📱 在 iOS 设备上，还需要禁用 -webkit-touch-callout 防止长按弹出菜单</p>
+    <div class="demo-box select-none" style="-webkit-touch-callout: none;">
+      <p>iOS 长按此区域不会弹出复制菜单</p>
+    </div>
+    <pre><code>.mobile-safe {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* 禁用 iOS 长按菜单 */
+}</code></pre>
+  </div>
+
+  <div class="copy-notice" id="copyNotice">文本已复制到剪贴板！</div>
+
+  <script>
+    // 监听选择事件，显示提示
+    document.addEventListener('selectionchange', () => {
+      const selection = window.getSelection();
+      const notice = document.getElementById('copyNotice');
+
+      if (selection && selection.toString().length > 0) {
+        console.log('用户选择了文本:', selection.toString());
+      }
+    });
+
+    // 监听复制事件
+    document.addEventListener('copy', () => {
+      const notice = document.getElementById('copyNotice');
+      notice.classList.add('show');
+      setTimeout(() => {
+        notice.classList.remove('show');
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+---
+title: user-select 控制文本选择
+category: 文本处理
+tags: [user-select, text-selection, -webkit-user-select, 文本选择, 禁用复制]
+description: 详细介绍 CSS user-select 属性控制文本选择行为，包括 none/auto/text/all 等值的用法和浏览器兼容性处理。
+keywords: user-select, -webkit-user-select, text-selection, 文本选择, 防止复制, 移动端适配
+---
+
+# user-select 控制文本选择
+
+`user-select` 属性控制用户是否能够选择文本内容。这个属性在保护内容、创建自定义交互和提升用户体验方面非常有用。
+
+## 属性值详解
+
+| 值 | 描述 |
+|---|---|
+| `none` | 完全禁用文本选择，连双击都不会选中 |
+| `auto` | 根据父元素和其他规则自动决定（默认值） |
+| `text` | 只允许选择文本内容 |
+| `all` | 单击即可选中全部内容，无需双击 |
+
+### none - 完全禁用选择
+
+```css
+.no-select {
+  user-select: none;
+  -webkit-user-select: none; /* Safari 兼容 */
+}
+```
+
+适用于：
+- 保护版权内容
+- 防止意外选择
+- 游戏界面元素
+
+### text - 仅允许文本选择
+
+```css
+.text-only-select {
+  user-select: text;
+  -webkit-user-select: text; /* Safari 兼容 */
+}
+```
+
+适用于：
+- 只允许选择纯文本
+- 禁止选择图片、图标等非文本内容
+
+### all - 单击全选
+
+```css
+.select-all-on-click {
+  user-select: all;
+  -webkit-user-select: all; /* Safari 兼容 */
+}
+```
+
+适用于：
+- 全选按钮
+- 许可证协议
+- 同意条款
+
+### auto - 自动模式
+
+```css
+.auto-select {
+  user-select: auto;
+}
+```
+
+`auto` 的实际行为取决于父元素：
+- 如果元素可编辑（如 `contenteditable`），行为同 `text`
+- 否则行为同 `none`
+- 伪元素 `::before` 和 `::after` 继承父元素的 `user-select` 值
+
+## 浏览器兼容性处理
+
+移动端 Safari（旧版本）和一些旧版浏览器需要 `-webkit-user-select` 前缀：
+
+```css
+.兼容写法 {
+  user-select: none;
+  -webkit-user-select: none;   /* Safari 6+, Chrome Android */
+  -moz-user-select: none;      /* Firefox (旧) */
+  -ms-user-select: none;       /* IE/Edge (旧) */
+}
+```
+
+### 移动端适配要点
+
+**iOS Safari 特殊处理：**
+```css
+.mobile-safe {
+  -webkit-touch-callout: none; /* 禁用长按弹出菜单 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+```
+
+**Android WebView：**
+```css
+.android-safe {
+  -webkit-user-select: none;
+  user-select: none;
+}
+```
+
+## 实战案例
+
+### 1. 防止内容被复制
+
+```html
+<div class="protected-content">
+  这段文字无法被选中复制。
+  <p>段落内容同样受保护。</p>
+</div>
+```
+
+```css
+.protected-content {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* iOS */
+}
+```
+
+### 2. 允许部分选择
+
+```html
+<div class="partial-select">
+  <span class="selectable">这段可以选中</span>
+  <span class="locked">这段不能选中</span>
+  <span class="selectable">这段也可以选中</span>
+</div>
+```
+
+```css
+.partial-select .selectable {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.partial-select .locked {
+  user-select: none;
+  -webkit-user-select: none;
+}
+```
+
+### 3. 点击全选效果
+
+```html
+<p class="click-to-select">单击此文本即可全部选中！</p>
+```
+
+```css
+.click-to-select {
+  user-select: all;
+  -webkit-user-select: all;
+  cursor: text;
+  padding: 10px;
+  border: 1px dashed #999;
+}
+```
+
+### 4. 可编辑区域保护
+
+```html
+<div class="editor-container">
+  <div class="toolbar">工具栏（不可选择）</div>
+  <div contenteditable="true" class="editor">
+    这里可以输入和选择文本...
+  </div>
+</div>
+```
+
+```css
+.toolbar {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.editor {
+  user-select: text;
+  -webkit-user-select: text;
+}
+```
+
+## 注意事项
+
+1. **`user-select` 不能完全防止内容被复制** - 通过开发者工具或禁用 CSS 仍可获取内容
+2. **不影响 JavaScript 的 `selection` API** - 需要配合 JS 才能完全控制
+3. **祖父级传播** - 父元素的 `user-select` 会影响子元素，但子元素可以覆盖
+
+## 交互式演示
+
+下面是一个交互式演示，你可以体验不同 `user-select` 值的效果：
+
+{/* @playground id="css-user-select-demo" mode="demo" */}
+
+## 相关属性
+
+- `-webkit-user-select` - Safari/Chrome 前缀版本
+- `-webkit-touch-callout` - iOS 长按菜单控制
+- `::selection` - 选中文本的样式
