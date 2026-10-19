@@ -1,0 +1,178 @@
+---
+title: CSS Masonry 瀑布流布局
+category: 布局进阶
+tags: [grid, masonry, layout]
+description: 讲解 CSS Grid Level 3 中新增的 masonry（瀑布流）布局特性，浏览器支持现状及实战案例。
+keywords: CSS Masonry, 瀑布流, grid-template-columns, grid-template-rows, grid-lanes
+---
+
+Masonry（瀑布流）是一种常见的布局模式，常见于图片画廊、商品列表等场景。元素按照列排序，每列找到最短的位置放置，呈现「砌砖」一样的紧凑效果。
+
+CSS Grid Layout Module Level 3 引入了原生的 `grid-lanes` 布局模式，可以不依赖 JavaScript 或 CSS Multi-column 实现纯 CSS 瀑布流。
+
+通过本章学习达到以下目标：
+
+- 理解 CSS Grid Level 3 masonry 布局的核心概念
+- 掌握 `grid-template-columns` 和 `grid-template-rows` 两种轴向的瀑布流用法
+- 了解浏览器支持现状及降级方案
+
+## 概念模型
+
+### 什么是 Masonry 布局
+
+传统 Grid 布局要求精确的行列轨道，元素按固定顺序排列。Masonry 则不同——它让元素沿某个轴自动寻找「最矮」的轨道位置放置，从而实现高度不等元素的紧密排布。
+
+### 核心属性：`display: grid-lanes`
+
+```css
+.grid {
+  display: grid-lanes;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+```
+
+- `display: grid-lanes`：启用 masonry 布局模式（实验性，需浏览器支持）
+- `grid-template-columns`：沿行轴（inline axis）排列，按列分轨道
+- `grid-template-rows`：沿列轴（block axis）排列，按行分轨道
+
+## 按列分轨道（默认）
+
+最常用的瀑布流形式，元素沿水平方向排列，垂直方向自动找最短列填入。
+
+```css
+.grid {
+  display: grid-lanes;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+```
+
+{/* @playground id="masonry-columns" mode="demo" */}
+
+```js
+// 模拟不同高度的图片
+const itemSizes = [
+  "2em", "3em", "1.6em", "4em", "3.2em",
+  "3em", "4.5em", "1em", "3.5em", "2.8em",
+];
+const items = document.querySelectorAll(".item");
+for (let i = 0; i < items.length; i++) {
+  items[i].style.blockSize = itemSizes[i];
+}
+```
+
+### 原理说明
+
+1. 浏览器根据 `grid-template-columns` 计算出若干列轨道
+2. 每个元素按顺序逐一填入「当前最矮」的那一列
+3. 列高度不固定，随着内容自动增长
+4. 元素之间通过 `gap` 控制间距
+
+## 按行分轨道
+
+另一种 masonry 模式，让元素沿垂直方向排列，水平方向自动找最窄列填入。
+
+```css
+.grid {
+  display: grid-lanes;
+  gap: 10px;
+  grid-template-rows: repeat(3, 100px);
+}
+```
+
+{/* @playground id="masonry-rows" mode="demo" */}
+
+```js
+// 模拟不同宽度的内容块
+const itemSizes = [
+  "2em", "3em", "1.6em", "4em", "2.2em",
+  "3em", "4.5em", "1em", "3.5em", "2.8em",
+];
+const items = document.querySelectorAll(".item");
+for (let i = 0; i < items.length; i++) {
+  items[i].style.inlineSize = itemSizes[i];
+}
+```
+
+## 跨轨道元素
+
+Masonry 布局中，元素可以沿网格轴跨越多个轨道。
+
+### 列方向跨列
+
+```css
+.span-2 {
+  grid-column-end: span 2;
+}
+```
+
+{/* @playground id="masonry-span-columns" mode="demo" */}
+
+### 定位到指定列
+
+```css
+.positioned {
+  grid-column: 2 / 4;
+}
+```
+
+{/* @playground id="masonry-positioned" mode="demo" */}
+
+具有明确 `grid-column` 定位的元素，会在 masonry 排列之前先放置好。
+
+## 浏览器支持现状
+
+| 特性 | 状态 | 说明 |
+|------|------|------|
+| `display: grid-lanes` | ⚠️ 实验性 | 仅 Firefox 129+ 默启用，Chrome/Edge 需要开启 `chrome://flags/#enable-experimental-web-platform-features` |
+| `grid-template-columns: masonry` | ⚠️ 实验性 | 同上 |
+| `grid-template-rows: masonry` | ⚠️ 实验性 | 同上 |
+
+> **提示**：截至 2025 年第一季度，CSS Masonry 仍为 CSS Grid Level 3 草案阶段，API 可能有变化。生产环境使用请做好降级方案。
+
+### 降级方案
+
+在不支持 `grid-lanes` 的浏览器中，会回退为标准 Grid 自动布局：
+
+```css
+@supports (display: grid-lanes) {
+  .grid {
+    display: grid-lanes;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+```
+
+常见的 JS 降级库：[Masonry.js](https://masonry.desandro.com/)、[Isotope](https://isotope.metafizzy.co/)
+
+## 实战案例
+
+### 图片画廊
+
+{/* @playground id="masonry-gallery" mode="demo" */}
+
+### 商品列表
+
+{/* @playground id="masonry-products" mode="demo" */}
+
+### 博客卡片
+
+{/* @playground id="masonry-cards" mode="demo" */}
+
+## 与 Multi-column 的区别
+
+| 特性 | CSS Masonry | CSS Multi-column |
+|------|-------------|-------------------|
+| 轴向 | 可配置行列轴 | 仅沿块轴（垂直）分列 |
+| 元素顺序 | 按列填入 | 按列顺序填入，内容被截断 |
+| 跨轨道 | 支持 `span` | 不支持 |
+| 浏览器支持 | 实验性 | 良好（>= IE10 不支持） |
+
+Masonry 更适合「智能填充」场景，Multi-column 更适合「报纸式」分栏。
+
+## See Also
+
+- [MDN: Masonry layout](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout/Masonry_layout)
+- [CSS Grid Layout Module Level 3 草案](https://drafts.csswg.org/css-grid-3/#masonry-layout)
+- [Smashing Magazine: Native CSS Masonry Layout](https://www.smashingmagazine.com/native-css-masonry-layout-css-grid/)

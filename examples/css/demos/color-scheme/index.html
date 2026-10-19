@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 声明支持亮色和暗黑模式，避免页面加载闪烁 -->
+  <meta name="color-scheme" content="light dark">
+  <title>CSS color-scheme 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* 声明此文档支持 light 和 dark 两种色彩方案 */
+    :root {
+      color-scheme: light dark;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+      /* 使用 light-dark() 根据系统主题自动选择颜色 */
+      background-color: light-dark(#ffffff, #121212);
+      color: light-dark(#1a1a1a, #e0e0e0);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: light-dark(#666, #888); margin-bottom: 24px; }
+
+    .section {
+      background-color: light-dark(#f8f8f8, #1e1e1e);
+      border: 1px solid light-dark(#e0e0e0, #333);
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid light-dark(#e0e0e0, #333);
+      color: light-dark(#1a1a1a, #f0f0f0);
+    }
+
+    .section h3 {
+      font-size: 14px;
+      color: light-dark(#666, #999);
+      margin: 16px 0 8px;
+    }
+
+    /* 基础卡片 */
+    .card {
+      background-color: light-dark(#fff, #252525);
+      border: 1px solid light-dark(#ddd, #444);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: light-dark(#333, #ddd);
+    }
+
+    .card p {
+      font-size: 13px;
+      color: light-dark(#666, #aaa);
+      line-height: 1.6;
+    }
+
+    /* 颜色展示 */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .color-chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: light-dark(#fff, #252525);
+      border: 1px solid light-dark(#e0e0e0, #333);
+      border-radius: 6px;
+    }
+
+    .swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid light-dark(#ddd, #444);
+      flex-shrink: 0;
+    }
+
+    .chip-info { font-size: 13px; }
+    .chip-info strong { display: block; color: light-dark(#333, #ddd); }
+    .chip-info span { color: light-dark(#888, #888); font-size: 12px; }
+
+    /* 演示区域 - 分区域不同 color-scheme */
+    .demo-blocks {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .demo-block {
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .demo-block.light-only {
+      /* 仅声明亮色模式，即使系统是暗黑也不应用暗黑 */
+      color-scheme: only light;
+      background-color: #f0f4ff;
+      border: 2px solid #4a90d9;
+      color: #1a1a1a;
+    }
+
+    .demo-block.dark-only {
+      /* 仅声明暗黑模式 */
+      color-scheme: only dark;
+      background-color: #1a1a2e;
+      border: 2px solid #4a90d9;
+      color: #f0f0f0;
+    }
+
+    .demo-block.auto {
+      /* 跟随系统 */
+      color-scheme: light dark;
+      background-color: light-dark(#e8f4e8, #1e2e1e);
+      border: 2px solid light-dark(#4a90d9, #4a90d9);
+      color: light-dark(#1a1a1a, #f0f0f0);
+    }
+
+    .demo-block .label {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+
+    .demo-block .desc {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* 表单元素展示 */
+    .form-demo {
+      display: grid;
+      gap: 12px;
+      max-width: 400px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-row label {
+      width: 80px;
+      font-size: 13px;
+      color: light-dark(#666, #999);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid light-dark(#ccc, #444);
+      border-radius: 4px;
+      font-size: 13px;
+      /* 表单控件也会受到 color-scheme 影响 */
+      background-color: light-dark(#fff, #2d2d2d);
+      color: light-dark(#333, #e0e0e0);
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      background-color: light-dark(#0066cc, #4da3ff);
+      color: light-dark(#fff, #000);
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: light-dark(#0052a3, #6db8ff);
+    }
+
+    /* 信息提示 */
+    .info {
+      font-size: 12px;
+      color: light-dark(#666, #888);
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: light-dark(#f0f0f0, #252525);
+      border-radius: 4px;
+    }
+
+    .info strong {
+      color: light-dark(#333, #ccc);
+    }
+
+    /* 代码块 */
+    pre {
+      background: light-dark(#f5f5f5, #1a1a1a);
+      border: 1px solid light-dark(#e0e0e0, #333);
+      border-radius: 4px;
+      padding: 12px;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-top: 8px;
+      color: light-dark(#333, #d0d0d0);
+    }
+
+    code {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 12px;
+    }
+
+    /* 滚动条样式演示 */
+    .scrollbox {
+      height: 100px;
+      overflow-y: auto;
+      background: light-dark(#f8f8f8, #1e1e1e);
+      border: 1px solid light-dark(#ddd, #444);
+      border-radius: 4px;
+      padding: 8px;
+      margin-top: 12px;
+    }
+
+    .scrollbox-content {
+      height: 200px;
+      color: light-dark(#666, #aaa);
+      font-size: 13px;
+    }
+
+    /* 颜色方案切换器 */
+    .switcher {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .switch-btn {
+      padding: 8px 16px;
+      border: 1px solid light-dark(#ccc, #444);
+      border-radius: 20px;
+      background: light-dark(#fff, #252525);
+      color: light-dark(#666, #999);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .switch-btn:hover {
+      border-color: light-dark(#999, #666);
+    }
+
+    .switch-btn.active {
+      background: light-dark(#0066cc, #4da3ff);
+      color: light-dark(#fff, #000);
+      border-color: light-dark(#0066cc, #4da3ff);
+    }
+
+    @media (max-width: 640px) {
+      .demo-blocks { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h1>CSS `color-scheme` 颜色方案适配</h1>
+    <p class="subtitle">声明页面支持的色彩方案，浏览器自动调整 UI 外观。切换系统主题可查看效果。</p>
+
+    <!-- 分区域 color-scheme 演示 -->
+    <section class="section">
+      <h2>① 分区域 color-scheme 声明</h2>
+      <p class="info" style="margin-bottom: 16px;">
+        <strong>💡 说明：</strong>不同区域可以声明不同的 color-scheme。<strong>仅亮色</strong>的区域即使在系统暗黑模式下也不会应用暗黑；<strong>仅暗黑</strong>的区域即使在系统亮色模式下也会保持暗黑。
+      </p>
+      <div class="demo-blocks">
+        <div class="demo-block light-only">
+          <div class="label">header / nav</div>
+          <div class="desc">color-scheme: only light</div>
+          <div style="margin-top:8px;font-size:12px;opacity:0.7;">固定亮色，不会变暗</div>
+        </div>
+        <div class="demo-block auto">
+          <div class="label">main / content</div>
+          <div class="desc">color-scheme: light dark</div>
+          <div style="margin-top:8px;font-size:12px;opacity:0.7;">跟随系统主题变化</div>
+        </div>
+        <div class="demo-block dark-only">
+          <div class="label">footer / sidebar</div>
+          <div class="desc">color-scheme: only dark</div>
+          <div style="margin-top:8px;font-size:12px;opacity:0.7;">固定暗黑，不会变亮</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- light-dark() 函数演示 -->
+    <section class="section">
+      <h2>② light-dark() 函数配合使用</h2>
+      <p class="info" style="margin-bottom: 16px;">
+        <strong>💡 说明：</strong><code>light-dark(lightVal, darkVal)</code> 根据当前活跃的色彩方案返回对应颜色。当前为亮色模式时返回第一个值，为暗黑模式时返回第二个值。
+      </p>
+      <div class="card">
+        <h4>双主题自动适配卡片</h4>
+        <p>这个卡片的背景、边框、文字颜色全部使用 <code>light-dark()</code> 定义，切换系统主题即可看到变化。</p>
+      </div>
+      <div class="color-grid">
+        <div class="color-chip">
+          <div class="swatch" style="background:light-dark(#fff,#121212)"></div>
+          <div class="chip-info">
+            <strong>background</strong>
+            <span>light-dark(#fff, #121212)</span>
+          </div>
+        </div>
+        <div class="color-chip">
+          <div class="swatch" style="background:light-dark(#1a1a1a,#e0e0e0)"></div>
+          <div class="chip-info">
+            <strong>color</strong>
+            <span>light-dark(#1a1a1a, #e0e0e0)</span>
+          </div>
+        </div>
+        <div class="color-chip">
+          <div class="swatch" style="background:light-dark(#e0e0e0,#333)"></div>
+          <div class="chip-info">
+            <strong>border</strong>
+            <span>light-dark(#e0e0e0, #333)</span>
+          </div>
+        </div>
+        <div class="color-chip">
+          <div class="swatch" style="background:light-dark(#0066cc,#4da3ff)"></div>
+          <div class="chip-info">
+            <strong>primary</strong>
+            <span>light-dark(#0066cc, #4da3ff)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 表单元素演示 -->
+    <section class="section">
+      <h2>③ 表单控件自动适配</h2>
+      <p class="info" style="margin-bottom: 16px;">
+        <strong>💡 说明：</strong>声明 <code>color-scheme: light dark</code> 后，浏览器会自动调整表单控件（输入框、下拉框、按钮等）的默认颜色，无需额外 CSS。
+      </p>
+      <div class="form-demo">
+        <div class="form-row">
+          <label>文本输入</label>
+          <input type="text" placeholder="点击这里输入文本">
+        </div>
+        <div class="form-row">
+          <label>邮箱</label>
+          <input type="email" placeholder="example@domain.com">
+        </div>
+        <div class="form-row">
+          <label>下拉框</label>
+          <select>
+            <option>亮色模式</option>
+            <option>暗黑模式</option>
+            <option>跟随系统</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>多行文本</label>
+          <textarea rows="2" placeholder="输入多行文本..."></textarea>
+        </div>
+        <div class="form-row">
+          <label></label>
+          <button type="button">提交按钮</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 滚动条演示 -->
+    <section class="section">
+      <h2>④ 滚动条样式自动适配</h2>
+      <p class="info" style="margin-bottom: 16px;">
+        <strong>💡 说明：</strong>滚动条的轨道和滑块颜色也会根据 <code>color-scheme</code> 自动调整。尝试滚动下面这个框。
+      </p>
+      <div class="scrollbox">
+        <div class="scrollbox-content">
+          向下滚动查看效果...<br><br>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+          Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+          <br><br>
+          继续滚动...
+        </div>
+      </div>
+    </section>
+
+    <!-- 代码示例 -->
+    <section class="section">
+      <h2>⑤ 核心代码示例</h2>
+
+      <h3>HTML: 添加 meta 标签</h3>
+      <pre><code>&lt;head&gt;
+  &lt;!-- 声明支持亮色和暗黑，防止页面加载闪烁 --&gt;
+  &lt;meta name="color-scheme" content="light dark"&gt;
+  &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;</code></pre>
+
+      <h3>CSS: 使用 light-dark() 定义主题变量</h3>
+      <pre><code>:root {
+  color-scheme: light dark;
+}
+
+:root {
+  --bg: light-dark(#ffffff, #121212);
+  --surface: light-dark(#f5f5f5, #1e1e1e);
+  --text: light-dark(#1a1a1a, #e0e0e0);
+  --border: light-dark(#e0e0e0, #333333);
+  --primary: light-dark(#0066cc, #4da3ff);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}</code></pre>
+
+      <h3>分区域声明</h3>
+      <pre><code>/* 固定亮色区域 */
+.brand-header {
+  color-scheme: only light;
+  background: #007bff;
+  color: #fff;
+}
+
+/* 固定暗黑区域 */
+.dark-panel {
+  color-scheme: only dark;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* 跟随系统 */
+.main-content {
+  color-scheme: light dark;
+}</code></pre>
+    </section>
+
+    <p class="info">
+      <strong>总结：</strong><code>color-scheme</code> 让浏览器知道你的页面支持哪些色彩方案，浏览器据此自动调整原生 UI 的颜色。<br>
+      配合 <code>light-dark()</code> 函数，可以用一行 CSS 声明实现双主题适配，代码简洁且易于维护。
+    </p>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Masonry - 按行分轨道</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 12px; color: #8b949e; padding: 12px; background: #0d1117; border-radius: 4px; line-height: 1.6; margin-bottom: 12px; }
+    .demo-area { background: #21262d; border-radius: 6px; padding: 16px; min-height: 200px; overflow-x: auto; }
+    .grid { display: grid-lanes; gap: 10px; grid-template-rows: repeat(3, 100px); }
+    .item { background: linear-gradient(135deg, #3fb950, #196c2e); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 14px; min-inline-size: 60px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; margin-top: 12px; white-space: pre; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; vertical-align: middle; }
+    .badge-experimental { background: #f0883e; color: #0d1117; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Masonry - 按行分轨道 <span class="badge badge-experimental">实验性</span></h1>
+    <p class="subtitle">使用 grid-template-rows 沿块轴排列，元素沿垂直方向自动找最窄行填入</p>
+
+    <div class="section">
+      <h2>基础按行分轨道</h2>
+      <div class="info">使用 <code>grid-template-rows: repeat(3, 100px)</code> 定义 3 行固定高度轨道，元素自动填入最窄行。</div>
+      <div class="demo-area">
+        <div class="grid" id="masonry-grid">
+          <div class="item">1</div>
+          <div class="item">2</div>
+          <div class="item">3</div>
+          <div class="item">4</div>
+          <div class="item">5</div>
+          <div class="item">6</div>
+          <div class="item">7</div>
+          <div class="item">8</div>
+          <div class="item">9</div>
+          <div class="item">10</div>
+        </div>
+      </div>
+      <div class="code-block">.grid {
+  display: grid-lanes;
+  gap: 10px;
+  grid-template-rows: repeat(3, 100px);
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>动态宽度效果</h2>
+      <div class="info">每行轨道 <code>inline-size</code> 由内容决定，呈现「从左到右紧凑排列」的效果</div>
+      <div class="demo-area">
+        <div class="grid" id="masonry-grid-var" style="grid-template-rows: repeat(4, 80px);">
+        </div>
+      </div>
+      <div class="code-block">// JS 设置不同宽度
+items[i].style.inlineSize = itemSizes[i];</div>
+    </div>
+  </div>
+
+  <script>
+    const itemSizes = [
+      "2em", "3em", "1.6em", "4em", "2.2em",
+      "3em", "4.5em", "1em", "3.5em", "2.8em",
+    ];
+    const items = document.querySelectorAll(".item");
+    for (let i = 0; i < items.length; i++) {
+      items[i].style.inlineSize = itemSizes[i];
+    }
+
+    // 动态宽度演示
+    const sizes2 = ["3em", "5em", "2em", "4em", "6em", "2.5em", "3.5em", "4.5em", "1.5em", "5.5em"];
+    const grid2 = document.getElementById("masonry-grid-var");
+    for (let i = 0; i < 10; i++) {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = i + 1;
+      div.style.inlineSize = sizes2[i];
+      grid2.appendChild(div);
+    }
+  </script>
+</body>
+</html>
