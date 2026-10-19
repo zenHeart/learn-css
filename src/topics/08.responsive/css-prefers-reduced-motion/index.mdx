@@ -1,0 +1,186 @@
+---
+title: prefers-reduced-motion 减少动效
+category: 响应式设计
+tags: [prefers-reduced-motion, 减少动效, 动画, 无障碍, accessibility]
+description: 详细介绍 CSS prefers-reduced-motion 媒体查询，尊重用户减少动效的设置。
+keywords: prefers-reduced-motion, 减少动效, 动画, 无障碍, accessibility, 动效偏好
+---
+
+# prefers-reduced-motion 减少动效
+
+`prefers-reduced-motion` 是 CSS 媒体查询，用于检测用户是否请求减少页面动画效果，提升无障碍体验。
+
+## 基本语法
+
+```css
+/* 用户偏好减少动效 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+## 检测的值
+
+| 值 | 说明 |
+|---|---|
+| `no-preference` | 用户未设置偏好（默认值） |
+| `reduce` | 用户偏好减少或消除动画 |
+
+## 使用场景
+
+### 1. 禁用所有动画
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+### 2. 保留关键动画
+
+```css
+/* 关键加载动画保留 */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* 非关键动画禁用 */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    animation: none;
+    opacity: 1;
+  }
+}
+```
+
+### 3. 使用 prefers-reduced-motion 查询
+
+```css
+/* 复杂的入场动画 */
+.hero-animation {
+  animation: slideIn 1s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-animation {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+```
+
+## JavaScript 检测
+
+```javascript
+// 检测用户偏好
+const prefersReducedMotion = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches;
+
+// 监听变化
+window.matchMedia('(prefers-reduced-motion: reduce)')
+  .addEventListener('change', (e) => {
+    if (e.matches) {
+      console.log('用户启用了减少动效');
+    } else {
+      console.log('用户禁用了减少动效');
+    }
+  });
+```
+
+## 常见问题
+
+### 1. 滚动动画
+
+```css
+/* 禁用平滑滚动 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* 禁用锚点平滑滚动 */
+a[href^="#"] {
+  scroll-behavior: auto;
+}
+```
+
+### 2. Loader 和 Spinner
+
+```css
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+  }
+}
+```
+
+### 3. 模态框动画
+
+```css
+.modal {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    transition: none;
+  }
+
+  .modal-enter {
+    opacity: 1;
+    transform: none;
+  }
+}
+```
+
+## 浏览器支持
+
+| 浏览器 | 支持版本 |
+|--------|----------|
+| Chrome | 74+ |
+| Firefox | 63+ |
+| Safari | 10.1+ |
+| Edge | 79+ |
+| iOS Safari | 10.3+ |
+
+## 最佳实践
+
+1. **全局禁用非关键动画**：在 `@media (prefers-reduced-motion: reduce)` 中禁用不必要的动画
+2. **保留功能性动画**：如加载指示器，让用户知道系统在工作
+3. **使用 `prefers-reduced-motion`** 而不是完全禁用动画
+4. **添加过渡效果而非动画**：过渡比动画更轻量
+
+## 交互式演示
+
+{/* @playground id="prefers-reduced-motion-demo" mode="demo" */}

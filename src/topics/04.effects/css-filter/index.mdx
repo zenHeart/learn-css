@@ -1,0 +1,422 @@
+---
+title: CSS filter
+category: 视觉效果
+tags: [filter, blur, brightness, contrast, drop-shadow, grayscale, hue-rotate, invert, opacity, saturate, sepia, css-effects]
+description: 详细介绍 CSS filter 滤镜属性，包括10种滤镜函数的工作原理和视觉效果。
+keywords: CSS filter, blur, brightness, contrast, drop-shadow, grayscale, hue-rotate, invert, opacity, saturate, sepia, 滤镜, CSS 效果
+---
+
+## 学习目标
+
+通过本章学习，你将：
+
+1. 理解 CSS filter 滤镜的基本概念和滤镜链原理
+2. 掌握 10 种滤镜函数的取值和工作原理
+3. 学会组合使用多个滤镜函数创造丰富效果
+4. 能够使用滤镜实现常见的视觉交互效果
+
+---
+
+## 快速上手
+
+### filter 属性
+
+`filter` 属性将图形变化效果应用于元素。通过滤镜函数，可以实现模糊、亮度调整、对比度调整、投影、灰度转换、色相旋转等效果。
+
+```css
+.element {
+  filter: blur(5px);
+  filter: grayscale(100%);
+}
+```
+
+### 基本示例
+
+{/* @playground id="css-filter-demo" mode="code" */}
+
+---
+
+## 工作原理
+
+### 滤镜链
+
+`filter` 属性接受一个或多个滤镜函数，以空格分隔，按从左到右的顺序依次应用。这种链式调用（Filter Functions Chain）使得可以组合多个效果。
+
+```css
+/* 组合多个滤镜函数 */
+.photo-effect {
+  filter: contrast(175%) brightness(3%);
+}
+
+/* 等价于 */
+.complex-effect {
+  filter: grayscale(80%) contrast(150%) brightness(1.2);
+}
+```
+
+### 取值类型
+
+滤镜函数的值主要有两种类型：
+
+- **绝对长度**：`blur(5px)` 中的 `px`
+- **百分比/倍数**：`brightness(150%)`、`brightness(1.5)`
+
+### 滤镜函数一览
+
+| 函数 | 取值 | 说明 |
+|------|------|------|
+| `blur()` | `<length>`（px, em, rem） | 高斯模糊 |
+| `brightness()` | `<number>` 或 `<percentage>` | 亮度调整 |
+| `contrast()` | `<number>` 或 `<percentage>` | 对比度调整 |
+| `drop-shadow()` | `<shadow>`（类似 box-shadow） | 投影 |
+| `grayscale()` | `<number>` 或 `<percentage>` | 灰度转换 |
+| `hue-rotate()` | `<angle>`（deg, rad, grad, turn） | 色相旋转 |
+| `invert()` | `<number>` 或 `<percentage>` | 反相 |
+| `opacity()` | `<number>` 或 `<percentage>` | 透明度 |
+| `saturate()` | `<number>` 或 `<percentage>` | 饱和度 |
+| `sepia()` | `<number>` 或 `<percentage>` | 棕褐色 |
+
+---
+
+## 主要属性详解
+
+### blur()
+
+高斯模糊函数，使用标准差（σ）控制模糊程度。
+
+```css
+.blur-sm { filter: blur(2px); }
+.blur-md { filter: blur(5px); }
+.blur-lg { filter: blur(10px); }
+```
+
+- **取值**：`0` 表示不模糊
+- **原理**：通过高斯函数计算周围像素的加权平均值
+
+### brightness()
+
+调整元素的明暗程度。
+
+```css
+.bright { filter: brightness(150%); }   /* 变亮 50% */
+.dark { filter: brightness(50%); }      /* 变暗 50% */
+.normal { filter: brightness(100%); }   /* 原始亮度 */
+```
+
+- `100%` 或 `1` = 原始亮度
+- `0%` 或 `0` = 全黑
+- 超过 `100%` 或 `1` = 更亮
+
+### contrast()
+
+调整元素的对比度，即明暗之间的差异程度。
+
+```css
+.high-contrast { filter: contrast(200%); }
+.low-contrast { filter: contrast(50%); }
+```
+
+- `100%` 或 `1` = 原始对比度
+- `0%` 或 `0` = 全灰（无对比度）
+- 超过 `100%` = 更高对比度
+
+### drop-shadow()
+
+为元素添加投影效果，类似于 `box-shadow`，但**会遵循Alpha通道**，产生更自然的投影。
+
+```css
+/* drop-shadow 的语法 */
+.shadow-1 { filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3)); }
+.shadow-2 { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+
+/* 与 box-shadow 对比：box-shadow 不遵循 Alpha 通道 */
+.bad-shadow {
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.3);  /* 矩形投影，不跟随形状 */
+}
+.good-shadow {
+  filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));  /* 跟随形状 */
+}
+```
+
+`drop-shadow()` 的 `<shadow>` 值语法：
+
+```
+drop-shadow(offset-x offset-y blur-radius spread-radius color)
+```
+
+- `offset-x`：水平偏移（必需）
+- `offset-y`：垂直偏移（必需）
+- `blur-radius`：模糊半径（可选，默认 0）
+- `spread-radius`：扩展半径（可选，默认 0）
+- `color`：投影颜色（可选，默认跟随 color 属性）
+
+### grayscale()
+
+将元素转换为灰度图像。
+
+```css
+.gray { filter: grayscale(100%); }      /* 完全灰度 */
+.half-gray { filter: grayscale(50%); }  /* 50% 灰度 */
+.color { filter: grayscale(0%); }        /* 原始颜色 */
+```
+
+- `0%` = 原始颜色
+- `100%` = 完全灰度
+
+### hue-rotate()
+
+通过色轮旋转改变图像的色相。
+
+```css
+.hue-0 { filter: hue-rotate(0deg); }    /* 原始颜色 */
+.hue-90 { filter: hue-rotate(90deg); }   /* 旋转 90° */
+.hue-180 { filter: hue-rotate(180deg); } /* 反相色（互补色） */
+.hue-360 { filter: hue-rotate(360deg); } /* 回到原始 */
+```
+
+- `0deg` = 无变化
+- `360deg` = 色轮完整旋转一圈
+- 负值向相反方向旋转
+
+### invert()
+
+反转元素的颜色，产生照片负片效果。
+
+```css
+.negative { filter: invert(100%); }     /* 完全反相 */
+.partial { filter: invert(50%); }        /* 50% 反相 */
+.original { filter: invert(0%); }        /* 原始颜色 */
+```
+
+- `0%` = 原始颜色
+- `100%` = 完全反相
+
+### opacity()
+
+调整元素的透明度，与 `opacity` 属性效果类似，但滤镜版本可以利用硬件加速。
+
+```css
+.transparent { filter: opacity(0%); }  /* 完全透明 */
+.half { filter: opacity(50%); }         /* 50% 透明度 */
+.opaque { filter: opacity(100%); }       /* 完全不透明 */
+```
+
+### saturate()
+
+调整元素的饱和度，即颜色的鲜艳程度。
+
+```css
+.vivid { filter: saturate(200%); }      /* 高度饱和 */
+.muted { filter: saturate(50%); }       /* 低饱和度 */
+.desaturate { filter: saturate(0%); }  /* 完全去饱和（灰度） */
+.normal { filter: saturate(100%); }    /* 原始饱和度 */
+```
+
+- `0%` = 完全去饱和（灰度）
+- `100%` = 原始饱和度
+- `200%` = 双倍饱和度
+
+### sepia()
+
+将元素转换为棕褐色怀旧风格。
+
+```css
+.sepia { filter: sepia(100%); }         /* 完全棕褐色 */
+.vintage { filter: sepia(50%); }       /* 50% 棕褐色 */
+.original { filter: sepia(0%); }        /* 原始颜色 */
+```
+
+- `0%` = 原始颜色
+- `100%` = 完全棕褐色
+
+---
+
+## 实战应用示例
+
+### 场景一：卡片悬停效果
+
+鼠标悬停时应用模糊和亮度变化：
+
+```css
+.card {
+  transition: filter 0.3s ease;
+}
+
+.card:hover {
+  filter: blur(2px) brightness(1.1);
+}
+```
+
+### 场景二：图片滤镜处理
+
+为图片添加统一的视觉风格：
+
+```css
+/* 黑白照片效果 */
+.photo-bw {
+  filter: grayscale(100%);
+}
+
+/* 复古风格 */
+.photo-vintage {
+  filter: sepia(40%) contrast(110%) brightness(90%);
+}
+
+/* 高饱和风格 */
+.photo-vivid {
+  filter: saturate(150%) contrast(110%);
+}
+```
+
+### 场景三：文本投影
+
+使用 `drop-shadow` 为文本添加清晰可读的投影：
+
+```css
+.text-shadow {
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+```
+
+### 场景四：按钮点击反馈
+
+点击时改变按钮的亮度和对比度：
+
+```css
+.button {
+  transition: filter 0.1s ease;
+}
+
+.button:active {
+  filter: brightness(0.8) contrast(1.2);
+}
+```
+
+### 场景五：loading 动画
+
+利用模糊和旋转创造动态效果：
+
+```css
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #667eea;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  filter: blur(1px);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+---
+
+## 组合使用
+
+### 常用组合
+
+```css
+/* 提升图片清晰度 */
+.enhance {
+  filter: contrast(110%) saturate(130%);
+}
+
+/* 怀旧风格 */
+.vintage {
+  filter: sepia(30%) contrast(90%) brightness(110%);
+}
+
+/* 冷色调风格 */
+.cool-tone {
+  filter: saturate(140%) hue-rotate(180deg);
+}
+
+/* 暖色调风格 */
+.warm-tone {
+  filter: saturate(120%) brightness(105%) sepia(20%);
+}
+
+/* 高对比黑白 */
+.bw-high-contrast {
+  filter: grayscale(100%) contrast(150%);
+}
+
+/* 柔焦效果 */
+.soft-focus {
+  filter: blur(2px) brightness(110%) contrast(90%);
+}
+```
+
+---
+
+## 最佳实践与注意事项
+
+### 性能方面
+
+- `blur()` 是计算密集型滤镜，大面积使用可能影响性能
+- 滤镜会创建新的层叠上下文，考虑使用 `will-change` 优化
+- 在移动设备上谨慎使用复杂滤镜链
+
+### 可访问性
+
+- 使用 `prefers-reduced-motion` 媒体查询禁用动画滤镜
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .animated-filter {
+    filter: none;
+    animation: none;
+  }
+}
+```
+
+### 常见陷阱
+
+- **陷阱 1**：`filter` 和 `opacity` 混淆
+  - `opacity` 是 CSS 属性，整体控制透明度
+  - `filter: opacity()` 是滤镜函数，效果类似但可以利用硬件加速
+- **陷阱 2**：`box-shadow` 和 `drop-shadow()` 混淆
+  - `box-shadow` 只生成矩形投影
+  - `drop-shadow()` 遵循 Alpha 通道，跟随元素形状
+- **陷阱 3**：滤镜链顺序影响结果
+  - `grayscale(100%) contrast(200%)` vs `contrast(200%) grayscale(100%)`
+  - 不同顺序可能产生不同效果
+
+### 浏览器兼容性
+
+- 现代浏览器支持良好
+- IE 不支持
+- 部分老版本浏览器可能需要前缀 `-webkit-filter`
+
+---
+
+## 总结
+
+### 核心知识点回顾
+
+- `filter` 属性通过滤镜函数改变元素的视觉表现
+- 10 种滤镜函数：
+  - 模糊：`blur()`
+  - 亮度：`brightness()`
+  - 对比度：`contrast()`
+  - 投影：`drop-shadow()`
+  - 灰度：`grayscale()`
+  - 色相旋转：`hue-rotate()`
+  - 反相：`invert()`
+  - 透明度：`opacity()`
+  - 饱和度：`saturate()`
+  - 棕褐色：`sepia()`
+- 多个滤镜函数可以链式组合，效果按顺序应用
+- `drop-shadow()` 会遵循 Alpha 通道，`box-shadow` 不会
+
+### 延伸阅读
+
+- [MDN: filter](https://developer.mozilla.org/zh-CN/docs/Web/CSS/filter)
+- [CSS Filters (W3C)](https://www.w3.org/TR/filter-effects-1/)
+- [CSS Filter Tricks](https://css-tricks.com/almanac/properties/f/filter/)

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mix-blend-mode 混合模式演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1e293b;
+      margin-bottom: 30px;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-box strong {
+      color: #1e40af;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.3em;
+    }
+
+    .demo-section p {
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    /* 混合模式网格 */
+    .blend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .blend-item {
+      position: relative;
+      height: 120px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .blend-item .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .blend-item .mode-label {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      font-size: 11px;
+      font-family: monospace;
+      color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* 各混合模式 */
+    .blend-normal { mix-blend-mode: normal; }
+    .blend-multiply { mix-blend-mode: multiply; background: #ff6b6b; }
+    .blend-screen { mix-blend-mode: screen; background: #4ecdc4; }
+    .blend-overlay { mix-blend-mode: overlay; background: #ffe66d; }
+    .blend-darken { mix-blend-mode: darken; background: linear-gradient(45deg, #667eea 50%, #764ba2 50%); }
+    .blend-lighten { mix-blend-mode: lighten; background: linear-gradient(45deg, #667eea 50%, #764ba2 50%); }
+    .blend-color-dodge { mix-blend-mode: color-dodge; background: #ff6b6b; }
+    .blend-color-burn { mix-blend-mode: color-burn; background: #ff6b6b; }
+    .blend-difference { mix-blend-mode: difference; background: #4ecdc4; }
+    .blend-exclusion { mix-blend-mode: exclusion; background: #4ecdc4; }
+    .blend-hue { mix-blend-mode: hue; background: #ff6b6b; }
+    .blend-saturation { mix-blend-mode: saturation; background: #ff6b6b; }
+    .blend-color { mix-blend-mode: color; background: #4ecdc4; }
+    .blend-luminosity { mix-blend-mode: luminosity; background: #ff6b6b; }
+
+    /* 代码块 */
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9em;
+      margin-top: 16px;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .code-comment { color: #6a9955; }
+    .code-prop { color: #9cdcfe; }
+    .code-value { color: #ce9178; }
+
+    /* 对比表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+
+    th:first-child, td:first-child {
+      font-family: monospace;
+      color: #7c3aed;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 mix-blend-mode 混合模式演示</h1>
+
+  <div class="info-box">
+    <strong>💡 什么是混合模式？</strong>
+    <p style="margin: 8px 0 0 0;">
+      混合模式控制两个图层叠加时的视觉效果。当元素放在其它内容之上时，
+      通过设置不同的混合模式，可以创造出丰富的视觉效果，如同 Photoshop 中的图层混合。
+    </p>
+  </div>
+
+  <div class="demo-section">
+    <h2>所有混合模式一览</h2>
+    <p>下方展示所有可用的混合模式效果。白色文字叠加在不同颜色背景上，产生不同的视觉效果。</p>
+
+    <div class="blend-grid">
+      <div class="blend-item blend-normal">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">normal</span>
+      </div>
+      <div class="blend-item blend-multiply">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">multiply</span>
+      </div>
+      <div class="blend-item blend-screen">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">screen</span>
+      </div>
+      <div class="blend-item blend-overlay">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">overlay</span>
+      </div>
+      <div class="blend-item blend-darken">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">darken</span>
+      </div>
+      <div class="blend-item blend-lighten">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">lighten</span>
+      </div>
+      <div class="blend-item blend-color-dodge">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">color-dodge</span>
+      </div>
+      <div class="blend-item blend-color-burn">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">color-burn</span>
+      </div>
+      <div class="blend-item blend-difference">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">difference</span>
+      </div>
+      <div class="blend-item blend-exclusion">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">exclusion</span>
+      </div>
+      <div class="blend-item blend-hue">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">hue</span>
+      </div>
+      <div class="blend-item blend-saturation">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">saturation</span>
+      </div>
+      <div class="blend-item blend-color">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">color</span>
+      </div>
+      <div class="blend-item blend-luminosity">
+        <div class="overlay">Hello</div>
+        <span class="mode-label">luminosity</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>混合模式原理对比</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模式</th>
+          <th>原理</th>
+          <th>效果特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>multiply</td>
+          <td>前景 × 背景</td>
+          <td>黑色完全变黑，白色保持不变</td>
+        </tr>
+        <tr>
+          <td>screen</td>
+          <td>1 - (1-前景) × (1-背景)</td>
+          <td>与 multiply 相反，白色完全保留</td>
+        </tr>
+        <tr>
+          <td>overlay</td>
+          <td>根据背景交替使用 multiply/screen</td>
+          <td>暗部加深，亮部提亮</td>
+        </tr>
+        <tr>
+          <td>darken</td>
+          <td>取较暗的颜色</td>
+          <td>保留较暗的像素</td>
+        </tr>
+        <tr>
+          <td>lighten</td>
+          <td>取较亮的颜色</td>
+          <td>保留较亮的像素</td>
+        </tr>
+        <tr>
+          <td>difference</td>
+          <td>|前景 - 背景|</td>
+          <td>高对比度，产生负片效果</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="demo-section">
+    <h2>核心代码示例</h2>
+    <pre><code><span class="code-comment">/* 基础用法：文字与背景混合 */</span>
+<span class="code-prop">.text-blend</span> {
+  <span class="code-prop">position</span>: relative;
+  <span class="code-prop">background</span>: linear-gradient(135deg, <span class="code-value">#667eea</span>, <span class="code-value">#764ba2</span>);
+}
+
+<span class="code-prop">.text-blend h1</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 文字与背景混合 */</span>
+  <span class="code-prop">color</span>: white;
+}
+
+<span class="code-comment">/* 与 background-blend-mode 的区别 */</span>
+<span class="code-prop">.bg-blend</span> {
+  <span class="code-prop">background-image</span>: url(<span class="code-value">'image.jpg'</span>);
+  <span class="code-prop">background-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 仅背景图片之间混合 */</span>
+}
+
+<span class="code-prop">.content-blend</span> {
+  <span class="code-prop">background-image</span>: url(<span class="code-value">'image.jpg'</span>);
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 包括文字在内整体混合 */</span>
+}
+
+<span class="code-comment">/* 使用 isolation 隔离混合效果 */</span>
+<span class="code-prop">.container</span> {
+  <span class="code-prop">isolation</span>: <span class="code-value">isolate</span>; <span class="code-comment">/* 混合只在容器内生效 */</span>
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>混用 vs 隔离：isolation 的作用</h2>
+    <p>
+      <strong>不隔离：</strong>混合效果会传播到父元素外部<br>
+      <strong>隔离（isolation: isolate）：</strong>混合效果只在当前容器内生效
+    </p>
+    <pre><code><span class="code-comment">/* 不隔离：.inner 的混合会影响整个页面背景 */</span>
+<span class="code-prop">.outer</span> {
+  <span class="code-prop">background</span>: <span class="code-value">#764ba2</span>;
+}
+<span class="code-prop">.inner</span> {
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>;
+  <span class="code-prop">background</span>: <span class="code-value">#ff6b6b</span>;
+}
+
+<span class="code-comment">/* 隔离：混合只在 .group 内生效 */</span>
+<span class="code-prop">.group</span> {
+  <span class="code-prop">isolation</span>: <span class="code-value">isolate</span>;
+}</code></pre>
+  </div>
+
+  <div style="text-align: center; margin-top: 40px; color: #94a3b8;">
+    <p>更多演示请查看：text-blend.html | image-overlay.html | layer-blend.html</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片叠加混合 - mix-blend-mode 演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1e293b;
+      margin-bottom: 24px;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    /* 图片叠加容器 */
+    .image-blend-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1e1e1e;
+      margin-bottom: 16px;
+    }
+
+    .image-blend-container img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-blend-container img:first-child {
+      /* 底层图片 */
+    }
+
+    .image-blend-container img:last-child {
+      width: 50%;
+      height: 50%;
+      top: 25%;
+      left: 25%;
+      mix-blend-mode: multiply;
+    }
+
+    .blend-multiply img:last-child { mix-blend-mode: multiply; }
+    .blend-screen img:last-child { mix-blend-mode: screen; }
+    .blend-overlay img:last-child { mix-blend-mode: overlay; }
+    .blend-difference img:last-child { mix-blend-mode: difference; }
+    .blend-color img:last-child { mix-blend-mode: color; }
+
+    /* 双图叠加对比 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .compare-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 200px;
+    }
+
+    .compare-item img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .compare-item .overlay-img {
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 20%;
+    }
+
+    .compare-label {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+      z-index: 10;
+    }
+
+    /* 色彩叠加层 */
+    .color-overlay-demo {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .color-overlay-demo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .color-overlay-demo .color-layer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%);
+    }
+
+    .color-overlay-demo .text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 900;
+      color: white;
+      mix-blend-mode: overlay;
+    }
+
+    /* 网格效果 */
+    .grid-blend-demo {
+      position: relative;
+      height: 250px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: url('https://picsum.photos/seed/gridbase/600/400') center/cover;
+      margin-bottom: 16px;
+    }
+
+    .grid-blend-demo .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    .grid-blend-demo .grid-overlay.blend {
+      mix-blend-mode: multiply;
+    }
+
+    /* 选择器 */
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      padding: 8px 16px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: monospace;
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover {
+      border-color: #667eea;
+      background: #eff6ff;
+    }
+
+    .mode-btn.active {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    .code-comment { color: #6a9955; }
+    .code-prop { color: #9cdcfe; }
+    .code-value { color: #ce9178; }
+  </style>
+</head>
+<body>
+  <h1>🖼️ 图片叠加混合模式</h1>
+
+  <div class="demo-section">
+    <h2>两张图片叠加对比</h2>
+    <p>底层图片 + 上层图片（半透明），不同混合模式产生不同效果：</p>
+
+    <div class="mode-selector">
+      <button class="mode-btn active" onclick="setBlendMode('normal')">normal</button>
+      <button class="mode-btn" onclick="setBlendMode('multiply')">multiply</button>
+      <button class="mode-btn" onclick="setBlendMode('screen')">screen</button>
+      <button class="mode-btn" onclick="setBlendMode('overlay')">overlay</button>
+      <button class="mode-btn" onclick="setBlendMode('difference')">difference</button>
+    </div>
+
+    <div class="image-blend-container" id="blendDemo">
+      <img src="https://picsum.photos/seed/blendbase/600/400" alt="底层图片">
+      <img src="https://picsum.photos/seed/blendoverlay/600/400" alt="叠加层" class="overlay-img">
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>快速对比：不同混合模式</h2>
+    <div class="compare-grid">
+      <div class="compare-item blend-multiply">
+        <img src="https://picsum.photos/seed/blendbase2/400/300" alt="背景">
+        <img src="https://picsum.photos/seed/blendoverlay2/400/300" alt="叠加" class="overlay-img">
+        <span class="compare-label">multiply</span>
+      </div>
+      <div class="compare-item blend-screen">
+        <img src="https://picsum.photos/seed/blendbase2/400/300" alt="背景">
+        <img src="https://picsum.photos/seed/blendoverlay2/400/300" alt="叠加" class="overlay-img">
+        <span class="compare-label">screen</span>
+      </div>
+      <div class="compare-item blend-overlay">
+        <img src="https://picsum.photos/seed/blendbase2/400/300" alt="背景">
+        <img src="https://picsum.photos/seed/blendoverlay2/400/300" alt="叠加" class="overlay-img">
+        <span class="compare-label">overlay</span>
+      </div>
+      <div class="compare-item blend-difference">
+        <img src="https://picsum.photos/seed/blendbase2/400/300" alt="背景">
+        <img src="https://picsum.photos/seed/blendoverlay2/400/300" alt="叠加" class="overlay-img">
+        <span class="compare-label">difference</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>彩色叠加层 + 文字</h2>
+    <p>图片 + 半透明渐变 + 文字，多层叠加：</p>
+
+    <div class="color-overlay-demo">
+      <img src="https://picsum.photos/seed/colormix/800/400" alt="背景图片">
+      <div class="color-layer"></div>
+      <div class="text">COLOR BLEND</div>
+    </div>
+    <pre><code><span class="code-comment">/* 图片 + 彩色叠加层 + 文字混合 */</span>
+<span class="code-prop">.color-overlay-demo</span> {
+  <span class="code-prop">position</span>: <span class="code-value">relative</span>;
+  <span class="code-prop">height</span>: <span class="code-value">250px</span>;
+}
+
+<span class="code-prop">.color-overlay-demo img</span> {
+  <span class="code-prop">width</span>: <span class="code-value">100%</span>;
+  <span class="code-prop">height</span>: <span class="code-value">100%</span>;
+  <span class="code-prop">object-fit</span>: <span class="code-value">cover</span>;
+}
+
+<span class="code-prop">.color-layer</span> {
+  <span class="code-prop">position</span>: <span class="code-value">absolute</span>;
+  <span class="code-prop">inset</span>: <span class="code-value">0</span>;
+  <span class="code-prop">background</span>: <span class="code-value">linear-gradient(135deg,
+    rgba(102, 126, 234, 0.6),
+    rgba(118, 75, 162, 0.6))</span>;
+}
+
+<span class="code-prop">.text</span> {
+  <span class="code-prop">position</span>: <span class="code-value">absolute</span>;
+  <span class="code-prop">inset</span>: <span class="code-value">0</span>;
+  <span class="code-prop">display</span>: <span class="code-value">flex</span>;
+  <span class="code-prop">align-items</span>: <span class="code-value">center</span>;
+  <span class="code-prop">justify-content</span>: <span class="code-value">center</span>;
+  <span class="code-prop">font-size</span>: <span class="code-value">48px</span>;
+  <span class="code-prop">font-weight</span>: <span class="code-value">900</span>;
+  <span class="code-prop">color</span>: <span class="code-value">white</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">overlay</span>;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>网格叠加效果</h2>
+    <p>图片上叠加网格线，使用 multiply 混合让网格融入图片：</p>
+
+    <div class="grid-blend-demo">
+      <div class="grid-overlay blend"></div>
+    </div>
+    <pre><code><span class="code-comment">/* 网格叠加 - 使用 multiply 让网格融入图片 */</span>
+<span class="code-prop">.grid-overlay</span> {
+  <span class="code-prop">position</span>: <span class="code-value">absolute</span>;
+  <span class="code-prop">inset</span>: <span class="code-value">0</span>;
+  <span class="code-prop">background-image</span>:
+    <span class="code-value">linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)</span>;
+  <span class="code-prop">background-size</span>: <span class="code-value">30px 30px</span>;
+  <span class="code-prop">mix-blend-mode</span>: <span class="code-value">multiply</span>; <span class="code-comment">/* 白色网格融入图片 */</span>
+}</code></pre>
+  </div>
+
+  <script>
+    const demo = document.getElementById('blendDemo');
+    const buttons = document.querySelectorAll('.mode-btn');
+    const overlay = demo.querySelector('.overlay-img');
+
+    function setBlendMode(mode) {
+      overlay.style.mixBlendMode = mode;
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

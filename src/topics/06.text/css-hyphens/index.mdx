@@ -1,0 +1,108 @@
+---
+title: CSS hyphens 自动断字
+category: CSS 文本
+tags: [css, hyphens, hyphenation, text, word-break, 断字, 连字符, 文本排版]
+description: 详细介绍 CSS hyphens 属性如何控制文本的断字方式，实现更美观的文本排版。
+keywords: hyphens, hyphenation, text-overflow, word-break, 断字, 连字符, 文本排版
+---
+
+`hyphens` 属性控制文本在换行时如何添加连字符（hyphen），可以让文本排版更加美观自然。
+
+## 基本概念
+
+断字（hyphenation）是指在文本换行时，在单词中间添加连字符，使文本能够更自然地分布在多行。适当使用断字可以避免行尾出现大空白，让文本排版更加紧凑美观。
+
+## 语法
+
+```css
+hyphens: none | manual | auto
+```
+
+## 取值说明
+
+### none - 不断字
+
+```css
+hyphens: none;
+```
+
+- 文本换行时不添加连字符
+- 单词完整保留在一行
+- 可能导致行尾出现大空白
+
+### manual - 手动断字（默认值）
+
+```css
+hyphens: manual;
+```
+
+- 浏览器只在开发者手动标记的位置断字
+- 使用软连字符（`­` 或 `&#xAD;`）或硬连字符（`-`）来标记断字位置
+
+### auto - 自动断字
+
+```css
+hyphens: auto;
+```
+
+- 浏览器根据语言词典自动判断断字位置
+- 需要配合 `lang` 属性指定语言
+- 支持的语言包括：英语、德语、法语、西班牙语等
+
+## 使用场景
+
+### 文章排版
+
+```css
+article {
+  hyphens: auto;
+  language: en; /* 或 zh 等 */
+}
+```
+
+### 多语言网站
+
+```css
+.multilingual {
+  hyphens: auto;
+}
+```
+
+## 软连字符和硬连字符
+
+### 软连字符 (SHY)
+
+```html
+软&shy;连字符
+软&#xAD;字符
+```
+
+- 在 HTML 中使用 `&shy;` 或 `&#xAD;`
+- 只在需要断行时显示
+- 用于手动标记可断字的位置
+
+### 硬连字符
+
+```html
+硬-连字符
+```
+
+- 普通的连字符 `-`
+- 始终显示在文本中
+
+## 浏览器支持
+
+- Chrome、S Safari、Edge 支持 `auto` 值
+- Firefox 支持 `auto` 值
+- 需要配合正确的 `lang` 属性
+
+## 交互式演示
+
+{/* @playground id="css-hyphens" mode="demo" */}
+
+## 总结
+
+- `manual` 适合需要精确控制断字的位置
+- `auto` 适合多语言内容，让浏览器自动处理
+- 配合 `lang` 属性可以获得更好的断字效果
+- 软连字符 `&shy;` 可以在 HTML 中手动标记断字位置

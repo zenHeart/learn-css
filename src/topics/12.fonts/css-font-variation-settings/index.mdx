@@ -1,0 +1,232 @@
+---
+title: CSS font-variation-settings 可变字体
+category: CSS 字体
+tags: [css, font, variable-fonts, font-variation-settings,可变字体, opentype]
+description: 详细介绍可变字体（Variable Fonts）和 font-variation-settings 属性，如何通过轴控制字体的字重、宽度、倾斜等特性。
+keywords: font-variation-settings, 可变字体, Variable Fonts, wght, wdth, slnt, opentype
+---
+
+可变字体（Variable Fonts）是 OpenType 字体规范的重要发展，允许在单个字体文件中包含多个变体，通过轴（axis）来控制字体的外观。
+
+## 什么是可变字体？
+
+传统字体需要为每个字重（Regular、Bold、Light 等）单独的文件，而可变字体只需一个文件即可包含所有变体：
+
+```
+传统方式: Roboto-Regular.ttf, Roboto-Bold.ttf, Roboto-Light.ttf (3个文件)
+
+可变字体: RobotoFlex-Variable.ttf (1个文件，包含所有字重)
+```
+
+## 基本语法
+
+```css
+.element {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 400;
+}
+```
+
+## 常用特性轴
+
+### wght - 字重轴
+
+```css
+.text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 700;  /* 粗体 */
+}
+```
+
+常用字重值：
+- 100 - Thin
+- 300 - Light
+- 400 - Regular
+- 500 - Medium
+- 700 - Bold
+- 900 - Black
+
+### wdth - 宽度轴
+
+```css
+.condensed {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wdth' 75;  /* 压缩字体 */
+}
+
+.expanded {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wdth' 125;  /* 扩展字体 */
+}
+```
+
+典型范围：75 - 125
+
+### slnt - 倾斜轴
+
+```css
+.italic-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'slnt' -12;  /* 倾斜12度 */
+}
+```
+
+典型范围：-10 - 0
+
+### ital - 斜体轴
+
+```css
+.italic {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'ital' 1;  /* 1 = 斜体，0 = 正体 */
+}
+```
+
+### opsz - 光学尺寸
+
+```css
+.caption {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'opsz' 8;  /* 小字号优化 */
+}
+
+.heading {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'opsz' 48;  /* 大字号优化 */
+}
+```
+
+## 组合使用多个轴
+
+```css
+.heading {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 700, 'wdth' 95, 'opsz' 24;
+  font-size: 48px;
+}
+```
+
+## 与标准字体属性的关系
+
+```css
+.text {
+  font-family: 'Roboto Flex', sans-serif;
+  
+  /* 标准属性 */
+  font-weight: 500;
+  font-stretch: 95%;
+  
+  /* 可变字体轴（更高精度控制） */
+  font-variation-settings: 'wght' 500, 'wdth' 95;
+}
+```
+
+当同时使用时，标准属性会被转换为 `font-variation-settings`。
+
+## 常用可变字体推荐
+
+### Google Fonts 可变字体
+
+| 字体名称 | 支持的轴 | 用途 |
+|---|---|---|
+| Roboto Flex | wght, wdth, slnt, opsz | 通用 |
+| Inter | wght | 界面字体 |
+|Recursive | wght, slnt, MONO, CASL | 多功能 |
+| Source Sans 3 | wght, wdth, ital, slnt | 文档 |
+| Amstelvar | wght, opsz, XTRA, YOPQ | 优雅衬线 |
+
+### 使用示例
+
+```css
+/* 来自 Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,slnt,wdth,wght@8..144,-10..0,75..125,100..1000&display=swap');
+
+h1 {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 700;
+}
+
+.condensed-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 400, 'wdth' 75;
+}
+```
+
+## 浏览器支持
+
+所有现代浏览器都支持 `font-variation-settings`。
+
+## 可变字体轴注册表
+
+除了自定义轴，还有注册的标准化轴：
+
+| 轴名 | 全称 | 说明 |
+|---|---|---|
+| wght | Weight | 字重 |
+| wdth | Width | 字宽 |
+| ital | Italic | 斜体 |
+| slnt | Slant | 倾斜 |
+| opsz | Optical Size | 光学尺寸 |
+| GRAD | Grade | 字重等级 |
+| XTRA | Counter | 轮廓对比度 |
+| YOPQ | Y Opaque | 不透明度 |
+| GRAD | Grade | 等级 |
+
+## 实际应用场景
+
+### 响应式字体
+
+```css
+.text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 300;
+}
+
+@media (min-width: 768px) {
+  .text {
+    font-variation-settings: 'wght' 400;
+  }
+}
+
+@media (min-width: 1200px) {
+  .text {
+    font-variation-settings: 'wght' 500;
+  }
+}
+```
+
+### 交互式字体
+
+```css
+.button {
+  font-family: 'Roboto Flex', sans-serif;
+  font-variation-settings: 'wght' 500;
+  transition: font-variation-settings 0.2s;
+}
+
+.button:hover {
+  font-variation-settings: 'wght' 700;
+}
+```
+
+### 性能优化
+
+```css
+@font-face {
+  font-family: 'MyVariableFont';
+  src: url('font.woff2') format('woff2-variations');
+  font-display: optional;  /* 不可用时使用后备字体 */
+}
+```
+
+## 交互式演示
+
+{/* @playground id="css-font-variation-settings" mode="demo" */}
+
+## 总结
+
+- 可变字体通过单一文件支持多种字形变体
+- 使用 `font-variation-settings` 控制各个轴
+- 常用轴：wght（字重）、wdth（宽度）、slnt（倾斜）、opsz（光学尺寸）
+- 可以动态调整实现平滑的字体动画
+- 相比传统多文件字体，更节省带宽
