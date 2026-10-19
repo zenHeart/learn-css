@@ -1,0 +1,502 @@
+---
+title: 多层级目录交互设计优化
+category: 交互设计
+tags: [目录, 树形, 交互设计, 动画, 状态管理]
+description: 详细介绍多层级目录交互设计的核心模式、视觉反馈机制以及纯 CSS/JS 实现方案。
+keywords: 目录交互, 树形展开, 手风琴模式, 多选模式, 拖拽排序, CSS动画
+---
+
+# 多层级目录交互设计优化
+
+**掌握多层级目录交互设计的核心模式、视觉反馈与实现技巧**
+
+## 交互模式分类
+
+### 树形展开/收起
+
+树形展开是最常见的目录交互模式，通过点击文件夹图标或行来展开或收起子节点。
+
+```css
+/* 基础树形结构 */
+.tree-node {
+  cursor: pointer;
+  user-select: none;
+}
+
+.tree-node .children {
+  display: none;
+  padding-left: 20px;
+}
+
+.tree-node.expanded > .children {
+  display: block;
+}
+
+/* 展开动画 */
+.tree-node .children {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
+
+.tree-node.expanded > .children {
+  max-height: 500px; /* 根据内容设置足够大的值 */
+}
+```
+
+**核心交互逻辑**：
+- 点击节点切换展开/收起状态
+- 展开时显示子节点，收起时隐藏
+- 叶子节点无展开功能
+
+### 手风琴模式
+
+手风琴模式限制同时只能展开一个分支，展开新节点时自动收起其他节点。
+
+```css
+/* 手风琴模式 */
+.accordion .tree-node .children {
+  display: none;
+}
+
+.accordion .tree-node.active > .children {
+  display: block;
+}
+```
+
+```javascript
+// 手风琴模式 JS 逻辑
+document.querySelectorAll('.accordion .tree-node').forEach(node => {
+  node.addEventListener('click', (e) => {
+    const parent = e.currentTarget.closest('.accordion');
+
+    // 收起所有同级节点
+    parent.querySelectorAll('.tree-node.active').forEach(activeNode => {
+      if (!activeNode.contains(e.currentTarget)) {
+        activeNode.classList.remove('active');
+      }
+    });
+
+    // 切换当前节点
+    e.currentTarget.classList.toggle('active');
+  });
+});
+```
+
+**特点**：
+- 节省屏幕空间
+- 适合信息层级较深的场景
+- 用户可以快速切换不同分支
+
+### 多选模式
+
+多选模式允许同时选择多个目录项，常用于文件管理与批量操作场景。
+
+```css
+/* 选中状态 */
+.tree-node.selected {
+  background: var(--selected-bg);
+}
+
+.tree-node.selected::before {
+  content: '✓';
+  color: var(--primary);
+}
+
+/* 半选状态（部分子项被选） */
+.tree-node.indeterminate::after {
+  content: '-';
+  color: var(--primary);
+}
+```
+
+```javascript
+// 多选逻辑
+function updateSelection(node, checked) {
+  node.classList.toggle('selected', checked);
+
+  // 更新父节点的半选状态
+  const parent = node.parentElement?.closest('.tree-node');
+  if (parent) {
+    const siblings = parent.querySelectorAll(':scope > .children > .tree-node');
+    const selectedCount = [...siblings].filter(n => n.classList.contains('selected')).length;
+
+    if (selectedCount === 0) {
+      parent.classList.remove('selected', 'indeterminate');
+    } else if (selectedCount === siblings.length) {
+      parent.classList.add('selected');
+      parent.classList.remove('indeterminate');
+    } else {
+      parent.classList.add('indeterminate');
+      parent.classList.remove('selected');
+    }
+  }
+}
+```
+
+### 拖拽排序
+
+拖拽排序允许用户通过拖拽重新排列目录顺序。
+
+```css
+/* 拖拽占位符 */
+.tree-node.dragging {
+  opacity: 0.5;
+  background: var(--drag-bg);
+}
+
+.tree-node.drag-over {
+  border-top: 2px solid var(--primary);
+}
+
+.tree-node.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+}
+```
+
+```javascript
+// 拖拽排序核心逻辑
+let draggedNode = null;
+
+document.addEventListener('dragstart', (e) => {
+  if (e.target.classList.contains('tree-node')) {
+    draggedNode = e.target;
+    e.target.classList.add('dragging');
+  }
+});
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  const node = e.target.closest('.tree-node');
+  if (node && node !== draggedNode) {
+    node.classList.add('drag-over');
+  }
+});
+
+document.addEventListener('dragleave', (e) => {
+  const node = e.target.closest('.tree-node');
+  if (node) {
+    node.classList.remove('drag-over');
+  }
+});
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const targetNode = e.target.closest('.tree-node');
+  if (targetNode && targetNode !== draggedNode) {
+    // 交换位置
+    const parent = targetNode.parentElement;
+    const targetIndex = [...parent.children].indexOf(targetNode);
+    const dragIndex = [...parent.children].indexOf(draggedNode);
+
+    if (targetIndex < dragIndex) {
+      parent.insertBefore(draggedNode, targetNode);
+    } else {
+      parent.insertBefore(draggedNode, targetNode.nextSibling);
+    }
+  }
+
+  document.querySelectorAll('.drag-over').forEach(n => n.classList.remove('drag-over'));
+  draggedNode?.classList.remove('dragging');
+  draggedNode = null;
+});
+```
+
+## 视觉反馈
+
+### 展开/收起动画
+
+流畅的动画能显著提升用户体验，使用 CSS `transition` 和 `transform` 实现。
+
+```css
+/* 高度动画 */
+.tree-children {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: max-height 0.3s ease,
+              opacity 0.2s ease,
+              transform 0.2s ease;
+}
+
+.tree-node.expanded > .tree-children {
+  max-height: 1000px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 旋转箭头指示器 */
+.tree-arrow {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.tree-node.expanded > .tree-arrow {
+  transform: rotate(90deg);
+}
+```
+
+### 悬停高亮
+
+悬停状态帮助用户识别可交互元素。
+
+```css
+/* 悬停效果 */
+.tree-node {
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease,
+              transform 0.1s ease;
+}
+
+.tree-node:hover {
+  background: var(--hover-bg);
+}
+
+.tree-node:active {
+  transform: scale(0.98);
+}
+
+/* 仅叶子节点显示悬停效果 */
+.tree-node.has-children:hover {
+  background: transparent;
+}
+```
+
+### 选中状态
+
+清晰的选中状态帮助用户追踪选择。
+
+```css
+/* 选中状态 */
+.tree-node.selected {
+  background: var(--selected-bg);
+  border-left: 3px solid var(--primary);
+}
+
+.tree-node.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary);
+}
+
+/* 焦点状态（键盘导航） */
+.tree-node:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+```
+
+### 拖拽占位
+
+拖拽过程中的视觉占位帮助用户理解放置位置。
+
+```css
+/* 拖拽中 */
+.tree-node.dragging {
+  opacity: 0.4;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 放置目标上 */
+.tree-node.drag-over {
+  background: var(--drag-over-bg);
+}
+
+.tree-node.drag-over::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  height: 4px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* 有效放置区域 */
+.tree-node.drop-allowed {
+  border: 2px dashed var(--success);
+}
+```
+
+## 技术实现
+
+### CSS Transition 动画
+
+使用 CSS transition 实现流畅的交互动画：
+
+```css
+/* 基础动画属性 */
+.animatable {
+  transition-property: height, opacity, transform, background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+  transition-delay: 0s;
+}
+
+/* 性能优化：使用 transform 和 opacity */
+.high-perf-animation {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform, opacity;
+}
+
+/* 列表项依次动画 */
+.tree-node:nth-child(1) { transition-delay: 0ms; }
+.tree-node:nth-child(2) { transition-delay: 50ms; }
+.tree-node:nth-child(3) { transition-delay: 100ms; }
+.tree-node:nth-child(4) { transition-delay: 150ms; }
+.tree-node:nth-child(5) { transition-delay: 200ms; }
+```
+
+### 事件委托
+
+使用事件委托减少事件监听器数量，提升性能：
+
+```javascript
+// 事件委托
+document.querySelector('.tree-container').addEventListener('click', (e) => {
+  const node = e.target.closest('.tree-node');
+  if (!node) return;
+
+  // 展开/收起
+  if (node.classList.contains('has-children')) {
+    node.classList.toggle('expanded');
+  }
+
+  // 选中（多选模式）
+  if (node.classList.contains('selectable')) {
+    node.classList.toggle('selected');
+    updateParentState(node);
+  }
+});
+
+// 键盘导航
+document.querySelector('.tree-container').addEventListener('keydown', (e) => {
+  const focused = document.activeElement;
+  if (!focused.classList.contains('tree-node')) return;
+
+  switch (e.key) {
+    case 'ArrowDown':
+      focusNextSibling(focused);
+      break;
+    case 'ArrowUp':
+      focusPreviousSibling(focused);
+      break;
+    case 'ArrowRight':
+      expandNode(focused);
+      break;
+    case 'ArrowLeft':
+      collapseNode(focused);
+      break;
+    case 'Enter':
+      selectNode(focused);
+      break;
+  }
+});
+```
+
+### 状态管理
+
+使用数据驱动的方式管理目录状态：
+
+```javascript
+// 目录树数据结构
+const treeData = [
+  {
+    id: 1,
+    name: '文档',
+    expanded: false,
+    selected: false,
+    children: [
+      { id: 2, name: '图片', expanded: false, selected: false },
+      { id: 3, name: '视频', expanded: false, selected: false }
+    ]
+  }
+];
+
+// 状态更新函数
+function updateNodeState(nodes, id, updates) {
+  return nodes.map(node => {
+    if (node.id === id) {
+      return { ...node, ...updates };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: updateNodeState(node.children, id, updates)
+      };
+    }
+    return node;
+  });
+}
+
+// 渲染函数
+function renderTree(nodes, container) {
+  container.innerHTML = nodes.map(node => `
+    <div class="tree-node ${node.expanded ? 'expanded' : ''} ${node.selected ? 'selected' : ''}"
+         data-id="${node.id}"
+         tabindex="0"
+         role="treeitem"
+         aria-expanded="${node.expanded}">
+      <span class="tree-arrow">${node.children ? '▶' : ''}</span>
+      <span class="tree-label">${node.name}</span>
+      ${node.children ? `<div class="tree-children">${renderTree(node.children)}</div>` : ''}
+    </div>
+  `).join('');
+}
+```
+
+## 常见模式对比
+
+| 模式 | 适用场景 | 优点 | 缺点 |
+|------|---------|------|------|
+| 树形展开/收起 | 文件管理器、分类导航 | 结构清晰，操作直观 | 占空间 |
+| 手风琴模式 | 菜单、FAQ | 节省空间，聚焦内容 | 无法同时看多分支 |
+| 多选模式 | 文件批量操作、筛选 | 高效选择 | 交互复杂 |
+| 拖拽排序 | 任务管理、优先级设置 | 直观易用 | 移动端支持差 |
+
+## 最佳实践
+
+1. **动画时长控制**：展开/收起动画建议 200-400ms，过长会感觉迟钝
+2. **键盘可访问**：支持 Tab、方向键导航，Enter 确认，空格选择
+3. **状态持久化**：将展开/收起状态保存到 localStorage
+4. **虚拟滚动**：大量节点时使用虚拟滚动避免性能问题
+5. **触摸友好**：拖拽目标足够大，移动端支持长按菜单
+
+## 相关属性速查
+
+```css
+/* 核心交互 */
+transition: all 0.3s ease;
+transform: rotate(90deg);
+max-height: 0;
+
+/* 状态样式 */
+.tree-node.expanded { }
+.tree-node.selected { }
+.tree-node.dragging { }
+.tree-node.drag-over { }
+
+/* 性能优化 */
+will-change: transform;
+contain: layout style;
+```
+
+## 总结
+
+多层级目录交互设计需要平衡**功能完整性**、**视觉反馈**和**性能表现**。选择合适的交互模式（树形/手风琴/多选/拖拽），配合流畅的 CSS 动画和合理的事件委托，能显著提升用户体验。在实现时注意键盘可访问性和移动端适配，确保所有用户都能流畅使用。

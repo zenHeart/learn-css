@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue Keep-Alive 原理演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #42b883;
+      --secondary: #34495e;
+      --accent: #f39c12;
+      --bg: #fafafa;
+      --card-bg: #fff;
+      --border: #e0e0e0;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    h1 { font-size: 1.8rem; margin-bottom: 10px; color: var(--secondary); }
+    h2 { font-size: 1.3rem; margin: 20px 0 10px; color: var(--secondary); }
+    h3 { font-size: 1.1rem; margin: 15px 0 8px; color: var(--text); }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--border);
+      padding: 4px;
+      border-radius: 8px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .demo-section {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    
+    .demo-title {
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .demo-title::before { content: '📦'; }
+    
+    .component-viewer {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 30px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      position: relative;
+    }
+    
+    .component-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; }
+    .component-state { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; }
+    .component-count { position: absolute; top: 10px; right: 10px; background: var(--accent); padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; }
+    .counter-display { font-size: 3rem; font-weight: 800; margin: 16px 0; }
+    
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #3aa876; transform: translateY(-2px); }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-secondary:hover { background: #2c3e50; transform: translateY(-2px); }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-warning:hover { background: #e67e22; transform: translateY(-2px); }
+    
+    .lifecycle-log { background: #1e1e1e; border-radius: 8px; padding: 16px; max-height: 300px; overflow-y: auto; font-family: 'Monaco', 'Menlo', monospace; font-size: 0.85rem; }
+    .log-entry { padding: 6px 12px; margin: 4px 0; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+    .log-entry.created { background: #27ae60; color: white; }
+    .log-entry.mounted { background: #3498db; color: white; }
+    .log-entry.activated { background: #9b59b6; color: white; }
+    .log-entry.deactivated { background: #e67e22; color: white; }
+    .log-entry.unmounted { background: #e74c3c; color: white; }
+    .log-time { color: #888; font-size: 0.8rem; }
+    .log-clear { margin-top: 10px; text-align: right; }
+    
+    .flow-diagram { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 20px 0; }
+    .flow-node { padding: 12px 24px; border-radius: 8px; font-weight: 600; min-width: 200px; }
+    .flow-node.created { background: #27ae60; color: white; }
+    .flow-node.mounted { background: #3498db; color: white; }
+    .flow-node.active { background: #9b59b6; color: white; }
+    .flow-node.inactive { background: #e67e22; color: white; }
+    .flow-node.destroy { background: #e74c3c; color: white; }
+    .flow-node.neutral { background: #95a5a6; color: white; }
+    .flow-arrow { color: var(--text-light); font-size: 1.5rem; }
+    
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f8f9fa; font-weight: 600; color: var(--secondary); }
+    tr:hover { background: #f8f9fa; }
+    
+    .qa-item { margin: 16px 0; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary); }
+    .qa-question { font-weight: 600; color: var(--secondary); margin-bottom: 8px; }
+    .qa-answer { color: var(--text); line-height: 1.7; }
+    
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; }
+    
+    @media (max-width: 768px) {
+      .tab-nav { flex-wrap: wrap; }
+      .tab-btn { min-width: 45%; }
+      .btn-group { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vue Keep-Alive 原理交互演示</h1>
+    <p style="color: var(--text-light); margin-bottom: 20px;">
+      学习 Vue Keep-Alive 组件的缓存机制、生命周期变化和最佳实践
+    </p>
+    
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="overview">概念总览</button>
+      <button class="tab-btn" data-tab="lifecycle">生命周期</button>
+      <button class="tab-btn" data-tab="demo">交互演示</button>
+      <button class="tab-btn" data-tab="compare">方案对比</button>
+      <button class="tab-btn" data-tab="qa">常见问题</button>
+    </div>
+    
+    <!-- 概念总览 -->
+    <div class="tab-content active" id="overview">
+      <div class="card">
+        <h2>Keep-Alive 是什么</h2>
+        <p><strong>Keep-Alive</strong> 是 Vue 3 内置的抽象组件，用于缓存动态组件或路由组件，避免重复销毁和创建。</p>
+        
+        <div class="flow-diagram" style="margin-top: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+            <div style="text-align: center;">
+              <div style="font-weight: 600; margin-bottom: 8px; color: #e74c3c;">普通组件切换</div>
+              <div class="flow-diagram">
+                <div class="flow-node created">组件A 创建</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node mounted">挂载</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node neutral">销毁</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node created">组件A 重新创建</div>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-weight: 600; margin-bottom: 8px; color: #27ae60;">Keep-Alive 组件切换</div>
+              <div class="flow-diagram">
+                <div class="flow-node created">组件A 创建</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node mounted">挂载</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node inactive">停用 (deactivated)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-node active">激活 (activated)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>核心特性</h2>
+        <table>
+          <thead>
+            <tr><th>特性</th><th>说明</th><th>示例</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>缓存实例</strong></td><td>不销毁被包裹的组件</td><td>保留组件状态和 DOM</td></tr>
+            <tr><td><strong>激活/停用</strong></td><td>触发 activated/deactivated</td><td>适合数据刷新、动画控制</td></tr>
+            <tr><td><strong>条件缓存</strong></td><td>通过 include/exclude 控制</td><td>只缓存特定组件</td></tr>
+            <tr><td><strong>数量限制</strong></td><td>通过 max 属性限制</td><td>防止内存泄漏</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 生命周期 -->
+    <div class="tab-content" id="lifecycle">
+      <div class="card">
+        <h2>组件生命周期完整流程</h2>
+        <div class="flow-diagram">
+          <div class="flow-node created">created</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-node mounted">beforeMount + mounted</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-node active">正常运行</div>
+          <div class="flow-arrow">↓ 切换离开</div>
+          <div class="flow-node inactive">deactivated</div>
+          <div class="flow-arrow">↓ 切换回来</div>
+          <div class="flow-node active">activated</div>
+          <div class="flow-arrow">↓ 真正销毁</div>
+          <div class="flow-node destroy">beforeUnmount + unmounted</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>生命周期钩子触发规则</h2>
+        <table>
+          <thead>
+            <tr><th>场景</th><th>created</th><th>mounted</th><th>activated</th><th>deactivated</th><th>beforeUnmount</th><th>unmounted</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>首次渲染</td><td>✅</td><td>✅</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr><td>切换离开</td><td>-</td><td>-</td><td>-</td><td>✅</td><td>-</td><td>-</td></tr>
+            <tr><td>切换回来</td><td>-</td><td>-</td><td>✅</td><td>-</td><td>-</td><td>-</td></tr>
+            <tr><td>真正销毁</td><td>-</td><td>-</td><td>-</td><td>-</td><td>✅</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 交互演示 -->
+    <div class="tab-content" id="demo">
+      <div class="card">
+        <h2>Keep-Alive 交互演示</h2>
+        <p style="color: var(--text-light); margin-bottom: 16px;">点击下方按钮切换组件，观察生命周期钩子的触发和状态保留情况。</p>
+        
+        <div class="demo-section">
+          <div class="demo-title">计数器组件演示</div>
+          <div class="component-viewer" id="componentDemo">
+            <span class="component-count" id="mountCount">挂载次数: 0</span>
+            <div class="component-name" id="componentName">组件 A</div>
+            <div class="counter-display" id="counterDisplay">0</div>
+            <div class="component-state" id="componentState">状态: 激活</div>
+          </div>
+          
+          <div class="btn-group" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="switchToA()">切换到 组件 A</button>
+            <button class="btn btn-secondary" onclick="switchToB()">切换到 组件 B</button>
+            <button class="btn btn-warning" onclick="switchToC()">切换到 组件 C</button>
+          </div>
+          
+          <div class="btn-group" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="increment()">计数 +1</button>
+            <button class="btn btn-secondary" onclick="resetCounter()">重置计数</button>
+          </div>
+        </div>
+        
+        <div class="demo-section">
+          <div class="demo-title">生命周期日志</div>
+          <div class="lifecycle-log" id="lifecycleLog">
+            <div style="color: #888; text-align: center; padding: 20px;">点击上方按钮切换组件，观察日志变化...</div>
+          </div>
+          <div class="log-clear">
+            <button class="btn btn-secondary" onclick="clearLog()">清空日志</button>
+          </div>
+        </div>
+        
+        <div class="demo-section">
+          <div class="demo-title">缓存状态监控</div>
+          <table>
+            <thead><tr><th>组件</th><th>缓存状态</th><th>计数</th><th>最后更新时间</th></tr></thead>
+            <tbody id="cacheBody">
+              <tr><td>组件 A</td><td id="cacheA">未缓存</td><td id="countA">0</td><td id="timeA">-</td></tr>
+              <tr><td>组件 B</td><td id="cacheB">未缓存</td><td id="countB">0</td><td id="timeB">-</td></tr>
+              <tr><td>组件 C</td><td id="cacheC">未缓存</td><td id="countC">0</td><td id="timeC">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 方案对比 -->
+    <div class="tab-content" id="compare">
+      <div class="card">
+        <h2>Keep-Alive vs 其他方案对比</h2>
+        <table>
+          <thead><tr><th>方案</th><th>状态保留</th><th>性能</th><th>复杂度</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Keep-Alive</strong></td><td>✅ 完全保留</td><td>高</td><td>低</td><td>动态组件/路由切换</td></tr>
+            <tr><td>v-show</td><td>✅ DOM 保留</td><td>高</td><td>最低</td><td>频繁切换的简单组件</td></tr>
+            <tr><td>Pinia/Vuex</td><td>✅ 全局共享</td><td>高</td><td>中</td><td>跨组件状态共享</td></tr>
+            <tr><td>localStorage</td><td>✅ 持久化</td><td>低</td><td>中</td><td>刷新页面后保留</td></tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <h2>Keep-Alive Props 详解</h2>
+        <table>
+          <thead><tr><th>Prop</th><th>类型</th><th>说明</th><th>示例</th></tr></thead>
+          <tbody>
+            <tr><td>include</td><td>string | RegExp | string[]</td><td>需要缓存的组件名</td><td>"Home,About"</td></tr>
+            <tr><td>exclude</td><td>string | RegExp | string[]</td><td>不需要缓存的组件名</td><td>"Login"</td></tr>
+            <tr><td>max</td><td>number | string</td><td>最大缓存数量</td><td>10</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 常见问题 -->
+    <div class="tab-content" id="qa">
+      <div class="card">
+        <h2>常见问题解答</h2>
+        
+        <div class="qa-item">
+          <div class="qa-question">Q: Keep-Alive 缓存的组件何时会被销毁？</div>
+          <div class="qa-answer">
+            当组件符合以下任一条件时会被销毁：<br>
+            1. 使用 v-if="false" 直接卸载<br>
+            2. 组件不在 include 列表中（但在 exclude 中）<br>
+            3. 缓存数量超过 max 限制（最早的会被销毁）<br>
+            4. 页面/路由完全切换，Keep-Alive 组件被销毁
+          </div>
+        </div>
+        
+        <div class="qa-item">
+          <div class="qa-question">Q: 组件在 Keep-Alive 中，数据会过期吗？</div>
+          <div class="qa-answer">
+            是的！Keep-Alive 只缓存组件实例和 DOM，不会自动刷新数据。<br>
+            建议在 activated 钩子中获取最新数据：<br>
+            <pre>onActivated(() => { fetchLatestData() })</pre>
+          </div>
+        </div>
+        
+        <div class="qa-item">
+          <div class="qa-question">Q: Keep-Alive 和 v-show 有什么区别？</div>
+          <div class="qa-answer">
+            v-show 只是 CSS 显示/隐藏，组件始终存在；<br>
+            Keep-Alive 会真正停用组件，触发 deactivated 钩子，但保留完整状态。<br>
+            v-show 不支持 activated/deactivated 生命周期。
+          </div>
+        </div>
+        
+        <div class="qa-item">
+          <div class="qa-question">Q: 为什么组件更新后没有重新渲染？</div>
+          <div class="qa-answer">
+            Keep-Alive 缓存的是组件实例，如果组件依赖的 props 变化但组件内部没有正确响应，可能不会更新。<br>
+            解决：使用 watch 监听 props 变化，或在 activated 中刷新数据。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 状态管理
+    const state = {
+      current: 'A',
+      components: {
+        A: { count: 0, mounted: 0, cached: false, lastTime: null },
+        B: { count: 0, mounted: 0, cached: false, lastTime: null },
+        C: { count: 0, mounted: 0, cached: false, lastTime: null }
+      }
+    };
+    
+    // 切换组件
+    function switchTo(name) {
+      if (state.current === name) return;
+      
+      const old = state.current;
+      
+      // deactivated 日志
+      addLog(`deactivated: 组件 ${old} 停用`, 'deactivated');
+      state.components[old].cached = true;
+      updateCacheUI(old);
+      
+      state.current = name;
+      
+      // activated 日志
+      addLog(`activated: 组件 ${name} 激活`, 'activated');
+      
+      // 更新 UI
+      updateUI();
+    }
+    
+    function switchToA() { switchTo('A'); }
+    function switchToB() { switchTo('B'); }
+    function switchToC() { switchTo('C'); }
+    
+    // 计数操作
+    function increment() {
+      state.components[state.current].count++;
+      state.components[state.current].lastTime = new Date().toLocaleTimeString();
+      updateUI();
+      updateCacheUI(state.current);
+    }
+    
+    function resetCounter() {
+      state.components[state.current].count = 0;
+      state.components[state.current].lastTime = new Date().toLocaleTimeString();
+      updateUI();
+      updateCacheUI(state.current);
+    }
+    
+    // 更新 UI
+    function updateUI() {
+      const comp = state.components[state.current];
+      
+      document.getElementById('componentName').textContent = `组件 ${state.current}`;
+      document.getElementById('counterDisplay').textContent = comp.count;
+      document.getElementById('mountCount').textContent = `挂载次数: ${comp.mounted}`;
+      document.getElementById('componentState').textContent = '状态: ' + (comp.cached ? '从缓存恢复' : '激活');
+    }
+    
+    // 更新缓存状态 UI
+    function updateCacheUI(name) {
+      const comp = state.components[name];
+      document.getElementById(`cache${name}`).textContent = comp.cached ? '已缓存' : '未缓存';
+      document.getElementById(`count${name}`).textContent = comp.count;
+      document.getElementById(`time${name}`).textContent = comp.lastTime || '-';
+    }
+    
+    // 添加生命周期日志
+    function addLog(message, type) {
+      const log = document.getElementById('lifecycleLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `<span>${message}</span><span class="log-time">${new Date().toLocaleTimeString()}</span>`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+    
+    function clearLog() {
+      document.getElementById('lifecycleLog').innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">日志已清空...</div>';
+    }
+    
+    // Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+    
+    // 初始化 - 模拟首次挂载
+    addLog('created: 组件 A 创建', 'created');
+    addLog('mounted: 组件 A 挂载完成', 'mounted');
+    state.components.A.mounted++;
+    updateUI();
+  </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Cell Ellipsis Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .demo-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+    
+    .demo-title.error {
+      border-bottom-color: #ff4444;
+      color: #ff4444;
+    }
+    
+    .demo-title.success {
+      border-bottom-color: #44bb44;
+      color: #44bb44;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: #fafafa;
+    }
+    
+    .cell-ellipsis {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    .cell-normal {
+      /* 默认样式 */
+    }
+    
+    .summary-table td {
+      vertical-align: top;
+      font-size: 14px;
+    }
+    
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 13px;
+    }
+    
+    .key-point {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 4px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+    
+    .key-point strong {
+      color: #856404;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    
+    .comparison-table th {
+      background: #f8f8f8;
+      font-weight: 600;
+    }
+    
+    .checklist {
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      padding: 15px;
+    }
+    
+    .checklist h4 {
+      margin: 0 0 10px 0;
+      color: #2e7d32;
+    }
+    
+    .checklist ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .checklist li {
+      margin: 5px 0;
+      color: #333;
+    }
+    
+    .checklist li strong {
+      color: #1b5e20;
+    }
+  </style>
+</head>
+<body>
+  <h1>📏 Table Cell 省略号不生效 — 解决方案</h1>
+  
+  <!-- 问题演示 -->
+  <div class="demo-section">
+    <div class="demo-title error">❌ 错误演示：默认 table-layout: auto（省略号不生效）</div>
+    <table>
+      <tr>
+        <td class="cell-normal">这是一段很长的文字内容，超出单元格宽度后需要显示省略号，但是省略号不生效</td>
+      </tr>
+    </table>
+    <div class="key-point">
+      <strong>原因：</strong>默认 <code>table-layout: auto</code> 时，单元格宽度由内容决定，内容永远不会被"溢出"
+    </div>
+  </div>
+  
+  <!-- 正确解决方案 -->
+  <div class="demo-section">
+    <div class="demo-title success">✅ 正确方案一：table-layout: fixed + width</div>
+    <table style="table-layout: fixed; width: 300px;">
+      <tr>
+        <td class="cell-ellipsis">这是一段很长的文字内容，超出单元格宽度后显示省略号 ✓</td>
+      </tr>
+    </table>
+    <div class="key-point">
+      <strong>关键代码：</strong>
+      <code>table-layout: fixed</code> + <code>width: 300px</code>
+    </div>
+  </div>
+  
+  <!-- 多列表格 -->
+  <div class="demo-section">
+    <div class="demo-title success">✅ 正确方案二：多列表格 + 固定宽度</div>
+    <table style="table-layout: fixed; width: 100%;">
+      <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 50%;">
+        <col style="width: 20%;">
+      </colgroup>
+      <tr>
+        <td class="cell-ellipsis">第一列的省略号内容</td>
+        <td class="cell-ellipsis">第二列的较长文字内容，也会省略显示省略号</td>
+        <td class="cell-ellipsis">第三列</td>
+      </tr>
+      <tr>
+        <td class="cell-ellipsis">第二行第一列</td>
+        <td class="cell-ellipsis">第二行第二列内容文字很长很长</td>
+        <td class="cell-ellipsis">第二行第三列</td>
+      </tr>
+    </table>
+  </div>
+  
+  <!-- 必要条件检查清单 -->
+  <div class="demo-section">
+    <div class="demo-title">📋 省略号生效的五个必要条件</div>
+    <div class="checklist">
+      <h4>检查清单（缺一不可）</h4>
+      <ul>
+        <li><strong>table-layout: fixed;</strong> — 表格使用固定布局</li>
+        <li><strong>width: 200px;</strong>（或 %） — 表格宽度必须 > 0</li>
+        <li><strong>overflow: hidden;</strong> — 溢出内容隐藏</li>
+        <li><strong>white-space: nowrap;</strong> — 禁止文字换行</li>
+        <li><strong>text-overflow: ellipsis;</strong> — 溢出显示省略号</li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- table-layout 对比 -->
+  <div class="demo-section">
+    <div class="demo-title">🔄 table-layout: auto vs fixed 对比</div>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>特性</th>
+          <th>table-layout: auto</th>
+          <th>table-layout: fixed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>布局算法</td>
+          <td>自动，内容决定列宽</td>
+          <td>固定，由定义决定列宽</td>
+        </tr>
+        <tr>
+          <td>省略号支持</td>
+          <td>❌ 不支持</td>
+          <td>✅ 支持</td>
+        </tr>
+        <tr>
+          <td>渲染性能</td>
+          <td>较慢（计算所有内容）</td>
+          <td>较快（只需计算首行）</td>
+        </tr>
+        <tr>
+          <td>适用场景</td>
+          <td>内容不确定的表格</td>
+          <td>需精确控制列宽的表格</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- 常见踩坑 -->
+  <div class="demo-section">
+    <div class="demo-title">⚠️ 常见踩坑</div>
+    <table class="summary-table">
+      <tr>
+        <td style="width: 30%;"><strong>踩坑 1</strong></td>
+        <td>没有设置 <code>table-layout: fixed</code></td>
+      </tr>
+      <tr>
+        <td><strong>踩坑 2</strong></td>
+        <td>table 的 <code>width</code> 为 0 或未设置</td>
+      </tr>
+      <tr>
+        <td><strong>踩坑 3</strong></td>
+        <td>没有设置 <code>white-space: nowrap</code></td>
+      </tr>
+      <tr>
+        <td><strong>踩坑 4</strong></td>
+        <td><code>overflow</code> 不是 <code>hidden</code>（默认值是 visible）</td>
+      </tr>
+    </table>
+  </div>
+  
+  <!-- 完整代码模板 -->
+  <div class="demo-section">
+    <div class="demo-title">📝 完整代码模板</div>
+    <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 13px;">
+<code>&lt;style&gt;
+table {
+  table-layout: fixed;  /* 必须：固定表格布局 */
+  width: 300px;          /* 必须：宽度 > 0 */
+}
+
+td {
+  overflow: hidden;      /* 必须：隐藏溢出 */
+  white-space: nowrap;   /* 必须：禁止换行 */
+  text-overflow: ellipsis; /* 必须：显示省略号 */
+}
+&lt;/style&gt;
+
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td&gt;很长很长的文字内容...&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+  </div>
+</body>
+</html>

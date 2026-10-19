@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Transform Click-Through 问题演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .demo-section {
+      margin-bottom: 48px;
+    }
+
+    .demo-title {
+      font-size: 16px;
+      color: #4fc3f7;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-title::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      background: #4fc3f7;
+      border-radius: 50%;
+    }
+
+    .problem-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .problem-box h3 {
+      color: #ef5350;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .problem-box p {
+      color: #888;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ========== Demo 1: Slide Switch ========== */
+    .slide-demo {
+      position: relative;
+      height: 220px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      /* 默认：禁用点击 */
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .slide.active {
+      /* 仅 active 状态启用点击 */
+      pointer-events: auto;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .slide.prev {
+      transform: translateX(-100%);
+    }
+
+    .slide.next {
+      transform: translateX(100%);
+    }
+
+    .slide-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .slide-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .slide-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+    .slide-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .slide-btn:hover {
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+    }
+
+    .slide-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .slide-btn.prev { left: 20px; }
+    .slide-btn.next { right: 20px; }
+
+    .slide-indicator {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .indicator.active {
+      background: #fff;
+      transform: scale(1.2);
+    }
+
+    /* ========== Demo 2: Hover Scale ========== */
+    .scale-demo {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .scale-card {
+      width: 160px;
+      height: 200px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+    }
+
+    .scale-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+    }
+
+    .scale-card:active {
+      transform: scale(1.02);
+    }
+
+    .scale-card .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .scale-card .label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Problem state */
+    .scale-card.problem {
+      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+    }
+
+    .scale-card.problem::after {
+      content: '点击测试';
+      position: absolute;
+      bottom: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ========== Demo 3: Overlay ========== */
+    .overlay-demo {
+      position: relative;
+      height: 200px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .base-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay-content {
+      text-align: center;
+    }
+
+    .overlay-content h3 {
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .close-btn {
+      padding: 10px 24px;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: transform 0.2s;
+    }
+
+    .close-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* ========== Demo 4: Transform Layers ========== */
+    .layers-demo {
+      position: relative;
+      height: 220px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      perspective: 1000px;
+    }
+
+    .layer {
+      position: absolute;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      transition: transform 0.3s;
+    }
+
+    .layer-back {
+      width: 200px;
+      height: 140px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      top: 40px;
+      left: 60px;
+      z-index: 1;
+    }
+
+    .layer-middle {
+      width: 180px;
+      height: 120px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      top: 60px;
+      left: 120px;
+      z-index: 2;
+      transform: translateZ(0);
+    }
+
+    .layer-front {
+      width: 160px;
+      height: 100px;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      top: 80px;
+      left: 180px;
+      z-index: 3;
+      transform: translateZ(20px);
+    }
+
+    .layer.active {
+      transform: translateZ(50px) scale(0.95);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    /* ========== Tab Navigation ========== */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #888;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      border-color: #666;
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: #4fc3f7;
+      border-color: #4fc3f7;
+      color: #000;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ========== Click Counter ========== */
+    .click-counter {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-size: 14px;
+      z-index: 1000;
+    }
+
+    .click-counter .count {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4fc3f7;
+    }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #1b5e20;
+      border-color: #2e7d32;
+    }
+
+    .toast.error {
+      background: #b71c1c;
+      border-color: #c62828;
+    }
+
+    /* ========== Controls ========== */
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      padding: 8px 16px;
+      background: #333;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      background: #444;
+      border-color: #555;
+    }
+
+    .control-btn.active {
+      background: #4fc3f7;
+      border-color: #4fc3f7;
+      color: #000;
+    }
+
+    .control-btn.danger {
+      background: #c62828;
+      border-color: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <div class="click-counter">
+    <div>点击计数器</div>
+    <div class="count" id="clickCount">0</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <h1>CSS Transform Click-Through 问题演示</h1>
+  <p class="subtitle">学习 transform 属性如何影响 pointer-events 和 hit-testing</p>
+
+  <!-- Demo 1: Slide Switch -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 1: 幻灯片切换与点击穿透</div>
+    <div class="problem-box">
+      <h3>⚠️ 问题说明</h3>
+      <p>幻灯片切换动画过程中，非活跃幻灯片虽然视觉上移出了视口，但可能仍在视口范围内，
+         导致点击时被这些不可见的幻灯片捕获。解决方案：非活跃幻灯片设置 pointer-events: none。</p>
+    </div>
+    
+    <div class="slide-demo" id="slideDemo">
+      <div class="slide slide-1 active" data-index="0">1</div>
+      <div class="slide slide-2 prev" data-index="1">2</div>
+      <div class="slide slide-3 next" data-index="2">3</div>
+      
+      <button class="slide-btn prev" onclick="slidePrev()">←</button>
+      <button class="slide-btn next" onclick="slideNext()">→</button>
+      
+      <div class="slide-indicator">
+        <div class="indicator active" data-index="0" onclick="slideTo(0)"></div>
+        <div class="indicator" data-index="1" onclick="slideTo(1)"></div>
+        <div class="indicator" data-index="2" onclick="slideTo(2)"></div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="control-btn" onclick="togglePointerEvents()">切换 pointer-events 模式</button>
+      <button class="control-btn" onclick="toggleDebug()">调试模式</button>
+    </div>
+  </div>
+
+  <!-- Demo 2: Hover Scale -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 2: Hover Scale 与点击区域</div>
+    <div class="problem-box">
+      <h3>⚠️ 问题说明</h3>
+      <p>当使用 transform: scale() 实现 hover 放大效果时，元素的视觉边界扩大了，
+         但实际的点击区域（hit-box）是否也跟着扩大？这取决于父元素和具体浏览器实现。</p>
+    </div>
+    
+    <div class="scale-demo">
+      <div class="scale-card" onclick="trackClick(this, 'Card 1 - Normal')">
+        <div class="icon">🎯</div>
+        <div class="label">普通卡片</div>
+      </div>
+      <div class="scale-card" onclick="trackClick(this, 'Card 2 - Scale')">
+        <div class="icon">🔍</div>
+        <div class="label">Hover 放大</div>
+      </div>
+      <div class="scale-card problem" onclick="trackClick(this, 'Card 3 - Problem')">
+        <div class="icon">⚠️</div>
+        <div class="label">有问题</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 3: Overlay -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 3: Overlay 遮罩层点击穿透</div>
+    <div class="problem-box">
+      <h3>⚠️ 问题说明</h3>
+      <p>遮罩层（overlay）在隐藏时使用 opacity: 0，但 pointer-events 仍可能有效，
+         导致点击底层元素时无效。正确做法是同时设置 pointer-events: none。</p>
+    </div>
+    
+    <div class="overlay-demo" id="overlayDemo">
+      <div class="base-content" onclick="trackClick(this, '底层内容')">
+        <div>
+          <div style="font-size: 48px;">📄</div>
+          <div style="margin-top: 12px;">底层可点击内容</div>
+        </div>
+      </div>
+      <div class="overlay" id="overlay" onclick="trackClick(this, '遮罩层')">
+        <div class="overlay-content">
+          <h3>遮罩层</h3>
+          <button class="close-btn" onclick="event.stopPropagation(); hideOverlay()">关闭</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="control-btn" onclick="showOverlay()">显示遮罩</button>
+      <button class="control-btn" onclick="hideOverlay()">隐藏遮罩（opacity）</button>
+      <button class="control-btn" onclick="hideOverlayProper()">隐藏遮罩（正确方式）</button>
+    </div>
+  </div>
+
+  <!-- Demo 4: Transform Layers -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 4: Transform 与层叠上下文</div>
+    <div class="problem-box">
+      <h3>⚠️ 问题说明</h3>
+      <p>当元素使用 transform 创建新的 Stacking Context 时，z-index 的相对关系会发生变化。
+         这可能导致看似在上面的元素实际上无法接收点击事件。</p>
+    </div>
+    
+    <div class="layers-demo">
+      <div class="layer layer-back" onclick="trackClick(this, '底层卡片')">底层 (z-1)</div>
+      <div class="layer layer-middle" onclick="trackClick(this, '中间层')">中间 (z-2)</div>
+      <div class="layer layer-front" onclick="trackClick(this, '顶层卡片')">顶层 (z-3)</div>
+    </div>
+    
+    <div class="controls">
+      <button class="control-btn" onclick="activateLayer(1)">激活底层</button>
+      <button class="control-btn" onclick="activateLayer(2)">激活中间层</button>
+      <button class="control-btn" onclick="activateLayer(3)">激活顶层</button>
+      <button class="control-btn" onclick="resetLayers()">重置</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== Click Counter ==========
+    let clickCount = 0;
+    const clickCountEl = document.getElementById('clickCount');
+    const toastEl = document.getElementById('toast');
+
+    function trackClick(element, name) {
+      clickCount++;
+      clickCountEl.textContent = clickCount;
+      showToast(`✓ 点击了: ${name}`, 'success');
+      
+      // Visual feedback
+      element.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        element.style.transform = '';
+      }, 100);
+    }
+
+    function showToast(message, type = '') {
+      toastEl.textContent = message;
+      toastEl.className = 'toast show ' + type;
+      setTimeout(() => {
+        toastEl.className = 'toast';
+      }, 2000);
+    }
+
+    // ========== Slide Demo ==========
+    let currentSlide = 0;
+    const totalSlides = 3;
+    let pointerEventsMode = true; // true = correct (disabled), false = problem (enabled)
+
+    function updateSlides() {
+      const slides = document.querySelectorAll('.slide');
+      const indicators = document.querySelectorAll('.indicator');
+      
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active', 'prev', 'next');
+        
+        if (index === currentSlide) {
+          slide.classList.add('active');
+          // Correct way: only active slide has pointer-events
+          if (pointerEventsMode) {
+            slide.style.pointerEvents = 'auto';
+          }
+        } else if (index < currentSlide) {
+          slide.classList.add('prev');
+          slide.style.pointerEvents = 'none';
+        } else {
+          slide.classList.add('next');
+          slide.style.pointerEvents = 'none';
+        }
+      });
+      
+      indicators.forEach((ind, index) => {
+        ind.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    function slideNext() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      updateSlides();
+    }
+
+    function slidePrev() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      updateSlides();
+    }
+
+    function slideTo(index) {
+      currentSlide = index;
+      updateSlides();
+    }
+
+    function togglePointerEvents() {
+      pointerEventsMode = !pointerEventsMode;
+      updateSlides();
+      showToast(
+        pointerEventsMode ? '✓ pointer-events 模式: 正确' : '✗ pointer-events 模式: 问题演示',
+        pointerEventsMode ? 'success' : 'error'
+      );
+    }
+
+    function toggleDebug() {
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach(slide => {
+        if (!slide.classList.contains('active')) {
+          // Visual indicator of hit area
+          if (slide.style.backgroundColor === 'rgba(255,0,0,0.2)') {
+            slide.style.backgroundColor = '';
+          } else {
+            slide.style.backgroundColor = 'rgba(255,0,0,0.2)';
+          }
+        }
+      });
+    }
+
+    // ========== Overlay Demo ==========
+    function showOverlay() {
+      document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function hideOverlay() {
+      // Problem: only hides visually, still blocks clicks
+      document.getElementById('overlay').classList.add('hidden');
+      showToast('⚠️ 遮罩已隐藏（但仍可能阻挡点击）', 'error');
+    }
+
+    function hideOverlayProper() {
+      // Correct: hide + disable pointer-events
+      const overlay = document.getElementById('overlay');
+      overlay.classList.add('hidden');
+      overlay.style.pointerEvents = 'none';
+      showToast('✓ 遮罩已正确隐藏（不阻挡点击）', 'success');
+    }
+
+    // ========== Layers Demo ==========
+    function activateLayer(layerNum) {
+      const layers = document.querySelectorAll('.layer');
+      layers.forEach(layer => layer.classList.remove('active'));
+      
+      const layer = document.querySelector(`.layer-${['back', 'middle', 'front'][layerNum - 1]}`);
+      layer.classList.add('active');
+      layer.style.transform = 'translateZ(50px) scale(0.95)';
+    }
+
+    function resetLayers() {
+      const layers = document.querySelectorAll('.layer');
+      layers.forEach(layer => {
+        layer.classList.remove('active');
+        layer.style.transform = '';
+      });
+    }
+
+    // ========== Initialize ==========
+    updateSlides();
+  </script>
+</body>
+</html>

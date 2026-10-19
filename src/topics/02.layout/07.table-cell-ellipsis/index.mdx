@@ -1,0 +1,216 @@
+---
+title: Table Cell 省略号不生效
+category: 布局基础
+tags: [table, text-overflow, ellipsis, overflow, white-space]
+description: 详细介绍 CSS table cell 中 text-overflow: ellipsis 不生效的原因和多种解决方案。
+keywords: table, td, text-overflow, ellipsis, 省略号, overflow, white-space, nowrap
+---
+
+# Table Cell 省略号不生效
+
+**解决 table td 中 text-overflow: ellipsis 不生效的问题**
+
+## 问题描述
+
+在 `table` 的 `td` 中设置 `text-overflow: ellipsis` 想要实现文字溢出显示省略号，但发现省略号不生效。
+
+```html
+<table>
+  <tr>
+    <td class="cell">这是一段很长的文字内容，超出单元格宽度后需要显示省略号</td>
+  </tr>
+</table>
+```
+
+```css
+.cell {
+  text-overflow: ellipsis; /* ❌ 不生效 */
+  overflow: hidden;
+}
+```
+
+## 根本原因
+
+Table 默认采用 `table-layout: auto`，单元格的宽度由内容决定（自动表格布局算法）。
+
+`text-overflow: ellipsis` 生效的必要条件是**元素必须有明确的宽度约束**。当单元格宽度由内容决定时，内容永远不会被"溢出"，因此省略号永远不会触发。
+
+## 解决方案
+
+### 方案一：设置 table-layout: fixed（推荐）
+
+**核心原理**：`table-layout: fixed` 使表格使用固定表格布局算法，列宽由 `table` 或 `col` 元素的宽度决定，而非内容。
+
+```html
+<style>
+table {
+  table-layout: fixed; /* 关键：固定表格布局 */
+  width: 200px;       /* 必须设置宽度，且宽度 > 0 */
+}
+
+td {
+  overflow: hidden;
+  white-space: nowrap;   /* 关键：禁止换行 */
+  text-overflow: ellipsis; /* 关键：溢出显示省略号 */
+}
+</style>
+
+<table>
+  <tr>
+    <td>这是一段很长的文字内容...</td>
+  </tr>
+</table>
+```
+
+**生效的必要条件（缺一不可）**：
+1. `table` 设置 `table-layout: fixed`
+2. `table` 设置 `width`（且大于 0）
+3. `td` 设置 `overflow: hidden`
+4. `td` 设置 `white-space: nowrap`
+5. `td` 设置 `text-overflow: ellipsis`
+
+### 方案二：使用 colgroup 定义列宽
+
+使用 `<colgroup>` 定义列宽，配合 `table-layout: fixed` 实现精确控制：
+
+```html
+<table>
+  <colgroup>
+    <col style="width: 200px">
+    <col style="width: 100px">
+  </colgroup>
+  <tr>
+    <td>第一列内容</td>
+    <td>第二列内容</td>
+  </tr>
+</table>
+```
+
+### 方案三：同时限制最大宽度和最小宽度
+
+```css
+td {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+```
+
+注意：`max-width` 配合固定宽度表格使用效果更好。
+
+## 完整 Demo
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .demo-table {
+      table-layout: fixed;
+      width: 300px;
+      border-collapse: collapse;
+    }
+    
+    .demo-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <table class="demo-table">
+    <tr>
+      <td>这是一段很长的文字内容，超出单元格宽度后需要显示省略号</td>
+    </tr>
+  </table>
+</body>
+</html>
+```
+
+## 常见踩坑
+
+### ❌ 踩坑 1：没有设置 table-layout: fixed
+
+```css
+/* 错误：默认 auto 布局，内容决定列宽 */
+table {
+  width: 300px;
+  /* 缺少 table-layout: fixed */
+}
+```
+
+### ❌ 踩坑 2：table 的 width 为 0 或未设置
+
+```css
+/* 错误：width 为 0 或 auto */
+table {
+  width: 0; /* 或 width: auto; */
+  table-layout: fixed;
+}
+```
+
+### ❌ 踩坑 3：没有设置 white-space: nowrap
+
+```css
+/* 错误：文字可以换行，省略号不会触发 */
+td {
+  white-space: normal; /* 或省略不写 */
+  text-overflow: ellipsis;
+}
+```
+
+### ❌ 踩坑 4：overflow 不是 hidden
+
+```css
+/* 错误：overflow 默认是 visible */
+td {
+  overflow: visible;
+  text-overflow: ellipsis;
+}
+```
+
+## table-layout: auto vs fixed 对比
+
+| 特性 | `table-layout: auto` | `table-layout: fixed` |
+|------|---------------------|---------------------|
+| 布局算法 | 自动（内容决定列宽） | 固定（列宽由定义决定） |
+| 列宽 | 由最宽内容决定 | 由首行/colgroup 决定 |
+| 性能 | 较慢（需计算所有内容） | 较快（只需计算首行） |
+| 省略号支持 | ❌ 不支持 | ✅ 支持 |
+| 适用场景 | 内容不确定的表格 | 需要精确控制列宽的表格 |
+
+## 浏览器兼容性
+
+所有主流浏览器都支持 `table-layout: fixed` 和 `text-overflow: ellipsis`：
+- Chrome 1+
+- Firefox 7+
+- Safari 3.1+
+- Edge 12+
+- IE 8+（部分兼容）
+
+## 相关属性速查
+
+```css
+/* 省略号三件套 */
+text-overflow: ellipsis;  /* 溢出显示省略号 */
+overflow: hidden;         /* 隐藏溢出内容 */
+white-space: nowrap;      /* 禁止换行 */
+
+/* 表格固定布局 */
+table-layout: fixed;      /* 固定表格布局 */
+width: 200px;             /* 表格宽度（必须 > 0） */
+```
+
+## 总结
+
+Table cell 省略号不生效的核心原因是**默认的 `table-layout: auto` 使单元格宽度由内容决定**，省略号无法触发。
+
+解决方法是：
+1. 在 `table` 上设置 `table-layout: fixed` 和 `width`
+2. 在 `td` 上设置 `overflow: hidden`、`white-space: nowrap`、`text-overflow: ellipsis`
+
+记住省略号生效的**五个必要条件**，缺一不可！

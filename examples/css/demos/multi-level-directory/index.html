@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多层级目录交互设计演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #64748b;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card-bg: #fff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --hover-bg: #f1f5f9;
+      --selected-bg: #dbeafe;
+      --drag-bg: #fef3c7;
+      --drag-over-bg: #d1fae5;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--secondary); }
+    h2 { font-size: 1.3rem; margin: 20px 0 12px; color: var(--secondary); }
+    h3 { font-size: 1.1rem; margin: 15px 0 8px; color: var(--text); }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .mode-nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--border);
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover { color: var(--primary); }
+    .mode-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .mode-content { display: none; }
+    .mode-content.active { display: block; }
+
+    /* ===== 树形结构基础样式 ===== */
+    .tree {
+      font-size: 0.95rem;
+    }
+
+    .tree-node {
+      position: relative;
+      padding: 8px 12px 8px 32px;
+      margin: 2px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      user-select: none;
+    }
+
+    .tree-node:hover { background: var(--hover-bg); }
+    .tree-node:active { transform: scale(0.99); }
+
+    .tree-node.has-children::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 6px solid var(--secondary);
+      transition: transform 0.25s ease;
+    }
+
+    .tree-node.expanded::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+
+    .tree-node.selected {
+      background: var(--selected-bg);
+      border-left: 3px solid var(--primary);
+    }
+
+    .tree-node.indeterminate::after {
+      content: '◐';
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 12px;
+    }
+
+    /* ===== 树形子节点 ===== */
+    .tree-children {
+      padding-left: 20px;
+      overflow: hidden;
+    }
+
+    .tree-children.animatable {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: max-height 0.3s ease-out, opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .tree-node.expanded > .tree-children.animatable {
+      max-height: 500px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== 手风琴模式 ===== */
+    .accordion-mode .tree-node .tree-children {
+      display: none;
+    }
+
+    .accordion-mode .tree-node.expanded > .tree-children {
+      display: block;
+    }
+
+    /* ===== 多选模式 ===== */
+    .checkbox {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--secondary);
+      border-radius: 4px;
+      margin-right: 8px;
+      vertical-align: middle;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .tree-node.selected .checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .tree-node.selected .checkbox::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .tree-node.indeterminate .checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .tree-node.indeterminate .checkbox::after {
+      content: '−';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* ===== 拖拽模式 ===== */
+    .drag-mode .tree-node {
+      cursor: grab;
+    }
+
+    .drag-mode .tree-node:active {
+      cursor: grabbing;
+    }
+
+    .tree-node.dragging {
+      opacity: 0.5;
+      background: var(--drag-bg);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .tree-node.drag-over {
+      background: var(--drag-over-bg);
+      border-top: 3px solid var(--success);
+    }
+
+    .tree-node.drag-over::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--success);
+      border-radius: 2px;
+    }
+
+    .tree-children.drag-mode {
+      min-height: 20px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .tree-children.drag-mode.drag-over {
+      border-color: var(--success);
+      background: var(--drag-over-bg);
+    }
+
+    /* ===== 状态栏 ===== */
+    .status-bar {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      margin-top: 16px;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-label { color: #94a3b8; }
+    .status-value { color: #22c55e; font-weight: 600; }
+
+    /* ===== 操作按钮 ===== */
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: var(--success); color: white; }
+
+    /* ===== 代码块 ===== */
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    code { font-family: 'Monaco', 'Menlo', monospace; }
+
+    /* ===== 说明框 ===== */
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .mode-nav { flex-wrap: wrap; }
+      .mode-btn { min-width: 45%; }
+      .status-bar { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>多层级目录交互设计演示</h1>
+    <p style="color: var(--text-light); margin-bottom: 20px;">
+      交互模式包括：树形展开/收起、手风琴模式、多选模式、拖拽排序
+    </p>
+
+    <div class="mode-nav">
+      <button class="mode-btn active" data-mode="tree">树形展开/收起</button>
+      <button class="mode-btn" data-mode="accordion">手风琴模式</button>
+      <button class="mode-btn" data-mode="checkbox">多选模式</button>
+      <button class="mode-btn" data-mode="drag">拖拽排序</button>
+    </div>
+
+    <!-- 树形展开/收起 -->
+    <div class="mode-content active" id="mode-tree">
+      <div class="card">
+        <h2>树形展开/收起模式</h2>
+        <p style="color: var(--text-light); margin-bottom: 16px;">
+          点击节点箭头或行来展开/收起子节点。使用 CSS transition 实现流畅的高度动画。
+        </p>
+
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="expandAll('.tree-container')">全部展开</button>
+          <button class="btn btn-secondary" onclick="collapseAll('.tree-container')">全部收起</button>
+        </div>
+
+        <div class="tree accordion-mode" id="treeDemo">
+          <div class="tree-node has-children expanded" data-id="1">
+            <span class="tree-label">📁 前端文档</span>
+            <div class="tree-children animatable">
+              <div class="tree-node has-children expanded" data-id="1-1">
+                <span class="tree-label">📁 JavaScript</span>
+                <div class="tree-children animatable">
+                  <div class="tree-node" data-id="1-1-1"><span class="tree-label">📄 闭包详解</span></div>
+                  <div class="tree-node" data-id="1-1-2"><span class="tree-label">📄 原型链</span></div>
+                  <div class="tree-node" data-id="1-1-3"><span class="tree-label">📄 异步编程</span></div>
+                </div>
+              </div>
+              <div class="tree-node has-children" data-id="1-2">
+                <span class="tree-label">📁 CSS</span>
+                <div class="tree-children animatable">
+                  <div class="tree-node" data-id="1-2-1"><span class="tree-label">📄 Flexbox 布局</span></div>
+                  <div class="tree-node" data-id="1-2-2"><span class="tree-label">📄 Grid 布局</span></div>
+                </div>
+              </div>
+              <div class="tree-node has-children" data-id="1-3">
+                <span class="tree-label">📁 Vue</span>
+                <div class="tree-children animatable">
+                  <div class="tree-node" data-id="1-3-1"><span class="tree-label">📄 响应式原理</span></div>
+                  <div class="tree-node" data-id="1-3-2"><span class="tree-label">📄 组件系统</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tree-node has-children" data-id="2">
+            <span class="tree-label">📁 后端文档</span>
+            <div class="tree-children animatable">
+              <div class="tree-node has-children" data-id="2-1">
+                <span class="tree-label">📁 Node.js</span>
+                <div class="tree-children animatable">
+                  <div class="tree-node" data-id="2-1-1"><span class="tree-label">📄 Express 框架</span></div>
+                  <div class="tree-node" data-id="2-1-2"><span class="tree-label">📄 Koa 框架</span></div>
+                </div>
+              </div>
+              <div class="tree-node" data-id="2-2"><span class="tree-label">📄 Python 基础</span></div>
+            </div>
+          </div>
+          <div class="tree-node" data-id="3"><span class="tree-label">📄 README.md</span></div>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-label">展开节点:</span>
+            <span class="status-value" id="expandedCount">4</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">收起节点:</span>
+            <span class="status-value" id="collapsedCount">4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 手风琴模式 -->
+    <div class="mode-content" id="mode-accordion">
+      <div class="card">
+        <h2>手风琴模式</h2>
+        <p style="color: var(--text-light); margin-bottom: 16px;">
+          同时只能展开一个分支，展开新节点时会自动收起其他节点。适合信息层级较深的场景。
+        </p>
+
+        <div class="info-box">
+          <strong>特点：</strong>节省屏幕空间，用户可以快速切换不同分支查看内容。
+        </div>
+
+        <div class="tree accordion-mode" id="accordionDemo">
+          <div class="tree-node has-children expanded" data-id="a1">
+            <span class="tree-label">🎯 交互设计原则</span>
+            <div class="tree-children animatable">
+              <div class="tree-node"><span class="tree-label">一致性 (Consistency)</span></div>
+              <div class="tree-node"><span class="tree-label">反馈 (Feedback)</span></div>
+              <div class="tree-node"><span class="tree-label">效率 (Efficiency)</span></div>
+            </div>
+          </div>
+          <div class="tree-node has-children" data-id="a2">
+            <span class="tree-label">🎨 视觉设计要素</span>
+            <div class="tree-children animatable">
+              <div class="tree-node"><span class="tree-label">色彩理论</span></div>
+              <div class="tree-node"><span class="tree-label">排版设计</span></div>
+              <div class="tree-node"><span class="tree-label">空间系统</span></div>
+            </div>
+          </div>
+          <div class="tree-node has-children" data-id="a3">
+            <span class="tree-label">⚡ 性能优化策略</span>
+            <div class="tree-children animatable">
+              <div class="tree-node"><span class="tree-label">首屏加载优化</span></div>
+              <div class="tree-node"><span class="tree-label">交互响应优化</span></div>
+              <div class="tree-node"><span class="tree-label">渲染性能优化</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 多选模式 -->
+    <div class="mode-content" id="mode-checkbox">
+      <div class="card">
+        <h2>多选模式</h2>
+        <p style="color: var(--text-light); margin-bottom: 16px;">
+          支持多项目选择，选中子项时父项显示半选状态。适用于文件批量操作与筛选场景。
+        </p>
+
+        <div class="action-bar">
+          <button class="btn btn-success" onclick="selectAll()">全选</button>
+          <button class="btn btn-secondary" onclick="unselectAll()">取消全选</button>
+          <button class="btn btn-primary" onclick="invertSelection()">反选</button>
+        </div>
+
+        <div class="tree" id="checkboxDemo">
+          <div class="tree-node has-children selected" data-id="b1">
+            <span class="checkbox"></span>
+            <span class="tree-label">📋 前端项目</span>
+            <div class="tree-children">
+              <div class="tree-node selected" data-id="b1-1"><span class="checkbox"></span><span class="tree-label">✅ Vue3 后台管理</span></div>
+              <div class="tree-node selected" data-id="b1-2"><span class="checkbox"></span><span class="tree-label">✅ React 移动端</span></div>
+              <div class="tree-node" data-id="b1-3"><span class="checkbox"></span><span class="tree-label">待开发 小程序项目</span></div>
+            </div>
+          </div>
+          <div class="tree-node has-children indeterminate" data-id="b2">
+            <span class="checkbox"></span>
+            <span class="tree-label">📋 后端项目</span>
+            <div class="tree-children">
+              <div class="tree-node selected" data-id="b2-1"><span class="checkbox"></span><span class="tree-label">✅ Node.js API</span></div>
+              <div class="tree-node" data-id="b2-2"><span class="checkbox"></span><span class="tree-label">Python 微服务</span></div>
+            </div>
+          </div>
+          <div class="tree-node" data-id="b3"><span class="checkbox"></span><span class="tree-label">📄 package.json</span></div>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-label">已选中:</span>
+            <span class="status-value" id="selectedCount">4</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">未选中:</span>
+            <span class="status-value" id="unselectedCount">3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 拖拽排序 -->
+    <div class="mode-content" id="mode-drag">
+      <div class="card">
+        <h2>拖拽排序模式</h2>
+        <p style="color: var(--text-light); margin-bottom: 16px;">
+          通过拖拽重新排列项目顺序。拖拽时显示占位符，放置时显示目标位置指示。
+        </p>
+
+        <div class="info-box">
+          <strong>操作提示：</strong>拖动项目到目标位置后释放，顺序将自动更新。
+        </div>
+
+        <div class="tree drag-mode" id="dragDemo">
+          <div class="tree-node" draggable="true" data-id="c1">
+            <span class="tree-label">☕ 第一优先级：代码审查</span>
+          </div>
+          <div class="tree-node" draggable="true" data-id="c2">
+            <span class="tree-label">🔥 第二优先级：修复 Bug</span>
+          </div>
+          <div class="tree-node" draggable="true" data-id="c3">
+            <span class="tree-label">📝 第三优先级：编写文档</span>
+          </div>
+          <div class="tree-node" draggable="true" data-id="c4">
+            <span class="tree-label">🎨 第四优先级：优化样式</span>
+          </div>
+          <div class="tree-node" draggable="true" data-id="c5">
+            <span class="tree-label">📦 第五优先级：发布版本</span>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-label">当前排序:</span>
+            <span class="status-value" id="currentOrder">1 → 2 → 3 → 4 → 5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== 通用函数 =====
+    function updateStatus() {
+      // 树形模式状态
+      const expanded = document.querySelectorAll('#treeDemo .tree-node.expanded').length;
+      const total = document.querySelectorAll('#treeDemo .tree-node').length;
+      document.getElementById('expandedCount').textContent = expanded;
+      document.getElementById('collapsedCount').textContent = total - expanded;
+
+      // 多选模式状态
+      const selected = document.querySelectorAll('#checkboxDemo .tree-node.selected').length;
+      const totalCheck = document.querySelectorAll('#checkboxDemo .tree-node').length;
+      document.getElementById('selectedCount').textContent = selected;
+      document.getElementById('unselectedCount').textContent = totalCheck - selected;
+    }
+
+    function expandAll(container) {
+      document.querySelectorAll(`${container} .tree-node.has-children`).forEach(node => {
+        node.classList.add('expanded');
+      });
+      updateStatus();
+    }
+
+    function collapseAll(container) {
+      document.querySelectorAll(`${container} .tree-node.has-children`).forEach(node => {
+        node.classList.remove('expanded');
+      });
+      updateStatus();
+    }
+
+    // ===== Tab 切换 =====
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`mode-${btn.dataset.mode}`).classList.add('active');
+      });
+    });
+
+    // ===== 树形展开/收起 =====
+    document.querySelectorAll('#treeDemo .tree-node.has-children, #accordionDemo .tree-node.has-children').forEach(node => {
+      node.addEventListener('click', (e) => {
+        // 手风琴模式：收起同级节点
+        if (document.querySelector('#treeDemo.accordion-mode') ||
+            document.querySelector('#accordionDemo.accordion-mode')) {
+          const parent = node.closest('.tree-children');
+          if (parent) {
+            parent.querySelectorAll(':scope > .tree-node.expanded').forEach(sibling => {
+              if (sibling !== node) {
+                sibling.classList.remove('expanded');
+              }
+            });
+          }
+        }
+        node.classList.toggle('expanded');
+        updateStatus();
+      });
+    });
+
+    // ===== 多选模式 =====
+    function updateParentState(node) {
+      const parent = node.parentElement?.closest('.tree-node');
+      if (!parent) return;
+
+      const siblings = parent.querySelectorAll(':scope > .tree-children > .tree-node');
+      const selectedCount = [...siblings].filter(n => n.classList.contains('selected')).length;
+
+      parent.classList.remove('selected', 'indeterminate');
+      if (selectedCount === siblings.length) {
+        parent.classList.add('selected');
+      } else if (selectedCount > 0) {
+        parent.classList.add('indeterminate');
+      }
+      updateStatus();
+    }
+
+    document.querySelectorAll('#checkboxDemo .tree-node').forEach(node => {
+      node.addEventListener('click', (e) => {
+        if (e.target.classList.contains('checkbox')) {
+          node.classList.toggle('selected');
+          updateParentState(node);
+        }
+      });
+    });
+
+    function selectAll() {
+      document.querySelectorAll('#checkboxDemo .tree-node').forEach(node => {
+        node.classList.add('selected');
+      });
+      updateStatus();
+    }
+
+    function unselectAll() {
+      document.querySelectorAll('#checkboxDemo .tree-node').forEach(node => {
+        node.classList.remove('selected', 'indeterminate');
+      });
+      updateStatus();
+    }
+
+    function invertSelection() {
+      document.querySelectorAll('#checkboxDemo .tree-node').forEach(node => {
+        node.classList.toggle('selected');
+      });
+      // 更新父状态
+      document.querySelectorAll('#checkboxDemo .tree-node.has-children').forEach(parent => {
+        const siblings = parent.querySelectorAll(':scope > .tree-children > .tree-node');
+        const selectedCount = [...siblings].filter(n => n.classList.contains('selected')).length;
+        parent.classList.remove('selected', 'indeterminate');
+        if (selectedCount === siblings.length) {
+          parent.classList.add('selected');
+        } else if (selectedCount > 0) {
+          parent.classList.add('indeterminate');
+        }
+      });
+      updateStatus();
+    }
+
+    // ===== 拖拽排序 =====
+    let draggedNode = null;
+
+    document.querySelectorAll('#dragDemo .tree-node').forEach(node => {
+      node.addEventListener('dragstart', (e) => {
+        draggedNode = node;
+        node.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      node.addEventListener('dragend', () => {
+        node.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(n => n.classList.remove('drag-over'));
+        draggedNode = null;
+        updateDragOrder();
+      });
+
+      node.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (node !== draggedNode) {
+          node.classList.add('drag-over');
+        }
+      });
+
+      node.addEventListener('dragleave', () => {
+        node.classList.remove('drag-over');
+      });
+
+      node.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (node !== draggedNode) {
+          const container = node.parentElement;
+          const draggedIndex = [...container.children].indexOf(draggedNode);
+          const targetIndex = [...container.children].indexOf(node);
+
+          if (draggedIndex < targetIndex) {
+            container.insertBefore(draggedNode, node.nextSibling);
+          } else {
+            container.insertBefore(draggedNode, node);
+          }
+        }
+        node.classList.remove('drag-over');
+      });
+    });
+
+    function updateDragOrder() {
+      const nodes = document.querySelectorAll('#dragDemo .tree-node');
+      const order = [...nodes].map((n, i) => i + 1).join(' → ');
+      document.getElementById('currentOrder').textContent = order;
+    }
+
+    // 初始化
+    updateStatus();
+  </script>
+</body>
+</html>
