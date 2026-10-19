@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS animation 属性组合 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    .demo-area { display: flex; gap: 24px; min-height: 150px; padding: 40px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    
+    .box { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; cursor: pointer; }
+    .box.blue { background: #388bfd; }
+    .box.purple { background: #a371f7; }
+    .box.green { background: #3fb950; }
+    .box.orange { background: #f0883e; }
+    
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; }
+    .btn:hover { background: #30363d; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    
+    /* 动画定义 */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideIn { from { transform: translateX(-50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(56, 139, 253, 0.5); } 50% { box-shadow: 0 0 20px rgba(56, 139, 253, 0.8); } }
+    
+    /* 旋转加载器 */
+    .loader { width: 50px; height: 50px; border: 4px solid #30363d; border-top-color: #388bfd; border-radius: 50%; animation: spin 1s linear infinite; }
+    
+    /* 脉冲发光 */
+    .pulse-glow { animation: pulse 1s ease-in-out infinite, glow 1s ease-in-out infinite; }
+    
+    /* 多个动画叠加 */
+    .multi-animation { animation: fadeIn 0.5s ease, slideIn 0.5s ease; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS animation 属性组合</h1>
+    <p class="subtitle">多个动画叠加 | animation-composite | 交互演示</p>
+
+    <div class="section">
+      <h2>多个动画叠加</h2>
+      <div class="demo-area">
+        <div class="box blue multi-animation" id="multi-box">叠加</div>
+      </div>
+      <div class="code-block">/* 多个动画用逗号分隔 */
+.multi {
+  animation: fadeIn 0.5s ease, slideIn 0.5s ease;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>加载动画</h2>
+      <div class="demo-area">
+        <div class="loader"></div>
+      </div>
+      <div class="code-block">.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #30363d;
+  border-top-color: #388bfd;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>脉冲发光效果</h2>
+      <div class="demo-area">
+        <div class="box purple pulse-glow">发光</div>
+      </div>
+      <div class="code-block">.pulse-glow {
+  animation: pulse 1s ease-in-out infinite, glow 1s ease-in-out infinite;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>animation-direction 方向</h2>
+      <div class="controls">
+        <button class="btn" data-direction="normal">normal</button>
+        <button class="btn" data-direction="reverse">reverse</button>
+        <button class="btn" data-direction="alternate">alternate</button>
+        <button class="btn" data-direction="alternate-reverse">alternate-reverse</button>
+      </div>
+      <div class="demo-area">
+        <div class="box green" id="direction-box" style="animation: pulse 2s ease-in-out infinite; animation-direction: normal;">方向</div>
+      </div>
+      <div class="code-block" id="direction-code">animation-direction: normal;</div>
+    </div>
+
+    <div class="section">
+      <h2>animation-play-state 暂停/播放</h2>
+      <div class="demo-area">
+        <div class="box orange" id="play-state-box" style="animation: spin 2s linear infinite;">旋转中</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="pause-btn">暂停</button>
+        <button class="btn" id="play-btn">播放</button>
+      </div>
+      <div class="code-block">.paused { animation-play-state: paused; }
+.running { animation-play-state: running; }</div>
+    </div>
+
+    <div class="section">
+      <h2>代码示例</h2>
+      <div class="code-block">/* 完整 animation 缩写 */
+/* animation: name duration timing-function delay iteration-count direction fill-mode; */
+
+.element {
+  animation: slideIn 0.5s ease-out 0s 1 normal forwards;
+}
+
+/* 多个动画 */
+.multi {
+  animation: 
+    fadeIn 0.5s ease forwards,
+    slideIn 0.5s ease 0.2s forwards,
+    pulse 2s ease-in-out infinite 1s;
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>浏览器兼容性</h2>
+      <div class="desc">
+        <ul style="font-size: 12px; color: #8b949e; margin-top: 8px; padding-left: 20px;">
+          <li>Chrome 43+ ✓</li>
+          <li>Firefox 16+ ✓</li>
+          <li>Safari 9+ ✓</li>
+          <li>Edge 12+ ✓</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // direction 切换
+    const directionBox = document.getElementById('direction-box');
+    const directionCode = document.getElementById('direction-code');
+    
+    document.querySelectorAll('[data-direction]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const direction = btn.dataset.direction;
+        directionBox.style.animationDirection = direction;
+        directionCode.textContent = `animation-direction: ${direction};`;
+      });
+    });
+    
+    // play/pause 切换
+    const playStateBox = document.getElementById('play-state-box');
+    
+    document.getElementById('pause-btn').addEventListener('click', () => {
+      playStateBox.style.animationPlayState = 'paused';
+    });
+    
+    document.getElementById('play-btn').addEventListener('click', () => {
+      playStateBox.style.animationPlayState = 'running';
+    });
+  </script>
+</body>
+</html>

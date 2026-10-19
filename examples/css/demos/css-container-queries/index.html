@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @container 容器查询 — 示例总览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .demo-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; transition: all 0.15s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .demo-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .demo-card h3 { font-size: 15px; color: #f0f6fc; margin-bottom: 8px; }
+    .demo-card p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+    .demo-card .tag { display: inline-block; padding: 2px 8px; background: #21262d; border-radius: 4px; font-size: 11px; color: #58a6ff; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS @container 容器查询</h1>
+    <p class="subtitle">基于父容器尺寸的组件级响应式设计，让组件在不同容器中自动适配</p>
+
+    <div class="info">
+      <strong>浏览器支持：</strong>
+      <span class="badge badge-yes">Chrome 105+</span>
+      <span class="badge badge-yes">Safari 16+</span>
+      <span class="badge badge-yes">Firefox 110+</span>
+    </div>
+
+    <div class="demo-grid">
+      <a class="demo-card" href="card-demo.html">
+        <h3>卡片组件自适应</h3>
+        <p>演示卡片组件在不同宽度容器中的自适应效果，包括布局方向、字号、网格等变化。</p>
+        <span class="tag">基础</span>
+      </a>
+
+      <a class="demo-card" href="sidebar-demo.html">
+        <h3>侧边栏响应式</h3>
+        <p>演示侧边栏组件在小容器和大容器中的不同展示模式。</p>
+        <span class="tag">进阶</span>
+      </a>
+
+      <a class="demo-card" href="gallery-demo.html">
+        <h3>图片画廊布局</h3>
+        <p>演示图片画廊根据容器宽度自动切换列数的效果。</p>
+        <span class="tag">实战</span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

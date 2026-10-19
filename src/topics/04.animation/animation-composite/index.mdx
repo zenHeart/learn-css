@@ -1,0 +1,209 @@
+---
+title: "CSS animation 属性组合"
+category: "动画"
+tags:
+  - CSS
+  - animation
+  - 动画组合
+  - 多个动画
+  - 交互动画
+description: "详解CSS animation属性组合使用和多个动画叠加的方法"
+keywords: "animation, 动画组合, 多个动画, CSS动画, animation-composite"
+---
+
+# CSS animation 属性组合
+
+## 概述
+
+CSS animation 属性可以通过组合使用，创建更复杂的动画效果，包括多个动画叠加、animation-composite 属性等高级用法。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## animation 完整属性
+
+### 1. 缩写形式
+
+```css
+.element {
+  animation: name duration timing-function delay iteration-count direction fill-mode;
+}
+```
+
+### 2. 分别定义
+
+```css
+.element {
+  animation-name: slideIn;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0s;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+```
+
+## 多个动画叠加
+
+### 1. 使用逗号分隔
+
+```css
+.multi-animation {
+  animation: 
+    fadeIn 0.5s ease forwards,
+    slideIn 0.5s ease forwards 0.2s,
+    pulse 2s ease-in-out infinite 1s;
+}
+```
+
+### 2. 分别定义
+
+```css
+.multi-animation {
+  animation-name: fadeIn, slideIn, pulse;
+  animation-duration: 0.5s, 0.5s, 2s;
+  animation-delay: 0s, 0.2s, 1s;
+  animation-timing-function: ease, ease, ease-in-out;
+  animation-iteration-count: 1, 1, infinite;
+}
+```
+
+## animation-composite 属性
+
+控制动画关键帧之间的合成方式：
+
+```css
+.element {
+  animation-composite: replace | add | accumulate;
+}
+```
+
+### 值说明
+
+| 值 | 说明 |
+|---|------|
+| `replace` | 用新值替换旧值（默认） |
+| `add` | 添加新值到旧值 |
+| `accumulate` | 累积动画值 |
+
+## animation-iteration-count
+
+控制动画播放次数：
+
+```css
+.iteration-1 { animation-iteration-count: 1; }     /* 播放1次 */
+.iteration-3 { animation-iteration-count: 3; }       /* 播放3次 */
+.iteration-infinite { animation-iteration-count: infinite; } /* 无限循环 */
+```
+
+## animation-direction
+
+控制动画播放方向：
+
+```css
+.direction-normal { animation-direction: normal; }          /* 正向 */
+.direction-reverse { animation-direction: reverse; }       /* 反向 */
+.direction-alternate { animation-direction: alternate; }    /* 交替 */
+.direction-alternate-reverse { animation-direction: alternate-reverse; }
+```
+
+## animation-play-state
+
+控制动画播放/暂停：
+
+```css
+.paused { animation-play-state: paused; }
+.running { animation-play-state: running; }
+```
+
+### 实际应用：悬停暂停
+
+```css
+.animated:hover {
+  animation-play-state: paused;
+}
+```
+
+## 实际应用
+
+### 1. 加载动画组合
+
+```css
+.loader {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid #ddd;
+  border-top-color: #007bff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+```
+
+### 2. 脉冲发光效果
+
+```css
+.pulse-glow {
+  animation: pulse 2s ease-in-out infinite, glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.8); }
+}
+```
+
+### 3. 打字机效果
+
+```css
+.typing {
+  animation: typing 3s steps(30) forwards, blink 0.5s step-end infinite;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+```
+
+## 浏览器兼容性
+
+animation 属性兼容性极佳：
+
+- Chrome 43+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 性能优化
+
+1. **使用 transform 和 opacity**：避免触发重排
+2. **减少动画数量**：同时运行太多动画会影响性能
+3. **使用 will-change**：
+
+```css
+.animated {
+  will-change: transform, opacity;
+}
+```
+
+## 参考资料
+
+- [animation - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/animation)
+- [CSS Animation - CSS-Tricks](https://css-tricks.com/almanac/properties/a/animation/)

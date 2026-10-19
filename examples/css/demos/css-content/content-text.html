@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 文本内容</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .required::after { content: " *"; color: #f85149; }
+    .badge::before { content: "NEW "; background: #238636; color: white; padding: 2px 6px; border-radius: 3px; margin-right: 6px; font-size: 12px; }
+    .badge { display: inline-block; }
+    .arrow-link::after { content: " →"; color: #58a6ff; }
+    .arrow-link { color: #58a6ff; text-decoration: none; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 文本内容</h1>
+
+    <div class="section">
+      <h2>必填标记</h2>
+      <div class="demo-box">
+        <p class="required">用户名</p>
+        <input type="text" placeholder="请输入用户名" style="margin-top:8px; padding:6px; background:#0d1117; border:1px solid #30363d; color:#c9d1d9; border-radius:4px;">
+      </div>
+      <div class="code-block">.required::after { content: " *"; color: red; }</div>
+      <p class="desc">使用 ::after 伪元素在必填字段后添加 * 标记</p>
+    </div>
+
+    <div class="section">
+      <h2>徽章标签</h2>
+      <div class="demo-box">
+        <span class="badge">新功能发布</span>
+      </div>
+      <div class="code-block">.badge::before { content: "NEW "; background: #238636; color: white; padding: 2px 6px; border-radius: 3px; margin-right: 6px; font-size: 12px; }</div>
+      <p class="desc">使用 ::before 伪元素在内容前添加彩色徽章</p>
+    </div>
+
+    <div class="section">
+      <h2>链接箭头</h2>
+      <div class="demo-box">
+        <a href="#" class="arrow-link">查看详情</a>
+      </div>
+      <div class="code-block">.arrow-link::after { content: " →"; color: #58a6ff; }</div>
+      <p class="desc">在链接文字后添加箭头符号</p>
+    </div>
+  </div>
+</body>
+</html>

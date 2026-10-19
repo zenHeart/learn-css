@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS shape() 案例三：文字环绕异形图片</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .demo-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .demo-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-section h3 {
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    /* 圆形图片文字环绕 */
+    .text-wrap-circle {
+      display: flow-root;
+    }
+
+    .text-wrap-circle img {
+      float: left;
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      shape-outside: circle(50% at 50% 50%);
+      clip-path: circle(50% at 50% 50%);
+      margin-right: 25px;
+      margin-bottom: 10px;
+    }
+
+    .text-wrap-circle p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    /* 椭圆图片文字环绕 */
+    .text-wrap-ellipse {
+      display: flow-root;
+    }
+
+    .text-wrap-ellipse img {
+      float: left;
+      width: 200px;
+      height: 140px;
+      object-fit: cover;
+      shape-outside: ellipse(50% 50% at 50% 50%);
+      clip-path: ellipse(50% 50% at 50% 50%);
+      margin-right: 25px;
+      margin-bottom: 10px;
+    }
+
+    .text-wrap-ellipse p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    /* 六边形文字环绕 */
+    .text-wrap-hexagon {
+      display: flow-root;
+    }
+
+    .text-wrap-hexagon img {
+      float: left;
+      width: 180px;
+      height: 200px;
+      object-fit: cover;
+      shape-outside: polygon(
+        25% 0%, 75% 0%, 100% 50%,
+        75% 100%, 25% 100%, 0% 50%
+      );
+      clip-path: polygon(
+        25% 0%, 75% 0%, 100% 50%,
+        75% 100%, 25% 100%, 0% 50%
+      );
+      margin-right: 25px;
+      margin-bottom: 10px;
+    }
+
+    .text-wrap-hexagon p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    /* 菱形文字环绕 */
+    .text-wrap-diamond {
+      display: flow-root;
+    }
+
+    .text-wrap-diamond img {
+      float: left;
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      shape-outside: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      margin-right: 25px;
+      margin-bottom: 10px;
+      /* 旋转让菱形尖角朝上 */
+      transform: rotate(45deg);
+    }
+
+    .text-wrap-diamond .diamond-wrapper {
+      float: left;
+      shape-outside: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      margin-right: 25px;
+    }
+
+    .text-wrap-diamond p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    /* 斜切角卡片 */
+    .text-wrap-bevel {
+      display: flow-root;
+    }
+
+    .text-wrap-bevel img {
+      float: right;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      shape-outside: polygon(
+        0 0, calc(100% - 40px) 0, 100% 40px,
+        100% 100%, 0 100%
+      );
+      clip-path: polygon(
+        0 0, calc(100% - 40px) 0, 100% 40px,
+        100% 100%, 0 100%
+      );
+      margin-left: 25px;
+      margin-bottom: 10px;
+    }
+
+    .text-wrap-bevel p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    /* 多图组合布局 */
+    .text-wrap-multi {
+      display: flow-root;
+    }
+
+    .text-wrap-multi .img-stack {
+      float: left;
+      margin-right: 20px;
+      position: relative;
+    }
+
+    .text-wrap-multi img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .text-wrap-multi img:first-child {
+      clip-path: circle(50% at 50% 50%);
+      shape-outside: circle(50% at 50% 50%);
+      position: relative;
+      z-index: 2;
+    }
+
+    .text-wrap-multi img:last-child {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      clip-path: circle(50% at 50% 50%);
+      shape-outside: circle(50% at 50% 50%);
+      z-index: 1;
+      opacity: 0.7;
+    }
+
+    .text-wrap-multi p {
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: justify;
+    }
+
+    .code-snippet {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.7rem;
+      text-align: left;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS shape() 案例三：文字环绕异形图片</h1>
+
+  <div class="demo-container">
+    <!-- 圆形文字环绕 -->
+    <div class="demo-section">
+      <div class="label">shape-outside: circle()</div>
+      <h3>圆形图片文字环绕</h3>
+      <div class="text-wrap-circle">
+        <img src="https://picsum.photos/300/300?random=30" alt="示例图片">
+        <p>
+          CSS 的 shape-outside 属性允许文字环绕不规则形状的图片。通过定义
+          shape-outside，可以实现文字自然地贴合圆形边缘流动，而不是传统的矩形排列。
+          这项技术特别适合杂志风格的布局，让文字与图片形成有机的视觉结合。
+          结合 clip-path 裁剪图片形状，可以创造出优雅的图文混排效果。
+          shape-outside 不仅支持圆形，还支持 ellipse、polygon 等多种形状函数。
+        </p>
+      </div>
+      <div class="code-snippet">img {
+  float: left;
+  clip-path: circle(50% at 50% 50%);
+  shape-outside: circle(50% at 50% 50%);
+}</div>
+    </div>
+
+    <!-- 椭圆文字环绕 -->
+    <div class="demo-section">
+      <div class="label">shape-outside: ellipse()</div>
+      <h3>椭圆图片文字环绕</h3>
+      <div class="text-wrap-ellipse">
+        <img src="https://picsum.photos/300/300?random=31" alt="示例图片">
+        <p>
+          使用 ellipse() 函数可以创建椭圆形状的文字环绕效果。相比圆形，
+          椭圆在横向布局中更加适用，可以在页面顶部放置一张宽幅的椭圆图片，
+          让文字在两侧自然流动。这种布局方式常见于个人简历、作品集展示等场景，
+          既展示了图片内容，又保证了文字的可读性。
+          椭圆的水平半径为 50%，垂直半径也是 50%，形成完美的椭圆形状。
+        </p>
+      </div>
+      <div class="code-snippet">img {
+  float: left;
+  clip-path: ellipse(50% 50% at 50% 50%);
+  shape-outside: ellipse(50% 50% at 50% 50%);
+}</div>
+    </div>
+
+    <!-- 六边形文字环绕 -->
+    <div class="demo-section">
+      <div class="label">shape-outside: polygon()</div>
+      <h3>六边形图片文字环绕</h3>
+      <div class="text-wrap-hexagon">
+        <img src="https://picsum.photos/300/300?random=32" alt="示例图片">
+        <p>
+          通过 polygon() 函数，我们可以创建六边形等更复杂形状的文字环绕。
+          六边形给人一种稳定、现代的视觉感受，适合科技、设计类网站的内容展示。
+          文字会精确地沿着六边形的每一条边流动，创造出独特的阅读体验。
+          这种不规则的图文布局打破了传统网格的束缚，让页面更加生动有趣。
+          结合 hover 动画，还可以实现悬停时形状变化的交互效果。
+        </p>
+      </div>
+      <div class="code-snippet">img {
+  float: left;
+  clip-path: polygon(
+    25% 0%, 75% 0%, 100% 50%,
+    75% 100%, 25% 100%, 0% 50%
+  );
+  shape-outside: polygon(
+    25% 0%, 75% 0%, 100% 50%,
+    75% 100%, 25% 100%, 0% 50%
+  );
+}</div>
+    </div>
+
+    <!-- 菱形文字环绕 -->
+    <div class="demo-section">
+      <div class="label">shape-outside + transform</div>
+      <h3>菱形图片文字环绕</h3>
+      <div class="text-wrap-diamond">
+        <div class="diamond-wrapper">
+          <img src="https://picsum.photos/300/300?random=33" alt="示例图片">
+        </div>
+        <p>
+          菱形布局需要配合 transform: rotate() 来实现。由于 shape-outside
+          定义的形状不能直接旋转，我们需要将图片包裹在一个容器中，对容器应用
+          shape-outside，对图片应用 rotate(45deg)。这种技巧可以创建倾斜的
+          菱形图片，同时保持文字环绕的效果。在艺术展览、个人摄影作品集等场景中
+          非常适用，能够营造出独特的视觉冲击力。
+        </p>
+      </div>
+      <div class="code-snippet">.diamond-wrapper {
+  float: left;
+  shape-outside: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+img {
+  transform: rotate(45deg);
+}</div>
+    </div>
+
+    <!-- 斜切角卡片 -->
+    <div class="demo-section">
+      <div class="label">shape-outside: polygon() (右侧)</div>
+      <h3>斜切角图片（文字在左）</h3>
+      <div class="text-wrap-bevel">
+        <img src="https://picsum.photos/300/300?random=34" alt="示例图片">
+        <p>
+          使用 polygon() 可以创建带有斜切角的图片造型。将图片放置在右侧，
+          文字在左侧流动，可以创造出独特的杂志风布局。斜切的角度可以根据
+          视觉效果自由调整，本例中使用 40px 的斜切距离。这种技术在现代网页
+          设计中常用于卡片组件的装饰性处理，能够在不增加额外 HTML 元素的情况下
+          实现复杂的视觉效果。
+        </p>
+      </div>
+      <div class="code-snippet">img {
+  float: right;
+  clip-path: polygon(
+    0 0, calc(100% - 40px) 0,
+    100% 40px, 100% 100%, 0 100%
+  );
+  shape-outside: polygon(
+    0 0, calc(100% - 40px) 0,
+    100% 40px, 100% 100%, 0 100%
+  );
+}</div>
+    </div>
+
+    <!-- 多图叠加 -->
+    <div class="demo-section">
+      <div class="label">多图片 shape-outside 组合</div>
+      <h3>叠加图片组文字环绕</h3>
+      <div class="text-wrap-multi">
+        <div class="img-stack">
+          <img src="https://picsum.photos/300/300?random=35" alt="前景图片">
+          <img src="https://picsum.photos/300/300?random=36" alt="背景图片">
+        </div>
+        <p>
+          通过叠加多张带有 shape-outside 的图片，可以创建更复杂的文字环绕效果。
+          在这个示例中，两张圆形图片叠加在一起，前景图片完全不透明，
+          背景图片半透明，文字沿着两个圆的边缘流动。这种技术常用于个人介绍、
+          团队展示等场景，可以展示多个人物头像的同时，保持版面的整洁和可读性。
+          通过调整 z-index 和 opacity，可以控制图片之间的层次关系。
+        </p>
+      </div>
+      <div class="code-snippet">.img-stack {
+  position: relative;
+}
+.img-stack img:first-child {
+  position: relative;
+  z-index: 2;
+  clip-path: circle(50%);
+  shape-outside: circle(50%);
+}
+.img-stack img:last-child {
+  position: absolute;
+  top: 20px; left: 20px;
+  z-index: 1;
+  clip-path: circle(50%);
+  shape-outside: circle(50%);
+  opacity: 0.7;
+}</div>
+    </div>
+  </div>
+</body>
+</html>

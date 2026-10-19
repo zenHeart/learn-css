@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 图片内容</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 16px; }
+    .location { font-size: 16px; padding: 10px 0; }
+    .location-geo::before { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f85149'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; margin-right: 8px; vertical-align: middle; }
+    .star { font-size: 18px; }
+    .star-highlight::before { content: "★"; color: #f0883e; margin-right: 4px; }
+    .star-highlight { color: #f0f6fc; }
+    .img-text { border: 1px dashed #30363d; padding: 12px; border-radius: 4px; }
+    .img-text-geo::before { content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%2358a6ff'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'/%3E%3C/svg%3E"); margin-right: 8px; vertical-align: middle; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 图片内容</h1>
+
+    <div class="section">
+      <h2>使用 SVG Data URI 插入图标</h2>
+      <div class="demo-box">
+        <p class="location location-geo">北京市朝阳区</p>
+        <p class="star star-highlight">精选推荐</p>
+      </div>
+      <div class="code-block">.location-geo::before {
+  content: url("data:image/svg+xml,...");
+  margin-right: 8px;
+}</div>
+      <p class="desc">通过 Data URI 嵌入 SVG 图片，无需外部文件</p>
+    </div>
+
+    <div class="section">
+      <h2>图片与文本组合</h2>
+      <div class="demo-box">
+        <div class="img-text img-text-geo">当前位置：北京市朝阳区</div>
+      </div>
+      <div class="code-block">.img-text-geo::before {
+  content: url("data:image/svg+xml,...") "当前位置：";
+}</div>
+      <p class="desc">可以同时插入图片和文本内容</p>
+    </div>
+  </div>
+</body>
+</html>

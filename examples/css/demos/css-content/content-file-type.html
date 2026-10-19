@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 文件类型标识</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .file-list { list-style: none; }
+    .file-list li { padding: 10px 0; border-bottom: 1px solid #21262d; }
+    .file-list li:last-child { border-bottom: none; }
+    .file-list a { color: #58a6ff; text-decoration: none; font-size: 15px; }
+    .file-list a:hover { text-decoration: underline; }
+    a[href$=".pdf"]::after { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f85149'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; margin-left: 6px; vertical-align: middle; }
+    a[href$=".docx"]::after, a[href$=".doc"]::after { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2358a6ff'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; margin-left: 6px; vertical-align: middle; }
+    a[href$=".zip"]::after, a[href$=".rar"]::after { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233fb950'%3E%3Cpath d='M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 6h-2v2h2v2h-2v2h-2v-2h2v-2h-2v-2h2v-2h-2V8h2v2h2v2z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; margin-left: 6px; vertical-align: middle; }
+    a[href$=".mp4"]::after, a[href$=".mov"]::after { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a371f7'%3E%3Cpath d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; margin-left: 6px; vertical-align: middle; }
+    .download-section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+    .download-header { padding: 12px 16px; border-bottom: 1px solid #30363d; font-size: 14px; color: #f0f6fc; font-weight: bold; }
+    .download-list { list-style: none; }
+    .download-list li { padding: 12px 16px; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: center; }
+    .download-list li:last-child { border-bottom: none; }
+    .download-list .file-name { color: #c9d1d9; }
+    .download-list a { color: #58a6ff; text-decoration: none; }
+    .file-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
+    .file-meta::before { content: attr(data-size) " · "; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 文件类型标识</h1>
+
+    <div class="section">
+      <h2>按文件类型显示图标</h2>
+      <div class="demo-box">
+        <ul class="file-list">
+          <li><a href="report.pdf">年度财务报告.pdf</a></li>
+          <li><a href="proposal.docx">项目提案.docx</a></li>
+          <li><a href="assets.zip">设计资源包.zip</a></li>
+          <li><a href="demo.mp4">产品演示视频.mp4</a></li>
+          <li><a href="archive.rar">旧文件备份.rar</a></li>
+        </ul>
+      </div>
+      <div class="code-block">a[href$=".pdf"]::after {
+  content: url("pdf-icon.svg");
+}
+a[href$=".docx"]::after {
+  content: url("doc-icon.svg");
+}
+a[href$=".zip"]::after {
+  content: url("zip-icon.svg");
+}</div>
+      <p class="desc">通过属性选择器 [href$=".pdf"] 匹配特定扩展名，添加对应文件类型的图标</p>
+    </div>
+
+    <div class="section">
+      <h2>资源下载列表</h2>
+      <div class="demo-box">
+        <div class="download-section">
+          <div class="download-header">📦 资源下载</div>
+          <ul class="download-list">
+            <li>
+              <div>
+                <a href="guide.pdf">使用指南.pdf</a>
+                <div class="file-meta" data-size="2.4 MB"></div>
+              </div>
+              <a href="guide.pdf" style="font-size:13px; color:#58a6ff;">下载</a>
+            </li>
+            <li>
+              <div>
+                <a href="template.zip">文档模板.zip</a>
+                <div class="file-meta" data-size="15.8 MB"></div>
+              </div>
+              <a href="template.zip" style="font-size:13px; color:#58a6ff;">下载</a>
+            </li>
+            <li>
+              <div>
+                <a href="video.mp4">功能介绍视频.mp4</a>
+                <div class="file-meta" data-size="128.5 MB"></div>
+              </div>
+              <a href="video.mp4" style="font-size:13px; color:#58a6ff;">下载</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="code-block">.file-meta::before {
+  content: attr(data-size) " · ";
+}</div>
+      <p class="desc">结合 attr() 读取 data-size 属性显示文件大小</p>
+    </div>
+  </div>
+</body>
+</html>

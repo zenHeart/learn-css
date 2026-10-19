@@ -1,0 +1,299 @@
+---
+title: "CSS Houdini Layout API"
+category: "高级特性"
+tags:
+  - Houdini
+  - Layout API
+  - CSS Layout
+  - registerLayout
+  - 自定义布局
+description: "详解 CSS Houdini Layout API，通过 registerLayout 注册自定义布局算法，实现高级布局效果"
+keywords: "CSS Houdini, Layout API, registerLayout, CSS Layout API, 自定义布局"
+---
+
+# CSS Houdini Layout API
+
+**通过 JavaScript Worklet 注册自定义布局算法**
+
+---
+
+## 概述
+
+Layout API 是 CSS Houdini 的核心部分，它允许开发者注册自己的布局算法，类似于 `display: flex` 或 `display: grid`，但完全由 JavaScript 定义。
+
+### 基本工作流程
+
+1. **加载 Worklet**：`CSS.layoutWorklet.addModule('layout-script.js')`
+2. **注册布局**：`registerLayout(name, class)`
+3. **CSS 使用**：`.container { display: layout(my-layout); }`
+
+```js
+// my-layout.js
+class CenterLayout {
+  async intrinsicSizes() {}
+  async layout(children, edges, constraints, styleMap) {
+    const fragment = { autoBlockSize: 0 };
+    return fragment;
+  }
+}
+registerLayout('centering', CenterLayout);
+```
+
+---
+
+## registerLayout 注册自定义布局
+
+### 基本语法
+
+```js
+registerLayout(name, classDefinition)
+```
+
+- `name`：字符串，布局名称，在 CSS 中通过 `display: layout(name)` 引用
+- `classDefinition`：类定义，必须实现 `layout()` 方法，可选实现 `intrinsicSizes()`
+
+### intrinsicSizes()
+
+返回布局的 intrinsic size 信息，用于 CSS 引擎计算尺寸：
+
+```js
+class MyLayout {
+  async intrinsicSizes() {
+    return {
+      minInlineSize: 0,
+      maxInlineSize: Infinity,
+      minBlockSize: 0,
+      maxBlockSize: Infinity
+    };
+  }
+}
+```
+
+### layout(children, edges, constraints, styleMap)
+
+核心布局方法，控制子元素的放置：
+
+```js
+class MyLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const availableBlockSize = constraints.fixedBlockSize - edges.block;
+    const childFragments = [];
+
+    for (const child of children) {
+      const fragment = await child.layoutNextFragment({
+        availableInlineSize,
+        availableBlockSize
+      });
+      maxChildBlockSize = Math.max(maxChildBlockSize, fragment.blockSize);
+      childFragments.push(fragment);
+    }
+
+    return {
+      autoBlockSize: maxChildBlockSize + edges.block,
+      childFragments
+    };
+  }
+}
+```
+
+---
+
+## 布局参数详解
+
+### constraints — 尺寸约束
+
+| 属性 | 说明 |
+|------|------|
+| `constraints.fixedInlineSize` | 固定内联尺寸（类似 width）|
+| `constraints.fixedBlockSize` | 固定块级尺寸（类似 height）|
+| `constraints.percentageInlineSize` | 百分比内联尺寸 |
+| `constraints.percentageBlockSize` | 百分比块级尺寸 |
+
+### edges — 边框信息
+
+| 属性 | 说明 |
+|------|------|
+| `edges.inlineStart` | 内联起始边（left）|
+| `edges.inlineEnd` | 内联结束边（right）|
+| `edges.blockStart` | 块级起始边（top）|
+| `edges.blockEnd` | 块级结束边（bottom）|
+| `edges.inline` | `inlineStart + inlineEnd` |
+| `edges.block` | `blockStart + blockEnd` |
+
+### childFragments — 子片段
+
+```js
+// 读取子元素尺寸
+fragment.inlineSize;   // 子元素宽度
+fragment.blockSize;   // 子元素高度
+
+// 设置子元素位置
+fragment.inlineOffset = 50;  // x 坐标
+fragment.blockOffset = 100; // y 坐标
+```
+
+---
+
+## 实战案例
+
+### 案例一：居中布局
+
+```js
+class CenteringLayout {
+  async intrinsicSizes() {}
+
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const availableBlockSize = constraints.fixedBlockSize - edges.block;
+    const childFragments = [];
+
+    for (const child of children) {
+      const fragment = await child.layoutNextFragment({
+        availableInlineSize,
+        availableBlockSize
+      });
+
+      // 居中放置
+      fragment.inlineOffset = edges.inlineStart +
+        (availableInlineSize - fragment.inlineSize) / 2;
+      fragment.blockOffset = edges.blockStart +
+        (availableBlockSize - fragment.blockSize) / 2;
+
+      childFragments.push(fragment);
+    }
+
+    return {
+      autoBlockSize: availableBlockSize,
+      childFragments
+    };
+  }
+}
+registerLayout('centering', CenteringLayout);
+```
+
+**CSS**：
+```css
+.center-container {
+  display: layout(centering);
+  width: 400px;
+  height: 300px;
+}
+```
+
+### 案例二：水平等分布局
+
+```js
+class EqualColumnsLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const gap = 10;
+    const childCount = children.length;
+
+    if (childCount === 0) {
+      return { autoBlockSize: 0, childFragments: [] };
+    }
+
+    const columnWidth = (availableInlineSize - gap * (childCount - 1)) / childCount;
+    const childFragments = [];
+    let maxBlockSize = 0;
+
+    for (let i = 0; i < children.length; i++) {
+      const fragment = await children[i].layoutNextFragment({
+        availableInlineSize: columnWidth
+      });
+
+      fragment.inlineOffset = edges.inlineStart + i * (columnWidth + gap);
+      fragment.blockOffset = edges.blockStart;
+      fragment.inlineSize = columnWidth;
+
+      maxBlockSize = Math.max(maxBlockSize, fragment.blockSize);
+      childFragments.push(fragment);
+    }
+
+    return {
+      autoBlockSize: maxBlockSize + edges.block,
+      childFragments
+    };
+  }
+}
+registerLayout('equal-columns', EqualColumnsLayout);
+```
+
+### 案例三：瀑布流布局
+
+```js
+class MasonryLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availableInlineSize = constraints.fixedInlineSize - edges.inline;
+    const columnWidth = 150;
+    const gap = 10;
+    const columnCount = Math.max(1,
+      Math.floor((availableInlineSize + gap) / (columnWidth + gap)));
+    const actualColumnWidth =
+      (availableInlineSize - gap * (columnCount - 1)) / columnCount;
+
+    const columnHeights = new Array(columnCount).fill(0);
+    const childFragments = [];
+
+    for (const child of children) {
+      const minHeightCol = columnHeights.indexOf(Math.min(...columnHeights));
+      const fragment = await child.layoutNextFragment({
+        availableInlineSize: actualColumnWidth
+      });
+
+      // 缩放以适应列宽
+      if (fragment.inlineSize > actualColumnWidth) {
+        const scale = actualColumnWidth / fragment.inlineSize;
+        fragment.inlineSize = actualColumnWidth;
+        fragment.blockSize = fragment.blockSize * scale;
+      }
+
+      fragment.inlineOffset = edges.inlineStart + minHeightCol * (actualColumnWidth + gap);
+      fragment.blockOffset = edges.blockStart + columnHeights[minHeightCol];
+      columnHeights[minHeightCol] += fragment.blockSize + gap;
+      childFragments.push(fragment);
+    }
+
+    return {
+      autoBlockSize: Math.max(...columnHeights) + edges.block,
+      childFragments
+    };
+  }
+}
+registerLayout('masonry', MasonryLayout);
+```
+
+---
+
+## 浏览器兼容性
+
+| 浏览器 | 支持情况 |
+|--------|----------|
+| Chrome | ✅ 65+（部分）|
+| Edge | ✅ 79+（部分）|
+| Firefox | ❌ 不支持 |
+| Safari | ❌ 不支持 |
+
+**注意**：Layout API 目前支持有限，chromium 中需要开启实验性功能。
+
+### 功能检测
+
+```js
+if ('layoutWorklet' in CSS) {
+  CSS.layoutWorklet.addModule('my-layout.js');
+} else {
+  console.warn('Layout API not supported');
+}
+```
+
+---
+
+## 与其他 Houdini API 的区别
+
+| API | 作用 | 影响 |
+|-----|------|------|
+| Paint API | 绘制背景/边框图案 | 只影响绘制 |
+| Layout API | 自定义布局算法 | 影响盒模型生成 |
+| Animation Worklet | 自定义动画 | 影响动画效果 |
+| Properties & Values | 自定义 CSS 属性 | 影响样式计算 |

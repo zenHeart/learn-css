@@ -1,0 +1,176 @@
+---
+title: CSS corner-shape 角形状属性
+category: 形状（Shape）
+tags: [css, shape, corner, border-radius]
+description: 详细介绍 CSS corner-shape 角形状属性，用于控制元素拐角的形状。
+keywords: corner-shape, CSS 形状, 角形状, border-radius
+---
+
+## 基本概念
+
+`corner-shape` 是 CSS 中用于定义元素拐角形状的属性，允许你为元素的每个角落指定不同的几何形状。与 `border-radius` 配合使用时，可以创建丰富的角形状效果。
+
+## 与 border-radius 的配合
+
+`corner-shape` 与 `border-radius` 密切相关：
+
+- `border-radius` 定义拐角的半径大小
+- `corner-shape` 定义拐角的形状类型
+
+两者结合使用可以创建复杂而精确的角形状效果。
+
+```css
+.element {
+  corner-shape: circle;
+  border-radius: 50%;
+}
+```
+
+## 支持的几何形状选项
+
+### circle（圆形）
+
+创建圆形的拐角：
+
+```css
+.corner-circle {
+  corner-shape: circle;
+  border-radius: 50%;
+}
+```
+
+### ellipse（椭圆形）
+
+创建椭圆形的拐角：
+
+```css
+.corner-ellipse {
+  corner-shape: ellipse;
+  border-radius: 50%;
+}
+```
+
+### clip（裁剪形）
+
+使用裁剪方式创建拐角：
+
+```css
+.corner-clip {
+  corner-shape: clip;
+  border-radius: 10px;
+}
+```
+
+### bevel（斜切形）
+
+创建斜切效果的拐角：
+
+```css
+.corner-bevel {
+  corner-shape: bevel;
+  border-radius: 10px;
+}
+```
+
+### notch（缺口形）
+
+创建带缺口的拐角：
+
+```css
+.corner-notch {
+  corner-shape: notch;
+  border-radius: 10px;
+}
+```
+
+## 单独控制各角
+
+`corner-shape` 支持分别设置四个角的形状：
+
+```css
+.element {
+  /* top-left, top-right, bottom-right, bottom-left */
+  corner-shape: circle ellipse clip bevel;
+}
+```
+
+## 实战案例
+
+### 卡片圆角效果
+
+```css
+.card {
+  corner-shape: circle;
+  border-top-start-radius: 50%;
+  border-top-end-radius: 20px;
+  border-bottom-end-radius: 50%;
+  border-bottom-start-radius: 20px;
+}
+```
+
+### 聊天气泡
+
+```css
+.chat-bubble {
+  corner-shape: clip;
+  border-radius: 20px;
+}
+```
+
+### 异形按钮
+
+```css
+.fancy-button {
+  corner-shape: ellipse;
+  border-radius: 50%;
+  padding: 12px 32px;
+}
+```
+
+## 浏览器兼容性
+
+`corner-shape` 是一个较新的 CSS 属性，目前兼容性有限：
+
+| 浏览器 | 支持版本 | 备注 |
+|--------|----------|------|
+| Chrome  | ❌ 不支持 | 需要开启实验特性 |
+| Firefox | ❌ 不支持 | 考虑使用 SVG |
+| Safari  | ⚠️ 部分支持 | WebKit 内核可能有支持 |
+| Edge    | ❌ 不支持 | 依赖 Chromium |
+
+### 兼容性处理
+
+对于不支持 `corner-shape` 的浏览器，可以使用以下替代方案：
+
+1. **使用 border-radius**：提供基本的圆角效果
+2. **使用 clip-path**：创建复杂的多边形形状
+3. **使用 SVG 背景**：实现精确的角形状控制
+
+```css
+.fallback {
+  /* 基础圆角，所有浏览器支持 */
+  border-radius: 20px;
+}
+
+/* 如果浏览器支持 corner-shape */
+@supports (corner-shape: circle) {
+  .fallback {
+    corner-shape: circle;
+    border-radius: 50%;
+  }
+}
+```
+
+## 知识点总结
+
+1. `corner-shape` 用于定义拐角的几何形状
+2. 需要与 `border-radius` 配合使用以确定形状和大小
+3. 支持 circle、ellipse、clip、bevel、notch 等形状
+4. 可以使用 `border-top-start-radius` 等单独控制每个角
+5. 目前浏览器支持有限，需要提供降级方案
+
+## 交互式演示
+
+下面是 `corner-shape` 的交互式演示：
+
+{/* @playground id="corner-shape" mode="demo" */}

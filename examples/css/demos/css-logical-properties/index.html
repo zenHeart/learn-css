@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 逻辑属性 - 交互演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-area { display: flex; gap: 16px; min-height: 120px; padding: 20px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .box { padding: 16px 24px; border-radius: 8px; font-size: 14px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .btn { padding: 6px 12px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .desc { font-size: 12px; color: #6e7681; margin-top: 8px; line-height: 1.6; }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #388bfd33; color: #58a6ff; margin-right: 4px; }
+    
+    /* Demo styles */
+    .demo-card { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    .demo-card.physical { margin-top: 16px; margin-bottom: 16px; padding-left: 16px; padding-right: 16px; border-left: 3px solid #f59e0b; }
+    .demo-card.logical { margin-block: 16px; padding-inline: 16px; border-inline-start: 3px solid #3b82f6; }
+    
+    .input-demo { background: #21262d; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; }
+    .input-demo.physical { border-left: 3px solid #3b82f6; padding-left: 12px; }
+    .input-demo.logical { border-inline-start: 3px solid #22c55e; padding-inline-start: 12px; }
+    
+    .vertical-demo-container { display: flex; gap: 24px; flex-wrap: wrap; }
+    .vertical-card { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 20px; display: inline-flex; flex-direction: column; gap: 8px; }
+    .vertical-card .title { font-weight: 600; color: #f0f6fc; }
+    .vertical-card .desc { font-size: 12px; color: #6e7681; }
+    .vertical-card.border-logical { border-inline-end: 4px solid #a855f7; }
+    
+    .flow-demo { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    .flow-demo .sidebar { float: inline-start; inline-size: 120px; background: #3b82f633; padding: 12px; border-radius: 4px; margin-inline-end: 16px; font-size: 12px; }
+    .flow-demo .content { max-inline-size: 65ch; margin-inline: auto; }
+    
+    .property-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    .property-table th, .property-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    .property-table th { color: #8b949e; font-weight: 500; }
+    .property-table td { color: #c9d1d9; font-family: monospace; }
+    .property-table .physical { color: #f59e0b; }
+    .property-table .logical { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS 逻辑属性</h1>
+    <p class="subtitle">margin-inline/block | 书写模式无关 | RTL 适配</p>
+    
+    <!-- Basic Logical Margin -->
+    <div class="section">
+      <h2><span class="tag">案例 1</span>基础边距对比</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: stretch;">
+        <div class="demo-card physical">
+          <strong>物理属性</strong> margin-top/bottom, padding-left/right
+          <p style="font-size: 12px; color: #6e7681; margin-top: 8px;">border-left 固定在左侧</p>
+        </div>
+        <div class="demo-card logical" style="margin-top: 16px;">
+          <strong>逻辑属性</strong> margin-block, padding-inline
+          <p style="font-size: 12px; color: #6e7681; margin-top: 8px;">border-inline-start 自动适配方向</p>
+        </div>
+      </div>
+      <div class="code-block">/* 物理属性（固定方向） */
+.card-physical {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-left: 3px solid #f59e0b;
+}
+
+/* 逻辑属性（自动适配方向） */
+.card-logical {
+  margin-block: 16px;
+  padding-inline: 16px;
+  border-inline-start: 3px solid #3b82f6;
+}</div>
+      <p class="desc">逻辑属性根据书写方向自动调整，物理属性方向固定。</p>
+    </div>
+    
+    <!-- RTL Layout -->
+    <div class="section">
+      <h2><span class="tag">案例 2</span>RTL 布局适配</h2>
+      <div class="controls">
+        <button class="btn" onclick="toggleDirection()">切换 LTR / RTL</button>
+      </div>
+      <div class="demo-area" style="flex-direction: column; align-items: stretch;">
+        <div id="rtl-demo" dir="ltr" style="background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+          <div class="input-demo logical" style="max-width: 300px;">
+            <label style="display: block; margin-bottom: 8px; color: #8b949e; font-size: 13px;">输入框 (border-inline-start)</label>
+            <input type="text" placeholder="点击获得焦点..." style="width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 8px 12px; color: #c9d1d9;">
+          </div>
+          <div style="margin-top: 16px; padding-inline-start: 12px; border-inline-start: 4px solid #22c55e; max-width: 300px;">
+            <p style="font-style: italic; color: #8b949e;">引用文本</p>
+            <p style="font-size: 13px; color: #c9d1d9;">边框自动显示在正确的一侧</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">/* 输入框 - RTL 自动适配 */
+.input-field {
+  border-inline-start: 3px solid #3b82f6;
+  padding-inline-start: 12px;
+}
+
+/* 引用块 */
+.blockquote {
+  border-inline-start: 4px solid #22c55e;
+  padding-inline-start: 16px;
+}</div>
+      <p class="desc">点击按钮切换 LTR/RTL 模式，观察边框位置的变化。</p>
+    </div>
+    
+    <!-- Vertical Writing Mode -->
+    <div class="section">
+      <h2><span class="tag">案例 3</span>垂直书写模式</h2>
+      <div class="controls">
+        <button class="btn" onclick="toggleWritingMode()">切换书写模式</button>
+      </div>
+      <div class="demo-area" style="flex-direction: column; align-items: flex-start;">
+        <div id="vertical-demo" class="vertical-demo-container">
+          <div class="vertical-card border-logical" style="writing-mode: horizontal-tb;">
+            <span class="title">横向文本</span>
+            <span class="desc">writing-mode: horizontal-tb</span>
+          </div>
+          <div class="vertical-card border-logical" id="vertical-card-2">
+            <span class="title">垂直文本</span>
+            <span class="desc">writing-mode: vertical-rl</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">/* 垂直书写模式 */
+.vertical-card {
+  writing-mode: vertical-rl;
+  inline-size: 150px;
+  block-size: auto;
+  padding-block: 20px;
+  padding-inline: 16px;
+  border-inline-end: 4px solid #a855f7;
+}</div>
+      <p class="desc">垂直模式下，inline 方向变为垂直方向，border-inline-end 会显示在上方或下方。</p>
+    </div>
+    
+    <!-- Flow Layout -->
+    <div class="section">
+      <h2><span class="tag">案例 4</span>流式布局</h2>
+      <div class="demo-area" style="flex-direction: column; align-items: stretch;">
+        <div class="flow-demo">
+          <div class="sidebar">
+            <strong>侧边栏</strong>
+            <p style="font-size: 12px; margin-top: 8px; color: #6e7681;">float: inline-start</p>
+          </div>
+          <div class="content">
+            <p style="line-height: 1.8; color: #c9d1d9;">这是一段正文内容。使用逻辑属性实现流式布局，在不同书写模式下侧边栏会自动漂浮到正确的位置。</p>
+            <p style="line-height: 1.8; color: #c9d1d9; margin-top: 12px;">段落的最大宽度使用 max-inline-size 控制，这样可以保证行长度适中，提高可读性。</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">/* 侧边栏 */
+.sidebar {
+  float: inline-start;  /* LTR: left, RTL: right */
+  inline-size: 120px;
+  margin-inline-end: 16px;
+}
+
+/* 内容区 */
+.article {
+  max-inline-size: 65ch;  /* 最大行内尺寸 */
+  margin-inline: auto;     /* 水平居中 */
+  padding-inline: 16px;
+}</div>
+      <p class="desc">float: inline-start 会根据文字方向自动漂浮到开始侧。</p>
+    </div>
+    
+    <!-- Property Reference Table -->
+    <div class="section">
+      <h2><span class="tag">参考</span>属性对照表</h2>
+      <table class="property-table">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>物理属性</th>
+            <th>逻辑属性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Margin</td>
+            <td class="physical">margin-top/bottom/left/right</td>
+            <td class="logical">margin-block-start/end<br>margin-inline-start/end</td>
+          </tr>
+          <tr>
+            <td>Padding</td>
+            <td class="physical">padding-top/bottom/left/right</td>
+            <td class="logical">padding-block-start/end<br>padding-inline-start/end</td>
+          </tr>
+          <tr>
+            <td>Size</td>
+            <td class="physical">width, height</td>
+            <td class="logical">inline-size, block-size</td>
+          </tr>
+          <tr>
+            <td>Position</td>
+            <td class="physical">top/right/bottom/left</td>
+            <td class="logical">inset-block-start/end<br>inset-inline-start/end</td>
+          </tr>
+          <tr>
+            <td>Border</td>
+            <td class="physical">border-top/left/bottom/right</td>
+            <td class="logical">border-block-start/end<br>border-inline-start/end</td>
+          </tr>
+          <tr>
+            <td>Float</td>
+            <td class="physical">float: left/right</td>
+            <td class="logical">float: inline-start/end</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script>
+    let currentDirection = 'ltr';
+    let currentWritingMode = 'horizontal-tb';
+    
+    function toggleDirection() {
+      const demo = document.getElementById('rtl-demo');
+      currentDirection = currentDirection === 'ltr' ? 'rtl' : 'ltr';
+      demo.dir = currentDirection;
+    }
+    
+    function toggleWritingMode() {
+      const card = document.getElementById('vertical-card-2');
+      if (currentWritingMode === 'horizontal-tb') {
+        currentWritingMode = 'vertical-rl';
+        card.style.writingMode = 'vertical-rl';
+      } else {
+        currentWritingMode = 'horizontal-tb';
+        card.style.writingMode = 'horizontal-tb';
+      }
+    }
+  </script>
+</body>
+</html>
