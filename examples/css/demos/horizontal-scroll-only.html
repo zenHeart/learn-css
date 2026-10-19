@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>限制只有水平方向滚动 - CSS Horizontal Scroll</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; background: #f5f5f5; }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #333; }
+    h2 { font-size: 14px; margin: 20px 0 10px; color: #555; }
+    .container { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .label { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .note { font-size: 13px; color: #666; margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #667eea; }
+    .warning { font-size: 13px; color: #721c24; margin-top: 12px; padding: 12px; background: #f8d7da; border-radius: 4px; border-left: 3px solid #e74c3c; }
+    .success { font-size: 13px; color: #155724; margin-top: 12px; padding: 12px; background: #d4edda; border-radius: 4px; border-left: 3px solid #27ae60; }
+    .code-block { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 13px; overflow-x: auto; white-space: pre; }
+    .code-block .comment { color: #6a9955; }
+    .code-block .keyword { color: #569cd6; }
+    .code-block .prop { color: #9cdcfe; }
+    .code-block .value { color: #b5cea8; }
+
+    /* 演示区域通用样式 */
+    .demo-section { margin: 20px 0; }
+    .demo-title { font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600; }
+
+    /* 通用滚动容器演示样式 */
+    .scroll-container {
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .scroll-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border-radius: 8px;
+      margin-right: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* ========== 方案 1: overflow-x:auto + overflow-y:hidden ========== */
+    .method1-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+    }
+
+    .method1-container .scroll-item:nth-child(odd) {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .method1-container .scroll-item:nth-child(even) {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    /* ========== 方案 2: Flexbox 水平滚动 ========== */
+    .method2-container {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .method2-container .scroll-item:nth-child(3n+1) {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+    .method2-container .scroll-item:nth-child(3n+2) {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+    }
+    .method2-container .scroll-item:nth-child(3n) {
+      background: linear-gradient(135deg, #fc4a1a, #f7b733);
+    }
+
+    /* ========== 方案 3: Scroll Snap 水平吸附 ========== */
+    .method3-container {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-padding: 12px;
+    }
+
+    .method3-container .scroll-item {
+      scroll-snap-align: start;
+      min-width: 160px;
+    }
+
+    .method3-container .scroll-item:nth-child(1),
+    .method3-container .scroll-item:nth-child(6) {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+    .method3-container .scroll-item:nth-child(2),
+    .method3-container .scroll-item:nth-child(7) {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .method3-container .scroll-item:nth-child(3),
+    .method3-container .scroll-item:nth-child(8) {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+    .method3-container .scroll-item:nth-child(4),
+    .method3-container .scroll-item:nth-child(9) {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+    }
+    .method3-container .scroll-item:nth-child(5),
+    .method3-container .scroll-item:nth-child(10) {
+      background: linear-gradient(135deg, #fc4a1a, #f7b733);
+    }
+
+    /* ========== 方案 4: white-space: nowrap ========== */
+    .method4-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      font-size: 0; /* 消除行内块元素间的空白间隙 */
+    }
+
+    .method4-container .inline-block-item {
+      display: inline-block;
+      width: 120px;
+      height: 80px;
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      color: #fff;
+      border-radius: 8px;
+      margin-right: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 80px;
+      text-align: center;
+      vertical-align: top;
+    }
+
+    /* ========== 方案 5: CSS Grid column 方向 ========== */
+    .method5-container {
+      display: grid;
+      grid-auto-flow: column;
+      overflow-x: auto;
+      overflow-y: hidden;
+      grid-auto-columns: 120px;
+      grid-gap: 12px;
+    }
+
+    .method5-container .scroll-item {
+      width: auto;
+      height: 80px;
+      margin: 0;
+    }
+
+    /* ========== 踩坑演示: overflow-x:visible + overflow-y:hidden 问题 ========== */
+    .pitfall-container {
+      overflow-x: visible;
+      overflow-y: hidden;
+      /* MDN 明确说明：这个组合会让 overflow-x 表现为 visible！ */
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .pitfall-container .scroll-item {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e0e0e0;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+
+    /* 比较表格 */
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare-table th { text-align: left; padding: 10px; background: #f5f5f5; border-bottom: 2px solid #ddd; }
+    .compare-table td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .tag-recommend { background: #d4edda; color: #155724; }
+    .tag-warning { background: #fff3cd; color: #856404; }
+    .tag-danger { background: #f8d7da; color: #721c24; }
+
+    /* 交互控件 */
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+    }
+    .controls input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>限制只有水平方向滚动 - CSS Horizontal Scroll Only</h1>
+
+  <!-- 简介 -->
+  <div class="container">
+    <div class="label">核心原理</div>
+    <p style="font-size:14px;color:#333;line-height:1.8;">
+      限制水平滚动的关键在于：<br>
+      1. <strong>overflow-x: auto | scroll</strong> — 允许水平方向溢出时产生滚动条<br>
+      2. <strong>overflow-y: hidden</strong> — 隐藏垂直方向溢出，禁止垂直滚动<br>
+      3. 内容必须横向排列（flex/grid/inline-block）
+    </p>
+    <div class="warning">
+      ⚠️ <strong>踩坑警告：</strong>overflow-x: visible + overflow-y: hidden 组合是<strong>无效的</strong>！
+      MDN 明确说明：当 overflow-x 或 overflow-y 其中一个设为 visible，另一个设为 hidden/auto/scroll 时，
+      visible 的一方会隐式转换为 auto。
+    </div>
+  </div>
+
+  <!-- 方案 1: overflow-x:auto + overflow-y:hidden -->
+  <div class="container">
+    <div class="label">方案一（推荐）</div>
+    <div class="demo-title">overflow-x: auto + overflow-y: hidden + white-space: nowrap</div>
+
+    <div class="demo-section">
+      <div class="scroll-container method1-container">
+        <div class="scroll-item">卡片 1</div>
+        <div class="scroll-item">卡片 2</div>
+        <div class="scroll-item">卡片 3</div>
+        <div class="scroll-item">卡片 4</div>
+        <div class="scroll-item">卡片 5</div>
+        <div class="scroll-item">卡片 6</div>
+        <div class="scroll-item">卡片 7</div>
+        <div class="scroll-item">卡片 8</div>
+        <div class="scroll-item">卡片 9</div>
+        <div class="scroll-item">卡片 10</div>
+      </div>
+      <div class="note">
+        ✅ 最简单直接的方式：overflow-x:auto 开启水平滚动，overflow-y:hidden 禁止垂直溢出，
+        white-space:nowrap 确保内容不换行横向排列。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="comment">/* 核心 CSS */</span>
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;   <span class="comment">/* 允许水平滚动 */</span>
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;  <span class="comment">/* 禁止垂直滚动 */</span>
+<span class="prop">white-space</span>: <span class="value">nowrap</span>; <span class="comment">/* 强制内容不换行 */</span></div>
+  </div>
+
+  <!-- 方案 2: Flexbox 水平滚动 -->
+  <div class="container">
+    <div class="label">方案二</div>
+    <div class="demo-title">display: flex + flex-wrap: nowrap + overflow-x: auto</div>
+
+    <div class="demo-section">
+      <div class="scroll-container method2-container">
+        <div class="scroll-item">项目 A</div>
+        <div class="scroll-item">项目 B</div>
+        <div class="scroll-item">项目 C</div>
+        <div class="scroll-item">项目 D</div>
+        <div class="scroll-item">项目 E</div>
+        <div class="scroll-item">项目 F</div>
+        <div class="scroll-item">项目 G</div>
+        <div class="scroll-item">项目 H</div>
+        <div class="scroll-item">项目 I</div>
+        <div class="scroll-item">项目 J</div>
+      </div>
+      <div class="note">
+        ✅ Flexbox 方式更灵活，适合需要精确控制子元素大小的场景。
+        flex-shrink: 0 防止子元素被压缩。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="prop">display</span>: <span class="value">flex</span>;
+<span class="prop">flex-wrap</span>: <span class="value">nowrap</span>;   <span class="comment">/* 强制不换行 */</span>
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;      <span class="comment">/* 允许水平滚动 */</span>
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;     <span class="comment">/* 禁止垂直溢出 */</span>
+
+<span class="comment">/* 子元素 */</span>
+<span class="prop">flex-shrink</span>: <span class="value">0</span>;           <span class="comment">/* 防止被压缩 */</span></div>
+  </div>
+
+  <!-- 方案 3: Scroll Snap -->
+  <div class="container">
+    <div class="label">方案三</div>
+    <div class="demo-title">display: flex + scroll-snap-type: x mandatory</div>
+
+    <div class="demo-section">
+      <div class="scroll-container method3-container">
+        <div class="scroll-item">吸附 1</div>
+        <div class="scroll-item">吸附 2</div>
+        <div class="scroll-item">吸附 3</div>
+        <div class="scroll-item">吸附 4</div>
+        <div class="scroll-item">吸附 5</div>
+        <div class="scroll-item">吸附 6</div>
+        <div class="scroll-item">吸附 7</div>
+        <div class="scroll-item">吸附 8</div>
+      </div>
+      <div class="note">
+        ✅ scroll-snap 让滚动停止时自动吸附到指定位置，适合轮播、卡片列表等场景。
+        scroll-snap-type: x mandatory 强制吸附，scroll-snap-align: start 定义吸附点。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="comment">/* 父容器 */</span>
+<span class="prop">display</span>: <span class="value">flex</span>;
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+<span class="prop">scroll-snap-type</span>: <span class="value">x mandatory</span>;  <span class="comment">/* 水平强制吸附 */</span>
+<span class="prop">scroll-padding</span>: <span class="value">12px</span>;            <span class="comment">/* 吸附内边距 */</span>
+
+<span class="comment">/* 子元素 */</span>
+<span class="prop">scroll-snap-align</span>: <span class="value">start</span>;       <span class="comment">/* 吸附到起始边缘 */</span>
+<span class="prop">min-width</span>: <span class="value">160px</span>;                <span class="comment">/* 每个吸附单元的最小宽度 */</span></div>
+  </div>
+
+  <!-- 方案 4: white-space: nowrap + inline-block -->
+  <div class="container">
+    <div class="label">方案四</div>
+    <div class="demo-title">white-space: nowrap + display: inline-block</div>
+
+    <div class="demo-section">
+      <div class="scroll-container method4-container">
+        <div class="inline-block-item">元素 ①</div>
+        <div class="inline-block-item">元素 ②</div>
+        <div class="inline-block-item">元素 ③</div>
+        <div class="inline-block-item">元素 ④</div>
+        <div class="inline-block-item">元素 ⑤</div>
+        <div class="inline-block-item">元素 ⑥</div>
+        <div class="inline-block-item">元素 ⑦</div>
+        <div class="inline-block-item">元素 ⑧</div>
+      </div>
+      <div class="note">
+        💡 传统方法：使用 inline-block 排列元素，配合 white-space: nowrap。
+        注意：需要设置 font-size: 0 消除元素间的空白间隙。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="comment">/* 父容器 */</span>
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+<span class="prop">white-space</span>: <span class="value">nowrap</span>;
+<span class="prop">font-size</span>: <span class="value">0</span>;           <span class="comment">/* 消除行内块间隙 */</span>
+
+<span class="comment">/* 子元素 */</span>
+<span class="prop">display</span>: <span class="value">inline-block</span>;
+<span class="prop">min-width</span>: <span class="value">120px</span>;
+<span class="prop">font-size</span>: <span class="value">14px</span>;          <span class="comment">/* 恢复字体大小 */</span></div>
+  </div>
+
+  <!-- 方案 5: CSS Grid -->
+  <div class="container">
+    <div class="label">方案五</div>
+    <div class="demo-title">display: grid + grid-auto-flow: column</div>
+
+    <div class="demo-section">
+      <div class="scroll-container method5-container">
+        <div class="scroll-item">网格 A</div>
+        <div class="scroll-item">网格 B</div>
+        <div class="scroll-item">网格 C</div>
+        <div class="scroll-item">网格 D</div>
+        <div class="scroll-item">网格 E</div>
+        <div class="scroll-item">网格 F</div>
+        <div class="scroll-item">网格 G</div>
+        <div class="scroll-item">网格 H</div>
+      </div>
+      <div class="note">
+        💡 CSS Grid 方式：grid-auto-flow: column 让网格按列方向自动填充，适合固定大小的卡片。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="prop">display</span>: <span class="value">grid</span>;
+<span class="prop">grid-auto-flow</span>: <span class="value">column</span>;    <span class="comment">/* 沿列方向自动排列 */</span>
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+<span class="prop">grid-auto-columns</span>: <span class="value">120px</span>; <span class="comment">/* 每列宽度 */</span>
+<span class="prop">grid-gap</span>: <span class="value">12px</span>;             <span class="comment">/* 间距 */</span></div>
+  </div>
+
+  <!-- 踩坑演示 -->
+  <div class="container">
+    <div class="label">❌ 踩坑演示</div>
+    <div class="demo-title">overflow-x: visible + overflow-y: hidden — 这个组合是无效的！</div>
+
+    <div class="demo-section">
+      <div class="scroll-container pitfall-container" id="pitfallDemo">
+        <div class="scroll-item">会溢出</div>
+        <div class="scroll-item">会被裁剪</div>
+        <div class="scroll-item">无法滚动</div>
+        <div class="scroll-item">因为 visible</div>
+        <div class="scroll-item">会变成 auto</div>
+      </div>
+      <div class="warning">
+        ⚠️ <strong>问题原因：</strong>根据 CSS 规范，当 overflow-x 和 overflow-y 其中一个设为 visible，
+        另一个设为 hidden/auto/scroll 时，visible 的一方会隐式转换为 auto。
+        因此 overflow-x: visible 实际上会变成 overflow-x: auto，但开发者期望它能滚动，实际却无法滚动。
+      </div>
+    </div>
+
+    <div class="code-block"><span class="comment">/* ❌ 错误写法 — overflow-x: visible 无效！*/</span>
+<span class="prop">overflow-x</span>: <span class="value">visible</span>;  <span class="comment">/* MDN 明确不推荐！*/</span>
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+
+<span class="comment">/* ✅ 正确写法 */</span>
+<span class="prop">overflow-x</span>: <span class="value">auto</span>;
+<span class="prop">overflow-y</span>: <span class="value">hidden</span>;</div>
+
+    <div class="warning" style="margin-top:16px;">
+      📖 参考资料：<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/overflow" target="_blank" style="color:#e74c3c;">MDN overflow 文档</a>
+      明确说明：设置一个轴为 visible，另一个轴为 hidden/auto/scroll 的组合是无效的，会导致未定义行为。
+    </div>
+  </div>
+
+  <!-- 方案对比 -->
+  <div class="container">
+    <div class="label">方案对比</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>方案</th>
+          <th>核心代码</th>
+          <th>适用场景</th>
+          <th>推荐度</th>
+        </tr>
+      </thead>
+      <tbody style="color:#333;">
+        <tr>
+          <td><strong>方案一</strong><br>overflow + white-space</td>
+          <td>overflow-x: auto;<br>overflow-y: hidden;<br>white-space: nowrap;</td>
+          <td>简单列表、标签栏、面包屑等通用场景</td>
+          <td><span class="tag tag-recommend">⭐⭐⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td><strong>方案二</strong><br>Flexbox</td>
+          <td>display: flex;<br>flex-wrap: nowrap;<br>overflow-x: auto;</td>
+          <td>需要精确控制子元素大小、对齐方式</td>
+          <td><span class="tag tag-recommend">⭐⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td><strong>方案三</strong><br>Scroll Snap</td>
+          <td>scroll-snap-type: x mandatory;<br>scroll-snap-align: start;</td>
+          <td>轮播图、卡片吸附、画廊</td>
+          <td><span class="tag tag-recommend">⭐⭐⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td><strong>方案四</strong><br>inline-block</td>
+          <td>white-space: nowrap;<br>display: inline-block;</td>
+          <td>传统兼容写法、简单场景</td>
+          <td><span class="tag tag-warning">⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td><strong>方案五</strong><br>CSS Grid</td>
+          <td>display: grid;<br>grid-auto-flow: column;</td>
+          <td>固定尺寸卡片网格、表格列</td>
+          <td><span class="tag tag-recommend">⭐⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td><strong>❌ 踩坑</strong><br>visible + hidden</td>
+          <td>overflow-x: visible;<br>overflow-y: hidden;</td>
+          <td>无效组合，MDN 明确不推荐</td>
+          <td><span class="tag tag-danger">禁止</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 常用代码片段 -->
+  <div class="container">
+    <div class="label">常用代码片段</div>
+    <div class="code-block"><span class="comment">/* 1. 基础水平滚动容器（推荐）*/</span>
+<span class="prop">.scroll-container</span> {
+  <span class="prop">overflow-x</span>: <span class="value">auto</span>;
+  <span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+  <span class="prop">white-space</span>: <span class="value">nowrap</span>;
+}
+
+<span class="comment">/* 2. Flexbox 水平滚动（带对齐）*/</span>
+<span class="prop">.flex-scroll</span> {
+  <span class="prop">display</span>: <span class="value">flex</span>;
+  <span class="prop">flex-wrap</span>: <span class="value">nowrap</span>;
+  <span class="prop">overflow-x</span>: <span class="value">auto</span>;
+  <span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+  <span class="prop">align-items</span>: <span class="value">center</span>;  <span class="comment">/* 垂直居中 */</span>
+}
+
+<span class="comment">/* 3. 隐藏滚动条但保持功能 */</span>
+<span class="prop">.hide-scrollbar</span> {
+  <span class="prop">overflow-x</span>: <span class="value">auto</span>;
+  <span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+  <span class="prop">scrollbar-width</span>: <span class="value">none</span>;     <span class="comment">/* Firefox */</span>
+}
+<span class="prop">.hide-scrollbar::-webkit-scrollbar</span> {
+  <span class="prop">display</span>: <span class="value">none</span>;               <span class="comment">/* Chrome/Safari */</span>
+}
+
+<span class="comment">/* 4. Scroll Snap 吸附滚动 */</span>
+<span class="prop">.snap-scroll</span> {
+  <span class="prop">display</span>: <span class="value">flex</span>;
+  <span class="prop">overflow-x</span>: <span class="value">auto</span>;
+  <span class="prop">overflow-y</span>: <span class="value">hidden</span>;
+  <span class="prop">scroll-snap-type</span>: <span class="value">x mandatory</span>;
+}
+<span class="prop">.snap-scroll > *</span> {
+  <span class="prop">scroll-snap-align</span>: <span class="value">start</span>;
+  <span class="prop">min-width</span>: <span class="value">200px</span>;
+}</div>
+  </div>
+
+</body>
+</html>
