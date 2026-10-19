@@ -1,0 +1,232 @@
+---
+title: prefers-color-scheme 暗色模式
+category: 响应式设计
+tags: [prefers-color-scheme, dark mode, light mode, 暗色模式, 亮色模式, 媒体查询]
+description: 详细介绍 CSS prefers-color-scheme 媒体查询适配系统暗色/亮色模式。
+keywords: prefers-color-scheme, dark mode, light mode, 暗色模式, 亮色模式, 媒体查询
+---
+
+# prefers-color-scheme 暗色模式
+
+`prefers-color-scheme` 是 CSS 媒体查询，用于检测用户系统是否处于暗色模式或亮色模式，实现自动主题切换。
+
+## 基本语法
+
+```css
+/* 亮色模式 */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+  }
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+  }
+}
+```
+
+## 检测的值
+
+| 值 | 说明 |
+|---|---|
+| `light` | 用户偏好亮色模式 |
+| `dark` | 用户偏好暗色模式 |
+| `no-preference` | 用户未设置偏好（默认值） |
+
+## 实现方式
+
+### 方式一：CSS 变量 + 媒体查询（推荐）
+
+```css
+:root {
+  /* 亮色模式变量（默认值） */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --link-color: #0066cc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗色模式变量覆盖 */
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --link-color: #66b3ff;
+  }
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+```
+
+### 方式二：切换 class
+
+```css
+/* 亮色模式 */
+body {
+  --bg: #ffffff;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  body.dark-mode-disabled {
+    --bg: #1a1a1a;
+  }
+}
+```
+
+### 方式三：`<meta>` 标签控制
+
+```html
+<!-- 禁止浏览器自动主题切换 -->
+<meta name="color-scheme" content="light dark">
+```
+
+## 实战案例
+
+### 1. 完整主题切换
+
+```css
+:root {
+  /* 亮色主题 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --link-color: #0066cc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗色主题 */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --border-color: #404040;
+    --link-color: #66b3ff;
+  }
+}
+```
+
+### 2. 图片处理
+
+```css
+/* 亮色模式：正常图片 */
+.logo {
+  content: url(/logo.png);
+}
+
+/* 暗色模式：白色版本 logo */
+@media (prefers-color-scheme: dark) {
+  .logo {
+    content: url(/logo-white.png);
+  }
+}
+
+/* 或使用 SVG filter */
+.logo {
+  filter: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    filter: brightness(0) invert(1); /* 将黑色变白 */
+  }
+}
+```
+
+### 3. 代码高亮主题
+
+```css
+/* 亮色代码块 */
+pre {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* 暗色代码块 */
+@media (prefers-color-scheme: dark) {
+  pre {
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+}
+```
+
+### 4. 自动禁用背景图
+
+```css
+.hero {
+  background-image: url(/hero-light.jpg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .hero {
+    background-image: url(/hero-dark.jpg);
+  }
+}
+```
+
+## JavaScript 检测
+
+```javascript
+// 检测当前主题
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// 监听主题变化
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+mediaQuery.addEventListener('change', (e) => {
+  if (e.matches) {
+    console.log('切换到暗色模式');
+  } else {
+    console.log('切换到亮色模式');
+  }
+});
+```
+
+## 浏览器支持
+
+| 浏览器 | 支持版本 |
+|--------|----------|
+| Chrome | 76+ |
+| Firefox | 67+ |
+| Safari | 12.1+ |
+| Edge | 79+ |
+| iOS Safari | 13+ |
+| Android Browser | 76+ |
+
+## 注意事项
+
+1. **使用 CSS 变量**：通过变量覆盖实现主题切换，无需重复选择器
+2. **图片适配**：暗色模式下考虑使用滤镜或不同版本的图片
+3. **过渡效果**：添加 `transition` 使主题切换更平滑
+4. **避免纯黑**：暗色模式建议使用深灰而非纯黑，减少眼睛疲劳
+
+## 最佳实践
+
+```css
+/* 添加平滑过渡 */
+:root {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 确保对比度足够 */
+@media (prefers-color-scheme: dark) {
+  p {
+    color: #e0e0e0; /* 不要用纯白，纯白对比度太高 */
+  }
+}
+```
+
+## 交互式演示
+
+{/* @playground id="prefers-color-scheme-demo" mode="demo" */}
