@@ -1,0 +1,253 @@
+---
+title: CSS border-shape 属性
+category: 形状与边框
+tags: [border-shape, shape, css-borders, non-rectangular]
+description: 详细介绍 CSS border-shape 属性的语法、用法及实战案例，让你创建非矩形边框成为可能。
+keywords: border-shape, shape(), clip-path, corner-shape, CSS Borders, 非矩形边框
+---
+
+# CSS border-shape 属性
+
+`border-shape` 是一个强大的 CSS 属性，允许开发者使用灵活的语法定义元素边框的形状。与 `clip-path` 不同，`border-shape` 实际重新定义了元素的"盒子"本身——背景、边框、`box-shadow`、focus outline 都会跟随新的几何形状。
+
+> ⚠️ **浏览器支持**：目前 `border-shape` 已在 Chrome Canary 146+ 中可用，需要开启 **Experimental Web Platform Features** 标志（访问 `chrome://flags/#enable-experimental-web-platform-features`）。
+
+## 基本语法
+
+```css
+element {
+  border-shape: <shape>;
+  border-shape: shape(from <point>, <step>+);  /* shape() 函数 */
+  border-shape: path("M 10 10 L 90 10 ...");   /* SVG 路径字符串 */
+  border-shape: circle();                       /* 基础形状 */
+  border-shape: ellipse();
+  border-shape: inset();
+  border-shape: polygon();
+}
+```
+
+### 可用的基础形状
+
+```css
+/* 圆形 */
+border-shape: circle();
+
+/* 椭圆 */
+border-shape: ellipse();
+
+/* 矩形（可用 inset 模拟圆角矩形） */
+border-shape: inset();
+
+/* 多边形 */
+border-shape: polygon();
+```
+
+### content-box 关键字
+
+```css
+/* 坐标和百分比相对于元素的内容区域（不含 padding） */
+border-shape: shape(...) content-box;
+```
+
+## shape() 函数详解
+
+`shape()` 函数是 `border-shape` 最强大的特性，使用类似 SVG 路径的语法：
+
+```css
+border-shape: shape(
+  from <起点>,
+  <步骤>+
+);
+```
+
+### 可用的步骤命令
+
+| 命令 | 说明 | 示例 |
+|------|------|------|
+| `from <点>` | 移动到起点 | `from 0% 0%` |
+| `hline to <位置>` | 水平线到指定位置 | `hline to 100%` |
+| `vline to <位置>` | 垂直线到指定位置 | `vline to 100%` |
+| `line to <点>` | 直线到指定点 | `line to 50% 50%` |
+| `line by <x> <y>` | 相对当前点偏移 | `line by 10px -20px` |
+| `curve to <点> with <控制点>` | 贝塞尔曲线 | `curve to 100% 100% with right top` |
+| `arc by <x> <y> of <rx> <ry> <方向>` | 圆弧 | `arc by 20% 0% of 10% 10% small cw` |
+| `close` | 闭合路径 | `close` |
+
+### 位置关键字
+
+可以使用方位关键字：
+- `top`, `bottom`, `left`, `right`
+- `top left`, `top right`, `bottom left`, `bottom right`
+- `left center`, `right center`, `top center`, `bottom center`
+
+## border-shape vs corner-shape
+
+| 特性 | `border-shape` | `corner-shape` |
+|------|----------------|----------------|
+| 适用场景 | 任意复杂形状 | 仅限角落样式 |
+| 位置灵活性 | 任意位置（中间、底部等） | 仅限于四角 |
+| 形状复杂度 | 支持任意多边形、曲线 | 仅浏览器提供的简单形状 |
+| 支持形状 | star、speech bubble、箭头等 | circle、polygon、bevel 等 |
+
+## 实战案例
+
+### 1. 带箭头的气泡提示框
+
+<demo>
+
+```html
+<style>
+.tooltip {
+  --r: 10px;      /* 圆角半径 */
+  --ap: 50%;      /* 箭头位置 */
+  --ah: 10px;     /* 箭头高度 */
+  --aw: 10px;     /* 箭头半宽 */
+
+  border-shape: shape(
+    from var(--r) 0,
+    hline to calc(100% - var(--r)),
+    curve to right var(--r) with right top,
+    vline to calc(100% - (var(--r) + var(--ah))),
+    curve to calc(100% - var(--r)) calc(100% - var(--ah)) with right calc(100% - var(--ah)),
+    hline to calc(var(--ap) + var(--aw)),
+    line by calc(var(--aw) * -1) var(--ah),
+    line by calc(var(--aw) * -1) calc(var(--ah) * -1),
+    hline to var(--r),
+    curve to left calc(100% - (var(--r) + var(--ah))) with left calc(100% - var(--ah)),
+    vline to var(--r),
+    curve to var(--r) top with left top
+  );
+  background: #3b82f6;
+  padding: 16px 24px;
+  color: white;
+}
+</style>
+
+<div class="tooltip">
+  这是一个使用 border-shape 制作的气泡提示框！
+</div>
+```
+
+</demo>
+
+### 2. chevron 导航
+
+<demo>
+
+```css
+.chevron {
+  --arrow-size: 20px;
+
+  border-shape: shape(
+    from top left,
+    hline to calc(100% - var(--arrow-size)),
+    line to right center,
+    line to calc(100% - var(--arrow-size)) bottom,
+    hline to left,
+    line to var(--arrow-size) center,
+    close
+  );
+  background: #a371f7;
+  padding: 12px 32px;
+  color: white;
+  cursor: pointer;
+}
+
+/* 第一个元素：去掉左侧凹口 */
+.chevron:first-child {
+  border-shape: shape(
+    from top left,
+    hline to calc(100% - var(--arrow-size)),
+    line to right center,
+    line to calc(100% - var(--arrow-size)) bottom,
+    hline to left,
+    close
+  );
+}
+```
+
+</demo>
+
+### 3. 扇贝形边框
+
+<demo>
+
+```css
+.scalloped {
+  border-shape: shape(
+    from 0% 0%,
+
+    /* 上边：从左到右，5个扇贝 */
+    arc by 20% 0% of 10% 10% small cw,
+    arc by 20% 0% of 10% 10% small cw,
+    arc by 20% 0% of 10% 10% small cw,
+    arc by 20% 0% of 10% 10% small cw,
+    arc by 20% 0% of 10% 10% small cw,
+
+    /* 右边：从上到下 */
+    arc by 0% 20% of 10% 10% small cw,
+    arc by 0% 20% of 10% 10% small cw,
+    arc by 0% 20% of 10% 10% small cw,
+    arc by 0% 20% of 10% 10% small cw,
+    arc by 0% 20% of 10% 10% small cw,
+
+    /* 下边：从右到左 */
+    arc by -20% 0% of 10% 10% small cw,
+    arc by -20% 0% of 10% 10% small cw,
+    arc by -20% 0% of 10% 10% small cw,
+    arc by -20% 0% of 10% 10% small cw,
+    arc by -20% 0% of 10% 10% small cw,
+
+    /* 左边：从下到上 */
+    arc by 0% -20% of 10% 10% small cw,
+    arc by 0% -20% of 10% 10% small cw,
+    arc by 0% -20% of 10% 10% small cw,
+    arc by 0% -20% of 10% 10% small cw,
+    arc by 0% -20% of 10% 10% small cw,
+
+    close
+  ) content-box;
+
+  background: #f0883e;
+  padding: 24px;
+  color: white;
+}
+```
+
+</demo>
+
+### 4. 多边形剪头
+
+```css
+.arrow-right {
+  border-shape: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  background: #3fb950;
+  width: 100px;
+  height: 100px;
+}
+```
+
+## 浏览器兼容性与降级
+
+由于 `border-shape` 目前是实验性属性，建议提供 `clip-path` 降级方案：
+
+```css
+.tooltip {
+  /* 降级：使用 clip-path */
+  clip-path: polygon(...);
+
+  /* 现代浏览器：使用 border-shape */
+  @supports (border-shape: shape(from 0 0, close)) {
+    border-shape: shape(from 0 0, close);
+    /* 边框和阴影会完美跟随形状 */
+  }
+}
+```
+
+## 参考资源
+
+- [CSS Borders and Box Decorations Module Level 4 - border-shape](https://drafts.csswg.org/css-borders-4/#border-shape)
+- [Una Kravets - border-shape: the future of the non-rectangular web](https://una.im/border-shape)
+- Codepen 演示：[Border-shape demo](https://codepen.io/una/pen/bNeLmoZ)
+- Codepen 演示：[Chevron nav](https://codepen.io/una/pen/ByzYMVb)
+- Codepen 演示：[Scalloped borders](https://codepen.io/una/pen/bNePyrR)

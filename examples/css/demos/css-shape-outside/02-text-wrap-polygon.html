@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shape-outside 案例二：多边形文字环绕</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .demo-section {
+      max-width: 900px;
+      margin: 0 auto 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+      color: #a8dadc;
+      font-weight: 400;
+    }
+
+    /* 菱形图片 */
+    .diamond-img {
+      float: left;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      shape-outside: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      shape-margin: 20px;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    }
+
+    /* 梯形图片 */
+    .trapezoid-img {
+      float: left;
+      width: 220px;
+      height: 280px;
+      object-fit: cover;
+      shape-outside: polygon(
+        0 0,           /* 左上 */
+        100% 10%,      /* 右上（向内倾斜） */
+        100% 100%,     /* 右下 */
+        0 100%         /* 左下 */
+      );
+      shape-margin: 20px;
+      clip-path: polygon(
+        0 0,
+        100% 10%,
+        100% 100%,
+        0 100%
+      );
+    }
+
+    /* 三角形 */
+    .triangle-img {
+      float: left;
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      shape-outside: polygon(50% 0, 100% 100%, 0 100%);
+      shape-margin: 20px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+
+    /* 带圆角的斜边形状 */
+    .slanted-img {
+      float: left;
+      width: 250px;
+      height: 300px;
+      object-fit: cover;
+      shape-outside: inset(0 0 0 0 round 0 80px 0 0);
+      shape-margin: 20px;
+      clip-path: inset(0 0 0 0 round 0 80px 0 0);
+    }
+
+    .text-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: justify;
+    }
+
+    .text-content p {
+      margin-bottom: 15px;
+    }
+
+    .code-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .label {
+      display: inline-block;
+      background: rgba(167, 139, 250, 0.3);
+      color: #e0e7ff;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>shape-outside 案例二：多边形文字环绕</h1>
+
+  <div class="demo-section">
+    <span class="label">多边形</span>
+    <h2>菱形图片环绕</h2>
+    <img
+      class="diamond-img"
+      src="https://picsum.photos/seed/diamond/400/400"
+      alt="菱形图片"
+    >
+    <div class="text-content">
+      <p>使用 <code>polygon()</code> 可以创建任意多边形形状的文字环绕。菱形是一种常见且美观的形状。</p>
+      <p>定义菱形的四个顶点：顶部中心、右中间、底部中心、左中间。文字会沿着这个菱形轮廓流动。</p>
+      <p>注意：<code>shape-outside</code> 定义的是文字排除区域，而 <code>clip-path</code> 裁剪的是元素本身的可见区域。两者配合使用才能达到最佳效果。</p>
+      <p>菱形排版常见于个人简历、作品集等展示型页面，可以突出重点图片同时保持良好的文字可读性。</p>
+    </div>
+    <div class="code-box">.diamond-img {
+  float: left;
+  width: 200px;
+  height: 200px;
+  shape-outside: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  shape-margin: 20px;
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">斜边效果</span>
+    <h2>梯形/斜边图片环绕</h2>
+    <img
+      class="trapezoid-img"
+      src="https://picsum.photos/seed/trapezoid/400/560"
+      alt="梯形图片"
+    >
+    <div class="text-content">
+      <p>使用 <code>polygon()</code> 创建梯形效果，顶部边缘向内倾斜。这是一种经典的杂志排版风格。</p>
+      <p>梯形形状可以让文字在图片上方有更多流动空间，同时保持图片下方的完整性。</p>
+      <p>通过调整多边形顶点，可以控制斜边的角度和位置，创造出不同的视觉效果。</p>
+      <p>这种排版方式常用于采访类文章，被采访者的照片采用斜边设计，配合引用文字，层次分明。</p>
+    </div>
+    <div class="code-box">.trapezoid-img {
+  shape-outside: polygon(
+    0 0,           /* 左上 */
+    100% 10%,      /* 右上（向内倾斜 10%） */
+    100% 100%,     /* 右下 */
+    0 100%         /* 左下 */
+  );
+  clip-path: polygon(
+    0 0,
+    100% 10%,
+    100% 100%,
+    0 100%
+  );
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">三角形</span>
+    <h2>三角形图片环绕</h2>
+    <img
+      class="triangle-img"
+      src="https://picsum.photos/seed/triangle/400/400"
+      alt="三角形图片"
+    >
+    <div class="text-content">
+      <p>使用三点多边形可以创建三角形环绕效果。<code>polygon(50% 0, 100% 100%, 0 100%)</code> 定义了一个倒置的三角形。</p>
+      <p>三角形的顶部是文字流动的起点，底部是开放的，文字会在两侧自然流动。</p>
+      <p>三角形形状在现代网页设计中常用于创造动态感，适合科技、艺术等创意类网站。</p>
+    </div>
+    <div class="code-box">.triangle-img {
+  shape-outside: polygon(50% 0, 100% 100%, 0 100%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}</div>
+  </div>
+
+  <div class="demo-section">
+    <span class="label">圆角斜边</span>
+    <h2>带圆角的斜边图片</h2>
+    <img
+      class="slanted-img"
+      src="https://picsum.photos/seed/slanted/500/600"
+      alt="圆角斜边图片"
+    >
+    <div class="text-content">
+      <p>使用 <code>inset()</code> 函数配合 <code>round</code> 参数可以创建带圆角的斜边形状。</p>
+      <p><code>inset(0 0 0 0 round 0 80px 0 0)</code> 表示：四角中右上角有 80px 圆角，其他角为 0。</p>
+      <p>这种设计常见于产品展示页面，可以软化几何形状的硬朗感，同时保持现代感。</p>
+      <p>圆角斜边让整个页面显得更加柔和友好，适合消费品、生活方式类网站。</p>
+    </div>
+    <div class="code-box">.slanted-img {
+  shape-outside: inset(0 0 0 0 round 0 80px 0 0);
+  clip-path: inset(0 0 0 0 round 0 80px 0 0);
+}</div>
+  </div>
+</body>
+</html>
