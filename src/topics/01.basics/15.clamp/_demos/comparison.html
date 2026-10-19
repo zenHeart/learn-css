@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>clamp() vs 媒体查询对比</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #0f0f23;
+			color: #fff;
+			min-height: 100vh;
+		}
+
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			color: #00d9ff;
+			margin-bottom: 30px;
+		}
+
+		.resize-hint {
+			background: rgba(0, 217, 255, 0.1);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.demo-section {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 25px;
+		}
+
+		.demo-title {
+			color: #ffd700;
+			margin-bottom: 20px;
+			font-size: 1.2rem;
+		}
+
+		.comparison-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+		}
+
+		@media (max-width: 768px) {
+			.comparison-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.demo-panel {
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 8px;
+			overflow: hidden;
+		}
+
+		.panel-header {
+			padding: 12px 15px;
+			font-weight: bold;
+			font-size: 0.9rem;
+		}
+
+		.panel-header.media-query {
+			background: #2d2d44;
+			color: #ffd700;
+		}
+
+		.panel-header.clamp {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		}
+
+		.panel-content {
+			padding: 20px;
+		}
+
+		/* 媒体查询方式 */
+		.media-text {
+			font-size: 14px;
+			transition: all 0.3s ease;
+		}
+
+		@media (min-width: 480px) {
+			.media-text {
+				font-size: 18px;
+			}
+		}
+
+		@media (min-width: 768px) {
+			.media-text {
+				font-size: 24px;
+			}
+		}
+
+		@media (min-width: 1024px) {
+			.media-text {
+				font-size: 32px;
+			}
+		}
+
+		/* clamp 方式 */
+		.clamp-text {
+			font-size: clamp(14px, 4vw, 32px);
+			transition: all 0.3s ease;
+		}
+
+		.status-bar {
+			background: #1a1a2e;
+			padding: 15px;
+			border-radius: 8px;
+			margin-top: 20px;
+			display: flex;
+			justify-content: space-around;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.status-item {
+			text-align: center;
+		}
+
+		.status-item .label {
+			color: #888;
+			font-size: 0.8rem;
+		}
+
+		.status-item .value {
+			color: #00d9ff;
+			font-family: monospace;
+			font-size: 1.1rem;
+		}
+
+		.breakpoint-indicator {
+			display: flex;
+			justify-content: center;
+			gap: 10px;
+			margin-top: 15px;
+		}
+
+		.breakpoint {
+			padding: 5px 10px;
+			border-radius: 4px;
+			font-size: 0.8rem;
+			background: #2d2d44;
+			color: #888;
+		}
+
+		.breakpoint.active {
+			background: #00d9ff;
+			color: #000;
+		}
+
+		.code-comparison {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+		}
+
+		@media (max-width: 768px) {
+			.code-comparison {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.code-panel {
+			background: #1a1a2e;
+			border-radius: 8px;
+			overflow: hidden;
+		}
+
+		.code-header {
+			padding: 10px 15px;
+			font-weight: bold;
+			font-size: 0.85rem;
+		}
+
+		.code-header.media-query {
+			background: #2d2d44;
+			color: #ffd700;
+		}
+
+		.code-header.clamp {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		}
+
+		.code-content {
+			padding: 15px;
+			font-family: 'Fira Code', 'Consolas', monospace;
+			font-size: 0.85rem;
+			line-height: 1.6;
+			overflow-x: auto;
+		}
+
+		.code-content .comment { color: #6a9955; }
+		.code-content .property { color: #9cdcfe; }
+		.code-content .value { color: #ce9178; }
+		.code-content .selector { color: #d7ba7d; }
+
+		.advantages {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 15px;
+			margin-top: 20px;
+		}
+
+		.advantage-item {
+			background: rgba(0, 0, 0, 0.2);
+			padding: 15px;
+			border-radius: 8px;
+			border-left: 3px solid #00d9ff;
+		}
+
+		.advantage-item .title {
+			color: #00d9ff;
+			font-weight: bold;
+			margin-bottom: 8px;
+		}
+
+		.advantage-item .desc {
+			color: #aaa;
+			font-size: 0.9rem;
+			line-height: 1.5;
+		}
+
+		.visual-comparison {
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.visual-bar {
+			height: 40px;
+			background: #2d2d44;
+			border-radius: 6px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.visual-bar-fill {
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 0.8rem;
+			transition: width 0.3s ease;
+		}
+
+		.visual-bar.media .visual-bar-fill {
+			background: #ffd700;
+			color: #000;
+		}
+
+		.visual-bar.clamp .visual-bar-fill {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		}
+
+		.scale-markers {
+			display: flex;
+			justify-content: space-between;
+			padding: 0 10px;
+			margin-top: 5px;
+			font-size: 0.75rem;
+			color: #666;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>⚖️ clamp() vs 媒体查询对比</h1>
+
+		<div class="resize-hint">
+			👆 调整浏览器窗口宽度，对比两种方式的字体变化
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📝 字体大小变化对比</div>
+			
+			<div class="comparison-grid">
+				<div class="demo-panel">
+					<div class="panel-header media-query">🔧 媒体查询方式</div>
+					<div class="panel-content">
+						<div class="media-text">
+							<p>这是一个使用媒体查询实现的响应式字体。</p>
+							<p>字体大小会在特定的断点跳跃式变化。</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="demo-panel">
+					<div class="panel-header clamp">✨ clamp() 方式</div>
+					<div class="panel-content">
+						<div class="clamp-text">
+							<p>这是一个使用 clamp() 实现的响应式字体。</p>
+							<p>字体大小会随着视口平滑连续地变化。</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="status-bar">
+				<div class="status-item">
+					<div class="label">视口宽度</div>
+					<div class="value" id="vpWidth">0px</div>
+				</div>
+				<div class="status-item">
+					<div class="label">媒体查询字体</div>
+					<div class="value" id="mediaFontSize">14px</div>
+				</div>
+				<div class="status-item">
+					<div class="label">clamp 字体</div>
+					<div class="value" id="clampFontSize">14px</div>
+				</div>
+			</div>
+
+			<div class="breakpoint-indicator">
+				<div class="breakpoint" data-min="0" data-max="479">&lt;480px</div>
+				<div class="breakpoint" data-min="480" data-max="767">480-768px</div>
+				<div class="breakpoint" data-min="768" data-max="1023">768-1024px</div>
+				<div class="breakpoint" data-min="1024" data-max="9999">≥1024px</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">💻 代码对比</div>
+			
+			<div class="code-comparison">
+				<div class="code-panel">
+					<div class="code-header media-query">媒体查询方式</div>
+					<div class="code-content">
+						<span class="selector">.text</span> {<br>
+						&nbsp;&nbsp;<span class="property">font-size</span>: <span class="value">14px</span>;<br>
+						}<br><br>
+						<span class="comment">/* 4个断点，4处代码 */</span><br>
+						<span class="selector">@media (min-width: 480px)</span> {<br>
+						&nbsp;&nbsp;<span class="selector">.text</span> {<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="property">font-size</span>: <span class="value">18px</span>;<br>
+						&nbsp;&nbsp;}<br>
+						}<br><br>
+						<span class="selector">@media (min-width: 768px)</span> {<br>
+						&nbsp;&nbsp;<span class="selector">.text</span> {<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="property">font-size</span>: <span class="value">24px</span>;<br>
+						&nbsp;&nbsp;}<br>
+						}<br><br>
+						<span class="selector">@media (min-width: 1024px)</span> {<br>
+						&nbsp;&nbsp;<span class="selector">.text</span> {<br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="property">font-size</span>: <span class="value">32px</span>;<br>
+						&nbsp;&nbsp;}<br>
+						}
+					</div>
+				</div>
+
+				<div class="code-panel">
+					<div class="code-header clamp">clamp() 方式</div>
+					<div class="code-content">
+						<span class="comment">/* 一行代码搞定 */</span><br>
+						<span class="selector">.text</span> {<br>
+						&nbsp;&nbsp;<span class="property">font-size</span>:<br>
+						&nbsp;&nbsp;<span class="value">clamp(</span><br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="value">14px,</span><br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="value">4vw,</span><br>
+						&nbsp;&nbsp;&nbsp;&nbsp;<span class="value">32px</span><br>
+						&nbsp;&nbsp;<span class="value">)</span>;<br>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📊 可视化对比</div>
+			
+			<div class="visual-comparison">
+				<div class="visual-bar media">
+					<div class="visual-bar-fill" id="mediaBar">14px</div>
+				</div>
+				<div class="scale-markers">
+					<span>0px</span>
+					<span>320px</span>
+					<span>640px</span>
+					<span>960px</span>
+					<span>1280px</span>
+				</div>
+				
+				<div class="visual-bar clamp">
+					<div class="visual-bar-fill" id="clampBar">14px</div>
+				</div>
+				<div class="scale-markers">
+					<span>0px</span>
+					<span>320px</span>
+					<span>640px</span>
+					<span>960px</span>
+					<span>1280px</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🏆 clamp() 的优势</div>
+			
+			<div class="advantages">
+				<div class="advantage-item">
+					<div class="title">📝 代码量少</div>
+					<div class="desc">一行 clamp() 替代多行媒体查询代码</div>
+				</div>
+				<div class="advantage-item">
+					<div class="title">🔄 平滑过渡</div>
+					<div class="desc">值的变化是连续的，而非跳跃式的</div>
+				</div>
+				<div class="advantage-item">
+					<div class="title">🛠️ 易于维护</div>
+					<div class="desc">所有逻辑集中在一处，无需多处修改</div>
+				</div>
+				<div class="advantage-item">
+					<div class="title">📱 真正流体</div>
+					<div class="desc">完美适配任何视口尺寸，无固定断点</div>
+				</div>
+				<div class="advantage-item">
+					<div class="title">⚡ 运行时计算</div>
+					<div class="desc">基于当前视口实时计算，性能更好</div>
+				</div>
+				<div class="advantage-item">
+					<div class="title">🎯 精确控制</div>
+					<div class="desc">可以精确控制最小值、最大值和变化率</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const vpWidthDisplay = document.getElementById('vpWidth');
+		const mediaFontSizeDisplay = document.getElementById('mediaFontSize');
+		const clampFontSizeDisplay = document.getElementById('clampFontSize');
+		const mediaBar = document.getElementById('mediaBar');
+		const clampBar = document.getElementById('clampBar');
+		const breakpoints = document.querySelectorAll('.breakpoint');
+
+		function getMediaQueryFontSize(width) {
+			if (width < 480) return 14;
+			if (width < 768) return 18;
+			if (width < 1024) return 24;
+			return 32;
+		}
+
+		function getClampFontSize(width) {
+			const min = 14;
+			const max = 32;
+			const preferred = width * 4 / 100; // 4vw
+			return Math.min(Math.max(preferred, min), max);
+		}
+
+		function updateBreakpoints(width) {
+			breakpoints.forEach(bp => {
+				const min = parseInt(bp.dataset.min);
+				const max = parseInt(bp.dataset.max);
+				if (width >= min && width <= max) {
+					bp.classList.add('active');
+				} else {
+					bp.classList.remove('active');
+				}
+			});
+		}
+
+		function update() {
+			const width = window.innerWidth;
+			
+			const mediaSize = getMediaQueryFontSize(width);
+			const clampSize = getClampFontSize(width).toFixed(1);
+
+			vpWidthDisplay.textContent = width + 'px';
+			mediaFontSizeDisplay.textContent = mediaSize + 'px';
+			clampFontSizeDisplay.textContent = clampSize + 'px';
+
+			// Update visual bars (scale to max 1280px viewport)
+			const maxWidth = 1280;
+			const mediaPercent = (mediaSize / 32) * 100;
+			const clampPercent = (parseFloat(clampSize) / 32) * 100;
+
+			mediaBar.style.width = mediaPercent + '%';
+			mediaBar.textContent = mediaSize + 'px';
+
+			clampBar.style.width = clampPercent + '%';
+			clampBar.textContent = clampSize + 'px';
+
+			updateBreakpoints(width);
+		}
+
+		window.addEventListener('resize', update);
+		update();
+	</script>
+</body>
+</html>

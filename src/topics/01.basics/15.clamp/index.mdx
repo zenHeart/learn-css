@@ -1,0 +1,285 @@
+---
+title: "CSS clamp() 函数"
+category: "基础知识"
+tags:
+  - CSS函数
+  - 响应式
+  - clamp
+  - 流体布局
+description: "详解 CSS clamp() 函数的原理、用法及在响应式设计中的应用"
+keywords: "CSS clamp(), clamp, 响应式布局, 流体尺寸, CSS函数"
+---
+
+# CSS clamp() 函数
+
+## 概述
+
+`clamp()` 是 CSS 中的一个比较函数，用于在一个最小值和一个最大值之间选择一个中间值。它接收三个参数：`最小值`、`首选值`（通常是相对值）和 `最大值`。
+
+`clamp()` 函数是实现流体布局的强大工具，可以让元素的尺寸随着视口大小平滑地变化，而无需使用多个媒体查询。
+
+## 语法
+
+```css
+clamp(min, preferred, max)
+```
+
+### 参数说明
+
+| 参数 | 描述 |
+|------|------|
+| `min` | 最小值，当首选值小于此值时使用 |
+| `preferred` | 首选值，可以是计算表达式（通常包含视口单位） |
+| `max` | 最大值，当首选值大于此值时使用 |
+
+### 返回值
+
+- 如果 `preferred` < `min`：返回 `min`
+- 如果 `preferred` > `max`：返回 `max`
+- 否则：返回 `preferred`
+
+## 基本用法
+
+### 1. 流体字体大小
+
+```css
+font-size: clamp(1rem, 2.5vw, 2rem);
+```
+
+这行 CSS 的含义：
+- 最小字体大小：`1rem`（16px）
+- 最大字体大小：`2rem`（32px）
+- 在两者之间时，字体大小等于 `2.5vw`（视口宽度的 2.5%）
+
+{/* @playground id="fluid-font-size" mode="demo" */}
+
+### 2. 流体间距
+
+```css
+padding: clamp(1rem, 5vw, 3rem);
+```
+
+### 3. 流体容器宽度
+
+```css
+width: clamp(300px, 80vw, 1200px);
+```
+
+{/* @playground id="responsive-container" mode="demo" */}
+
+## 与媒体查询的对比
+
+### 媒体查询方式
+
+传统响应式设计使用多个断点：
+
+```css
+.title {
+  font-size: 16px;
+}
+
+@media (min-width: 480px) {
+  .title {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .title {
+    font-size: 36px;
+  }
+}
+```
+
+### clamp() 方式
+
+使用 `clamp()` 可以用一行代码实现相同效果：
+
+```css
+.title {
+  font-size: clamp(16px, 4vw, 36px);
+}
+```
+
+{/* @playground id="comparison" mode="demo" */}
+
+### 对比总结
+
+| 特性 | 媒体查询 | clamp() |
+|------|---------|--------|
+| 代码量 | 多行，多个断点 | 一行 |
+| 过渡 | 跳跃式变化 | 平滑过渡 |
+| 维护性 | 需要管理多个位置 | 集中管理 |
+| 灵活性 | 固定断点 | 连续变化 |
+| 性能 | 可能有重绘 | 运行时计算 |
+
+## 实际应用场景
+
+### 1. 流体字体 (Fluid Typography)
+
+```css
+h1 {
+  font-size: clamp(1.75rem, 5vw, 4rem);
+  line-height: 1.2;
+}
+
+p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.6;
+}
+```
+
+### 2. 流体间距
+
+```css
+.card {
+  padding: clamp(1rem, 3vw, 2rem);
+  margin: clamp(0.5rem, 1.5vw, 1rem);
+}
+```
+
+### 3. 流体组件尺寸
+
+```css
+.button {
+  padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+```
+
+### 4. 响应式网格间距
+
+```css
+.gallery {
+  gap: clamp(0.5rem, 2vw, 1.5rem);
+}
+```
+
+### 5. 安全范围
+
+```css
+.container {
+  padding-left: max(1rem, 5vw);
+  padding-right: max(1rem, 5vw);
+}
+```
+
+## 与其他 CSS 函数结合
+
+### 与 calc() 结合
+
+```css
+.element {
+  width: clamp(200px, calc(50% - 100px), 500px);
+}
+```
+
+### 与自定义属性结合
+
+```css
+:root {
+  --fluid-min: 1rem;
+  --fluid-max: 2rem;
+  --fluid-scale: 3vw;
+}
+
+.text {
+  font-size: clamp(var(--fluid-min), var(--fluid-scale), var(--fluid-max));
+}
+```
+
+{/* @playground id="with-calc" mode="demo" */}
+
+## 浏览器兼容性
+
+`clamp()` 函数在现代浏览器中有良好的支持：
+
+| 浏览器 | 支持版本 |
+|--------|---------|
+| Chrome | 79+ |
+| Firefox | 75+ |
+| Safari | 13.1+ |
+| Edge | 79+ |
+
+对于不支持的浏览器，会回退到 `preferred` 值（中间值），可能导致问题。建议结合回退值使用：
+
+```css
+font-size: 16px; /* 回退值 */
+font-size: clamp(1rem, 2.5vw, 2rem);
+```
+
+## 常见陷阱与最佳实践
+
+### 1. 避免极端值
+
+```css
+/* ❌ 不推荐：preferred 值过于极端 */
+font-size: clamp(10px, 50vw, 100px);
+
+/* ✅ 推荐：preferred 值在合理范围内 */
+font-size: clamp(12px, 2.5vw, 24px);
+```
+
+### 2. 确保 min <= max
+
+```css
+/* ⚠️ 警告：如果 min > max，clamp() 行为未定义 */
+font-size: clamp(2rem, 1vw, 1rem); /* 避免这种情况 */
+```
+
+### 3. 选择合适的 preferred 值
+
+```css
+/* 使用 vw 单位实现真正的流体效果 */
+font-size: clamp(1rem, 0.5rem + 2vw, 2rem);
+
+/* 纯 vw 可能导致过小或过大的值 */
+font-size: clamp(1rem, 10vw, 3rem); /* 10vw 可能太大 */
+```
+
+### 4. 结合 rem 实现可访问性
+
+```css
+/* 使用 rem 单位确保可访问性 */
+font-size: clamp(1rem, 1.5vw + 0.5rem, 2rem);
+```
+
+## 推荐配置
+
+### 流体字体配置
+
+| 场景 | clamp 公式 | 说明 |
+|------|-----------|------|
+| 大标题 | `clamp(1.75rem, 5vw, 4rem)` | 变化范围大 |
+| 副标题 | `clamp(1.25rem, 3vw, 2rem)` | 变化范围中等 |
+| 正文 | `clamp(1rem, 2vw, 1.125rem)` | 变化范围小 |
+
+### 间距配置
+
+| 场景 | clamp 公式 | 说明 |
+|------|-----------|------|
+| 内边距 | `clamp(0.75rem, 3vw, 2rem)` | 大组件间距 |
+| 外边距 | `clamp(0.5rem, 2vw, 1rem)` | 小间距 |
+| 容器 | `clamp(1rem, 5vw, 3rem)` | 内容区域 |
+
+## 更多演示
+
+### clamp() 基础语法
+
+{/* @playground id="basic-syntax" mode="demo" */}
+
+### 流体间距
+
+{/* @playground id="fluid-spacing" mode="demo" */}
+
+## 参考资料
+
+- [clamp() - MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/clamp)
+- [CSS Values and Units](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/Values_and_units)
+- [Fluid Typography with CSS clamp()](https://www.smashingmagazine.com/css-f-fluid-typography/)

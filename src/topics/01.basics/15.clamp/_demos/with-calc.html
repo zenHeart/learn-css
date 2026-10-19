@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>clamp() 与其他 CSS 函数结合</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #0f0f23;
+			color: #fff;
+			min-height: 100vh;
+		}
+
+		.container {
+			max-width: 900px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			color: #00d9ff;
+			margin-bottom: 30px;
+		}
+
+		.resize-hint {
+			background: rgba(0, 217, 255, 0.1);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.demo-section {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 25px;
+		}
+
+		.demo-title {
+			color: #ffd700;
+			margin-bottom: 20px;
+		}
+
+		.demo-content {
+			background: rgba(0, 0, 0, 0.3);
+			padding: 20px;
+			border-radius: 8px;
+		}
+
+		.demo-element {
+			padding: clamp(15px, 4vw, 40px);
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 8px;
+			margin-bottom: 15px;
+		}
+
+		.demo-element h3 {
+			margin: 0 0 10px 0;
+			font-size: clamp(1rem, 2.5vw, 1.5rem);
+		}
+
+		.demo-element p {
+			margin: 0;
+			font-size: clamp(0.875rem, 1.5vw + 0.5rem, 1.125rem);
+			line-height: 1.6;
+		}
+
+		/* 高级 clamp 用法 */
+		.advanced-text {
+			font-size: clamp(1rem, 1rem + 2vw, 2rem);
+			/* 等价于 clamp(1rem, 1rem + 2vw, 2rem) */
+		}
+
+		.balanced-padding {
+			padding: clamp(10px, 2vw + 5px, 30px);
+			/* 使用 calc 在 preferred 值中添加固定值 */
+		}
+
+		.centered-element {
+			width: clamp(200px, 60% - 50px, 500px);
+			/* 容器相关的流体宽度 */
+			margin: 0 auto;
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+			padding: 30px;
+			border-radius: 8px;
+			text-align: center;
+		}
+
+		.aspect-ratio-box {
+			width: clamp(150px, 40vw, 400px);
+			background: linear-gradient(135deg, #00d9ff 0%, #007bff 100%);
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: clamp(14px, 2vw + 8px, 24px);
+		}
+
+		.custom-properties-demo {
+			--min-size: 1rem;
+			--max-size: 2.5rem;
+			--scale: 3vw;
+			
+			font-size: clamp(var(--min-size), var(--scale), var(--max-size));
+			background: rgba(255, 255, 255, 0.1);
+			padding: 20px;
+			border-radius: 8px;
+			margin-top: 15px;
+		}
+
+		.formula-card {
+			background: #1a1a2e;
+			padding: 20px;
+			border-radius: 8px;
+			margin-top: 20px;
+		}
+
+		.formula-card h4 {
+			color: #00d9ff;
+			margin: 0 0 15px 0;
+			font-size: 1rem;
+		}
+
+		.formula {
+			font-family: 'Fira Code', 'Consolas', monospace;
+			font-size: 0.9rem;
+			line-height: 1.8;
+			color: #ccc;
+		}
+
+		.formula .property { color: #ff79c6; }
+		.formula .function { color: #50fa7b; }
+		.formula .calc { color: #8be9fd; }
+		.formula .value { color: #f1fa8c; }
+		.formula .comment { color: #6a9955; }
+
+		.controls {
+			background: rgba(0, 0, 0, 0.3);
+			padding: 20px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+		}
+
+		.control-group {
+			margin-bottom: 15px;
+		}
+
+		.control-group label {
+			display: block;
+			margin-bottom: 8px;
+			color: #888;
+			font-size: 0.9rem;
+		}
+
+		.control-group input[type="range"] {
+			width: 100%;
+		}
+
+		.control-group .value {
+			font-family: monospace;
+			color: #00d9ff;
+			font-size: 1.1rem;
+		}
+
+		:root {
+			--dynamic-min: 1rem;
+			--dynamic-max: 2.5rem;
+			--dynamic-scale: 3vw;
+		}
+
+		.dynamic-text {
+			font-size: clamp(var(--dynamic-min), var(--dynamic-scale), var(--dynamic-max));
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			padding: 20px;
+			border-radius: 8px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>🔗 clamp() 与其他 CSS 函数结合</h1>
+
+		<div class="resize-hint">
+			👆 调整浏览器窗口宽度，观察不同组合的效果
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📐 clamp() + calc() 基础</div>
+			
+			<div class="demo-content">
+				<div class="demo-element advanced-text">
+					<h3>高级字体大小计算</h3>
+					<p>font-size: clamp(1rem, 1rem + 2vw, 2rem)</p>
+				</div>
+				<p style="color: #888; font-size: 0.9rem; margin-top: 10px;">
+					💡 这种写法可以确保最小字体不小于 1rem，同时在计算中加入了基础值。
+				</p>
+			</div>
+
+			<div class="formula-card">
+				<h4>📝 CSS 代码</h4>
+				<div class="formula">
+					<span class="property">font-size</span>: <span class="function">clamp</span>(<br>
+					&nbsp;&nbsp;<span class="value">1rem</span>,<br>
+					&nbsp;&nbsp;<span class="calc">1rem + 2vw</span>,<br>
+					&nbsp;&nbsp;<span class="value">2rem</span><br>
+					);
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">⚖️ 平衡的间距计算</div>
+			
+			<div class="demo-content">
+				<div class="demo-element balanced-padding">
+					<h3>平衡的内边距</h3>
+					<p>padding: clamp(10px, 2vw + 5px, 30px)</p>
+				</div>
+			</div>
+
+			<div class="formula-card">
+				<h4>📝 CSS 代码</h4>
+				<div class="formula">
+					<span class="property">padding</span>: <span class="function">clamp</span>(<br>
+					&nbsp;&nbsp;<span class="value">10px</span>,<br>
+					&nbsp;&nbsp;<span class="calc">2vw + 5px</span>,<br>
+					&nbsp;&nbsp;<span class="value">30px</span><br>
+					);
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📦 容器相关的流体宽度</div>
+			
+			<div class="demo-content">
+				<div class="centered-element">
+					<h3>居中的流体元素</h3>
+					<p>width: clamp(200px, 60% - 50px, 500px)</p>
+				</div>
+			</div>
+
+			<div class="formula-card">
+				<h4>📝 CSS 代码</h4>
+				<div class="formula">
+					<span class="property">width</span>: <span class="function">clamp</span>(<br>
+					&nbsp;&nbsp;<span class="value">200px</span>,<br>
+					&nbsp;&nbsp;<span class="calc">60% - 50px</span>,<br>
+					&nbsp;&nbsp;<span class="value">500px</span><br>
+					);<br><br>
+					<span class="comment">/* 始终居中 */</span><br>
+					<span class="property">margin</span>: <span class="value">0 auto</span>;
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🎨 动态字体大小 (带控件)</div>
+			
+			<div class="controls">
+				<div class="control-group">
+					<label>最小值</label>
+					<input type="range" id="minSlider" min="8" max="24" value="16" step="1">
+					<div class="value">--dynamic-min: <span id="minValue">16</span>px</div>
+				</div>
+				<div class="control-group">
+					<label>缩放比例</label>
+					<input type="range" id="scaleSlider" min="1" max="6" value="3" step="0.5">
+					<div class="value">--dynamic-scale: <span id="scaleValue">3</span>vw</div>
+				</div>
+				<div class="control-group">
+					<label>最大值</label>
+					<input type="range" id="maxSlider" min="24" max="48" value="40" step="1">
+					<div class="value">--dynamic-max: <span id="maxValue">40</span>px</div>
+				</div>
+			</div>
+
+			<div class="dynamic-text" id="dynamicText">
+				调整上方滑块查看效果
+			</div>
+
+			<div class="formula-card">
+				<h4>📝 当前 CSS</h4>
+				<div class="formula">
+					<span class="property">font-size</span>: <span class="function">clamp</span>(<br>
+					&nbsp;&nbsp;<span class="value" id="cssMin">16</span>px, <span class="calc" id="cssScale">3</span>vw,<br>
+					&nbsp;&nbsp;<span class="value" id="cssMax">40</span>px<br>
+					);
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📐 clamp() + 自定义属性</div>
+			
+			<div class="demo-content">
+				<div class="custom-properties-demo">
+					<h3>使用 CSS 自定义属性</h3>
+					<p>结合 var() 和 clamp() 创建可复用的流体设计系统。</p>
+				</div>
+			</div>
+
+			<div class="formula-card">
+				<h4>📝 CSS 代码</h4>
+				<div class="formula">
+					<span class="property">:root</span> {<br>
+					&nbsp;&nbsp;<span class="value">--min-size</span>: <span class="value">1rem</span>;<br>
+					&nbsp;&nbsp;<span class="value">--max-size</span>: <span class="value">2.5rem</span>;<br>
+					&nbsp;&nbsp;<span class="value">--scale</span>: <span class="value">3vw</span>;<br>
+					}<br><br>
+					<span class="property">.text</span> {<br>
+					&nbsp;&nbsp;<span class="property">font-size</span>: <span class="function">clamp</span>(<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">var</span>(<span class="value">--min-size</span>),<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">var</span>(<span class="value">--scale</span>),<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">var</span>(<span class="value">--max-size</span>)<br>
+					&nbsp;&nbsp;);<br>
+					}
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">💡 最佳实践公式</div>
+			
+			<div class="demo-content">
+				<div class="formula-card">
+					<h4>流体排版 (推荐)</h4>
+					<div class="formula">
+						<span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">minREM</span>, <span class="calc">baseREM + scaleVW</span>, <span class="value">maxREM</span>);
+					</div>
+				</div>
+
+				<div class="formula-card">
+					<h4>流体间距</h4>
+					<div class="formula">
+						<span class="property">gap</span>: <span class="function">clamp</span>(<span class="value">minPX</span>, <span class="calc">minPX + scaleVW</span>, <span class="value">maxPX</span>);
+					</div>
+				</div>
+
+				<div class="formula-card">
+					<h4>流体组件尺寸</h4>
+					<div class="formula">
+						<span class="property">width</span>: <span class="function">clamp</span>(<span class="value">minPX</span>, <span class="calc">percentageVW</span>, <span class="value">maxPX</span>);
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const root = document.documentElement;
+		const minSlider = document.getElementById('minSlider');
+		const scaleSlider = document.getElementById('scaleSlider');
+		const maxSlider = document.getElementById('maxSlider');
+		const minValueDisplay = document.getElementById('minValue');
+		const scaleValueDisplay = document.getElementById('scaleValue');
+		const maxValueDisplay = document.getElementById('maxValue');
+		const cssMin = document.getElementById('cssMin');
+		const cssScale = document.getElementById('cssScale');
+		const cssMax = document.getElementById('cssMax');
+
+		function update() {
+			const min = minSlider.value;
+			const scale = scaleSlider.value;
+			const max = maxSlider.value;
+
+			root.style.setProperty('--dynamic-min', min + 'px');
+			root.style.setProperty('--dynamic-scale', scale + 'vw');
+			root.style.setProperty('--dynamic-max', max + 'px');
+
+			minValueDisplay.textContent = min;
+			scaleValueDisplay.textContent = scale;
+			maxValueDisplay.textContent = max;
+			cssMin.textContent = min;
+			cssScale.textContent = scale;
+			cssMax.textContent = max;
+		}
+
+		minSlider.addEventListener('input', update);
+		scaleSlider.addEventListener('input', update);
+		maxSlider.addEventListener('input', update);
+
+		update();
+	</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>流体字体大小</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #0f0f23;
+			color: #fff;
+			min-height: 100vh;
+		}
+
+		.container {
+			max-width: 900px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			color: #00d9ff;
+			margin-bottom: 30px;
+		}
+
+		.resize-hint {
+			background: rgba(0, 217, 255, 0.1);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+			margin-bottom: 30px;
+			color: #00d9ff;
+		}
+
+		.demo-section {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 25px;
+		}
+
+		.demo-title {
+			color: #ffd700;
+			font-size: 1.1rem;
+			margin-bottom: 20px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.demo-content {
+			padding: 20px;
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 8px;
+		}
+
+		/* 固定字体 */
+		.fixed-text {
+			font-size: 16px;
+			margin-bottom: 20px;
+			padding: 15px;
+			background: #2d2d44;
+			border-radius: 6px;
+		}
+
+		.fixed-text .label {
+			color: #888;
+			font-size: 0.8rem;
+			margin-bottom: 5px;
+		}
+
+		/* clamp 字体 */
+		.fluid-text {
+			font-size: clamp(16px, 2.5vw, 28px);
+			margin-bottom: 20px;
+			padding: 15px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 6px;
+		}
+
+		.fluid-text .label {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 0.8rem;
+			margin-bottom: 5px;
+		}
+
+		/* 响应式字体 */
+		.responsive-text {
+			font-size: clamp(1rem, 5vw, 3rem);
+			line-height: 1.2;
+			margin-bottom: 20px;
+			padding: 15px;
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+			border-radius: 6px;
+		}
+
+		.responsive-text .label {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 0.8rem;
+			margin-bottom: 5px;
+		}
+
+		.typography-demo {
+			font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
+			line-height: 1.6;
+			padding: 20px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 8px;
+		}
+
+		.typography-demo h2 {
+			font-size: clamp(1.5rem, 4vw, 2.5rem);
+			margin: 0 0 15px 0;
+			color: #00d9ff;
+		}
+
+		.typography-demo p {
+			margin: 0 0 15px 0;
+			color: #ccc;
+		}
+
+		.size-indicator {
+			position: fixed;
+			top: 20px;
+			left: 20px;
+			background: rgba(0, 0, 0, 0.8);
+			padding: 15px 20px;
+			border-radius: 8px;
+			font-family: monospace;
+		}
+
+		.size-indicator div {
+			margin: 5px 0;
+		}
+
+		.size-indicator .label {
+			color: #888;
+			font-size: 0.8rem;
+		}
+
+		.size-indicator .value {
+			color: #00d9ff;
+			font-size: 1.1rem;
+		}
+
+		.css-formula {
+			background: #1a1a2e;
+			padding: 15px;
+			border-radius: 8px;
+			font-family: 'Fira Code', monospace;
+			font-size: 0.9rem;
+			margin-top: 15px;
+			overflow-x: auto;
+		}
+
+		.css-formula .property { color: #ff79c6; }
+		.css-formula .function { color: #50fa7b; }
+		.css-formula .value { color: #f1fa8c; }
+	</style>
+</head>
+<body>
+	<div class="size-indicator">
+		<div><span class="label">视口宽度:</span> <span class="value" id="vpWidth">0</span>px</div>
+		<div><span class="label">1vw =</span> <span class="value" id="vwValue">0</span>px</div>
+	</div>
+
+	<div class="container">
+		<h1>📝 流体字体大小演示</h1>
+
+		<div class="resize-hint">
+			👆 调整浏览器窗口宽度，查看字体大小变化
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🔒 固定字体 vs 🚀 clamp() 流体字体</div>
+			
+			<div class="demo-content">
+				<div class="fixed-text">
+					<div class="label">固定字体 (font-size: 16px)</div>
+					<p>无论视口如何变化，这段文字的字体大小始终保持 16px。</p>
+				</div>
+
+				<div class="fluid-text">
+					<div class="label">流体字体 (clamp(16px, 2.5vw, 28px))</div>
+					<p>这段文字的字体大小会在 16px 到 28px 之间平滑变化，根据视口宽度自动调整。</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🎯 clamp() 推荐配置</div>
+			
+			<div class="demo-content">
+				<div class="responsive-text">
+					<div class="label">大标题 clamp(1rem, 5vw, 3rem)</div>
+					这是一个响应式大标题
+				</div>
+
+				<div class="css-formula">
+					<span class="property">font-size</span>: <span class="function">clamp</span>(<span class="value">1rem, 5vw, 3rem</span>);
+				</div>
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📄 完整排版示例</div>
+			
+			<div class="demo-content">
+				<div class="typography-demo">
+					<h2>流体排版系统</h2>
+					<p>
+						这个示例展示了如何使用 clamp() 创建一个完整的流体排版系统。
+						标题和正文的字体大小都会根据视口宽度平滑变化，无需使用多个媒体查询。
+					</p>
+					<p>
+						在移动设备上，文字会略微缩小以适应狭窄的屏幕；在桌面设备上，
+						文字会适当放大以获得更好的阅读体验。
+					</p>
+				</div>
+
+				<div class="css-formula">
+					<span class="property">h2</span>: <span class="function">clamp</span>(<span class="value">1.5rem, 4vw, 2.5rem</span>);<br>
+					<span class="property">p</span>: <span class="function">clamp</span>(<span class="value">1rem, 2vw + 0.5rem, 1.5rem</span>);
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const vpWidth = document.getElementById('vpWidth');
+		const vwValue = document.getElementById('vwValue');
+
+		function update() {
+			const width = window.innerWidth;
+			vpWidth.textContent = width;
+			vwValue.textContent = (width / 100).toFixed(2);
+		}
+
+		window.addEventListener('resize', update);
+		update();
+	</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>响应式容器宽度</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			margin: 0;
+			padding: 20px;
+			background: #1a1a2e;
+			color: #fff;
+			min-height: 100vh;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			text-align: center;
+			color: #00d9ff;
+			margin-bottom: 30px;
+		}
+
+		.resize-hint {
+			background: rgba(0, 217, 255, 0.1);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			padding: 15px;
+			border-radius: 8px;
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		.demo-section {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 12px;
+			padding: 25px;
+			margin-bottom: 25px;
+		}
+
+		.demo-title {
+			color: #ffd700;
+			margin-bottom: 20px;
+		}
+
+		/* 固定宽度容器 */
+		.fixed-container {
+			width: 800px;
+			max-width: 100%;
+			margin: 0 auto 30px;
+			padding: 20px;
+			background: #2d2d44;
+			border-radius: 8px;
+		}
+
+		.fixed-container .label {
+			color: #888;
+			font-size: 0.85rem;
+			margin-bottom: 10px;
+		}
+
+		/* clamp 容器 */
+		.fluid-container {
+			width: clamp(300px, 80vw, 800px);
+			margin: 0 auto 30px;
+			padding: 20px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 8px;
+		}
+
+		.fluid-container .label {
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 0.85rem;
+			margin-bottom: 10px;
+		}
+
+		/* 响应式网格 */
+		.grid-container {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 30vw, 250px), 1fr));
+			gap: clamp(10px, 2vw, 20px);
+			margin-bottom: 30px;
+		}
+
+		.grid-item {
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+			padding: clamp(15px, 3vw, 30px);
+			border-radius: 8px;
+			text-align: center;
+			font-size: clamp(14px, 2vw, 20px);
+		}
+
+		/* 卡片组件 */
+		.card-container {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 40vw, 300px), 1fr));
+			gap: clamp(15px, 3vw, 25px);
+		}
+
+		.card {
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			overflow: hidden;
+			transition: transform 0.3s ease;
+		}
+
+		.card:hover {
+			transform: translateY(-5px);
+		}
+
+		.card-image {
+			height: clamp(100px, 20vw, 180px);
+			background: linear-gradient(135deg, #00d9ff 0%, #007bff 100%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 3rem;
+		}
+
+		.card-content {
+			padding: clamp(15px, 3vw, 25px);
+		}
+
+		.card-title {
+			font-size: clamp(1rem, 2vw, 1.25rem);
+			margin: 0 0 10px 0;
+			color: #00d9ff;
+		}
+
+		.card-text {
+			font-size: clamp(0.875rem, 1.5vw, 1rem);
+			color: #aaa;
+			margin: 0;
+			line-height: 1.5;
+		}
+
+		.info-panel {
+			background: #0d1117;
+			padding: 15px;
+			border-radius: 8px;
+			font-family: monospace;
+			margin-top: 20px;
+		}
+
+		.info-panel .property { color: #ff79c6; }
+		.info-panel .function { color: #50fa7b; }
+		.info-panel .value { color: #f1fa8c; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>📦 响应式容器宽度</h1>
+
+		<div class="resize-hint">
+			👆 调整浏览器窗口宽度，观察容器和卡片的变化
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🔒 固定 vs 🚀 clamp() 流体容器</div>
+			
+			<div class="fixed-container">
+				<div class="label">固定宽度 (width: 800px, max-width: 100%)</div>
+				<p>固定宽度的容器在小屏幕上会被压缩，但不会小于视口宽度。</p>
+			</div>
+
+			<div class="fluid-container">
+				<div class="label">clamp() 流体宽度 (clamp(300px, 80vw, 800px))</div>
+				<p>使用 clamp() 的容器会在 300px 到 800px 之间平滑变化，始终保持视口的 80%。</p>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">width</span>: <span class="function">clamp</span>(<span class="value">300px, 80vw, 800px</span>);
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">📐 响应式网格</div>
+			
+			<div class="grid-container">
+				<div class="grid-item">卡片 1</div>
+				<div class="grid-item">卡片 2</div>
+				<div class="grid-item">卡片 3</div>
+				<div class="grid-item">卡片 4</div>
+			</div>
+
+			<div class="info-panel">
+				<span class="property">grid-template-columns</span>: repeat(auto-fit, minmax(<span class="function">clamp</span>(<span class="value">150px, 30vw, 250px</span>), 1fr));
+			</div>
+		</div>
+
+		<div class="demo-section">
+			<div class="demo-title">🃏 卡片组件示例</div>
+			
+			<div class="card-container">
+				<div class="card">
+					<div class="card-image">🎨</div>
+					<div class="card-content">
+						<h3 class="card-title">设计</h3>
+						<p class="card-text">精美的 UI 设计，让你的产品脱颖而出。</p>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-image">⚡</div>
+					<div class="card-content">
+						<h3 class="card-title">性能</h3>
+						<p class="card-text">优化的性能，确保流畅的用户体验。</p>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-image">🔒</div>
+					<div class="card-content">
+						<h3 class="card-title">安全</h3>
+						<p class="card-text">全面的安全保护，保障用户数据安全。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
