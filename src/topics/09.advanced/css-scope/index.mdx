@@ -1,0 +1,414 @@
+---
+title: CSS @scope 规则
+category: 高级特性
+tags: [css, @scope, style-scoping, specificity]
+description: 详细介绍 CSS @scope 规则的用法、语法及其与特异性的关系。
+keywords: CSS @scope, 样式隔离, 作用域, 特异性, donut scope
+---
+
+# CSS @scope 规则
+
+---
+
+## 概述
+
+`@scope` 是 CSS 级联模块中引入的新规则，用于**限制选择器的触及范围**。通过设置作用域根（scoping root），可以让样式规则仅作用于 DOM 树的某个子树内，从而在不需要高特异性选择器或紧耦合 DOM 结构的情况下，精准地选择元素。
+
+### 为什么需要 @scope？
+
+传统 CSS 选择器面临两难困境：
+
+- **过于具体**：如 `.card > .content > img.hero`，特异性高达 `(0,3,1)`，难以覆盖，且与 DOM 结构紧耦合
+- **过于宽泛**：如 `img`，会选中页面中所有图片
+
+已有解决方案的局限：
+
+| 方案 | 局限性 |
+|------|--------|
+| BEM 命名 | 需要手动添加复杂类名，命名成本高 |
+| CSS Modules / Scoped CSS | 依赖构建工具或框架 |
+| 放弃选择器、直写行内样式 | 失去 CSS 的声明式优势 |
+
+`@scope` 让 CSS 原生支持作用域，兼顾**精确选择**与**低特异性**。
+
+---
+
+## 语法结构
+
+### 基本语法
+
+```css
+@scope (<scoping-root-selector>) {
+  /* scoped style rules */
+}
+```
+
+**`<scoping-root-selector>`** 可以是任意复杂的选择器，如类名、ID、属性选择器等。
+
+### 带下限的作用域（Donut Scope）
+
+```css
+@scope (<scoping-root-selector>) to (<scoping-limit-selector>) {
+  /* scoped style rules */
+}
+```
+
+- **上限**（`<scoping-root-selector>`）：确定作用域的上边界
+- **下限**（`<scoping-limit-selector>`）：确定作用域的下边界，排除某些子树
+
+下限使选择器只能命中位于上下边界之间的元素，形似"甜甜圈"，故称 **Donut Scope**。
+
+### 省略 prelude 的 @scope
+
+在 `<style>` 标签内使用时，可以省略 prelude，此时作用域根为 `<style>` 元素的父元素：
+
+```html
+<div class="card">
+  <div class="card__header">
+    <style>
+      @scope {
+        img {
+          border-color: green;
+        }
+      }
+    </style>
+    <!-- img 在作用域内 -->
+  </div>
+  <div class="card__content">
+    <p><img src="..."></p>
+    <!-- img 不在 card__header 内，不受作用域约束 -->
+  </div>
+</div>
+```
+
+---
+
+## :scope 选择器
+
+`@scope` 块内的选择器默认相对于作用域根匹配。如果需要**显式选择作用域根元素本身**，使用 `:scope` 伪类。
+
+### 基本用法
+
+```css
+@scope (.card) {
+  :scope {
+    /* 匹配 .card 根元素本身 */
+    border: 1px solid #ccc;
+  }
+
+  img {
+    /* 匹配 .card 内的 img 元素 */
+    border-color: green;
+  }
+
+  :scope img {
+    /* 与上面等价，显式写法 */
+  }
+
+  & img {
+    /* 使用 & 嵌套选择器，同样匹配 .card 内的 img */
+  }
+}
+```
+
+### :scope 与 & 的区别
+
+| 特性 | `:scope` | `&` |
+|------|----------|-----|
+| 含义 | 代表匹配到的作用域根元素 | 代表用于匹配作用域根的选择器 |
+| 可用次数 | 只能使用一次（不能嵌套 `:scope`） | 可以多次使用 |
+| 特异性计算 | 视为普通伪类 `(0,1,0)` | 按 `:is()` 规则计算（取最具体参数） |
+
+```css
+@scope (.card) {
+  & & {
+    /* 有效：选择嵌套在 .card 中的 .card */
+  }
+
+  :scope :scope {
+    /* 无效：不能嵌套 :scope */
+  }
+}
+```
+
+---
+
+## @scope 与 CSS 特异性
+
+### Prelude 选择器不影响特异性
+
+`@scope`  Prelude 中的选择器（如 `.card`）不参与块内选择器的特异性计算：
+
+```css
+@scope (#sidebar) {
+  img {
+    /* 特异性 = (0,0,1)，不受 #sidebar 影响 */
+  }
+}
+```
+
+### :scope 的特异性
+
+`:scope` 伪类的特异性为 **(0,1,0)**，与普通伪类（如 `:hover`）相同：
+
+```css
+@scope (#sidebar) {
+  :scope img {
+    /* 特异性 = (0,1,0) + (0,0,1) = (0,1,1) */
+  }
+}
+```
+
+### & 的特异性（Desugaring）
+
+`&` 在内部会被转换为 `:is(<scoping-root>)`（称为 *desugaring*），其特异性按 `:is()` 规则计算——**取最具体参数**的特异性：
+
+```css
+@scope (#sidebar, .card) {
+  & img {
+    /* 内部转换为 :is(#sidebar, .card) img
+       特异性 = max(id(#sidebar), class(.card)) + img
+              = (1,0,0) + (0,0,1) = (1,0,1) */
+  }
+}
+```
+
+---
+
+## 级联中的 Scoping Proximity
+
+`@scope` 在 CSS 级联中引入了一个新步骤：**Scoping Proximity（作用域邻近性）**，位于 specificity 之后、order of appearance 之前。
+
+### 规则
+
+当比较来自不同作用域根的声明时，**跳数（hops）更少**的作用域优先：
+
+```css
+@scope (.light) {
+  :scope { background: #ccc; }
+  a { color: black; }
+}
+
+@scope (.dark) {
+  :scope { background: #333; }
+  a { color: white; }
+}
+```
+
+```html
+<div class="light">
+  <p><a href="#">黑色</a></p>
+  <div class="dark">
+    <p><a href="#">白色</a></p>
+    <div class="light">
+      <p><a href="#">黑色（.light 作用域跳数更少，优先）</a></p>
+    </div>
+  </div>
+</div>
+```
+
+对于第三个 `<a>`：到 `.light` 作用域根只需 1 跳，到 `.dark` 需要 2 跳，因此 `.light` 的规则生效。
+
+### ⚠️ 注意：选择器隔离，非样式隔离
+
+`@scope` **限制的是选择器的触及范围**，不是样式属性本身。继承属性（如 `color`、`font-size`）仍然会穿透下限继承下去：
+
+```css
+@scope (.card) to (.card__content) {
+  :scope {
+    color: hotpink;
+  }
+}
+```
+
+```html
+<div class="card">
+  <p style="color: hotpink">Card 内容</p>
+  <div class="card__content">
+    <!-- .card__content 及其子元素仍会继承 hotpink -->
+    <p>.card__content 继承了父级 color</p>
+  </div>
+</div>
+```
+
+---
+
+## 实战案例
+
+### 案例一：组件样式隔离
+
+使用 `@scope` 实现组件样式隔离，无需 BEM 命名或构建工具：
+
+```css
+/* 基础卡片样式 */
+@scope (.card) {
+  :scope {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .card__title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .card__img {
+    width: 100%;
+    border-radius: 4px;
+  }
+}
+
+/* 暗色主题卡片 */
+@scope (.card--dark) {
+  :scope {
+    background: #1a1a1a;
+    color: #fff;
+  }
+
+  .card__title {
+    color: #fff;
+  }
+
+  .card__img {
+    filter: brightness(0.8);
+  }
+}
+```
+
+### 案例二：Donut Scope 精确选择
+
+排除特定区域，只选择组件根元素和其直接子元素中的图片：
+
+```css
+@scope (.card) to (.card__footer) {
+  img {
+    border: 2px solid blue;
+  }
+}
+```
+
+```html
+<div class="card">
+  <img src="hero.jpg" />         <!-- 被选中，蓝色边框 -->
+  <div class="card__body">
+    <img src="icon.png" />       <!-- 被选中，蓝色边框 -->
+  </div>
+  <div class="card__footer">
+    <img src="badge.png" />      <!-- 不被选中，跳出了作用域 -->
+  </div>
+</div>
+```
+
+### 案例三：主题作用域
+
+利用 Scoping Proximity 实现嵌套主题的自动优先级：
+
+```css
+@scope (.theme--primary) {
+  a { color: blue; }
+}
+
+@scope (.theme--danger) {
+  a { color: red; }
+}
+```
+
+```html
+<div class="theme--primary">
+  <a>蓝色链接</a>
+  <div class="theme--danger">
+    <a>红色链接（嵌套层离 .theme--danger 更近，优先级更高）</a>
+  </div>
+</div>
+```
+
+---
+
+## 与其他样式隔离方案的对比
+
+### 对比表
+
+| 特性 | `@scope` | BEM | CSS Modules | Scoped CSS (Vue) |
+|------|----------|-----|-------------|------------------|
+| 原生支持 | ✅ | ❌ | ❌ | ❌ |
+| 零构建依赖 | ✅ | ✅ | ❌ | ❌ |
+| 选择器特异性可控 | ✅ | ⚠️ 依赖命名 | ✅ | ✅ |
+| 原生作用域隔离 | ✅ | ❌ | ✅ | ✅ |
+| 支持 Donut Scope | ✅ | ❌ | ❌ | ❌ |
+| 级联邻近性 | ✅ | ❌ | ❌ | ❌ |
+| 浏览器支持 | 现代浏览器 | ✅ | 需要构建 | 需要框架 |
+
+### BEM 对比
+
+```css
+/* BEM 方式 */
+.card__img--hero {
+  border-radius: 50%;
+}
+
+/* @scope 方式 */
+@scope (.card) {
+  img.hero {
+    border-radius: 50%;
+  }
+}
+```
+
+- BEM 通过**命名约定**实现隔离，类名复杂
+- `@scope` 通过**原生语法**实现隔离，语义更清晰
+
+### CSS Modules 对比
+
+```css
+/* CSS Modules 方式 */
+.card__img__7d3f2a {
+  border-radius: 50%;
+}
+
+/* @scope 方式 */
+@scope (.card) {
+  img.hero {
+    border-radius: 50%;
+  }
+}
+```
+
+- CSS Modules 需要构建工具注入哈希
+- `@scope` 无需构建，浏览器原生支持
+
+### Scoped CSS (Vue) 对比
+
+```html
+<!-- Vue Scoped CSS -->
+<style scoped>
+  .card img {
+    border-radius: 50%;
+  }
+</style>
+
+<!-- @scope 原生方式 -->
+<style>
+  @scope (.card) {
+    img {
+      border-radius: 50%;
+    }
+  }
+</style>
+```
+
+---
+
+## 浏览器兼容性
+
+`@scope` 已于 **Chrome 118+**、**Safari 17.4+** 支持。Firefox 正在实现中。
+
+查看最新兼容性：[caniuse.com/css-at-scope](https://caniuse.com/css-at-scope)
+
+---
+
+## 参考资源
+
+- [CSS @scope 规范 (W3C)](https://drafts.csswg.org/css-cascade-6/#scope-atrule)
+- [Chrome 开发者文档：CSS @scope](https://developer.chrome.com/docs/css-ui/at-scope)
+- [MDN: @scope](https://developer.mozilla.org/en-US/docs/Web/CSS/@scope)

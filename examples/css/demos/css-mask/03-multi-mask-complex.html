@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Mask - 多遮罩叠加实现复杂图形</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0f0f2f 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 300;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
+
+    .intro {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card h3 {
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    .demo-box {
+      width: 100%;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .desc {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.6;
+    }
+
+    .code-snippet {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.7rem;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* ========== 案例1：底部 + 两侧渐隐叠加 ========== */
+    .multi-fade {
+      background: url('https://picsum.photos/600/400?random=10');
+      background-size: cover;
+      background-position: center;
+      mask-image:
+        /* 底部渐隐 */
+        linear-gradient(
+          to bottom,
+          black 0%,
+          transparent 100%
+        ),
+        /* 左右渐隐 */
+        radial-gradient(
+          ellipse 80% 100% at 50% 50%,
+          transparent 0%,
+          transparent 50%,
+          black 100%
+        );
+      -webkit-mask-image:
+        linear-gradient(
+          to bottom,
+          black 0%,
+          transparent 100%
+        ),
+        radial-gradient(
+          ellipse 80% 100% at 50% 50%,
+          transparent 0%,
+          transparent 50%,
+          black 100%
+        );
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+
+    /* ========== 案例2：圆形 + 十字遮罩 ========== */
+    .circle-cross {
+      background: url('https://picsum.photos/600/400?random=11');
+      background-size: cover;
+      background-position: center;
+      mask-image:
+        /* 圆形遮罩 */
+        radial-gradient(
+          circle,
+          black 0%,
+          black 35%,
+          transparent 36%,
+          transparent 100%
+        ),
+        /* 横向条 */
+        linear-gradient(
+          to right,
+          transparent 0%,
+          transparent 42%,
+          black 43%,
+          black 57%,
+          transparent 58%,
+          transparent 100%
+        ),
+        /* 纵向条 */
+        linear-gradient(
+          to bottom,
+          transparent 0%,
+          transparent 42%,
+          black 43%,
+          black 57%,
+          transparent 58%,
+          transparent 100%
+        );
+      -webkit-mask-image:
+        radial-gradient(
+          circle,
+          black 0%,
+          black 35%,
+          transparent 36%,
+          transparent 100%
+        ),
+        linear-gradient(
+          to right,
+          transparent 0%,
+          transparent 42%,
+          black 43%,
+          black 57%,
+          transparent 58%,
+          transparent 100%
+        ),
+        linear-gradient(
+          to bottom,
+          transparent 0%,
+          transparent 42%,
+          black 43%,
+          black 57%,
+          transparent 58%,
+          transparent 100%
+        );
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+
+    /* ========== 案例3：雷达扫描效果 ========== */
+    .radar {
+      background: linear-gradient(135deg, #0a3d2e 0%, #1a6b5a 50%, #0a3d2e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .radar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(0, 255, 136, 0.6) 30deg,
+        transparent 60deg
+      );
+      animation: radarSweep 3s linear infinite;
+    }
+
+    .radar-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: rgba(0, 255, 136, 0.8);
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+      mask-image: radial-gradient(
+        circle at center,
+        black 0%,
+        black 30%,
+        transparent 70%,
+        transparent 100%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle at center,
+        black 0%,
+        black 30%,
+        transparent 70%,
+        transparent 100%
+      );
+    }
+
+    .radar-dots {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.6) 2px, transparent 2px),
+        radial-gradient(circle at 70% 60%, rgba(0, 255, 136, 0.6) 3px, transparent 3px),
+        radial-gradient(circle at 45% 80%, rgba(0, 255, 136, 0.6) 2px, transparent 2px),
+        radial-gradient(circle at 80% 20%, rgba(0, 255, 136, 0.6) 2px, transparent 2px);
+    }
+
+    @keyframes radarSweep {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========== 案例4：条纹蒙版叠加 ========== */
+    .stripes {
+      background: url('https://picsum.photos/600/400?random=12');
+      background-size: cover;
+      background-position: center;
+      mask-image:
+        /* 保留的圆角矩形区域 */
+        radial-gradient(
+          ellipse 100% 100% at 50% 50%,
+          black 0%,
+          black 40%,
+          transparent 41%,
+          transparent 100%
+        ),
+        /* 水平条纹遮罩 */
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 8px,
+          black 8px,
+          black 16px
+        );
+      -webkit-mask-image:
+        radial-gradient(
+          ellipse 100% 100% at 50% 50%,
+          black 0%,
+          black 40%,
+          transparent 41%,
+          transparent 100%
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 8px,
+          black 8px,
+          black 16px
+        );
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+
+    /* ========== 案例5：渐变边框 ========== */
+    .gradient-border {
+      background: #1a1a2e;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #ff6b6b);
+      border-radius: 12px;
+      mask-image:
+        /* 边框区域 */
+        linear-gradient(
+          to right,
+          black 0%,
+          black 4%,
+          transparent 4%,
+          transparent 96%,
+          black 96%,
+          black 100%
+        ),
+        linear-gradient(
+          to bottom,
+          black 0%,
+          black 4%,
+          transparent 4%,
+          transparent 96%,
+          black 96%,
+          black 100%
+        ),
+        /* 中心透明 */
+        linear-gradient(
+          to bottom,
+          black 0%,
+          black 100%
+        );
+      -webkit-mask-image:
+        linear-gradient(
+          to right,
+          black 0%,
+          black 4%,
+          transparent 4%,
+          transparent 96%,
+          black 96%,
+          black 100%
+        ),
+        linear-gradient(
+          to bottom,
+          black 0%,
+          black 4%,
+          transparent 4%,
+          transparent 96%,
+          black 96%,
+          black 100%
+        ),
+        linear-gradient(
+          to bottom,
+          black 0%,
+          black 100%
+        );
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+      padding: 2px;
+      border-radius: inherit;
+    }
+
+    .gradient-border-inner {
+      width: calc(100% - 20px);
+      height: calc(100% - 20px);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* ========== 案例6：对角线切割 ========== */
+    .diagonal-cut {
+      background: url('https://picsum.photos/600/400?random=13');
+      background-size: cover;
+      background-position: center;
+      mask-image:
+        /* 左上三角形 */
+        polygon(0 0, 60% 0, 0 60%),
+        /* 右下三角形 */
+        polygon(100% 100%, 40% 100%, 100% 40%);
+      -webkit-mask-image:
+        polygon(0 0, 60% 0, 0 60%),
+        polygon(100% 100%, 40% 100%, 100% 40%);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+
+    /* ========== 响应式布局 ========== */
+    @media (max-width: 768px) {
+      .demo-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Mask 案例三：多遮罩叠加实现复杂图形</h1>
+  <p class="intro">
+    CSS Mask 支持多个遮罩层叠加，通过 mask-composite 属性控制各层之间的合成方式，<br>
+    可以实现单一遮罩无法完成的复杂视觉效果。
+  </p>
+
+  <div class="demo-container">
+    <!-- 案例1：底部 + 两侧渐隐叠加 -->
+    <div class="card">
+      <h3>底部 + 两侧渐隐叠加</h3>
+      <div class="demo-box multi-fade"></div>
+      <p class="desc">
+        叠加 linear-gradient（底部渐隐）和 radial-gradient（左右渐隐），<br>
+        使用 intersect 模式保留两层遮罩的重叠区域。
+      </p>
+      <div class="code-snippet">mask-image:
+  linear-gradient(to bottom, black, transparent),
+  radial-gradient(ellipse 80% 100% at 50% 50%, ...);
+mask-composite: intersect;</div>
+    </div>
+
+    <!-- 案例2：圆形 + 十字遮罩 -->
+    <div class="card">
+      <h3>圆形 + 十字网格遮罩</h3>
+      <div class="demo-box circle-cross"></div>
+      <p class="desc">
+        三层遮罩叠加：圆形遮罩 + 横向条 + 纵向条，<br>
+        使用 intersect 保留十字形镂空效果。
+      </p>
+      <div class="code-snippet">mask-image:
+  radial-gradient(circle, black 35%, transparent 36%),
+  linear-gradient(to right, ...),  /* 横向条 */
+  linear-gradient(to bottom, ...); /* 纵向条 */
+mask-composite: intersect;</div>
+    </div>
+
+    <!-- 案例3：雷达扫描效果 -->
+    <div class="card">
+      <h3>雷达扫描动画</h3>
+      <div class="demo-box radar">
+        <div class="radar-dots"></div>
+        <div class="radar-content">RADAR</div>
+      </div>
+      <p class="desc">
+        使用 conic-gradient 创建旋转扫描光束，<br>
+        配合 radial-gradient 遮罩实现圆形探测范围。
+      </p>
+      <div class="code-snippet">/* 扫描光束 */
+background: conic-gradient(from 0deg,
+  transparent, rgba(0,255,136,.6) 30deg, transparent);
+animation: radarSweep 3s linear infinite;</div>
+    </div>
+
+    <!-- 案例4：条纹蒙版叠加 -->
+    <div class="card">
+      <h3>条纹 + 圆形叠加</h3>
+      <div class="demo-box stripes"></div>
+      <p class="desc">
+        叠加圆形遮罩和重复条纹渐变，<br>
+        实现透过圆窗看到条纹图案的效果。
+      </p>
+      <div class="code-snippet">mask-image:
+  radial-gradient(ellipse, black 40%, transparent 41%),
+  repeating-linear-gradient(
+    to bottom, transparent 0px, black 8px, black 16px
+  );
+mask-composite: intersect;</div>
+    </div>
+
+    <!-- 案例5：渐变边框 -->
+    <div class="card">
+      <h3>渐变边框效果</h3>
+      <div class="demo-box gradient-border">
+        <div class="gradient-border-inner">BORDER</div>
+      </div>
+      <p class="desc">
+        使用三层 linear-gradient 控制边框四个边的显示，<br>
+        结合 intersect 保留边框同时镂空中心。
+      </p>
+      <div class="code-snippet">mask-image:
+  linear-gradient(to right, black 4%, transparent 96%),
+  linear-gradient(to bottom, black 4%, transparent 96%);
+mask-composite: intersect;</div>
+    </div>
+
+    <!-- 案例6：对角线切割 -->
+    <div class="card">
+      <h3>对角线切割形状</h3>
+      <div class="demo-box diagonal-cut"></div>
+      <p class="desc">
+        使用 polygon 遮罩实现两个对角三角形叠加，<br>
+        切割出独特的斜角边缘效果。
+      </p>
+      <div class="code-snippet">mask-image:
+  polygon(0 0, 60% 0, 0 60%),
+  polygon(100% 100%, 40% 100%, 100% 40%);
+mask-composite: intersect;</div>
+    </div>
+  </div>
+</body>
+</html>

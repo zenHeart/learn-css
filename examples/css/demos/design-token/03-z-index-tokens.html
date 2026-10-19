@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Z-Index Tokens - 层级令牌</title>
+  <style>
+    /* Z-Index Tokens from Martin Fowler Article */
+    :root {
+      /* Z-Index Scale */
+      --z-index-default: 1;
+      --z-index-sticky: 100;
+      --z-index-navigation: 200;
+      --z-index-spinner: 300;
+      --z-index-toast: 400;
+      --z-index-modal: 500;
+      --z-index-tooltip: 600;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 2rem;
+      background: #f9fafb;
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #3b82f6;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 2rem;
+    }
+
+    /* Stacking Context Demo */
+    .demo-area {
+      position: relative;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      min-height: 400px;
+      overflow: hidden;
+    }
+
+    .demo-label {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      z-index: 1000;
+    }
+
+    /* Base layer */
+    .layer {
+      position: absolute;
+      width: 120px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .layer-default {
+      background: #e0f2fe;
+      border: 2px solid #3b82f6;
+      color: #1e40af;
+      z-index: var(--z-index-default);
+      top: 20px;
+      left: 20px;
+    }
+
+    .layer-sticky {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #92400e;
+      z-index: var(--z-index-sticky);
+      top: 40px;
+      left: 80px;
+    }
+
+    .layer-navigation {
+      background: #d1fae5;
+      border: 2px solid #10b981;
+      color: #065f46;
+      z-index: var(--z-index-navigation);
+      top: 60px;
+      left: 140px;
+    }
+
+    .layer-spinner {
+      background: #ede9fe;
+      border: 2px solid #8b5cf6;
+      color: #5b21b6;
+      z-index: var(--z-index-spinner);
+      top: 80px;
+      left: 200px;
+    }
+
+    .layer-toast {
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+      z-index: var(--z-index-toast);
+      top: 100px;
+      left: 260px;
+    }
+
+    .layer-modal {
+      background: #f3e8ff;
+      border: 2px solid #a855f7;
+      color: #6b21a8;
+      z-index: var(--z-index-modal);
+      top: 120px;
+      left: 320px;
+    }
+
+    .layer-tooltip {
+      background: #fce7f3;
+      border: 2px solid #ec4899;
+      color: #9d174d;
+      z-index: var(--z-index-tooltip);
+      top: 140px;
+      left: 380px;
+    }
+
+    /* Z-Index Scale Table */
+    .z-index-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+    }
+
+    .z-index-table th,
+    .z-index-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .z-index-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .z-index-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .token-name {
+      font-family: monospace;
+      background: #f3f4f6;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      color: #7c3aed;
+    }
+
+    .token-value {
+      font-family: monospace;
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .use-case {
+      color: #6b7280;
+    }
+
+    .z-swatch {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* JSON Display */
+    .json-block {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8125rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .json-key {
+      color: #60a5fa;
+    }
+
+    .json-number {
+      color: #34d399;
+    }
+
+    .json-string {
+      color: #fbbf24;
+    }
+
+    /* Section */
+    .section {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section h2 {
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+      color: #111827;
+    }
+
+    /* Visual scale */
+    .visual-scale {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+      margin: 1rem 0;
+      height: 100px;
+    }
+
+    .scale-bar {
+      flex: 1;
+      background: linear-gradient(to top, #3b82f6, #8b5cf6);
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      min-width: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Z-Index Tokens - 层级令牌</h1>
+    <p class="subtitle">来自 Martin Fowler 文章的实践案例：解决 z-index 魔法数字问题</p>
+
+    <div class="section">
+      <h2>问题：魔法数字的困境</h2>
+      <p style="color: #6b7280; margin-bottom: 1rem;">
+        在微前端架构中，不同团队可能使用任意的 z-index 值，导致层级冲突：
+      </p>
+      <div class="json-block"><span class="json-comment">/* ❌ 魔法数字 - 难以维护 */</span>
+<span class="json-key">.modal</span> { <span class="json-key">z-index</span>: <span class="json-string">9999</span>; }
+<span class="json-key">.dropdown</span> { <span class="json-key">z-index</span>: <span class="json-string">1000</span>; }
+<span class="json-key">.tooltip</span> { <span class="json-key">z-index</span>: <span class="json-string">8888</span>; }</div>
+    </div>
+
+    <div class="section">
+      <h2>解决方案：Z-Index Token 标尺</h2>
+      <p style="color: #6b7280; margin-bottom: 1rem;">
+        使用命名的 Token 值，清晰表达每个层级的语义和用途：
+      </p>
+      <div class="json-block"><span class="json-comment">/* ✅ 语义化 Token - 团队协作友好 */</span>
+<span class="json-key">"z-index"</span>: {
+  <span class="json-key">"$type"</span>: <span class="json-string">"number"</span>,
+  <span class="json-key">"default"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">1</span> },
+  <span class="json-key">"sticky"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">100</span> },
+  <span class="json-key">"navigation"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">200</span> },
+  <span class="json-key">"spinner"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">300</span> },
+  <span class="json-key">"toast"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">400</span> },
+  <span class="json-key">"modal"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">500</span> },
+  <span class="json-key">"tooltip"</span>: { <span class="json-key">"$value"</span>: <span class="json-number">600</span> }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>视觉化 Z-Index 层级</h2>
+      <div class="visual-scale">
+        <div class="scale-bar" style="height: 5%">1</div>
+        <div class="scale-bar" style="height: 20%">100</div>
+        <div class="scale-bar" style="height: 35%">200</div>
+        <div class="scale-bar" style="height: 50%">300</div>
+        <div class="scale-bar" style="height: 65%">400</div>
+        <div class="scale-bar" style="height: 80%">500</div>
+        <div class="scale-bar" style="height: 95%">600</div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+        <span style="flex: 1; text-align: left;">default</span>
+        <span style="flex: 1; text-align: left;">sticky</span>
+        <span style="flex: 1; text-align: left;">navigation</span>
+        <span style="flex: 1; text-align: left;">spinner</span>
+        <span style="flex: 1; text-align: left;">toast</span>
+        <span style="flex: 1; text-align: left;">modal</span>
+        <span style="flex: 1; text-align: left;">tooltip</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>堆叠上下文演示</h2>
+      <div class="demo-area">
+        <span class="demo-label">堆叠演示区域</span>
+        <div class="layer layer-default">default: 1</div>
+        <div class="layer layer-sticky">sticky: 100</div>
+        <div class="layer layer-navigation">nav: 200</div>
+        <div class="layer layer-spinner">spinner: 300</div>
+        <div class="layer layer-toast">toast: 400</div>
+        <div class="layer layer-modal">modal: 500</div>
+        <div class="layer layer-tooltip">tooltip: 600</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Token 对照表</h2>
+      <table class="z-index-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Value</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="token-name">--z-index-default</span></td>
+            <td><span class="token-value">1</span></td>
+            <td class="use-case">默认元素，正常文档流</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-sticky</span></td>
+            <td><span class="token-value">100</span></td>
+            <td class="use-case">position: sticky 元素</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-navigation</span></td>
+            <td><span class="token-value">200</span></td>
+            <td class="use-case">导航栏、顶部菜单</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-spinner</span></td>
+            <td><span class="token-value">300</span></td>
+            <td class="use-case">加载指示器</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-toast</span></td>
+            <td><span class="token-value">400</span></td>
+            <td class="use-case">Toast 通知</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-modal</span></td>
+            <td><span class="token-value">500</span></td>
+            <td class="use-case">模态框、对话框</td>
+          </tr>
+          <tr>
+            <td><span class="token-name">--z-index-tooltip</span></td>
+            <td><span class="token-value">600</span></td>
+            <td class="use-case">Tooltip、Popover</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>优势总结</h2>
+      <ul style="color: #6b7280; padding-left: 1.5rem; line-height: 2;">
+        <li><strong>避免冲突：</strong>不同团队使用统一标尺，不会出现 999 vs 1000 的困惑</li>
+        <li><strong>语义清晰：</strong>名称即含义，开发者无需猜测数值大小</li>
+        <li><strong>易于扩展：</strong>新增层级时按需插入，保持间隔便于未来扩展</li>
+        <li><strong>跨团队协作：</strong>微前端场景下，各团队引用相同 Token 规范</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

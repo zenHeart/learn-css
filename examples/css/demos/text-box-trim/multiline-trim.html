@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多行文本裁剪 - text-box-trim</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+      background: #1a1a2e;
+      color: #eee;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 30px;
+    }
+
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #16213e;
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #e94560;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 15px;
+    }
+
+    code {
+      background: #0f3460;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    /* 多行文本容器 */
+    .text-container {
+      background: rgba(233, 69, 96, 0.2);
+      border: 1px dashed #e94560;
+      margin: 15px 0;
+      padding: 15px;
+    }
+
+    .text-box {
+      background: rgba(59, 130, 246, 0.3);
+      padding: 15px;
+      margin: 10px 0;
+    }
+
+    .multiline {
+      line-height: 1.5;
+    }
+
+    .multiline.trimmed {
+      text-box: trim-both cap alphabetic;
+    }
+
+    /* 小标签/Badge 示例 */
+    .badge-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .badge {
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      background: #3b82f6;
+      color: white;
+    }
+
+    .badge.trimmed {
+      text-box: trim-both cap alphabetic;
+    }
+
+    /* 表格布局对齐 */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+
+    .comparison-table th {
+      color: #e94560;
+    }
+
+    .highlight {
+      color: #e94560;
+    }
+  </style>
+</head>
+<body>
+  <h1>text-box-trim: 多行文本裁剪</h1>
+
+  <div class="demo-section">
+    <h2>单行 vs 多行文本</h2>
+    <p class="description">
+      每行文本都有半行距空间（half-leading），text-box-trim 可以统一修剪这些空间。
+    </p>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>未修剪</th>
+          <th>已修剪 (trim-both cap alphabetic)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="text-box multiline">
+              第一行文本<br>
+              第二行文本<br>
+              第三行文本
+            </div>
+          </td>
+          <td>
+            <div class="text-box multiline trimmed">
+              第一行文本<br>
+              第二行文本<br>
+              第三行文本
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="description">
+      注意红色边框区域：<span class="highlight">左侧有额外的上下空间，右侧已修剪</span>
+    </p>
+  </div>
+
+  <div class="demo-section">
+    <h2>标签/徽章应用</h2>
+    <p class="description">标签类场景通常需要紧凑的垂直间距</p>
+
+    <div class="badge-container">
+      <span class="badge">未修剪标签</span>
+      <span class="badge">未修剪标签</span>
+      <span class="badge">未修剪标签</span>
+    </div>
+
+    <div class="badge-container">
+      <span class="badge trimmed">已修剪标签</span>
+      <span class="badge trimmed">已修剪标签</span>
+      <span class="badge trimmed">已修剪标签</span>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>配合 line-height 使用</h2>
+    <p class="description">
+      <code>line-height</code> 控制行间距，<code>text-box-trim</code> 修剪文本框边缘。
+      <br>两者配合使用可以实现精确的间距控制。
+    </p>
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <div class="text-container">
+        <p style="line-height: 1.2; margin: 0;">line-height: 1.2<br>这是第二行</p>
+      </div>
+      <div class="text-container">
+        <p style="line-height: 1.2; text-box: trim-both cap alphabetic; margin: 0;">line-height: 1.2<br>+ trim-both</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>实际应用场景</h2>
+    <p class="description">卡片列表中的紧凑文本布局</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+      <div style="background: #0f3460; padding: 15px; border-radius: 8px;">
+        <h3 style="margin: 0 0 10px 0; color: #3b82f6;">未使用 text-box</h3>
+        <p style="margin: 0; line-height: 1.5;">这是一个普通的段落文本，用于展示未修剪的效果。可以看到上下有额外的空间。</p>
+      </div>
+      <div style="background: #0f3460; padding: 15px; border-radius: 8px;">
+        <h3 style="margin: 0 0 10px 0; color: #3b82f6; text-box: trim-both cap alphabetic;">已使用 text-box</h3>
+        <p style="margin: 0; line-height: 1.5; text-box: trim-both cap alphabetic;">这是一个使用了 text-box-trim 的段落文本，上下空间被修剪掉了。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>浏览器兼容性</h2>
+    <p class="description">
+      <span style="color: #4ade80;">✓ Chrome 133+</span> &nbsp;
+      <span style="color: #4ade80;">✓ Safari 18.2+</span> &nbsp;
+      <span style="color: #f87171;">✗ Firefox (不支持)</span>
+    </p>
+  </div>
+</body>
+</html>
