@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS @page 打印样式演示</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+      font-size: 1.2em;
+    }
+
+    .demo-box {
+      padding: 15px;
+      border: 2px dashed #ccc;
+      border-radius: 6px;
+      margin: 10px 0;
+      background: #fafafa;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+
+    code {
+      font-family: "Fira Code", Consolas, monospace;
+    }
+
+    /* 打印样式 - 页面设置 */
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    @page :first {
+      margin-top: 4cm;
+    }
+
+    @page :left {
+      margin-left: 2.5cm;
+      margin-right: 2cm;
+    }
+
+    @page :right {
+      margin-left: 2cm;
+      margin-right: 2.5cm;
+    }
+
+    /* 避免在标题后分页 */
+    h2 {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* 避免表格内部分页 */
+    table {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* 保持段落完整 */
+    p {
+      orphans: 3;
+      widows: 3;
+    }
+
+    /* 文章内容样式 */
+    .article {
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .article h2 {
+      background: #e5e7eb;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 2em;
+    }
+
+    /* 表格样式 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    table th {
+      background: #f3f4f6;
+    }
+
+    /* 打印相关控件 */
+    .controls {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .controls button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    .controls button:hover {
+      background: #1d4ed8;
+    }
+
+    .controls .info {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #9ca3af;
+    }
+
+    /* 打印时隐藏 */
+    .no-print {
+      background: #fef3c7;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    @media print {
+      .no-print, .controls {
+        display: none !important;
+      }
+
+      .demo-section {
+        box-shadow: none;
+        border: none;
+      }
+
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS @page 打印样式演示</h1>
+
+  <div class="no-print">
+    <strong>💡 提示：</strong>点击「打印」按钮或使用浏览器打印预览（Ctrl+P / Cmd+P）查看 @page 样式效果。
+  </div>
+
+  <div class="controls">
+    <button onclick="window.print()">🖨️ 打印 / 打印预览</button>
+    <button onclick="window.close()">关闭</button>
+    <div class="info">
+      当前页面设置了 @page 规则：A4 纸张，2cm 边距，第一页 4cm 上边距，左右页对称边距
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>1. 页面设置 (@page)</h2>
+    <pre><code>/* 基础页面设置 */
+@page {
+  size: A4;        /* 页面尺寸 */
+  margin: 2cm;     /* 页边距 */
+}
+
+/* 第一页特殊设置 */
+@page :first {
+  margin-top: 4cm;  /* 第一页顶部留白更大 */
+}
+
+/* 左右页对称边距 */
+@page :left {
+  margin-left: 2.5cm;
+  margin-right: 2cm;
+}
+
+@page :right {
+  margin-left: 2cm;
+  margin-right: 2.5cm;
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>2. 分页控制 (page-break-*)</h2>
+    <pre><code>/* 避免在标题后分页 */
+h2 {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* 避免表格内部分页 */
+table {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* 段落的孤行控制 */
+p {
+  orphans: 3;   /* 底部至少保留3行 */
+  widows: 3;    /* 顶部至少保留3行 */
+}</code></pre>
+  </div>
+
+  <div class="demo-section">
+    <h2>3. 示例文章（用于测试分页）</h2>
+    <div class="article demo-box">
+      <h2>第一章：引言</h2>
+      <p>CSS @page 规则是 CSS 中用于控制打印页面布局的重要特性。通过 @page，我们可以设置页面尺寸、页边距、分页符等打印相关的样式。这对于创建适合打印的网页非常重要。</p>
+      <p>想象一下，当你需要打印一份报告或者文章时，良好的打印样式可以大大提升打印效果，避免出现孤行、标题被分隔到不同页面等问题。</p>
+
+      <h2>第二章：核心概念</h2>
+      <p>@page 规则支持多种页面伪类，包括 :first（第一页）、:left（左侧页）和 :right（右侧页）。这些伪类允许我们为不同页面设置不同的样式。</p>
+      <p>在实际应用中，我们经常需要：避免标题和其后续内容被分页到不同页面；确保表格不会被截断；控制段落的首行和末行出现在同一页面。</p>
+
+      <h2>第三章：实战技巧</h2>
+      <p>分页控制是打印样式中最重要的部分。通过 page-break-before、page-break-after 和 page-break-inside 属性，我们可以精细地控制内容在页面间的分布。</p>
+      <p>orphans 和 widows 属性用于控制段落的首行和末行。orphans 控制页面底部至少保留的行数，widows 控制页面顶部至少保留的行数。</p>
+
+      <h2>数据表示例</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>属性</th>
+            <th>值</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>页面尺寸</td>
+            <td>size</td>
+            <td>A4, A5, Letter, 自定义</td>
+          </tr>
+          <tr>
+            <td>页边距</td>
+            <td>margin</td>
+            <td>cm, mm, in</td>
+          </tr>
+          <tr>
+            <td>分页前</td>
+            <td>page-break-before</td>
+            <td>auto, always, avoid, left, right</td>
+          </tr>
+          <tr>
+            <td>分页后</td>
+            <td>page-break-after</td>
+            <td>auto, always, avoid, left, right</td>
+          </tr>
+          <tr>
+            <td>分页内</td>
+            <td>page-break-inside</td>
+            <td>auto, avoid</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>第四章：总结</h2>
+      <p>掌握 @page 规则可以让你的网页在打印时呈现更好的效果。记住几个关键点：使用 cm 或 mm 作为单位而非 px；通过 page-break-* 属性避免不理想的分页；使用 orphans 和 widows 控制段落完整性。</p>
+      <p>在实际项目中，建议创建专门的打印样式表，并使用 @media print 来控制哪些内容需要打印、哪些需要隐藏。</p>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>4. 常用打印样式模板</h2>
+    <pre><code>/* 打印样式表模板 */
+@media print {
+  /* 隐藏非打印内容 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 设置打印页面 */
+  @page {
+    size: A4 portrait;
+    margin: 2cm;
+  }
+
+  /* 避免分页 */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  figure, table, pre {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 控制孤行 */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* 链接显示 URL */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+  }
+}</code></pre>
+  </div>
+
+  <script>
+    // 检测打印预览模式
+    window.addEventListener('beforeprint', function() {
+      console.log('进入打印预览模式');
+    });
+
+    window.addEventListener('afterprint', function() {
+      console.log('退出打印预览模式');
+    });
+  </script>
+</body>
+</html>
