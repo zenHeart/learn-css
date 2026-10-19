@@ -214,13 +214,12 @@ img {
 
 IE/旧 Edge 不支持，可以使用：
 
-```html
-<!-- 图片备用方案 -->
-<img 
-  src="photo.jpg" 
-  alt="照片"
-  onerror="this.style.objectFit='none'; this.style.width='auto'; this.style.height='auto';"
-/>
+`object-fit` 不受支持时，`onerror` 不会触发——它只在图片加载失败时执行，和 `object-fit` 是否受支持无关。需要兼容旧浏览器时，先用特性检测判断，再切换到背景图方案：
+
+```js
+if (!CSS.supports('object-fit', 'cover')) {
+  // 退化：改用 background-image + background-size: cover
+}
 ```
 
 ## 相关属性
