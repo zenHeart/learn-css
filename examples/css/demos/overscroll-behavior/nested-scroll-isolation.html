@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案例3：嵌套滚动隔离 | overscroll-behavior</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; }
+
+    h1 { font-size: 22px; margin-bottom: 8px; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
+
+    /*
+     * === 外层布局容器 ===
+     * 整个页面分三块：头部、内容区（聊天列表+侧边栏）、输入区
+     */
+    .app-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    }
+
+    /* 顶部导航 */
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+    .app-header h1 { color: white; font-size: 18px; }
+    .app-header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+    /* 内容区：聊天列表 + 侧边栏 */
+    .content-area {
+      display: flex;
+      flex: 1;
+      overflow: hidden; /* 内容区本身不滚动 */
+    }
+
+    /*
+     * === 聊天消息列表 ===
+     * 关键：设置 overscroll-behavior: contain
+     * 使得聊天列表滚动到边界后，不会触发外层或其他区域的滚动
+     */
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      
+      /* ✅ 关键：聊天列表滚动隔离 */
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .message.received {
+      background: #f1f0f0;
+      color: #333;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .message.sent {
+      background: #667eea;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .message .time { font-size: 10px; opacity: 0.7; margin-top: 4px; display: block; }
+
+    /*
+     * === 侧边栏 ===
+     * 另一个独立的滚动区域，同样需要 overscroll-behavior: contain
+     */
+    .sidebar {
+      width: 220px;
+      background: #fafafa;
+      border-left: 1px solid #eee;
+      overflow-y: auto;
+      
+      /* ✅ 关键：侧边栏滚动隔离 */
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #eee;
+      background: #f5f5f5;
+    }
+    .sidebar-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .sidebar-item:hover { background: #f0f0f0; }
+    .sidebar-item.active { background: #e8f0fe; color: #667eea; border-left: 3px solid #667eea; }
+    .sidebar-item .count {
+      float: right;
+      background: #667eea;
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    /* 输入区 */
+    .input-area {
+      padding: 16px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      font-size: 14px;
+      outline: none;
+    }
+    .input-area input:focus { border-color: #667eea; }
+    .input-area button {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .input-area button:hover { background: #5a6fd6; }
+
+    /* 说明面板 */
+    .info-panel {
+      background: #e7f3ff;
+      border: 1px solid #b3d7ff;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .info-panel h4 { color: #004085; margin-bottom: 8px; font-size: 14px; }
+    .info-panel code { background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #d63384; }
+
+    /* 对比实验区 */
+    .experiment-section {
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    .experiment-section h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
+    .experiment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .exp-box {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .exp-box strong { display: block; margin-bottom: 8px; color: #333; }
+    .exp-box span { font-size: 12px; color: #666; }
+    .exp-box.bad { border-color: #f8d7da; background: #fff5f5; }
+    .exp-box.good { border-color: #d4edda; background: #f0fff4; }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+
+    <!-- 顶部导航 -->
+    <div class="app-header">
+      <h1>消息应用</h1>
+      <p>嵌套滚动隔离演示 — 每个区域独立滚动，互不影响</p>
+    </div>
+
+    <!-- 内容区 -->
+    <div class="content-area">
+
+      <!-- 聊天列表（可滚动） -->
+      <div class="chat-list" id="chatList">
+        <!-- 模拟消息 -->
+        <div class="message received">
+          你好！这是一个聊天应用演示
+          <span class="time">10:30</span>
+        </div>
+        <div class="message sent">
+          你好！我在测试滚动隔离
+          <span class="time">10:31</span>
+        </div>
+        <div class="message received">
+          试试在聊天区域滚动到底，然后继续拖动
+          <span class="time">10:32</span>
+        </div>
+        <div class="message sent">
+          如果 overscroll-behavior: contain 生效，右边侧边栏不会跟着滚动
+          <span class="time">10:32</span>
+        </div>
+        <div class="message received">
+          同样，侧边栏滚动时也不会影响聊天区域
+          <span class="time">10:33</span>
+        </div>
+        <div class="message sent">
+          这就是「嵌套滚动隔离」的效果 ✅
+          <span class="time">10:33</span>
+        </div>
+        <div class="message received">
+          继续滚动，测试边界行为...
+          <span class="time">10:34</span>
+        </div>
+        <div class="message sent">
+          好的，我继续滚动聊天列表到最底部
+          <span class="time">10:35</span>
+        </div>
+        <div class="message received">
+          现在聊天已经滚到最底部了（这条消息在底部附近）
+          <span class="time">10:36</span>
+        </div>
+        <div class="message received">
+          （底部消息 1）
+          <span class="time">10:37</span>
+        </div>
+        <div class="message received">
+          （底部消息 2）
+          <span class="time">10:38</span>
+        </div>
+        <div class="message received">
+          （底部消息 3）
+          <span class="time">10:39</span>
+        </div>
+        <div class="message received">
+          （底部消息 4）
+          <span class="time">10:40</span>
+        </div>
+        <div class="message received">
+          （底部消息 5 — 最底部）
+          <span class="time">10:41</span>
+        </div>
+      </div>
+
+      <!-- 侧边栏（独立可滚动） -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">会话列表</div>
+        <div class="sidebar-item active">
+          前端开发群
+          <span class="count">99+</span>
+        </div>
+        <div class="sidebar-item">技术交流 <span class="count">23</span></div>
+        <div class="sidebar-item">产品讨论 <span class="count">8</span></div>
+        <div class="sidebar-item">设计灵感 <span class="count">5</span></div>
+        <div class="sidebar-item">深夜食堂 <span class="count">42</span></div>
+        <div class="sidebar-item">摸鱼大厅 <span class="count">128</span></div>
+        <div class="sidebar-item">Bug 反馈 <span class="count">3</span></div>
+        <div class="sidebar-item">功能建议 <span class="count">17</span></div>
+        <div class="sidebar-item">周报吐槽 <span class="count">31</span></div>
+        <div class="sidebar-item">招聘求职 <span class="count">12</span></div>
+        <div class="sidebar-item">开源项目 <span class="count">6</span></div>
+        <div class="sidebar-item">工具分享 <span class="count">9</span></div>
+        <div class="sidebar-item">资源汇总 <span class="count">45</span></div>
+        <div class="sidebar-item">今日热榜 <span class="count">78</span></div>
+        <div class="sidebar-item">往期精华 <span class="count">21</span></div>
+        <div class="sidebar-item" style="color:#999;">（侧边栏底部）</div>
+        <div class="sidebar-item" style="color:#999;">（底部 2）</div>
+        <div class="sidebar-item" style="color:#999;">（底部 3）</div>
+        <div class="sidebar-item" style="color:#999;">（底部 4）</div>
+        <div class="sidebar-item" style="color:#999;">（最底部）</div>
+      </div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="input-area">
+      <input type="text" placeholder="输入消息...">
+      <button>发送</button>
+    </div>
+
+  </div>
+
+  <!-- 说明面板 -->
+  <div class="info-panel">
+    <h4>🔑 嵌套滚动隔离的原理</h4>
+    <p>当一个可滚动元素设置了 <code>overscroll-behavior: contain</code>，其内部的滚动到边界后，不会「溢」到父容器或其他兄弟元素。</p>
+    <p style="margin-top:8px;">本例中，聊天列表和侧边栏<strong>各自独立滚动</strong>，互不影响。</p>
+    <pre style="font-family:'SF Mono',monospace; font-size:12px; margin-top:12px; color:#333;">
+/* 聊天列表和侧边栏的共同样式 */
+.chat-list, .sidebar {
+  overscroll-behavior: contain;
+  overflow-y: auto;
+}</pre>
+  </div>
+
+  <div class="experiment-section">
+    <h3>滚动隔离 vs 未隔离对比</h3>
+    <div class="experiment-grid">
+      <div class="exp-box good">
+        <strong>✅ overscroll-behavior: contain</strong>
+        <span>每个区域滚动边界独立<br>不会互相影响</span>
+      </div>
+      <div class="exp-box bad">
+        <strong>❌ 无隔离（默认 auto）</strong>
+        <span>子区域滚到边界后会「穿透」<br>到父容器或其他滚动区域</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

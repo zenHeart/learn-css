@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案例2：横向轮播垂直滚动锁定 | overscroll-behavior</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fafafa; color: #333; }
+    .container { max-width: 800px; margin: 0 auto; padding: 24px; }
+
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+
+    h2 { font-size: 16px; color: #333; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #eee; }
+
+    /* 页面整体可滚动（模拟长页面） */
+    .page模拟 {
+      min-height: 200vh; /* 让页面可以垂直滚动 */
+      padding-top: 20px;
+    }
+    .page模拟 p { color: #999; font-size: 13px; margin-bottom: 8px; }
+
+    /*
+     * === 横向轮播容器 ===
+     * 关键组合：
+     * 1. touch-action: pan-y — 禁止浏览器默认的垂直触摸手势
+     * 2. overscroll-behavior: contain — 横向滚动到边界后不触发父容器垂直滚动
+     * 3. -webkit-overflow-scrolling: touch — iOS 原生惯性滚动（新版可省略）
+     */
+    .carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 20px 4px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      
+      /* ✅ 横向滚动关键 */
+      overscroll-behavior-x: contain;
+      touch-action: pan-y;          /* 禁止垂直手势，让横向滚动优先 */
+      -webkit-overflow-scrolling: touch;
+      
+      /* 隐藏滚动条但保持功能 */
+      scrollbar-width: none;        /* Firefox */
+      -ms-overflow-style: none;     /* IE/Edge */
+    }
+    .carousel::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+    /* 轮播卡片 */
+    .carousel-card {
+      flex-shrink: 0;
+      width: 260px;
+      height: 160px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
+      color: white;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s;
+    }
+    .carousel-card:hover { transform: translateY(-4px); }
+    .carousel-card:active { cursor: grabbing; }
+    .carousel-card h3 { font-size: 16px; margin-bottom: 4px; }
+    .carousel-card p { font-size: 12px; opacity: 0.9; }
+    .carousel-card:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .carousel-card:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .carousel-card:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .carousel-card:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .carousel-card:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .carousel-card:nth-child(6) { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+
+    /* 说明面板 */
+    .info-panel {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 13px;
+      margin-top: 24px;
+      line-height: 1.8;
+    }
+    .info-panel h4 { color: #856404; margin-bottom: 8px; font-size: 14px; }
+    .info-panel code { background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #d63384; }
+
+    /* 对比展示 */
+    .comparison { margin-top: 32px; }
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .comparison-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .comparison-item h4 { font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .comparison-item h4 .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .comparison-item h4 .badge-ok { background: #d4edda; color: #155724; }
+    .comparison-item h4 .badge-fail { background: #f8d7da; color: #721c24; }
+    .comparison-item ul { font-size: 13px; color: #666; padding-left: 20px; }
+    .comparison-item li { margin-bottom: 6px; }
+
+    /* 测试区域 */
+    .test-hint {
+      background: #e7f3ff;
+      border: 1px solid #b3d7ff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .test-hint strong { color: #004085; }
+  </style>
+</head>
+<body>
+
+  <!-- 模拟可滚动页面 -->
+  <div class="page模拟">
+    <div class="container">
+
+      <h1>横向轮播 + 垂直滚动锁定</h1>
+      <p class="subtitle">overscroll-behavior + touch-action 组合使用</p>
+
+      <div class="test-hint">
+        <strong>🖱️ 桌面端测试：</strong>在轮播卡片上拖动滚动，滚动到最左/右端后<strong>继续拖动</strong>，背景页面不应滚动。<br>
+        <strong>📱 移动端测试：</strong>在轮播上水平滑动，<strong>故意倾斜手指</strong>尝试垂直滚动，页面不应被拉爆。
+      </div>
+
+      <!-- 横向轮播 -->
+      <h2>横向轮播组件</h2>
+      <div class="carousel">
+        <div class="carousel-card">
+          <h3>卡片 1</h3>
+          <p>支持水平滚动</p>
+        </div>
+        <div class="carousel-card">
+          <h3>卡片 2</h3>
+          <p>滑动到底继续拖动</p>
+        </div>
+        <div class="carousel-card">
+          <h3>卡片 3</h3>
+          <p>不会触发页面垂直滚动</p>
+        </div>
+        <div class="carousel-card">
+          <h3>卡片 4</h3>
+          <p>touch-action: pan-y</p>
+        </div>
+        <div class="carousel-card">
+          <h3>卡片 5</h3>
+          <p>overscroll-behavior: contain</p>
+        </div>
+        <div class="carousel-card">
+          <h3>卡片 6</h3>
+          <p>双向保护 ✅</p>
+        </div>
+      </div>
+
+      <!-- 关键代码说明 -->
+      <div class="info-panel">
+        <h4>🔑 关键 CSS 组合</h4>
+        <pre style="font-family:'SF Mono',monospace; font-size:12px; color:#333;">
+.carousel {
+  overflow-x: auto;
+  
+  /* ① 横向滚动到边界后，阻止向父容器传播垂直滚动 */
+  overscroll-behavior-x: contain;
+  
+  /* ② 禁止此元素的垂直方向触摸默认行为，让手势优先处理水平滚动 */
+  /* 这样用户稍微倾斜的手指动作也会被识别为水平滚动 */
+  touch-action: pan-y;
+  
+  /* ③ iOS 原生惯性滚动（iOS Safari 16+ 可省略） */
+  -webkit-overflow-scrolling: touch;
+}</pre>
+      </div>
+
+      <!-- 对比说明 -->
+      <div class="comparison">
+        <h2>加了 vs 没加 对比</h2>
+        <div class="comparison-grid">
+          <div class="comparison-item">
+            <h4><span class="badge badge-ok">✅ 有 overscroll-behavior</span></h4>
+            <ul>
+              <li>轮播横向滚到头，继续拖动 → 轮播有轻微回弹</li>
+              <li>背景页面 <strong>保持不动</strong></li>
+              <li>用户意图被正确识别为「继续横向滚动」</li>
+            </ul>
+          </div>
+          <div class="comparison-item">
+            <h4><span class="badge badge-fail">❌ 没有 overscroll-behavior</span></h4>
+            <ul>
+              <li>轮播横向滚到头，继续拖动 →</li>
+              <li>背景页面开始<strong>垂直滚动</strong>（滚动穿透）</li>
+              <li>用户无法在轮播上正常滚动</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 400px;"></div>
+      <p>↓ 继续向下滚动，观察背景页面能否正常滚动 ↓</p>
+      <p style="color:#ccc; font-size:12px;">（轮播在上方设置了独立的滚动边界，不会影响这里的滚动）</p>
+
+    </div>
+  </div>
+
+</body>
+</html>
