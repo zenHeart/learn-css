@@ -1,0 +1,485 @@
+---
+title: css-scroll-snap
+category: 布局
+tags: [css-scroll-snap]
+---
+
+## 学习目标
+
+通过本章学习 CSS Scroll Snap，掌握滚动捕捉的核心原理与实战技巧：
+
+1. 理解 `scroll-snap-type` 及 `x/y` 方向属性的作用
+2. 掌握 `scroll-snap-align` 和 `scroll-snap-stop` 的使用
+3. 理解与 `overflow` 属性的配合关系
+4. 独立实现移动端轮播图效果
+5. 了解兼容性与性能注意事项
+
+---
+
+## 快速上手
+
+### scroll-snap-type
+
+`scroll-snap-type` 定义滚动容器的捕捉行为，指定滚动结束后是否"吸附"到特定的捕捉点。
+
+{/* @playground id="css-scroll-snap-basic" mode="code" */}
+
+```css
+.container {
+  scroll-snap-type: y mandatory;
+}
+```
+
+- `y` / `x`：沿 Y 轴或 X 轴方向捕捉
+- `both`：两个方向都捕捉
+- `none`：不捕捉
+- `mandatory`：滚动停止后必须停在某个捕捉点（强制吸附）
+- `proximity`：滚动停止后，如果接近捕捉点则吸附，否则不吸附
+
+### 1.1 工作原理
+
+Scroll Snap 基于**滚动容器**（Scroll Container）和**捕捉子元素**（Snap Child）协作实现：
+
+- **滚动容器**：设置了 `overflow` 属性的父容器
+- **捕捉子元素**：设置了 `scroll-snap-align` 的直接子元素
+
+浏览器在用户停止滚动后，根据 `scroll-snap-type` 的策略自动计算并平滑过渡到最近的捕捉点。
+
+### 1.2 基本语法
+
+```css
+.container {
+  /* 语法：scroll-snap-type: <axis> <strictness> */
+  scroll-snap-type: x mandatory;
+  scroll-snap-type: y proximity;
+  scroll-snap-type: both mandatory;
+}
+```
+
+- `axis`（轴向）：`x` | `y` | `both` | `none`
+- `strictness`（严格程度）：`mandatory`（强制）| `proximity`（接近时）
+
+---
+
+## 主要属性详解
+
+### 3.1 `scroll-snap-type`
+
+定义滚动容器的捕捉类型和轴向。
+
+```css
+.container {
+  /* 仅水平方向，强制吸附 */
+  scroll-snap-type: x mandatory;
+
+  /* 仅垂直方向，接近时吸附 */
+  scroll-snap-type: y proximity;
+
+  /* 两个方向都吸附（网格场景） */
+  scroll-snap-type: both mandatory;
+
+  /* 不吸附 */
+  scroll-snap-type: none;
+}
+```
+
+| 值 | 说明 |
+|----|------|
+| `none` | 不启用滚动捕捉 |
+| `x` | 仅沿 X 轴（水平）捕捉 |
+| `y` | 仅沿 Y 轴（垂直）捕捉 |
+| `both` | 两个方向都捕捉（用于网格布局） |
+
+**严格程度：**
+
+| 值 | 说明 |
+|----|------|
+| `mandatory` | 滚动停止后**必须**吸附到最近的捕捉点，不允许停在非捕捉位置 |
+| `proximity` | 滚动停止后，仅当滚动位置**接近**捕捉点时才吸附；否则停在当前位置 |
+
+> **注意：** `mandatory` 适合精确分页场景（如轮播图）；`proximity` 适合希望保留一定自由滚动空间的场景。
+
+---
+
+### 3.2 `scroll-snap-align`
+
+定义子元素作为捕捉点时的对齐方式。
+
+```css
+.snap-item {
+  /* 对齐到捕捉区域的 start（默认）、center 或 end） */
+  scroll-snap-align: start;
+  scroll-snap-align: center;
+  scroll-snap-align: end;
+  scroll-snap-align: none;
+}
+```
+
+- `start`：子元素对齐到滚动容器的**起始边缘**
+- `center`：子元素对齐到滚动容器的**中心**
+- `end`：子元素对齐到滚动容器的**结束边缘**
+- `none`：该子元素不作为捕捉点
+
+也可以分别设置两个方向：
+
+```css
+.snap-item {
+  /* scroll-snap-align: <block> <inline> */
+  scroll-snap-align: start center;
+}
+```
+
+> **与 `scroll-padding` 配合**：`scroll-padding` 设置在滚动容器上，可以调整捕捉区域的"有效边距"，使吸附位置更靠中间或留出边距。
+
+---
+
+### 3.3 `scroll-snap-stop`
+
+控制用户是否能够跳过捕捉点。
+
+```css
+.snap-item {
+  /* normal：不强制停在当前捕捉点，可继续滚动跳过 */
+  scroll-snap-stop: normal;
+
+  /* always：强制停在当前捕捉点，无法跳过 */
+  scroll-snap-stop: always;
+}
+```
+
+| 值 | 说明 |
+|----|------|
+| `normal` | 允许用户在一次滚动操作中越过多个捕捉点 |
+| `always` | 强制每个捕捉点都被"停留"一次，适用于精确分页场景 |
+
+> **典型场景：** 分页轮播图建议使用 `always`，确保每次滚动恰好停留在一页。
+
+---
+
+### 3.4 `scroll-padding` 系列
+
+`scroll-padding` 定义滚动容器的**内边距**，用于调整捕捉区域的"视觉中心"。
+
+```css
+.container {
+  scroll-padding: 20px;
+  scroll-padding-top: 10px;
+  scroll-padding-inline: auto;
+}
+```
+
+> **常见场景：** 顶部导航栏固定时，滚动容器设置 `scroll-padding-top` 可确保内容不被导航栏遮挡。
+
+---
+
+### 3.5 `scroll-margin` 系列
+
+`scroll-margin` 定义子元素的**外边距**，用于调整该元素作为捕捉目标时的偏移。
+
+```css
+.snap-item {
+  scroll-margin: 10px;
+  scroll-margin-top: 20px;
+}
+```
+
+> **典型场景：** 多个卡片需要向中间对齐，但又要保持卡片之间的间距时使用。
+
+---
+
+## 与 overflow 的配合
+
+Scroll Snap **必须**配合 `overflow` 属性使用，因为捕捉行为发生在滚动容器内部。
+
+```css
+.container {
+  /* 必须设置 overflow 才能触发滚动容器 */
+  overflow-x: auto;
+  overflow-y: auto;
+  /* 简写 */
+  overflow: auto;
+
+  /* 水平滚动 + 垂直隐藏 */
+  overflow-x: scroll;
+  overflow-y: hidden;
+
+  scroll-snap-type: x mandatory;
+}
+```
+
+### 关键规则
+
+1. **滚动容器必须有明确尺寸**：容器需要设置 `width`/`height` 或通过 `max-width`/`max-height` 约束，否则无法滚动。
+2. **子元素超出容器**：子元素内容总尺寸必须超过容器尺寸，才能触发滚动。
+3. **水平与垂直方向互不影响**：`overflow-x` 和 `overflow-y` 可独立设置，各自触发独立的滚动轴。
+
+```css
+/* 正确的完整配置 */
+.carousel {
+  display: flex;
+  width: 100vw;
+  overflow-x: scroll;       /* 启用水平滚动 */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; /* iOS 惯性滚动 */
+}
+
+.carousel > .slide {
+  flex: 0 0 100vw;          /* 每张幻灯片占满视口宽度 */
+  scroll-snap-align: start;
+}
+```
+
+---
+
+## 实战应用示例
+
+### 4.1 移动端全屏轮播图
+
+移动端常见的轮播图，每滑动一次切换一整屏内容。
+
+#### 目标分析
+
+- 每张幻灯片占满视口（`100vw × 100vh`）
+- 水平方向每次吸附到最近的幻灯片
+- 指示器（Dot）实时显示当前页码
+- 支持触摸滑动和 CSS 动画过渡
+
+#### HTML 结构
+
+```html
+<section class="carousel">
+  <div class="slide slide-1">1</div>
+  <div class="slide slide-2">2</div>
+  <div class="slide slide-3">3</div>
+  <div class="slide slide-4">4</div>
+</section>
+<nav class="dots">
+  <button class="dot active" aria-label="第1页"></button>
+  <button class="dot" aria-label="第2页"></button>
+  <button class="dot" aria-label="第3页"></button>
+  <button class="dot" aria-label="第4页"></button>
+</nav>
+```
+
+#### CSS 实现
+
+```css
+/* 滚动容器：关键配置 */
+.carousel {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  /* 核心：水平强制吸附 */
+  scroll-snap-type: x mandatory;
+  /* 平滑滚动到吸附点 */
+  scroll-behavior: smooth;
+  /* 隐藏滚动条（可选）*/
+  scrollbar-width: none;    /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.carousel::-webkit-scrollbar {
+  display: none;           /* Chrome/Safari */
+}
+
+/* 每张幻灯片：固定宽度等于视口宽度 */
+.slide {
+  flex: 0 0 100vw;        /* 不伸缩，宽度 100vw */
+  height: 100%;
+  scroll-snap-align: start; /* 对齐到容器起始边缘 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: #fff;
+}
+
+.slide-1 { background: #ff6b6b; }
+.slide-2 { background: #4ecdc4; }
+.slide-3 { background: #45b7d1; }
+.slide-4 { background: #96ceb4; }
+
+/* 指示器 */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 10;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.dot.active {
+  background: #fff;
+}
+```
+
+#### JavaScript 交互（可选）
+
+```javascript
+const carousel = document.querySelector('.carousel');
+const dots = document.querySelectorAll('.dot');
+
+// 滚动停止后更新指示器
+carousel.addEventListener('scroll', () => {
+  const scrollLeft = carousel.scrollLeft;
+  const width = carousel.offsetWidth;
+  const index = Math.round(scrollLeft / width);
+
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('active', i === index);
+  });
+});
+
+// 点击指示器跳转
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    carousel.scrollTo({
+      left: i * carousel.offsetWidth,
+      behavior: 'smooth'
+    });
+  });
+});
+```
+
+---
+
+### 4.2 水平图片画廊
+
+图片画廊，每张图片捕捉到容器中心。
+
+```css
+.gallery {
+  display: flex;
+  width: 100vw;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding: 20px;
+  scrollbar-width: none;
+}
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery img {
+  /* 固定宽度 + 强制居中对齐 */
+  flex: 0 0 80vw;
+  height: 60vh;
+  object-fit: cover;
+  scroll-snap-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+```
+
+---
+
+### 4.3 垂直滚动卡片列表
+
+类似抖音/小红书卡片流，每次滚动吸附一张卡片。
+
+```css
+.feed {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.feed::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  width: 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always; /* 强制每张卡停一次 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+```
+
+---
+
+## 最佳实践与注意事项
+
+### 性能方面
+
+- **避免在滚动容器上同时触发布局抖动**：如动态改变子元素高度会导致重排，建议在滚动前固定尺寸。
+- **大量子元素时的性能**：`mandatory` 模式下每次滚动都会强制计算吸附点，子元素超过 50 个时建议评估渲染性能。
+- **硬件加速**：对于高频滚动的场景（如轮播图），可添加 `will-change: scroll-position` 提示浏览器优化：
+  ```css
+  .carousel {
+    will-change: scroll-position;
+  }
+  ```
+
+### 可访问性 (Accessibility)
+
+- **键盘导航**：`scroll-snap-type` 默认不响应键盘 `Tab` 切换，需额外监听键盘事件手动 `scrollTo()`。
+- **屏幕阅读器**：`aria-live` 或 `role="listbox"` 可帮助屏幕阅读器理解滚动区域。
+- **动画敏感性**：为尊重 `prefers-reduced-motion` 用户，可关闭吸附动画：
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    .carousel {
+      scroll-behavior: auto;
+    }
+  }
+  ```
+
+### 常见陷阱
+
+1. **容器无滚动**：`overflow` 未设置或子元素总尺寸未超出容器 → 无滚动，无吸附。
+2. **flex 子元素宽度问题**：flex 子元素默认不强制宽度，需设置 `flex: 0 0 <width>` 或 `width`。
+3. **Android 低版本卡顿**：部分 Android 浏览器需添加 `-webkit-overflow-scrolling: touch` 开启惯性滚动。
+4. **`mandatory` 导致无法自由滚动**：用户无法在一次手势中滑动多屏，如需保留自由滚动用 `proximity`。
+
+### 浏览器兼容性
+
+| 特性 | Chrome | Firefox | Safari | Edge |
+|------|--------|---------|--------|------|
+| `scroll-snap-type` | ✅ 69+ | ✅ 68+ | ✅ 11+ | ✅ 79+ |
+| `scroll-snap-align` | ✅ 69+ | ✅ 68+ | ✅ 11+ | ✅ 79+ |
+| `scroll-snap-stop` | ✅ 112+ | ✅ 68+ | ✅ 15+ | ✅ 112+ |
+| `scroll-padding` | ✅ 69+ | ✅ 68+ | ✅ 14+ | ✅ 79+ |
+| `scroll-margin` | ✅ 69+ | ✅ 68+ | ✅ 14+ | ✅ 79+ |
+
+> iOS Safari 14 以下版本对 `scroll-snap-stop: always` 支持有限，建议渐进增强。
+
+---
+
+## 总结
+
+### 核心知识点回顾
+
+- `scroll-snap-type` 定义滚动容器的捕捉类型和严格程度
+  - 轴向：`x`（水平）、`y`（垂直）、`both`（网格）、`none`
+  - 严格程度：`mandatory`（强制吸附）、`proximity`（接近时吸附）
+- `scroll-snap-align` 定义子元素作为捕捉点的对齐方式
+  - `start`（起始边缘）、`center`（中心）、`end`（结束边缘）
+- `scroll-snap-stop` 控制是否允许跳过捕捉点
+  - `normal`（允许跳过）、`always`（强制停留）
+- `scroll-padding`（容器）与 `scroll-margin`（子元素）调整吸附区域偏移
+- **必须配合 `overflow` 属性使用**，且滚动容器需有明确尺寸约束
+- `scroll-behavior: smooth` 可实现平滑吸附动画
+- 移动端建议同时设置 `-webkit-overflow-scrolling: touch`
+
+### 延伸阅读
+
+- [MDN: CSS Scroll Snap](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll_snap)
+- [CSS-Tricks: Practical CSS Scroll Snapping](https://css-tricks.com/practical-css-scroll-snapping/)
+- [web.dev: Well-controlled scrolling with CSS scroll snap](https://web.dev/articles/css-scroll-snap)
+- [CSS Scroll Snap Module Level 1 - W3C](https://drafts.csswg.org/css-scroll-snap/)
