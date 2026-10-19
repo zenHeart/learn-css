@@ -1,0 +1,280 @@
+---
+title: "CSS Style Observer"
+category: "高级特性"
+tags:
+  - CSS
+  - JavaScript
+  - Style Observer
+  - MutationObserver
+  - CSS变量
+description: "详解CSS Style Observer - 监听CSS属性变化的JavaScript库"
+keywords: "CSS Style Observer, observe.style, Lea Verou, CSS变量监听"
+---
+
+# CSS Style Observer
+
+## 概述
+
+CSS Style Observer 是一个 JavaScript 库，由 Lea Verou 开发，用于监听 CSS 样式变化。与传统的轮询方式不同，Style Observer 利用浏览器原生的 `transition-behavior: allow-discrete` 特性，以高效、精确的方式检测 CSS 属性值的变化。
+
+## 为什么需要 Style Observer
+
+在 Web 开发中，经常需要在 CSS 属性变化时执行 JavaScript 逻辑。常见的场景包括：
+
+- 实现基于 CSS 变量的高阶组件系统（如 `--variant: danger` 控制10个颜色 token）
+-  Polyfill 缺失的 CSS 特性
+- 通过 CSS 控制 HTML 属性（如 `--aria-expanded`）
+- 基于其他 CSS 属性设置 CSS 属性
+
+传统的实现方式依赖**轮询**（polling），性能开销大且响应不及时。
+
+## Style Observer 的工作原理
+
+### 核心机制
+
+Style Observer 利用 `@keyframes` 动画的 `transitionstart` 事件来检测变化：
+
+1. 注册需要观察的 CSS 属性（或自定义属性）
+2. 浏览器会在属性值变化时触发 `transitionstart` 事件
+3. Style Observer 捕获这个事件并调用回调函数
+
+### 关键技术
+
+```javascript
+// 注册属性
+el.attributeStyleMap.set('--my-color', CSS.keyword('red'));
+
+// 监听变化
+observer.callback = (records) => {
+  records.forEach(record => {
+    console.log(record.property, record.oldValue, record.newValue);
+  });
+};
+```
+
+## 安装和使用
+
+### 通过 NPM 安装
+
+```bash
+npm install style-observer
+```
+
+### CDN 引入
+
+```html
+<script type="module">
+  import { StyleObserver } from 'https://esm.sh/style-observer';
+</script>
+```
+
+### 基本用法
+
+```javascript
+import { StyleObserver } from 'style-observer';
+
+// 创建 Observer 实例
+const observer = new StyleObserver(document.documentElement, '--my-color', (观察的属性);
+
+// 设置初始值
+document.documentElement.style.setProperty('--my-color', 'red');
+
+// 改变值（触发回调）
+document.documentElement.style.setProperty('--my-color', 'blue');
+
+// 回调函数
+observer.callback = (records) => {
+  records.forEach(record => {
+    console.log(`${record.property}: ${record.oldValue} → ${record.newValue}`);
+  });
+};
+```
+
+## API 详解
+
+### constructor(element, property, callback)
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `element` | Element | 要观察的元素 |
+| `property` | string | CSS 属性名（支持自定义属性） |
+| `callback` | function | 属性变化时的回调函数 |
+
+### callback 参数
+
+回调函数接收一个 `PropertyRecord[]` 数组：
+
+```typescript
+interface PropertyRecord {
+  property: string;      // 属性名
+  element: Element;      // 元素引用
+  oldValue: string | null;  // 旧值
+  newValue: string | null;   // 新值
+}
+```
+
+### observe()
+
+开始观察：
+
+```javascript
+observer.observe();
+```
+
+### disconnect()
+
+停止观察：
+
+```javascript
+observer.disconnect();
+```
+
+### takeRecords()
+
+获取但不清除记录：
+
+```javascript
+const records = observer.takeRecords();
+```
+
+## 实际应用场景
+
+### 1. 高阶组件属性
+
+将一个属性映射到多个样式：
+
+```javascript
+const observer = new StyleObserver(element, '--variant', (records) => {
+  records.forEach(record => {
+    const variant = record.newValue;
+    element.style.setProperty('--button-bg', variants[variant].bg);
+    element.style.setProperty('--button-text', variants[variant].text);
+    element.style.setProperty('--button-border', variants[variant].border);
+  });
+});
+
+const variants = {
+  primary: { bg: '#007bff', text: 'white', border: '#0056b3' },
+  danger: { bg: '#dc3545', text: 'white', border: '#a71d2a' },
+  success: { bg: '#28a745', text: 'white', border: '#1e7e34' }
+};
+```
+
+### 2. Aria 属性同步
+
+将 CSS 属性同步到 ARIA 属性：
+
+```javascript
+// 监听 aria-hidden 的 CSS 值变化
+const observer = new StyleObserver(button, '--aria-hidden', (records) => {
+  records.forEach(record => {
+    button.setAttribute('aria-hidden', record.newValue);
+  });
+});
+
+button.style.setProperty('--aria-hidden', 'true');
+```
+
+### 3. CSS Polyfill
+
+用 JS 实现缺失的 CSS 特性：
+
+```javascript
+// 监听 backdrop-filter（如果浏览器不支持）
+const observer = new StyleObserver(element, '--backdrop-filter', (records) => {
+  if (!CSS.supports('backdrop-filter', 'blur()')) {
+    records.forEach(record => {
+      element.style.background = `rgba(255,255,255,0.8)`;
+    });
+  }
+});
+```
+
+### 4. 动态主题系统
+
+监听主题切换：
+
+```javascript
+const observer = new StyleObserver(document.documentElement, 'color-scheme', (records) => {
+  records.forEach(record => {
+    updateThemeAssets(record.newValue);
+  });
+});
+```
+
+## 高级用法
+
+### 观察多个属性
+
+```javascript
+const properties = ['--color-primary', '--color-secondary', '--spacing'];
+const observers = properties.map(prop => 
+  new StyleObserver(element, prop, handleChange)
+);
+```
+
+### 使用通配符观察所有 CSS 变量
+
+```javascript
+// 观察 element 上的所有 CSS 变量
+const allVars = Array.from(element.style)
+  .filter(prop => prop.startsWith('--'));
+
+allVars.forEach(prop => {
+  new StyleObserver(element, prop, callback);
+});
+```
+
+### 节流回调
+
+```javascript
+let timeout;
+const observer = new StyleObserver(element, '--scroll-y', (records) => {
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    updateScrollIndicator(records);
+  }, 16); // ~60fps
+});
+```
+
+## 浏览器兼容性
+
+Style Observer 利用 `transition-behavior: allow-discrete`，支持约 **90%** 的全球用户：
+
+| 浏览器 | 支持版本 |
+|--------|---------|
+| Chrome | 117+ |
+| Firefox | 129+ |
+| Safari | 17.5+ |
+| Edge | 117+ |
+
+> **注意**：对于不支持 `transition-behavior` 的旧版浏览器，Style Observer 会优雅降级。
+
+## 已知问题与解决
+
+### Safari 过渡循环 Bug
+
+Safari 有一个会导致过渡无限循环的 bug。Style Observer 会自动检测并通过 debounce 解决这个问题。
+
+### Chrome 未注册属性 Bug
+
+Chrome 在某些情况下不会为未注册的 CSS 自定义属性触发 `transitionstart`。Style Observer 通过在必要时注册属性来解决。
+
+## 与其他方案的对比
+
+| 方案 | 原理 | 精度 | 性能 | 支持度 |
+|------|------|------|------|--------|
+| Style Observer | transitionstart 事件 | 高 | 好 | ~90% |
+| 轮询 | setInterval | 低 | 差 | 100% |
+| MutationObserver | DOM 变化 | 中 | 中 | 良好 |
+
+## 资源链接
+
+- **官网**: [observe.style](https://observe.style)
+- **GitHub**: [leaverou/style-observer](https://github.com/LeaVerou/style-observer)
+- **npm**: [style-observer](https://www.npmjs.com/package/style-observer)
+
+## 参考资料
+
+- [JS to observe CSS property changes, for reals - Lea Verou's Blog](https://lea.verou.me/blog/2025/style-observer/)
+- [CSS Houdini & Style Observer - You Might Not Need a Framework](https://youmightnotneed.com/styleobserver/)
