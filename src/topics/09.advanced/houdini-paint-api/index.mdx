@@ -1,0 +1,401 @@
+---
+title: "CSS Houdini Paint API"
+category: "高级特性"
+tags:
+  - Houdini
+  - Paint API
+  - CSS Paint
+  - 自定义 paint
+  - registerPaint
+description: "详解 CSS Houdini Paint API，通过 registerPaint 注册自定义 paint worklet，实现自定义图案绘制"
+keywords: "CSS Houdini, Paint API, registerPaint, paint worklet, 自定义图案"
+---
+
+# CSS Houdini Paint API
+
+**通过 JavaScript Worklet 在 CSS 中绘制自定义图案**
+
+---
+
+## 概述
+
+CSS Houdini 是浏览器提供的一套底层 API，允许开发者介入浏览器的 CSS 引擎处理过程。Paint API 是 Houdini 规范中最实用的部分之一，它允许我们通过 JavaScript 在 CSS 中绘制自定义图案。
+
+传统 CSS 能实现的效果有限，而 Paint API 让你可以用 Canvas 2D 的绘图能力，在 `background-image`、`border-image`、`list-style-image` 等属性中绘制任意图案。
+
+### 工作原理
+
+1. **注册 Worklet**：使用 `registerPaint()` 注册一个 paint worklet 类
+2. **加载 Worklet**：通过 `CSS.paintWorklet.addModule()` 加载 worklet 脚本
+3. **使用**：在 CSS 中通过 `paint(worklet-name)` 函数引用
+
+```js
+// my-paint.js
+class MyPaint {
+  paint(ctx, geom, properties) {
+    // ctx: CanvasRenderingContext2D
+    // geom: { width, height }
+    // properties: CSSStyleValue map
+  }
+}
+registerPaint('my-paint', MyPaint);
+```
+
+```html
+<script>
+  CSS.paintWorklet.addModule('my-paint.js');
+</script>
+<style>
+  .element {
+    background-image: paint(my-paint);
+  }
+</style>
+```
+
+---
+
+## registerPaint 注册自定义 paint worklet
+
+### 基本语法
+
+```js
+registerPaint(name, classDefinition)
+```
+
+- `name`：字符串，worklet 的名称，在 CSS 中通过 `paint(name)` 引用
+- `classDefinition`：类定义，必须实现 `paint()` 方法
+
+```js
+class DotPattern {
+  paint(ctx, geom) {
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(geom.width / 2, geom.height / 2, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+registerPaint('dot', DotPattern);
+```
+
+### inputProperties 定义自定义属性
+
+通过 `inputProperties` 静态 getter 声明需要监听的自定义属性，让 CSS 变化时自动触发 worklet 重绘：
+
+```js
+class GradientPaint {
+  static get inputProperties() {
+    return ['--gradient-color1', '--gradient-color2'];
+  }
+
+  paint(ctx, geom, properties) {
+    const color1 = properties.get('--gradient-color1').toString();
+    const color2 = properties.get('--gradient-color2').toString();
+
+    const gradient = ctx.createLinearGradient(0, 0, geom.width, geom.height);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, geom.width, geom.height);
+  }
+}
+registerPaint('gradient', GradientPaint);
+```
+
+```css
+.element {
+  --gradient-color1: red;
+  --gradient-color2: blue;
+  background-image: paint(gradient);
+}
+```
+
+---
+
+## paint(ctx, geom, properties) 回调参数详解
+
+### ctx — 绘图上下文
+
+`ctx` 是 `CanvasRenderingContext2D` 实例，支持大部分 Canvas 2D API：
+
+```js
+paint(ctx, geom, properties) {
+  // 矩形
+  ctx.fillRect(x, y, width, height);
+  ctx.strokeRect(x, y, width, height);
+  ctx.clearRect(x, y, width, height);
+
+  // 渐变
+  const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+  gradient.addColorStop(0, 'red');
+  gradient.addColorStop(1, 'blue');
+  ctx.fillStyle = gradient;
+
+  // 路径
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y);
+  ctx.arc(x, y, radius, startAngle, endAngle);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+```
+
+### geom — 几何信息
+
+```js
+paint(ctx, geom, properties) {
+  console.log(geom.width);   // 元素宽度
+  console.log(geom.height);  // 元素高度
+  console.log(geom.width + geom.height); // 可用于缩放图案
+}
+```
+
+### properties — 样式属性
+
+`properties` 是 `CSSStyleValue` 的 Map，支持获取任意 CSS 属性：
+
+```js
+static get inputProperties() {
+  return ['--my-var', 'width', 'background-color'];
+}
+
+paint(ctx, geom, properties) {
+  // 获取自定义属性
+  const myVar = properties.get('--my-var');
+
+  // 获取计算样式
+  const bgColor = properties.get('background-color');
+
+  console.log(myVar.toString());    // 属性值字符串
+  console.log(bgColor.cssText);     // 颜色值
+}
+```
+
+---
+
+## ctx 绘图上下文方法
+
+### 矩形操作
+
+| 方法 | 说明 |
+|------|------|
+| `fillRect(x, y, w, h)` | 填充矩形 |
+| `strokeRect(x, y, w, h)` | 描边矩形 |
+| `clearRect(x, y, w, h)` | 清除矩形区域（透明） |
+
+```js
+paint(ctx, geom) {
+  // 绘制格子图案
+  const size = 20;
+  for (let x = 0; x < geom.width; x += size) {
+    for (let y = 0; y < geom.height; y += size) {
+      ctx.fillStyle = (x / size + y / size) % 2 === 0 ? '#fff' : '#000';
+      ctx.fillRect(x, y, size, size);
+    }
+  }
+}
+```
+
+### 渐变
+
+```js
+// 线性渐变
+const gradient = ctx.createLinearGradient(0, 0, geom.width, 0);
+gradient.addColorStop(0, 'red');
+gradient.addColorStop(0.5, 'yellow');
+gradient.addColorStop(1, 'blue');
+ctx.fillStyle = gradient;
+ctx.fillRect(0, 0, geom.width, geom.height);
+
+// 径向渐变
+const radial = ctx.createRadialGradient(
+  geom.width / 2, geom.height / 2, 0,
+  geom.width / 2, geom.height / 2, geom.width / 2
+);
+radial.addColorStop(0, 'white');
+radial.addColorStop(1, 'black');
+ctx.fillStyle = radial;
+ctx.fillRect(0, 0, geom.width, geom.height);
+```
+
+### 路径绘制
+
+```js
+paint(ctx, geom) {
+  // 多边形
+  ctx.beginPath();
+  const sides = 6;
+  const cx = geom.width / 2;
+  const cy = geom.height / 2;
+  const r = Math.min(cx, cy) * 0.8;
+
+  for (let i = 0; i <= sides; i++) {
+    const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+```
+
+---
+
+## 实战案例
+
+### 案例一：Blob 动画
+
+通过 CSS 动画驱动 `@property` 自定义属性，worklet 读取属性值绘制动态 blob 形状：
+
+```js
+class BlobPaint {
+  static get inputProperties() {
+    return ['--blob-radius'];
+  }
+
+  paint(ctx, geom, properties) {
+    const radius = parseFloat(properties.get('--blob-radius')) || 50;
+    const cx = geom.width / 2;
+    const cy = geom.height / 2;
+
+    ctx.fillStyle = '#6366f1';
+    ctx.beginPath();
+
+    // 用多个圆弧组合成 blob 形状
+    const points = 8;
+    for (let i = 0; i <= points; i++) {
+      const angle = (i / points) * Math.PI * 2;
+      const r = radius + Math.sin(angle * 3) * (radius * 0.3);
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+registerPaint('blob', BlobPaint);
+```
+
+**CSS**：
+```css
+@property --blob-radius {
+  syntax: '<number>';
+  initial-value: 50;
+  inherits: false;
+}
+
+.blob-element {
+  --blob-radius: 50;
+  background-image: paint(blob);
+  animation: blobAnim 2s ease-in-out infinite alternate;
+}
+
+@keyframes blobAnim {
+  to { --blob-radius: 80; }
+}
+```
+
+### 案例二：多边形边框
+
+```js
+class PolygonBorderPaint {
+  static get inputProperties() {
+    return ['--polygon-sides', '--polygon-color'];
+  }
+
+  paint(ctx, geom, properties) {
+    const sides = parseInt(properties.get('--polygon-sides')) || 6;
+    const color = properties.get('--polygon-color')?.toString() || '#3b82f6';
+    const cx = geom.width / 2;
+    const cy = geom.height / 2;
+    const r = Math.min(cx, cy) * 0.8;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+
+    for (let i = 0; i <= sides; i++) {
+      const angle = (i / sides) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
+registerPaint('polygon-border', PolygonBorderPaint);
+```
+
+### 案例三：图像分割（棋盘格混合）
+
+```js
+class CheckerboardPaint {
+  static get inputProperties() {
+    return ['--checkerboard-size', '--checkerboard-color'];
+  }
+
+  paint(ctx, geom, properties) {
+    const size = parseInt(properties.get('--checkerboard-size')) || 20;
+    const color = properties.get('--checkerboard-color')?.toString() || 'rgba(0,0,0,0.5)';
+
+    ctx.clearRect(0, 0, geom.width, geom.height);
+
+    for (let x = 0; x < geom.width; x += size) {
+      for (let y = 0; y < geom.height; y += size) {
+        if ((x / size + y / size) % 2 === 0) {
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, size, size);
+        }
+      }
+    }
+  }
+}
+registerPaint('checkerboard', CheckerboardPaint);
+```
+
+---
+
+## 浏览器兼容性
+
+| 浏览器 | 支持情况 |
+|--------|----------|
+| Chrome | ✅ 65+ |
+| Edge | ✅ 79+ |
+| Firefox | ❌ 不支持 |
+| Safari | ❌ 不支持 |
+| iOS Safari | ❌ 不支持 |
+
+**注意**：Paint API 需要通过 HTTPS 或 localhost 访问才能正常工作。
+
+### 功能检测
+
+```js
+if ('paintWorklet' in CSS) {
+  CSS.paintWorklet.addModule('my-paint.js');
+} else {
+  // 回退方案
+  document.querySelector('.element').style.background = 'blue';
+}
+```
+
+### 常见问题
+
+1. **Worklet 加载失败**：确保通过 HTTPS 或 localhost 访问
+2. **属性变化不重绘**：确认在 `inputProperties` 中声明了对应属性
+3. **性能问题**：避免在 paint 中执行耗时操作，Houdini 运行在独立线程但仍需高效
+
+---
+
+## 总结
+
+CSS Paint API 是 Houdini 中最实用的 API 之一，它让你可以用 Canvas 2D 的能力绘制任意 CSS 图案。配合 `@property` 定义的可动画自定义属性，可以实现过去只有 JavaScript 才能做到的复杂动画效果。
+
+尽管目前仅 Chrome/Edge 支持，但作为渐进增强的方案，可以在支持的浏览器中提供更丰富的视觉效果。

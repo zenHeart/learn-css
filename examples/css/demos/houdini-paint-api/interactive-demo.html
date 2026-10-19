@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Paint API — 交互式演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .demo-box { height: 200px; border-radius: 8px; border: 1px solid #30363d; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; position: relative; }
+    .demo-label { font-size: 12px; color: #8b949e; text-align: center; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .btn { padding: 6px 14px; background: #21262d; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: #30363d; border-color: #58a6ff; }
+    .btn.active { background: #388bfd33; border-color: #58a6ff; color: #58a6ff; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+    .badge-no { background: #da3633; color: #fff; }
+    .info-bar { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .slider-control { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
+    .slider-label { font-size: 12px; color: #8b949e; display: flex; justify-content: space-between; }
+    input[type="range"] { -webkit-appearance: none; background: #30363d; border-radius: 4px; height: 6px; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: #58a6ff; border-radius: 50%; cursor: pointer; }
+    .demo-area { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .tab-nav { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #30363d; }
+    .tab-btn { padding: 8px 16px; background: transparent; border: none; color: #8b949e; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+    .tab-btn:hover { color: #c9d1d9; }
+    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch { width: 28px; height: 28px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .swatch:hover { transform: scale(1.1); }
+    .swatch.active { border-color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Paint API — 交互式演示</h1>
+    <p class="subtitle">通过 registerPaint 注册自定义 paint worklet，在 CSS 中绘制任意图案</p>
+
+    <div class="info-bar">
+      <span><strong>浏览器支持：</strong></span>
+      <span class="badge badge-yes">Chrome 65+</span>
+      <span class="badge badge-yes">Edge 79+</span>
+      <span class="badge badge-no">Firefox ❌</span>
+      <span class="badge badge-no">Safari ❌</span>
+    </div>
+
+    <div class="warning">
+      ⚠️ Houdini Paint API 需要通过 <strong>HTTP 服务器</strong>或 <strong>localhost</strong> 访问才能运行（不能直接打开本地 HTML 文件）。<br>
+      启动方式：<code>python -m http.server 8080</code> 或 <code>npx serve .</code>，然后访问 <code>http://localhost:8080/interactive-demo.html</code>
+    </div>
+
+    <!-- Tab 导航 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="blob">Blob 动画</button>
+      <button class="tab-btn" data-tab="polygon">多边形边框</button>
+      <button class="tab-btn" data-tab="checker">棋盘格遮罩</button>
+    </div>
+
+    <!-- Tab 1: Blob 动画 -->
+    <div class="tab-content active" id="tab-blob">
+      <div class="section">
+        <h2>Blob 动画（配合 @property）</h2>
+        <div class="demo-area">
+          <div class="demo-box" id="blob-demo" style="width:100%;height:200px;">
+            <span class="demo-label">--blob-radius 动画驱动</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="blob-animate-btn">▶ 开始动画</button>
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>半径</span>
+              <span id="radius-val">50</span>
+            </div>
+            <input type="range" id="blob-radius" min="20" max="100" value="50">
+          </div>
+        </div>
+
+        <div style="margin-top:12px;" class="color-swatches">
+          <span style="font-size:12px;color:#8b949e;">颜色：</span>
+          <div class="swatch active" style="background:#6366f1;" data-color="#6366f1"></div>
+          <div class="swatch" style="background:#ec4899;" data-color="#ec4899"></div>
+          <div class="swatch" style="background:#f97316;" data-color="#f97316"></div>
+          <div class="swatch" style="background:#22c55e;" data-color="#22c55e"></div>
+          <div class="swatch" style="background:#3b82f6;" data-color="#3b82f6"></div>
+        </div>
+
+        <div class="code-block">/* CSS */
+@property --blob-radius {
+  syntax: '<number>';
+  initial-value: 50;
+  inherits: false;
+}
+
+.blob-element {
+  --blob-radius: 50;
+  --blob-color: #6366f1;
+  background-image: paint(blob);
+}
+
+/* JavaScript 动画驱动 */
+element.style.setProperty('--blob-radius', newValue);</div>
+      </div>
+    </div>
+
+    <!-- Tab 2: 多边形边框 -->
+    <div class="tab-content" id="tab-polygon">
+      <div class="section">
+        <h2>多边形边框（交互控制）</h2>
+        <div class="demo-area">
+          <div class="demo-box" id="polygon-demo" style="width:100%;height:200px;">
+            <span class="demo-label">--polygon-sides 交互控制</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn active" data-sides="3">三角形</button>
+          <button class="btn" data-sides="4">四边形</button>
+          <button class="btn" data-sides="5">五边形</button>
+          <button class="btn" data-sides="6">六边形</button>
+          <button class="btn" data-sides="8">八边形</button>
+          <button class="btn" data-sides="12">十二边形</button>
+        </div>
+
+        <div class="slider-control" style="margin-top:12px;">
+          <div class="slider-label">
+            <span>边框宽度</span>
+            <span id="stroke-val">3</span>
+          </div>
+          <input type="range" id="stroke-width" min="1" max="10" value="3">
+        </div>
+
+        <div style="margin-top:12px;" class="color-swatches">
+          <span style="font-size:12px;color:#8b949e;">颜色：</span>
+          <div class="swatch active" style="background:#3b82f6;" data-color="#3b82f6"></div>
+          <div class="swatch" style="background:#ef4444;" data-color="#ef4444"></div>
+          <div class="swatch" style="background:#22c55e;" data-color="#22c55e"></div>
+          <div class="swatch" style="background:#f59e0b;" data-color="#f59e0b"></div>
+          <div class="swatch" style="background:#8b5cf6;" data-color="#8b5cf6"></div>
+        </div>
+
+        <div class="code-block">/* HTML */
+&lt;div id="polygon-demo"&gt;&lt;/div&gt;
+
+/* JavaScript */
+demo.style.setProperty('--polygon-sides', 6);
+demo.style.setProperty('--polygon-color', '#3b82f6');
+demo.style.setProperty('--polygon-stroke-width', 3);</div>
+      </div>
+    </div>
+
+    <!-- Tab 3: 棋盘格遮罩 -->
+    <div class="tab-content" id="tab-checker">
+      <div class="section">
+        <h2>棋盘格遮罩（图像处理）</h2>
+        <div class="demo-area">
+          <div style="position:relative;width:100%;height:200px;border-radius:8px;overflow:hidden;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%23334155' width='400' height='200'/%3E%3Ccircle cx='200' cy='100' r='60' fill='%23f97316'/%3E%3Ccircle cx='160' cy='80' r='20' fill='%23fbbf24'/%3E%3Ccircle cx='240' cy='120' r='30' fill='%23ef4444'/%3E%3C/svg%3E" style="width:100%;height:100%;object-fit:cover;" alt="示例图片">
+            <div id="checker-overlay" style="position:absolute;inset:0;mix-blend-mode:multiply;background:#888;"></div>
+          </div>
+        </div>
+
+        <div class="slider-control">
+          <div class="slider-label">
+            <span>格子大小</span>
+            <span id="size-val">16</span>
+          </div>
+          <input type="range" id="checker-size" min="4" max="64" value="16">
+        </div>
+
+        <div class="code-block">/* CSS */
+.checker-overlay {
+  background-image: paint(checkerboard);
+  --checkerboard-size: 16;
+  --checkerboard-color: rgba(0,0,0,0.5);
+  mix-blend-mode: multiply;
+}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 检查是否支持 Paint Worklet
+    if ('paintWorklet' in CSS) {
+      // 加载 worklet
+      CSS.paintWorklet.addModule('worklets/basic-patterns.js');
+      CSS.paintWorklet.addModule('worklets/polygon-border.js');
+      CSS.paintWorklet.addModule('worklets/checkerboard.js');
+
+      // === Blob Demo ===
+      const blobDemo = document.getElementById('blob-demo');
+      const blobRadiusSlider = document.getElementById('blob-radius');
+      const radiusVal = document.getElementById('radius-val');
+      const blobAnimateBtn = document.getElementById('blob-animate-btn');
+      let blobColor = '#6366f1';
+      let isAnimating = false;
+      let animFrame;
+
+      // 初始化 blob
+      blobDemo.style.setProperty('--blob-radius', '50');
+      blobDemo.style.setProperty('--blob-color', blobColor);
+      blobDemo.style.backgroundImage = 'paint(blob)';
+
+      // 滑块控制
+      blobRadiusSlider.addEventListener('input', e => {
+        const val = e.target.value;
+        radiusVal.textContent = val;
+        blobDemo.style.setProperty('--blob-radius', val);
+      });
+
+      // 颜色选择
+      document.querySelectorAll('#tab-blob .swatch').forEach(s => {
+        s.addEventListener('click', () => {
+          document.querySelectorAll('#tab-blob .swatch').forEach(sw => sw.classList.remove('active'));
+          s.classList.add('active');
+          blobColor = s.dataset.color;
+          blobDemo.style.setProperty('--blob-color', blobColor);
+        });
+      });
+
+      // 动画
+      let start = null;
+      function animateBlob(timestamp) {
+        if (!start) start = timestamp;
+        const elapsed = timestamp - start;
+        const t = (elapsed % 2000) / 2000;
+        const eased = 0.5 + 0.5 * Math.sin(t * Math.PI * 2 - Math.PI / 2);
+        const radius = 30 + eased * 70;
+        blobDemo.style.setProperty('--blob-radius', radius.toFixed(1));
+        radiusVal.textContent = radius.toFixed(0);
+        blobRadiusSlider.value = radius;
+        animFrame = requestAnimationFrame(animateBlob);
+      }
+
+      blobAnimateBtn.addEventListener('click', () => {
+        isAnimating = !isAnimating;
+        if (isAnimating) {
+          blobAnimateBtn.textContent = '⏸ 暂停';
+          blobAnimateBtn.classList.add('active');
+          start = null;
+          animFrame = requestAnimationFrame(animateBlob);
+        } else {
+          blobAnimateBtn.textContent = '▶ 开始动画';
+          blobAnimateBtn.classList.remove('active');
+          cancelAnimationFrame(animFrame);
+        }
+      });
+
+      // === Polygon Demo ===
+      const polygonDemo = document.getElementById('polygon-demo');
+      const strokeSlider = document.getElementById('stroke-width');
+      const strokeVal = document.getElementById('stroke-val');
+      let polygonColor = '#3b82f6';
+
+      polygonDemo.style.setProperty('--polygon-sides', '3');
+      polygonDemo.style.setProperty('--polygon-color', polygonColor);
+      polygonDemo.style.setProperty('--polygon-stroke-width', '3');
+      polygonDemo.style.backgroundImage = 'paint(polygon-border)';
+
+      document.querySelectorAll('[data-sides]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-sides]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          polygonDemo.style.setProperty('--polygon-sides', btn.dataset.sides);
+        });
+      });
+
+      strokeSlider.addEventListener('input', e => {
+        const val = e.target.value;
+        strokeVal.textContent = val;
+        polygonDemo.style.setProperty('--polygon-stroke-width', val);
+      });
+
+      document.querySelectorAll('#tab-polygon .swatch').forEach(s => {
+        s.addEventListener('click', () => {
+          document.querySelectorAll('#tab-polygon .swatch').forEach(sw => sw.classList.remove('active'));
+          s.classList.add('active');
+          polygonColor = s.dataset.color;
+          polygonDemo.style.setProperty('--polygon-color', polygonColor);
+        });
+      });
+
+      // === Checker Demo ===
+      const checkerOverlay = document.getElementById('checker-overlay');
+      const checkerSizeSlider = document.getElementById('checker-size');
+      const sizeVal = document.getElementById('size-val');
+
+      checkerOverlay.style.setProperty('--checkerboard-size', '16');
+      checkerOverlay.style.setProperty('--checkerboard-color', 'rgba(0,0,0,0.3)');
+      checkerOverlay.style.backgroundImage = 'paint(checkerboard)';
+
+      checkerSizeSlider.addEventListener('input', e => {
+        const val = e.target.value;
+        sizeVal.textContent = val;
+        checkerOverlay.style.setProperty('--checkerboard-size', val);
+      });
+
+    } else {
+      // 不支持时的降级
+      document.querySelector('.warning').innerHTML =
+        '⚠️ 当前浏览器不支持 CSS Paint API。请使用 <strong>Chrome 65+</strong> 或 <strong>Edge 79+</strong> 访问此页面。';
+      document.querySelectorAll('.demo-box, .demo-area').forEach(el => {
+        el.style.background = 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50%/20px 20px';
+      });
+    }
+  </script>
+</body>
+</html>
