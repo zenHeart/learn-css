@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Layout API — 等分布局演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #79c0ff; margin-top: 12px; }
+    .info { font-size: 13px; color: #8b949e; margin-top: 12px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-top: 12px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .equal-container { display: flex; gap: 10px; width: 400px; padding: 10px; border: 2px dashed #30363d; border-radius: 8px; }
+    .equal-col { flex: 1; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 6px; color: white; font-weight: 600; display: flex; align-items: center; justify-content: center; min-height: 80px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Layout API — 等分布局</h1>
+
+    <div class="warning">
+      ⚠️ Layout API 需要在 Chrome/Edge 中开启实验性功能：<code>chrome://flags/#enable-experimental-web-platform-features</code>
+    </div>
+
+    <div class="section">
+      <h2>Worklet 实现</h2>
+      <div class="code-block">class EqualColumnsLayout {
+  async layout(children, edges, constraints, styleMap) {
+    const availW = constraints.fixedInlineSize - edges.inline;
+    const gap = 10;
+    const childCount = children.length;
+    if (childCount === 0) return { autoBlockSize: 0, childFragments: [] };
+    const colW = (availW - gap * (childCount - 1)) / childCount;
+    const childFragments = [];
+    let maxH = 0;
+    for (let i = 0; i < children.length; i++) {
+      const f = await children[i].layoutNextFragment({ availableInlineSize: colW });
+      f.inlineOffset = edges.inlineStart + i * (colW + gap);
+      f.inlineSize = colW;
+      maxH = Math.max(maxH, f.blockSize);
+      childFragments.push(f);
+    }
+    return { autoBlockSize: maxH + edges.block, childFragments };
+  }
+}
+registerLayout('equal-columns', EqualColumnsLayout);</div>
+    </div>
+
+    <div class="section">
+      <h2>效果演示（Flexbox 模拟）</h2>
+      <div class="equal-container">
+        <div class="equal-col" style="height:80px;">列 1</div>
+        <div class="equal-col" style="height:120px;">列 2</div>
+        <div class="equal-col" style="height:60px;">列 3</div>
+        <div class="equal-col" style="height:100px;">列 4</div>
+      </div>
+      <div class="code-block">/* CSS */
+.equal-container { display: layout(equal-columns); }</div>
+    </div>
+
+    <div class="section">
+      <h2>关键参数</h2>
+      <div class="info">
+        <strong>availableInlineSize</strong>：可用宽度（容器宽 - 边框 - 间距）<br>
+        <strong>child.layoutNextFragment({ availableInlineSize })</strong>：让子元素在约束下布局<br>
+        <strong>fragment.inlineSize</strong>：子元素宽度，<strong>fragment.blockSize</strong>：高度
+      </div>
+    </div>
+  </div>
+</body>
+</html>

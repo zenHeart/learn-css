@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>content 属性 - 图标注入</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      min-height: 100vh; padding: 24px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #f0f6fc; margin-bottom: 20px; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; color: #f0f6fc; margin-bottom: 14px; }
+    .demo-box { padding: 16px; background: #0d1117; border-radius: 4px; margin-bottom: 12px; }
+    .nav-menu { list-style: none; }
+    .nav-menu li { padding: 10px 0; border-bottom: 1px solid #21262d; }
+    .nav-menu li:last-child { border-bottom: none; }
+    .nav-menu a { color: #c9d1d9; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .icon-home::before { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2358a6ff'%3E%3Cpath d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; flex-shrink: 0; }
+    .icon-settings::before { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; flex-shrink: 0; }
+    .icon-mail::before { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E") no-repeat center; background-size: contain; flex-shrink: 0; }
+    .icon-user::before { content: ""; display: inline-block; width: 16px; height: 16px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%E%3C/svg%3E") no-repeat center; background-size: contain; flex-shrink: 0; }
+    .feature-list { list-style: none; }
+    .feature-list li { padding: 8px 0; color: #c9d1d9; }
+    .feature-list li::before { content: "✓"; color: #3fb950; margin-right: 8px; font-weight: bold; }
+    .feature-list.new li::before { content: "✦"; color: #58a6ff; }
+    .feature-list.beta li::before { content: "β"; color: #a371f7; background: #a371f722; padding: 0 4px; border-radius: 3px; font-size: 11px; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; color: #79c0ff; white-space: pre-wrap; }
+    .desc { font-size: 13px; color: #8b949e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>content 属性 - 图标注入</h1>
+
+    <div class="section">
+      <h2>导航菜单图标</h2>
+      <div class="demo-box">
+        <ul class="nav-menu">
+          <li><a href="#" class="icon-home">首页</a></li>
+          <li><a href="#" class="icon-settings">设置</a></li>
+          <li><a href="#" class="icon-mail">消息</a></li>
+          <li><a href="#" class="icon-user">个人中心</a></li>
+        </ul>
+      </div>
+      <div class="code-block">.icon-home::before {
+  content: url("data:image/svg+xml,%3Csvg ... %3E%3C/svg%3E");
+  display: inline-block;
+  width: 16px; height: 16px;
+  background-size: contain;
+  margin-right: 8px;
+}</div>
+      <p class="desc">使用 SVG Data URI 注入图标，无需任何外部资源</p>
+    </div>
+
+    <div class="section">
+      <h2>功能列表标记</h2>
+      <div class="demo-box">
+        <h3 style="color:#f0f6fc; font-size:14px; margin-bottom:8px;">已上线功能</h3>
+        <ul class="feature-list">
+          <li>用户注册和登录</li>
+          <li>数据可视化图表</li>
+          <li>团队协作功能</li>
+        </ul>
+      </div>
+      <div class="code-block">.feature-list li::before {
+  content: "✓";
+  color: #3fb950;
+  margin-right: 8px;
+}</div>
+      <p class="desc">通过 ::before 伪元素添加列表项图标</p>
+    </div>
+
+    <div class="section">
+      <h2>不同状态的列表标记</h2>
+      <div class="demo-box">
+        <h3 style="color:#f0f6fc; font-size:14px; margin-bottom:8px;">新功能</h3>
+        <ul class="feature-list new">
+          <li>AI 智能推荐</li>
+          <li>多语言支持</li>
+        </ul>
+        <h3 style="color:#f0f6fc; font-size:14px; margin:16px 0 8px;">Beta 功能</h3>
+        <ul class="feature-list beta">
+          <li>实时协作编辑</li>
+          <li>API Webhooks</li>
+        </ul>
+      </div>
+      <div class="code-block">.feature-list.new li::before {
+  content: "✦";
+  color: #58a6ff;
+}
+.feature-list.beta li::before {
+  content: "β";
+  color: #a371f7;
+  background: #a371f722;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 11px;
+}</div>
+      <p class="desc">使用不同图标区分功能状态</p>
+    </div>
+  </div>
+</body>
+</html>

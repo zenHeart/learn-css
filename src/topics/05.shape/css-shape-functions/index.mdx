@@ -1,0 +1,448 @@
+# CSS shape() 函数实现自定义形状裁剪
+
+## 基础概念
+
+CSS `shape()` 函数是 `clip-path` 属性中用于定义基本形状的函数集合。通过 `shape()` 函数，我们可以创建矩形、圆形、椭圆、多边形等多种自定义形状，实现元素的不规则裁剪效果。
+
+**核心属性**：`clip-path` 是使用 `shape()` 函数的主要属性，它可以定义元素的可见区域，超出定义形状的区域将被裁剪隐藏。
+
+**与 `mask` 的区别**：`clip-path` 是"硬裁剪"，只有完全可见和完全不可见两种状态；`mask` 支持半透明过渡，可以实现渐变淡出等丰富效果。
+
+## 语法详解
+
+### rect() - 矩形裁剪
+
+`rect()` 函数创建一个矩形裁剪区域，语法继承自已废弃的 `clip` 属性：
+
+```css
+/* rect(top, right, bottom, left) */
+clip-path: rect(0, 100px, 100px, 0);
+
+/* 带自动值的矩形 */
+clip-path: rect(auto, auto, auto, auto);
+
+/* 常用场景：隐藏左侧 50px */
+clip-path: rect(0, auto, auto, 50px);
+```
+
+| 参数 | 说明 |
+|------|------|
+| `top` | 矩形上边缘，相对于元素顶部 |
+| `right` | 矩形右边缘，相对于元素左侧 |
+| `bottom` | 矩形下边缘，相对于元素顶部 |
+| `left` | 矩形左边缘，相对于元素左侧 |
+
+**特点**：所有值都是相对于元素自身的尺寸，不支持百分比。
+
+### inset() - 内嵌矩形裁剪
+
+`inset()` 是 `rect()` 的现代升级版，支持更多功能：
+
+```css
+/* inset(top right bottom left) */
+clip-path: inset(0 0 0 0);     /* 完整显示 */
+clip-path: inset(10px 10px 10px 10px);  /* 四边各向内偏移 10px */
+
+/* 使用百分比 */
+clip-path: inset(10% 20% 10% 20%);
+
+/* 圆角内嵌矩形 */
+clip-path: inset(10px round 20px);
+clip-path: inset(10px 20px 10px 20px round 50%);
+
+/* 单值语法（四边相同） */
+clip-path: inset(20px);
+
+/* 双值语法（上下/左右） */
+clip-path: inset(10px 20px);
+
+/* 三值语法（上/左右/下） */
+clip-path: inset(10px 20px 30px);
+
+/* 隐藏部分边框 */
+clip-path: inset(0 0 50% 0);   /* 只显示上半部分 */
+clip-path: inset(50% 0 0 0);   /* 只显示下半部分 */
+```
+
+| 特性 | 说明 |
+|------|------|
+| 百分比 | 相对于元素尺寸计算 |
+| `round` | 可选参数，为裁剪区域添加圆角 |
+| 动画 | 支持 CSS 动画过渡 |
+
+**实战用法**：使用 `inset(50% 0 0 0)` 配合动画，可以实现从下往上扫过的效果。
+
+### circle() - 圆形裁剪
+
+```css
+/* circle(radius at center-x center-y) */
+clip-path: circle(50%);            /* 半径为元素一半 */
+clip-path: circle(50px);           /* 固定半径 */
+clip-path: circle(50px at 50% 50%); /* 圆心在中心 */
+clip-path: circle(30% at 70% 30%);   /* 偏心圆 */
+clip-path: circle(0);              /* 隐藏 */
+
+/* 简写：省略 at center */
+clip-path: circle(50px at 50% 50%);
+```
+
+| 参数 | 说明 |
+|------|------|
+| `radius` | 圆的半径，支持长度值或百分比（相对于元素宽高的平均水平） |
+| `center-x` | 圆心 X 坐标（默认 50%） |
+| `center-y` | 圆心 Y 坐标（默认 50%） |
+
+**特点**：半径的百分比是相对于元素宽高**平均值**的一半。
+
+### ellipse() - 椭圆裁剪
+
+```css
+/* ellipse(radius-x radius-y at center-x center-y) */
+clip-path: ellipse(50% 50%);              /* 标准椭圆填充 */
+clip-path: ellipse(50% 30%);              /* 水平椭圆 */
+clip-path: ellipse(30% 50% at 50% 50%);   /* 垂直椭圆 */
+clip-path: ellipse(50% 50% at 30% 70%);   /* 偏心椭圆 */
+clip-path: ellipse(50% 20% at 50% 50%);    /* 胶囊形 */
+
+/* 使用 at 关键字定位圆心 */
+clip-path: ellipse(40% 40% at 60% 40%);
+```
+
+| 参数 | 说明 |
+|------|------|
+| `radius-x` | 椭圆 X 轴半径（半宽度） |
+| `radius-y` | 椭圆 Y 轴半径（半高度） |
+| `center-x` | 椭圆圆心 X 坐标（默认 50%） |
+| `center-y` | 椭圆圆心 Y 坐标（默认 50%） |
+
+**常用场景**：创建胶囊按钮（`ellipse(50% 50%)` 配合 `border-radius`）、侧边栏头像等。
+
+### polygon() - 多边形裁剪
+
+```css
+/* polygon(x1 y1, x2 y2, x3 y3, ...) */
+clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);      /* 矩形（4 个点） */
+clip-path: polygon(50% 0, 100% 100%, 0 100%);             /* 三角形 */
+clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);    /* 菱形 */
+clip-path: polygon(0 0, 100% 0, 50% 100%);               /* 箭头/三角形 */
+clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);   /* 十字形 */
+clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); /* 五边形 */
+
+/* 百分比的灵活运用 */
+clip-path: polygon(
+  0 0,           /* 左上 */
+  50% 0,         /* 中上 */
+  50% 50%,       /* 中中 */
+  0 50%          /* 左中 */
+);
+
+/* 使用 fill-rule: evenodd 创建中空形状 */
+clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%) fill-rule(evenodd);
+```
+
+| 特性 | 说明 |
+|------|------|
+| 点数 | 至少需要 3 个点形成多边形 |
+| 坐标单位 | 支持 px、%、em 等任何长度单位 |
+| 闭合 | 点按顺序连接，最后一个点会自动与第一个点闭合 |
+| `fill-rule` | 可选值 `nonzero`（默认）或 `evenodd` 控制填充规则 |
+
+**常用场景**：创建星形、多边形标签、对话气泡、不规则按钮等。
+
+### path() - SVG 路径裁剪（扩展）
+
+```css
+/* 使用 SVG path 数据 */
+clip-path: path('M 0 0 L 100 0 L 100 100 L 0 100 Z');  /* 矩形 */
+clip-path: path('M 50 0 L 100 100 L 0 100 Z');           /* 三角形 */
+
+/* 带平滑曲线的路径 */
+clip-path: path('M 0 0 Q 50 100 100 0 T 200 0');
+```
+
+**优势**：`path()` 支持贝塞尔曲线等复杂形状，比 `polygon()` 更强大，但语法更复杂。
+
+## clip-path 与 shape() 的关系
+
+### 基本语法
+
+```css
+/* 使用 shape() 函数 */
+clip-path: rect(10px, 20px, 30px, 10px);
+clip-path: inset(10px 20px round 5px);
+clip-path: circle(50% at 50% 50%);
+clip-path: ellipse(50% 30% at 50% 50%);
+clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+
+/* 使用 URL 引用 SVG clip-path */
+clip-path: url('#my-clip');
+
+/* 混合使用 */
+clip-path: url('#my-clip') padding-box;
+clip-path: padding-box circle(50%);
+```
+
+### clip-path 的其他值
+
+```css
+/* 关键词值 */
+clip-path: none;                          /* 无裁剪 */
+clip-path: margin-box;                   /* 使用 margin 框作为形状 */
+clip-path: padding-box;                   /* 使用 padding 框（默认） */
+clip-path: border-box;                    /* 使用 border 框 */
+clip-path: content-box;                   /* 使用 content 框 */
+clip-path: fill-box;                     /* 使用对象边界框 */
+clip-path: stroke-box;                    /* 使用笔触边界框 */
+clip-path: view-box;                     /* 使用 view-box（配合 SVG） */
+
+/* 布尔运算（组合多个形状） */
+clip-path: circle(50% at 50% 50%) padding-box;
+clip-path: url('#clip') padding-box;
+```
+
+## clip-path 与 mask 对比
+
+| 特性 | clip-path + shape() | mask |
+|------|---------------------|------|
+| 裁剪效果 | 硬裁剪（可见/不可见） | 支持半透明过渡 |
+| 渐变 | ❌ 不支持 | ✅ 渐变遮罩 |
+| 模糊 | ❌ 不支持 | ✅ 可配合 filter |
+| 动画性能 | ✅ 优秀 | ⚠️ 较好 |
+| 浏览器支持 | ✅ 良好 | ⚠️ 需前缀 |
+| 语法复杂度 | ✅ 简单直观 | ⚠️ 较复杂 |
+| SVG 路径 | ✅ 支持 path() | ✅ 支持任意 SVG |
+| 动态形状 | ✅ 支持动画 | ❌ 不支持 |
+
+### 选择建议
+
+- **简单形状裁剪** → `clip-path`（圆形、矩形、多边形）
+- **需要半透明/渐隐效果** → `mask`（唯一选择）
+- **复杂 SVG 图形** → 两者都支持
+- **追求动画性能** → `clip-path`（性能更好）
+- **图片淡出、渐隐效果** → `mask`（必须使用）
+
+## 实战案例
+
+### 案例一：自定义按钮形状
+
+利用 `polygon()` 创建不规则形状按钮：
+
+```css
+.button-rabbit {
+  /* 兔子形状按钮 */
+  clip-path: polygon(
+    0 50%,          /* 左中 */
+    30% 0,          /* 右上 */
+    50% 30%,        /* 耳尖 */
+    70% 0,          /* 左耳尖 */
+    100% 50%,       /* 右中 */
+    70% 100%,       /* 右下 */
+    30% 100%        /* 左下 */
+  );
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 12px 32px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: clip-path 0.3s ease;
+}
+
+.button-rabbit:hover {
+  clip-path: polygon(
+    5% 50%,
+    35% 5%,
+    55% 35%,
+    75% 5%,
+    95% 50%,
+    65% 95%,
+    35% 95%
+  );
+}
+```
+
+**效果**：鼠标悬停时，兔子形状会轻微放大变形，增加交互趣味性。
+
+### 案例二：图片多边形裁剪
+
+使用 `polygon()` 实现图片的不规则裁剪：
+
+```css
+.photo-card {
+  /* 六边形裁剪 */
+  clip-path: polygon(
+    25% 0%,     /* 左上入 */
+    75% 0%,     /* 右上入 */
+    100% 50%,   /* 右中 */
+    75% 100%,   /* 右下出 */
+    25% 100%,   /* 左下出 */
+    0% 50%      /* 左中 */
+  );
+  width: 300px;
+  height: 350px;
+  object-fit: cover;
+}
+
+/* 配合 hover 实现动画效果 */
+.photo-card:hover {
+  clip-path: polygon(
+    20% 0%,
+    80% 0%,
+    100% 50%,
+    80% 100%,
+    20% 100%,
+    0% 50%
+  );
+}
+```
+
+**效果**：图片显示为六边形，悬停时形状轻微扩展。
+
+### 案例三：文字环绕异形图片
+
+利用 `clip-path` 配合浮动或 shape-outside 实现文字环绕：
+
+```css
+.shaped-image {
+  /* 半圆形图片 */
+  clip-path: circle(50% at 50% 50%);
+  float: left;
+  shape-outside: circle(50% at 50% 50%);
+  margin-right: 20px;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* 使用 polygon 实现更复杂的文字环绕 */
+.beer-shape {
+  clip-path: polygon(
+    0 20%, 30% 20%, 30% 0%, 70% 0%, 70% 20%,
+    100% 20%, 100% 100%, 0 100%
+  );
+  shape-outside: polygon(
+    0 20%, 30% 20%, 30% 0%, 70% 0%, 70% 20%,
+    100% 20%, 100% 100%, 0 100%
+  );
+  float: left;
+}
+```
+
+**效果**：文字环绕不规则形状的图片，创造更有趣的排版效果。
+
+### 案例四：带动画的动态裁剪
+
+结合 CSS 动画实现动态形状切换：
+
+```css
+.morphing-shape {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  clip-path: circle(50% at 50% 50%);
+  animation: morph 3s ease-in-out infinite;
+}
+
+@keyframes morph {
+  0%, 100% {
+    clip-path: circle(50% at 50% 50%);           /* 圆形 */
+  }
+  25% {
+    clip-path: ellipse(50% 30% at 50% 50%);      /* 横向椭圆 */
+  }
+  50% {
+    clip-path: polygon(
+      50% 0%, 100% 50%, 50% 100%, 0% 50%
+    );  /* 菱形 */
+  }
+  75% {
+    clip-path: polygon(
+      0 0, 100% 0, 100% 100%, 0 100%
+    );  /* 矩形 */
+  }
+}
+```
+
+### 案例五：气泡/标签裁剪
+
+使用 `polygon()` 创建对话气泡：
+
+```css
+.speech-bubble {
+  position: relative;
+  background: #4ecdc4;
+  padding: 20px 30px;
+  color: white;
+  clip-path: polygon(
+    0% 30%,           /* 三角形左边 */
+    15% 30%,          /* 三角形上边结束 */
+    15% 0%,           /* 三角形顶部 */
+    20% 15%,          /* 三角形尖角上 */
+    25% 0%,           /* 三角形右边上 */
+    25% 30%,          /* 三角形下边结束 */
+    100% 30%,         /* 右上角 */
+    100% 100%,        /* 右下角 */
+    0% 100%           /* 左下角 */
+  );
+}
+
+/* 带三角箭头的气泡 */
+.bubble-with-tail {
+  clip-path: polygon(
+    20% 0%,
+    100% 0%,
+    100% 85%,
+    80% 85%,
+    80% 100%,
+    60% 85%,
+    0% 85%
+  );
+  background: #667eea;
+}
+```
+
+## 浏览器兼容性
+
+现代浏览器已全面支持 `clip-path` 和 `shape()` 函数：
+
+- Chrome 55+ ✅
+- Firefox 54+ ✅
+- Safari 9.1+ ✅（部分旧版本需 `-webkit-` 前缀）
+- Edge 79+ ✅
+
+### 兼容处理
+
+```css
+.supported-shape {
+  /* Safari 9-15 需要前缀 */
+  -webkit-clip-path: circle(50% at 50% 50%);
+  clip-path: circle(50% at 50% 50%);
+}
+
+/* 备用方案（基础形状） */
+.fallback-circle {
+  border-radius: 50%;  /* 基础圆形回退 */
+  overflow: hidden;
+}
+```
+
+## 性能优化
+
+1. **优先使用简单形状**：`circle()` 和 `ellipse()` 比 `polygon()` 性能更好
+2. **避免频繁动画**：`clip-path` 动画性能优秀，但避免在滚动时触发
+3. **减少点数**：多边形点数越少性能越好
+4. **使用 `will-change`**：对于需要动画的元素提前告知浏览器
+
+```css
+.animated-shape {
+  will-change: clip-path;
+  transition: clip-path 0.3s ease;
+}
+```
+
+## 辅助工具
+
+创建复杂 `polygon()` 形状时，推荐使用以下工具：
+
+- **CSS Clip-Path Maker** (bennettfeely.com/clippy)：可视化拖拽生成代码
+- **Chrome DevTools**：支持直接在 Elements 面板编辑 clip-path
+- **Figma/Sketch**：导出 SVG 后转换为 polygon 坐标

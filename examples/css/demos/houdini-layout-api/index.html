@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Houdini Layout API — 示例总览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 24px; padding: 12px; background: rgba(88,166,255,0.1); border-radius: 4px; border-left: 3px solid #58a6ff; }
+    .warning { font-size: 13px; color: #f0883e; margin-bottom: 24px; padding: 12px; background: rgba(240,136,62,0.1); border-radius: 4px; border-left: 3px solid #f0883e; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .demo-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; transition: all 0.15s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .demo-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .demo-card h3 { font-size: 15px; color: #f0f6fc; margin-bottom: 8px; }
+    .demo-card p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+    .demo-card .tag { display: inline-block; padding: 2px 8px; background: #21262d; border-radius: 4px; font-size: 11px; color: #58a6ff; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 4px; }
+    .badge-yes { background: #238636; color: #fff; }
+    .badge-no { background: #da3633; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Houdini Layout API</h1>
+    <p class="subtitle">通过 registerLayout 注册自定义布局算法，像 display: flex 一样自定义布局逻辑</p>
+
+    <div class="warning">
+      ⚠️ Layout API 目前在 Chromium 中支持有限，且需要通过 <strong>HTTP 服务器</strong> 访问。<br>
+      启动方式：<code>python -m http.server 8080</code> 或 <code>npx serve .</code>
+    </div>
+
+    <div class="info">
+      <strong>浏览器支持：</strong>
+      <span class="badge badge-yes">Chrome 65+（部分）</span>
+      <span class="badge badge-yes">Edge 79+（部分）</span>
+      <span class="badge badge-no">Firefox ❌</span>
+      <span class="badge badge-no">Safari ❌</span>
+      <br><br>
+      <strong>注意</strong>：Layout API 需要在 Chrome/Edge 中开启实验性功能。访问 <code>chrome://flags/#enable-experimental-web-platform-features</code> 启用。
+    </div>
+
+    <div class="demo-grid">
+      <a class="demo-card" href="centering-demo.html">
+        <h3>居中布局（Centering）</h3>
+        <p>演示如何用 Layout API 创建居中布局，childFragments 如何设置 inlineOffset/blockOffset 实现居中。</p>
+        <span class="tag">入门级</span>
+      </a>
+
+      <a class="demo-card" href="equal-columns-demo.html">
+        <h3>等分布局（Equal Columns）</h3>
+        <p>演示水平等分布局，计算可用空间并分配给每个子元素。</p>
+        <span class="tag">进阶</span>
+      </a>
+
+      <a class="demo-card" href="masonry-demo.html">
+        <h3>瀑布流布局（Masonry）</h3>
+        <p>演示用 Layout API 实现瀑布流效果，自动选择最短列放置元素。</p>
+        <span class="tag">高级</span>
+      </a>
+    </div>
+
+    <div style="margin-top:32px;">
+      <h2 style="font-size:16px;color:#f0f6fc;margin-bottom:12px;">Worklet 文件</h2>
+      <ul style="font-size:13px;color:#8b949e;list-style:disc;padding-left:20px;line-height:2;">
+        <li><code>worklets/centering-layout.js</code> — 居中布局 worklet</li>
+        <li><code>worklets/equal-columns-layout.js</code> — 等分布局 worklet</li>
+        <li><code>worklets/masonry-layout.js</code> — 瀑布流布局 worklet</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

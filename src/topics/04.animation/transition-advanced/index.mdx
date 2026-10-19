@@ -1,0 +1,244 @@
+---
+title: "CSS transition 高级过渡技巧"
+category: "动画"
+tags:
+  - CSS
+  - transition
+  - 过渡
+  - 动画
+description: "详解CSS transition属性的高级用法和过渡技巧"
+keywords: "transition, CSS过渡, 动画技巧, 高级CSS"
+---
+
+# CSS transition 高级过渡技巧
+
+## 概述
+
+CSS `transition` 属性是创建平滑交互动画的基础。掌握高级技巧可以实现更复杂、更精美的过渡效果。
+
+{/* @playground id="basic-usage" mode="demo" */}
+
+## 基本回顾
+
+```css
+.element {
+  transition: property duration timing-function delay;
+}
+```
+
+## 高级技巧
+
+### 1. 多个属性过渡
+
+```css
+.multi-transition {
+  transition: 
+    background-color 0.3s ease,
+    transform 0.5s ease-out,
+    opacity 0.2s linear;
+}
+```
+
+### 2. 不同时间函数
+
+```css
+.timing-demo {
+  transition-timing-function: linear;      /* 匀速 */
+  transition-timing-function: ease;       /* 开始慢，结束快 */
+  transition-timing-function: ease-in;    /* 开始慢 */
+  transition-timing-function: ease-out;   /* 结束慢 */
+  transition-timing-function: ease-in-out; /* 开始结束都慢 */
+  transition-timing-function: steps(4);   /* 分步过渡 */
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); /* 自定义贝塞尔 */
+}
+```
+
+### 3. 伪元素过渡
+
+```css
+.button::before {
+  transition: transform 0.3s ease;
+}
+
+.button:hover::before {
+  transform: scale(1.2);
+}
+```
+
+### 4. 触发条件过渡
+
+```css
+/* 点击效果 */
+.click-effect:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
+/* 焦点效果 */
+.input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+/*:checked 伪类 */
+.checkbox:checked + label {
+  color: #007bff;
+  transition: color 0.2s;
+}
+```
+
+### 5. 渐变背景过渡
+
+```css
+.gradient-hover {
+  background: linear-gradient(90deg, #007bff, #00d4ff);
+  background-size: 200% 100%;
+  transition: background-position 0.5s ease;
+}
+
+.gradient-hover:hover {
+  background-position: 100% 0;
+}
+```
+
+### 6. 高度自动过渡
+
+```css
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.accordion-content.open {
+  max-height: 500px; /* 需要设置具体值或使用 JS */
+}
+```
+
+### 7. 使用 @starting-style
+
+```css
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.element {
+  animation: fade-in 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+```
+
+## 实际应用
+
+### 1. 卡片悬停效果
+
+```css
+.card {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+```
+
+### 2. 按钮点击反馈
+
+```css
+.btn {
+  transform: scale(1);
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+```
+
+### 3. 输入框聚焦效果
+
+```css
+.input {
+  border: 2px solid #ddd;
+  padding: 10px 15px;
+  transition: border-color 0.2s ease, padding 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: #007bff;
+  padding: 12px 17px;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+```
+
+### 4. 菜单滑入效果
+
+```css
+.menu-item {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.menu-item.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+```
+
+## 性能优化
+
+### 1. 使用 transform 和 opacity
+
+```css
+/* 推荐：使用 transform 和 opacity */
+.good {
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* 不推荐：触发重排的属性 */
+.bad {
+  transition: width 0.3s, height 0.3s, margin 0.3s;
+}
+```
+
+### 2. 使用 will-change
+
+```css
+.animated-element {
+  will-change: transform, opacity;
+  transition: transform 0.3s, opacity 0.3s;
+}
+```
+
+### 3. 使用 contain
+
+```css
+.contained {
+  contain: layout style;
+}
+```
+
+## 浏览器兼容性
+
+`transition` 属性兼容性极佳：
+
+- Chrome 26+
+- Firefox 16+
+- Safari 9+
+- Edge 12+
+
+## 参考资料
+
+- [transition - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/transition)
+- [CSS Transitions - CSS-Tricks](https://css-tricks.com/almanac/properties/t/transition/)
