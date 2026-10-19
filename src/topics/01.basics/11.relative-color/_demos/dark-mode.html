@@ -1,0 +1,94 @@
+<h1>深色模式适配</h1>
+<p>点击按钮切换深色/浅色模式，观察相对颜色的自动适配</p>
+<style>
+  :root {
+    --text-primary: oklch(20% 0.05 240);
+    --text-secondary: oklch(from oklch(20% 0.05 240) calc(L + 0.4) c h);
+    --accent: oklch(55% 0.2 245);
+    --accent-hover: oklch(from oklch(55% 0.2 245) calc(L + 0.1) c h);
+    --surface: oklch(from oklch(20% 0.05 240) calc(L + 0.85) c h / 5%);
+    --border: oklch(from oklch(20% 0.05 240) calc(L + 0.7) c h / 20%);
+    
+    background: var(--surface);
+    color: var(--text-primary);
+    padding: 20px;
+    border-radius: 12px;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  h1 {
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+  
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  
+  .card h2 {
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .card p {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text-primary: oklch(85% 0.05 240);
+      --text-secondary: oklch(from oklch(85% 0.05 240) calc(L - 0.4) c h);
+      --accent: oklch(70% 0.15 245);
+      --accent-hover: oklch(from oklch(70% 0.15 245) calc(L + 0.1) c h);
+      --surface: oklch(from oklch(85% 0.05 240) calc(L - 0.8) c h / 10%);
+      --border: oklch(from oklch(85% 0.05 240) calc(L - 0.7) c h / 15%);
+    }
+  }
+  
+  /* 手动切换类 */
+  .dark {
+    --text-primary: oklch(85% 0.05 240);
+    --text-secondary: oklch(from oklch(85% 0.05 240) calc(L - 0.4) c h);
+    --accent: oklch(70% 0.15 245);
+    --accent-hover: oklch(from oklch(70% 0.15 245) calc(L + 0.1) c h);
+    --surface: oklch(from oklch(85% 0.05 240) calc(L - 0.8) c h / 10%);
+    --border: oklch(from oklch(85% 0.05 240) calc(L - 0.7) c h / 15%);
+  }
+</style>
+
+<h1>相对颜色与深色模式</h1>
+<p>使用相对颜色可以根据基础颜色自动生成适配深色模式的颜色变体。</p>
+<button class="btn" onclick="document.body.classList.toggle('dark')">切换深色模式</button>
+
+<div class="card">
+  <h2>色彩适配</h2>
+  <p>当切换深色模式时，所有颜色都会根据基础色的变化自动调整，保持视觉一致性。</p>
+</div>

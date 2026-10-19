@@ -1,0 +1,81 @@
+<h1>色彩和谐</h1>
+<p>基于单一颜色计算互补色、三角色等和谐色彩</p>
+<style>
+  :root {
+    --brand: oklch(60% 0.2 245);
+  }
+  
+  .harmony-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  
+  .harmony-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .harmony-swatch {
+    height: 60px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  
+  .harmony-label {
+    font-size: 11px;
+    color: #8b949e;
+    text-align: center;
+  }
+  
+  /* 基准色 */
+  .swatch-base { background: var(--brand); }
+  
+  /* 互补色 (色相差 180°) */
+  .swatch-complement { background: oklch(from var(--brand) L c calc(h + 180)); }
+  
+  /* 三角色 1 (色相差 120°) */
+  .swatch-triad-1 { background: oklch(from var(--brand) L c calc(h + 120)); }
+  
+  /* 三角色 2 (色相差 240°) */
+  .swatch-triad-2 { background: oklch(from var(--brand) L c calc(h + 240)); }
+  
+  /* 分裂补色 1 (色相差 150°) */
+  .swatch-split-1 { background: oklch(from var(--brand) L c calc(h + 150)); }
+  
+  /* 分裂补色 2 (色相差 210°) */
+  .swatch-split-2 { background: oklch(from var(--brand) L c calc(h + 210)); }
+</style>
+
+<div class="harmony-grid">
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-base">Base</div>
+    <div class="harmony-label">基准色</div>
+  </div>
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-complement">+180°</div>
+    <div class="harmony-label">互补色</div>
+  </div>
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-triad-1">+120°</div>
+    <div class="harmony-label">三角色 1</div>
+  </div>
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-triad-2">+240°</div>
+    <div class="harmony-label">三角色 2</div>
+  </div>
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-split-1">+150°</div>
+    <div class="harmony-label">分裂补色 1</div>
+  </div>
+  <div class="harmony-item">
+    <div class="harmony-swatch swatch-split-2">+210°</div>
+    <div class="harmony-label">分裂补色 2</div>
+  </div>
+</div>

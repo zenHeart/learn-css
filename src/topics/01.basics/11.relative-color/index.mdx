@@ -1,0 +1,282 @@
+---
+title: "CSS 相对颜色"
+category: "基础知识"
+tags:
+  - CSS颜色
+  - 相对颜色
+  - oklch
+  - color
+description: "详解CSS相对颜色（Relative Color Syntax）的语法和使用场景"
+keywords: "CSS相对颜色, relative color, oklch, color syntax, CSS颜色"
+---
+
+# CSS 相对颜色
+
+## 什么是相对颜色
+
+相对颜色（Relative Color Syntax）允许你基于一个已有颜色，通过颜色函数动态计算出一个新的颜色。这是 CSS Color Level 5 引入的强大特性，可以从指定颜色中提取通道值进行数学运算后返回新颜色。
+
+## 基础语法
+
+相对颜色的核心是在颜色函数中使用一个**原始颜色**作为基准：
+
+```css
+color-function(from <origin-color> <modifier>)
+```
+
+- `color-function`：任意颜色函数，如 `oklch()`、`hsl()`、`lab()`、`lch()`、`rgb()` 等
+- `from`：关键字，声明使用相对颜色语法
+- `<origin-color>`：基准颜色，可以是任意有效 CSS 颜色值
+- `<modifier>`：通道调整或计算表达式
+
+### 语法示例
+
+```css
+/* 基于 hsl 基准颜色 */
+--accent: oklch(from hsl(210 80% 50%) calc(L * 1.2) c h);
+
+/* 基于 rgb 基准颜色 */
+--lighter: oklch(from rgb(0 128 255) l c h);
+
+/* 基于自定义属性 */
+--primary: #007AFF;
+--primary-light: oklch(from var(--primary) l 0.15 220);
+```
+
+## 工作原理
+
+相对颜色的工作方式：
+
+1. **提取通道**：从原始颜色中提取各个通道值（如 L、a、b、h、c 等）
+2. **计算**：对提取的通道进行数学运算
+3. **返回**：将计算结果作为新颜色返回
+
+```css
+/* 原始颜色 */
+--brand: oklch(60% 0.2 220);
+
+/* 提取 L、c、h 通道并调整 */
+--brand-light: oklch(
+  from var(--brand)           /* 基准颜色 */
+  calc(L * 1.2)              /* 调整亮度：L * 1.2 */
+  calc(c * 0.8)              /* 调整色度：c * 0.8 */
+  h                          /* 保持色调不变 */
+);
+```
+
+## 提取的通道
+
+不同颜色空间的通道提取规则：
+
+| 颜色函数 | 通道 |
+|---------|------|
+| `oklch()` | L（明度）、C（色度）、H（色调） |
+| `oklab()` | L（明度）、A（a 轴）、B（b 轴） |
+| `lch()` | L（明度）、C（色度）、H（色调） |
+| `lab()` | L（明度）、A（a 轴）、B（b 轴） |
+| `hsl()` | H（色调）、S（饱和度）、L（亮度） |
+| `rgb()` | R（红）、G（绿）、B（蓝） |
+| `hwb()` | H（色调）、W（白度）、B（黑度） |
+
+```css
+/* 使用原始 oklch 颜色作为基准 */
+--base: oklch(60% 0.15 200);
+
+--lighter: oklch(from var(--base) calc(L + 0.1) c h);
+--darker: oklch(from var(--base) calc(L - 0.1) c h);
+--more-chroma: oklch(from var(--base) L calc(c * 1.5) h);
+--hue-shift: oklch(from var(--base) L c calc(h + 30));
+```
+
+## 实际应用场景
+
+### 1. 主题色系生成
+
+相对颜色可以基于一个主题色，自动生成一整套色系：
+
+```css
+:root {
+  --brand: oklch(55% 0.2 245);
+  
+  /* 基于 brand 生成 100-900 色阶 */
+  --brand-100: oklch(from var(--brand) calc(L + 0.4) c h);
+  --brand-200: oklch(from var(--brand) calc(L + 0.3) c h);
+  --brand-300: oklch(from var(--brand) calc(L + 0.2) c h);
+  --brand-400: oklch(from var(--brand) calc(L + 0.1) c h);
+  --brand-500: var(--brand);
+  --brand-600: oklch(from var(--brand) calc(L - 0.05) c h);
+  --brand-700: oklch(from var(--brand) calc(L - 0.1) c h);
+  --brand-800: oklch(from var(--brand) calc(L - 0.2) c h);
+  --brand-900: oklch(from var(--brand) calc(L - 0.3) c h);
+}
+```
+
+{/* @playground id="theme-palette" mode="demo" */}
+
+### 2. 悬停/激活状态颜色
+
+无需手动定义悬停颜色，相对颜色自动计算：
+
+```css
+.button {
+  background: var(--primary);
+  transition: background 0.2s;
+}
+
+.button:hover {
+  /* 悬停时自动提亮 */
+  background: oklch(from var(--primary) calc(L + 0.1) c h);
+}
+
+.button:active {
+  /* 点击时自动变暗 */
+  background: oklch(from var(--primary) calc(L - 0.1) c h);
+}
+```
+
+{/* @playground id="hover-state" mode="demo" */}
+
+### 3. 半透明变体
+
+基于原始颜色快速生成半透明版本：
+
+```css
+:root {
+  --overlay-base: #1a1a1a;
+  
+  /* 生成不同透明度的遮罩 */
+  --overlay-10: oklch(from var(--overlay-base) l c h / 10%);
+  --overlay-20: oklch(from var(--overlay-base) l c h / 20%);
+  --overlay-50: oklch(from var(--overlay-base) l c h / 50%);
+  --overlay-80: oklch(from var(--overlay-base) l c h / 80%);
+}
+```
+
+{/* @playground id="alpha-variants" mode="demo" */}
+
+### 4. 互补色与对比色
+
+基于品牌色计算互补色：
+
+```css
+:root {
+  --brand: oklch(55% 0.2 245);
+  
+  /* 互补色（色相差 180°） */
+  --complement: oklch(from var(--brand) L c calc(h + 180));
+  
+  /* 三角色（色相差 120°） */
+  --triadic-1: oklch(from var(--brand) L c calc(h + 120));
+  --triadic-2: oklch(from var(--brand) L c calc(h + 240));
+}
+```
+
+{/* @playground id="color-harmony" mode="demo" */}
+
+### 5. 组件阴影颜色
+
+让阴影颜色与组件颜色协调：
+
+```css
+.card {
+  --card-color: oklch(70% 0.1 240);
+  background: var(--card-color);
+  box-shadow: 
+    0 2px 8px oklch(from var(--card-color) calc(L - 0.2) c h / 30%),
+    0 8px 24px oklch(from var(--card-color) calc(L - 0.3) c h / 20%);
+}
+```
+
+{/* @playground id="coordinated-shadow" mode="demo" */}
+
+### 6. 动态渐变
+
+基于单一颜色生成渐变色：
+
+```css
+.gradient-box {
+  --start: oklch(70% 0.2 250);
+  background: linear-gradient(
+    to bottom,
+    var(--start),
+    oklch(from var(--start) calc(L - 0.3) c h)
+  );
+}
+```
+
+{/* @playground id="dynamic-gradient" mode="demo" */}
+
+### 7. 深色模式适配
+
+在深色模式下优雅地调整颜色：
+
+```css
+:root {
+  --text-primary: oklch(20% 0.05 240);
+  --text-secondary: oklch(from var(--text-primary) calc(L + 0.3) c h);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗色模式下增加亮度 */
+    --text-primary: oklch(80% 0.05 240);
+    --text-secondary: oklch(from var(--text-primary) calc(L - 0.3) c h);
+  }
+}
+```
+
+{/* @playground id="dark-mode" mode="demo" */}
+
+## 嵌套与组合
+
+相对颜色可以嵌套使用：
+
+```css
+:root {
+  --base: oklch(60% 0.15 200);
+  
+  /* 嵌套：先变亮再变饱和 */
+  --result: oklch(
+    from oklch(from var(--base) calc(L + 0.1) c h)
+    L
+    calc(c * 1.2)
+    h
+  );
+}
+```
+
+## 浏览器兼容性
+
+相对颜色语法的支持正在增长：
+
+- Chrome 128+
+- Firefox 132+
+- Safari 16.4+（部分支持）
+- Edge 128+
+
+> **提示**：建议结合 `@supports` 检测或使用 [postcss-preset-env](https://github.com/csstools/postcss-preset-env) 进行降级处理。
+
+```css
+/* 降级方案示例 */
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --primary: oklch(55% 0.2 245);
+    --primary-light: oklch(from var(--primary) calc(L + 0.15) c h);
+  }
+}
+```
+
+## 最佳实践
+
+1. **统一颜色空间**：使用 `oklch()` 作为主颜色函数，它更符合人眼感知
+2. **单一数据源**：定义一个基础色，通过相对颜色生成其他变体
+3. **组合使用**：结合 CSS 自定义属性，实现主题系统
+4. **考虑对比度**：调整亮度时注意文本可读性
+5. **渐进增强**：为不支持的浏览器提供回退方案
+
+## 参考资料
+
+- [CSS Color Level 5 - W3C](https://www.w3.org/TR/css-color-5/)
+- [Relative Color Syntax - MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/relative_color_syntax)
+- [OKLCH in CSS -Una Kravets](https://web.dev/articles/oklch)
+- [Color Mix and Relative Color - Fully Stacked](https://fullystacked.net/posts/color-mix-and-relative-color/)
