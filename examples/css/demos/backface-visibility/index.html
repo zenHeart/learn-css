@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS backface-visibility Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 40px;
+    }
+
+    .demo-section {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    /* Interactive Demo Section */
+    .interactive-demo {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 60px;
+      text-align: center;
+    }
+
+    .demo-container {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .card-wrapper {
+      text-align: center;
+    }
+
+    .card-wrapper h3 {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      color: #aaa;
+    }
+
+    .card-container {
+      width: 200px;
+      height: 260px;
+      perspective: 1000px;
+      display: inline-block;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: rotateY(15deg) scale(1.02);
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card.flipped:hover {
+      transform: rotateY(165deg) scale(1.02);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .card-front::before {
+      content: '';
+      width: 60px;
+      height: 60px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+
+    .card-front span {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .card-back::before {
+      content: '';
+      width: 60px;
+      height: 60px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      margin-bottom: 20px;
+      transform: rotate(45deg);
+    }
+
+    .card-back span {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* Comparison Section */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+    }
+
+    .comparison-card h3 {
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    .comparison-card.visible h3 {
+      color: #f5576c;
+    }
+
+    .comparison-card.hidden h3 {
+      color: #4ade80;
+    }
+
+    /* Static comparison boxes */
+    .static-demo {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .static-card-container {
+      perspective: 1000px;
+    }
+
+    .static-card {
+      width: 150px;
+      height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateY(180deg);
+    }
+
+    .static-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .static-front {
+      background: #667eea;
+      color: white;
+    }
+
+    .static-back {
+      background: #f5576c;
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    /* backface-visibility visible demo */
+    .visible .static-card {
+      backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+    }
+
+    /* backface-visibility hidden demo */
+    .hidden .static-card {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .label {
+      text-align: center;
+      margin-top: 15px;
+      font-family: monospace;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* Code Section */
+    .code-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+    }
+
+    .code-section h3 {
+      margin-bottom: 20px;
+    }
+
+    pre {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    code {
+      color: #c9d1d9;
+    }
+
+    .comment {
+      color: #8b949e;
+    }
+
+    .property {
+      color: #ff7b72;
+    }
+
+    .value {
+      color: #a5d6ff;
+    }
+
+    .selector {
+      color: #d2a8ff;
+    }
+
+    /* Toggle button */
+    .toggle-all {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 20px;
+    }
+
+    .toggle-all:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .toggle-all:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS backface-visibility</h1>
+  <p class="subtitle">Interactive demonstration of the backface-visibility property</p>
+
+  <div class="demo-section">
+    <!-- Interactive Demo -->
+    <section class="interactive-demo">
+      <h2 class="section-title">Interactive Card Flip</h2>
+      <button class="toggle-all" onclick="toggleAllCards()">Flip All Cards</button>
+      <div class="demo-container">
+        <div class="card-wrapper">
+          <h3>With backface-visibility: hidden</h3>
+          <div class="card-container">
+            <div class="card" id="card1" onclick="this.classList.toggle('flipped')">
+              <div class="card-face card-front">
+                <span>FRONT</span>
+              </div>
+              <div class="card-face card-back">
+                <span>BACK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-wrapper">
+          <h3>Hover to preview</h3>
+          <p class="hint">Click to flip, hover to preview</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section>
+      <h2 class="section-title">backface-visibility: visible vs hidden</h2>
+      <div class="comparison">
+        <div class="comparison-card visible">
+          <h3>backface-visibility: visible</h3>
+          <div class="static-demo">
+            <div class="static-card-container">
+              <div class="static-card">
+                <div class="static-face static-front">Front</div>
+                <div class="static-face static-back">Back</div>
+              </div>
+              <p class="label">rotateY(180deg)</p>
+            </div>
+          </div>
+          <p style="margin-top: 20px; color: #888; font-size: 0.9rem;">
+            The back face shows a mirrored version of the front face
+          </p>
+        </div>
+        <div class="comparison-card hidden">
+          <h3>backface-visibility: hidden</h3>
+          <div class="static-demo">
+            <div class="static-card-container">
+              <div class="static-card">
+                <div class="static-face static-front">Front</div>
+                <div class="static-face static-back">Back</div>
+              </div>
+              <p class="label">rotateY(180deg)</p>
+            </div>
+          </div>
+          <p style="margin-top: 20px; color: #888; font-size: 0.9rem;">
+            The back face is hidden, revealing the background
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code Example -->
+    <section class="code-section">
+      <h2 class="section-title">Basic Implementation</h2>
+      <pre><code><span class="selector">.card-container</span> {
+  <span class="property">perspective</span>: <span class="value">1000px</span>;
+}
+
+<span class="selector">.card</span> {
+  <span class="property">position</span>: <span class="value">relative</span>;
+  <span class="property">transform-style</span>: <span class="value">preserve-3d</span>;
+  <span class="property">transition</span>: <span class="value">transform 0.6s</span>;
+}
+
+<span class="selector">.card-face</span> {
+  <span class="property">position</span>: <span class="value">absolute</span>;
+  <span class="property">backface-visibility</span>: <span class="value">hidden</span>;
+}
+
+<span class="selector">.card-front</span> {
+  <span class="comment">/* Front face styles */</span>
+}
+
+<span class="selector">.card-back</span> {
+  <span class="property">transform</span>: <span class="value">rotateY(180deg)</span>;
+  <span class="comment">/* Back face styles */</span>
+}</code></pre>
+    </section>
+  </div>
+
+  <script>
+    function toggleAllCards() {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => card.classList.toggle('flipped'));
+    }
+  </script>
+</body>
+</html>

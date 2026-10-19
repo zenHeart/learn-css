@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS touch-action Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #00d9ff;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .demo-box {
+      background: #16213e;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #0f3460;
+    }
+
+    .demo-header {
+      background: #0f3460;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .demo-title {
+      font-weight: 600;
+      color: #00d9ff;
+    }
+
+    .demo-value {
+      font-family: monospace;
+      background: #1a1a2e;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #ffd700;
+    }
+
+    .demo-desc {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #888;
+      background: #0d1b2a;
+    }
+
+    .touch-area {
+      height: 200px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #666;
+      position: relative;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .touch-area p {
+      text-align: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .touch-area.auto {
+      touch-action: auto;
+      border: 2px dashed #4a9eff;
+    }
+
+    .touch-area.none {
+      touch-action: none;
+      border: 2px dashed #ff4a4a;
+    }
+
+    .touch-area.manipulation {
+      touch-action: manipulation;
+      border: 2px dashed #4aff4a;
+    }
+
+    .touch-area.pan-x {
+      touch-action: pan-x;
+      border: 2px dashed #ffa64a;
+    }
+
+    .touch-area.pan-y {
+      touch-action: pan-y;
+      border: 2px dashed #d54aff;
+    }
+
+    .touch-area.pan-left {
+      touch-action: pan-left;
+      border: 2px dashed #ffeb4a;
+    }
+
+    .touch-area.pan-right {
+      touch-action: pan-right;
+      border: 2px dashed #4affeb;
+    }
+
+    .touch-area.pan-up {
+      touch-action: pan-up;
+      border: 2px dashed #ff4ad4;
+    }
+
+    .touch-area.pan-down {
+      touch-action: pan-down;
+      border: 2px dashed #4affd5;
+    }
+
+    .event-log {
+      background: #0d1b2a;
+      border-top: 1px solid #0f3460;
+      padding: 10px 16px;
+      font-family: monospace;
+      font-size: 12px;
+      height: 80px;
+      overflow-y: auto;
+      color: #888;
+    }
+
+    .event-log span {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .event-log .touch-start { color: #4a9eff; }
+    .event-log .touch-move { color: #4aff4a; }
+    .event-log .touch-end { color: #ffa64a; }
+
+    .info-section {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #0f3460;
+    }
+
+    .info-section h2 {
+      color: #00d9ff;
+      margin-bottom: 16px;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .comparison-table th {
+      background: #0f3460;
+      color: #00d9ff;
+    }
+
+    .comparison-table tr:hover {
+      background: #0d1b2a;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS `touch-action` 属性演示</h1>
+
+  <div class="demo-grid">
+    <!-- auto -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">auto（默认）</span>
+        <span class="demo-value">touch-action: auto</span>
+      </div>
+      <div class="demo-desc">浏览器处理所有触摸手势：滚动、缩放、双击等</div>
+      <div class="touch-area auto" data-value="auto">
+        <p>尝试滑动、捏合缩放<br/>所有默认手势可用</p>
+      </div>
+      <div class="event-log" id="log-auto"></div>
+    </div>
+
+    <!-- none -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">none</span>
+        <span class="demo-value">touch-action: none</span>
+      </div>
+      <div class="demo-desc">完全禁用触摸手势 - 适用于游戏控件</div>
+      <div class="touch-area none" data-value="none">
+        <p>滑动、缩放、双击<br/>全部被禁用</p>
+      </div>
+      <div class="event-log" id="log-none"></div>
+    </div>
+
+    <!-- manipulation -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">manipulation</span>
+        <span class="demo-value">touch-action: manipulation</span>
+      </div>
+      <div class="demo-desc">允许滚动和缩放，禁用双击缩放 - 移动端推荐</div>
+      <div class="touch-area manipulation" data-value="manipulation">
+        <p>可滚动、可捏合缩放<br/>双击缩放被禁用</p>
+      </div>
+      <div class="event-log" id="log-manipulation"></div>
+    </div>
+
+    <!-- pan-x -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-x</span>
+        <span class="demo-value">touch-action: pan-x</span>
+      </div>
+      <div class="demo-desc">仅允许水平滚动（左右滑动）</div>
+      <div class="touch-area pan-x" data-value="pan-x">
+        <p>← 左右滑动试试 →<br/>上下滑动会被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-x"></div>
+    </div>
+
+    <!-- pan-y -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-y</span>
+        <span class="demo-value">touch-action: pan-y</span>
+      </div>
+      <div class="demo-desc">仅允许垂直滚动（上下滑动）</div>
+      <div class="touch-area pan-y" data-value="pan-y">
+        <p>↑ 上下滑动试试 ↓<br/>左右滑动会被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-y"></div>
+    </div>
+
+    <!-- pan-left -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-left</span>
+        <span class="demo-value">touch-action: pan-left</span>
+      </div>
+      <div class="demo-desc">仅允许向左滑动 - 抽屉导航场景</div>
+      <div class="touch-area pan-left" data-value="pan-left">
+        <p>← 向左滑动打开<br/>其他方向被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-left"></div>
+    </div>
+
+    <!-- pan-right -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-right</span>
+        <span class="demo-value">touch-action: pan-right</span>
+      </div>
+      <div class="demo-desc">仅允许向右滑动</div>
+      <div class="touch-area pan-right" data-value="pan-right">
+        <p>→ 向右滑动试试<br/>其他方向被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-right"></div>
+    </div>
+
+    <!-- pan-up -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-up</span>
+        <span class="demo-value">touch-action: pan-up</span>
+      </div>
+      <div class="demo-desc">仅允许向上滑动</div>
+      <div class="touch-area pan-up" data-value="pan-up">
+        <p>↑ 向上滑动试试<br/>其他方向被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-up"></div>
+    </div>
+
+    <!-- pan-down -->
+    <div class="demo-box">
+      <div class="demo-header">
+        <span class="demo-title">pan-down</span>
+        <span class="demo-value">touch-action: pan-down</span>
+      </div>
+      <div class="demo-desc">仅允许向下滑动</div>
+      <div class="touch-area pan-down" data-value="pan-down">
+        <p>↓ 向下滑动试试<br/>其他方向被阻止</p>
+      </div>
+      <div class="event-log" id="log-pan-down"></div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h2>touch-action vs pointer-events</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>特性</th>
+          <th>touch-action</th>
+          <th>pointer-events</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>作用对象</td>
+          <td>触摸手势（滚动、缩放等）</td>
+          <td>指针事件（鼠标/触摸/触控笔点击）</td>
+        </tr>
+        <tr>
+          <td>主要用途</td>
+          <td>控制浏览器默认触摸行为</td>
+          <td>控制元素是否成为事件目标</td>
+        </tr>
+        <tr>
+          <td>典型场景</td>
+          <td>禁用缩放、限制滚动方向</td>
+          <td>禁用元素点击、事件穿透</td>
+        </tr>
+        <tr>
+          <td>常见值</td>
+          <td>auto, none, pan-x, pan-y</td>
+          <td>auto, none, all, visiblePainted</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.querySelectorAll('.touch-area').forEach(area => {
+      const value = area.dataset.value;
+      const logEl = document.getElementById(`log-${value}`);
+      let logCount = 0;
+
+      function log(type, message) {
+        if (logCount >= 5) {
+          logEl.removeChild(logEl.firstChild);
+        }
+        const span = document.createElement('span');
+        span.className = `touch-${type}`;
+        span.textContent = `[${type}] ${message}`;
+        logEl.appendChild(span);
+        logCount++;
+      }
+
+      area.addEventListener('touchstart', (e) => {
+        log('start', `触摸开始 (${e.touches.length} 指)`);
+        e.preventDefault();
+      }, { passive: false });
+
+      area.addEventListener('touchmove', (e) => {
+        log('move', `触摸移动 (${e.touches.length} 指)`);
+        e.preventDefault();
+      }, { passive: false });
+
+      area.addEventListener('touchend', (e) => {
+        log('end', '触摸结束');
+        e.preventDefault();
+      }, { passive: false });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+---
+title: CSS 3D Transform
+category: 动画与变换
+tags: [css, transform, 3d, perspective, rotate3d, scale3d, translate3d]
+description: 深入讲解 CSS 3D transform 函数，包括 rotate3d、scale3d、translate3d、perspective，以及 perspective 与 preserve-3d 的关系。
+keywords: CSS 3D transform, rotate3d, scale3d, translate3d, perspective, preserve-3d, transform-origin, CSS 3D 变换
+---
+
+通过本章理解
+
+1. CSS 3D 变换的基本概念与函数
+2. `perspective` 与 `preserve-3d` 的关系
+3. 常用 3D 变换的实际应用场景
+
+
+## 2D vs 3D Transform
+
+CSS Transform 分为 2D 和 3D 两大类。2D 变换在 `xOy` 平面内操作，而 3D 变换在 `xOy` 平面之外增加了 `z` 轴，允许元素在三维空间中旋转、缩放和平移。
+
+| 维度 | 变换函数 | 作用平面 |
+|------|----------|----------|
+| 2D | `translateX/Y`、`scaleX/Y`、`rotate` | xOy 平面 |
+| 3D | `translate3d`、`scale3d`、`rotate3d`、`perspective` | xOy+z 空间 |
+
+3D 变换的关键在于引入了 **z 轴** 和 **透视（perspective）** 的概念，使得元素可以在视觉上产生远近、大小的变化。
+
+
+## perspective 函数
+
+`perspective` 用于建立 3D 透视效果，模拟人眼观看 3D 场景时的近大远小感。
+
+```css
+perspective: 500px;
+```
+
+`perspective` 的值表示观察者到 `z=0` 平面的距离。值越小，透视效果越强烈（类似广角镜头）；值越大，透视效果越平缓（类似长焦镜头）。
+
+### perspective 与 preserve-3d 的关系
+
+这两个属性经常配合使用，但作用完全不同：
+
+- **`perspective`**: 定义单个元素的透视距离。它是一个**观察视角**，决定 3D 场景的透视深度。只影响应用它的元素本身及其直接子元素。
+
+```css
+.container {
+  perspective: 500px;
+}
+```
+
+- **`transform-style: preserve-3d`**: 定义元素的子元素是否保留在 3D 空间中。默认值为 `flat`（平面），子元素没有 3D 空间感；设为 `preserve-3d` 后，子元素会保留各自的 3D 位置，形成真正的 3D 场景。
+
+```css
+.container {
+  perspective: 500px;
+  transform-style: preserve-3d;
+}
+```
+
+**两者的配合逻辑**：在父容器上设置 `perspective` 定义观察视角，在需要保留 3D 空间的父容器上设置 `transform-style: preserve-3d`。子元素各自的 `transform` 变换才会产生真正的 3D 效果。
+
+
+## translate3d 函数
+
+`translate3d(tx, ty, tz)` 在三维空间中移动元素。
+
+```css
+transform: translate3d(50px, 100px, 200px);
+```
+
+- `tx`: 沿 x 轴（水平）移动的距离
+- `ty`: 沿 y 轴（垂直）移动的距离
+- `tz`: 沿 z 轴（纵深）移动的距离 — **正值向屏幕外移动，负值向屏幕内移动**
+
+### 轴向简写函数
+
+| 函数 | 等价于 | 说明 |
+|------|--------|------|
+| `translateX(t)` | `translate3d(t, 0, 0)` | 仅沿 x 轴移动 |
+| `translateY(t)` | `translate3d(0, t, 0)` | 仅沿 y 轴移动 |
+| `translateZ(t)` | `translate3d(0, 0, t)` | 仅沿 z 轴移动 |
+
+`translateZ` 特别有用，可以产生元素"远离"或"接近"观察者的视觉效果。结合 `perspective`，近的元素会显得更大，远的会更小。
+
+
+## scale3d 函数
+
+`scale3d(sx, sy, sz)` 在三维空间中缩放元素。
+
+```css
+transform: scale3d(1.5, 2, 0.5);
+```
+
+- `sx`: 沿 x 轴的缩放比例
+- `sy`: 沿 y 轴的缩放比例
+- `sz`: 沿 z 轴的缩放比例
+
+### 轴向简写函数
+
+| 函数 | 等价于 | 说明 |
+|------|--------|------|
+| `scaleX(s)` | `scale3d(s, 1, 1)` | 仅在 x 方向缩放 |
+| `scaleY(s)` | `scale3d(1, s, 1)` | 仅在 y 方向缩放 |
+| `scaleZ(s)` | `scale3d(1, 1, s)` | 仅在 z 方向缩放 |
+
+> 注意：`scaleZ` 的视觉效果只有在元素具有厚度（不是纯平面）或者在 3D 变换矩阵中与其他 z 轴操作配合时才能被直观观察到。
+
+
+## rotate3d 函数
+
+`rotate3d(x, y, z, angle)` 绕穿过原点的任意轴旋转元素。
+
+```css
+transform: rotate3d(1, 1, 0, 45deg);
+```
+
+参数 `(x, y, z)` 定义旋转轴的方向向量，浏览器会自动归一化该向量。`angle` 定义旋转角度。
+
+### 轴向简写函数
+
+| 函数 | 等价于 | 说明 |
+|------|--------|------|
+| `rotateX(a)` | `rotate3d(1, 0, 0, a)` | 绕 x 轴旋转（类似翻跟头） |
+| `rotateY(a)` | `rotate3d(0, 1, 0, a)` | 绕 y 轴旋转（类似摇头） |
+| `rotateZ(a)` | `rotate3d(0, 0, 1, a)` | 绕 z 轴旋转（类似钟表指针，与 2D rotate 等价） |
+
+### rotateX / rotateY 的直观效果
+
+- `rotateX`: 元素上下两端产生倾斜，正值时上半部向外、下半部向内，**类似于低头/抬头**
+- `rotateY`: 元素左右两端产生倾斜，正值时右半部向外、左半部向内，**类似于摇头（No）**
+
+### 绕任意轴旋转
+
+`rotate3d` 的强大之处在于可以绕任意轴旋转。例如绕 `[1, 1, 1]` 对角线旋转：
+
+```css
+transform: rotate3d(1, 1, 1, 60deg);
+```
+
+这等价于绕从原点到 `(1, 1, 1)` 的方向向量旋转 60 度。
+
+
+## transform-origin 对 3D 变换的影响
+
+`transform-origin` 在 3D 变换中同样重要，它定义了变换的**原点**。
+
+```css
+transform-origin: center center 0;
+```
+
+默认值是元素的中心 `(50% 50% 0)`。改变原点会显著影响 3D 变换的结果：
+
+- `transform-origin: top center`: 以元素顶部中心为轴旋转
+- `transform-origin: 0 0 0`: 以元素左下角为原点
+
+在 3D 场景中，`transform-origin` 的 z 值也有意义。设为非 0 时，旋转轴会沿 z 轴偏移。
+
+
+## matrix3d 函数
+
+`matrix3d(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3, a4, b4, c4, d4)` 是 3D 变换的底层表示，用一个 4×4 矩阵描述所有 3D 线性变换（旋转、缩放、剪切等）。
+
+实际开发中很少直接写 `matrix3d`，因为太不直观。通常使用 `rotate3d`、`translate3d` 等函数式写法，浏览器会自动转换为矩阵。
+
+
+## 常用应用场景
+
+
+### 3D 卡片翻转
+
+利用 `rotateY` 和 `backface-visibility` 可以实现卡片的正反面翻转效果：
+
+```css
+.card {
+  perspective: 1000px;
+}
+.card-inner {
+  position: relative;
+  width: 200px;
+  height: 280px;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+.card-inner:hover {
+  transform: rotateY(180deg);
+}
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-front {
+  background: #3b82f6;
+}
+.card-back {
+  background: #8b5cf6;
+  transform: rotateY(180deg);
+}
+```
+
+
+### 3D 立方体
+
+使用 6 个面 + `transform-style: preserve-3d` + 精确定位每个面的旋转角度，可以构建一个完整的 3D 立方体：
+
+```css
+.cube {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg) rotateY(-30deg);
+}
+.face {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.front  { transform: translateZ(50px); }
+.back   { transform: rotateY(180deg) translateZ(50px); }
+.left   { transform: rotateY(-90deg) translateZ(50px); }
+.right  { transform: rotateY(90deg) translateZ(50px); }
+.top    { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+```
+
+
+### 3D 卡片倾斜效果
+
+鼠标悬停时卡片产生 3D 倾斜，给界面带来层次感和交互反馈：
+
+```css
+.card {
+  transform-style: preserve-3d;
+  transition: transform 0.1s;
+}
+```
+
+配合 JavaScript 监听鼠标位置，动态计算 `rotateX` 和 `rotateY`，可以实现"卡片跟着鼠标转"的效果。
+
+
+## 交互式演示
+
+下面是 CSS 3D Transform 的交互式演示：
+
+{/* @playground id="transform-3d" mode="demo" */}

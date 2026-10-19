@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Scroll-Driven Animations — Interactive Demo</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --accent: #f59e0b;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── Progress Bar ──────────────────────────────────── */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--primary);
+      transform-origin: left center;
+      transform: scaleX(0);
+      z-index: 100;
+
+      /* Scroll-driven animation: scaleX from 0 to 1 as user scrolls */
+      animation: scale-progress linear both;
+      animation-timeline: --page-scroll;
+
+      scroll-timeline-name: --page-scroll;
+      scroll-timeline-axis: block;
+    }
+
+    @keyframes scale-progress {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 3rem;
+    }
+
+    section {
+      margin-bottom: 5rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Section Divider ────────────────────────────────── */
+    .scroll-marker {
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-marker-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* ── Dial / Rotation Demo ───────────────────────────── */
+    .dial-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    #dial {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 6px solid var(--primary);
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 12px;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    #dial::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 4px;
+      height: 44px;
+      background: var(--primary);
+      border-radius: 2px;
+      transform-origin: bottom center;
+
+      /* Rotate 360° as user scrolls through the demo section */
+      animation: rotate-dial linear both;
+      animation-timeline: --dial-scroll;
+      animation-range: entry 0% contain 60%;
+
+      scroll-timeline-name: --dial-scroll;
+      scroll-timeline-axis: block;
+    }
+
+    @keyframes rotate-dial {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .dial-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ── Card Reveal Demo ──────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+
+      /* Fade + slide in as card enters viewport */
+      animation: card-reveal ease-out both;
+      animation-timeline: --card-scroll;
+
+      scroll-timeline-name: --card-scroll;
+      scroll-timeline-axis: block;
+    }
+
+    .card:nth-child(1) { animation-range: entry 0% contain 40%; }
+    .card:nth-child(2) { animation-range: entry 10% contain 50%; }
+    .card:nth-child(3) { animation-range: entry 20% contain 60%; }
+    .card:nth-child(4) { animation-range: entry 30% contain 70%; }
+
+    @keyframes card-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(32px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    /* ── Code Snippet ──────────────────────────────────── */
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1.2rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    pre .comment { color: #64748b; }
+    pre .prop    { color: #7dd3fc; }
+    pre .value   { color: #86efac; }
+
+    /* ── Unsupported Banner ─────────────────────────────── */
+    #feature-notice {
+      display: none;
+      position: sticky;
+      top: 12px;
+      z-index: 99;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    #feature-notice.visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll-Linked Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Browser Support Notice -->
+  <div id="feature-notice">
+    ⚠️ Scroll-driven animations require Chrome 115+ with
+    <code>chrome://flags/#scroll-driven-animations</code> enabled.
+  </div>
+
+  <div class="container">
+
+    <h1>Scroll-Driven Animations</h1>
+    <p class="subtitle">
+      CSS-native scroll-linked animation via <code>scroll-timeline</code> and <code>animation-timeline</code>.
+      Scroll down to see the effects — no JavaScript required.
+    </p>
+
+    <!-- ── Section 1: Progress Bar ─────────────────── -->
+    <section>
+      <h2>1. Scroll Progress Bar</h2>
+      <p>
+        The blue bar at the very top of the page fills as you scroll.
+        It uses a single <code>scaleX</code> animation driven by the viewport's scroll position.
+      </p>
+
+      <pre><span class="comment">/* Declare a named scroll timeline on the viewport */</span>
+<span class="prop">scroll-timeline-name</span>: <span class="value">--page-scroll</span>;
+<span class="prop">scroll-timeline-axis</span>: <span class="value">block</span>;
+
+<span class="comment">/* Reference it on the animated element */</span>
+<span class="prop">animation-timeline</span>: <span class="value">--page-scroll</span>;
+<span class="prop">animation-name</span>: <span class="value">grow</span>;
+<span class="prop">animation-timing-function</span>: <span class="value">linear</span>;
+
+<span class="comment">/* Keyframes scale from 0 → 1 across the full scroll range */</span>
+<span class="prop">@keyframes</span> grow {
+  from { <span class="prop">transform</span>: <span class="value">scaleX(0)</span>; }
+  to   { <span class="prop">transform</span>: <span class="value">scaleX(1)</span>; }
+}</pre>
+
+      <div class="scroll-marker">
+        <span class="scroll-marker-label">Keep scrolling ↓</span>
+      </div>
+    </section>
+
+    <!-- ── Section 2: Rotation Dial ────────────────── -->
+    <section>
+      <h2>2. Scroll-Linked Rotation</h2>
+      <p>
+        A dial hand that rotates a full 360° as you scroll through this section,
+        using <code>animation-range</code> to scope when the animation plays.
+      </p>
+
+      <div class="dial-wrapper">
+        <div id="dial"></div>
+        <span class="dial-label">Rotate as you scroll</span>
+      </div>
+
+      <pre><span class="prop">@keyframes</span> rotate-dial {
+  from { <span class="prop">rotate</span>: <span class="value">0deg</span>; }
+  to   { <span class="prop">rotate</span>: <span class="value">360deg</span>; }
+}
+
+<span class="prop">animation</span>: <span class="value">rotate-dial linear both</span>;
+<span class="prop">animation-timeline</span>: <span class="value">--dial-scroll</span>;
+<span class="prop">animation-range</span>: <span class="value">entry 0% contain 60%</span>;
+
+<span class="prop">scroll-timeline-name</span>: <span class="value">--dial-scroll</span>;
+<span class="prop">scroll-timeline-axis</span>: <span class="value">block</span>;</pre>
+    </section>
+
+    <!-- ── Section 3: Card Reveal ──────────────────── -->
+    <section>
+      <h2>3. Reveal on Scroll</h2>
+      <p>
+        Cards animate in with staggered <code>animation-range</code> values.
+        Each card starts its animation slightly after the previous one.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon"></div>
+          <h3>Design</h3>
+          <p>Beautiful interfaces built with intent and precision.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"></div>
+          <h3>Motion</h3>
+          <p>Delightful animations that guide and inform.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"></div>
+          <h3>Performance</h3>
+          <p>Lightning-fast experiences without compromise.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon"></div>
+          <h3>Accessibility</h3>
+          <p>Built for everyone, by default and by design.</p>
+        </div>
+      </div>
+
+      <pre><span class="comment">/* Staggered card reveals via animation-range */</span>
+<span class="prop">@keyframes</span> card-reveal {
+  from { <span class="prop">opacity</span>: <span class="value">0</span>; <span class="prop">transform</span>: <span class="value">translateY(32px)</span>; }
+  to   { <span class="prop">opacity</span>: <span class="value">1</span>; <span class="prop">transform</span>: <span class="value">translateY(0)</span>; }
+}
+
+<span class="prop">animation</span>: <span class="value">card-reveal ease-out both</span>;
+<span class="prop">animation-timeline</span>: <span class="value">--card-scroll</span>;
+<span class="prop">animation-range</span>: <span class="value">entry 0% contain 40%</span>; <span class="comment">/* Card 1 */</span>
+<span class="prop">animation-range</span>: <span class="value">entry 10% contain 50%</span>; <span class="comment">/* Card 2 — starts 10% later */</span></pre>
+    </section>
+
+    <!-- ── Section 4: The Scroll ─────────────────────── -->
+    <section>
+      <div class="scroll-marker">
+        <span class="scroll-marker-label">You made it! 🎉</span>
+      </div>
+      <h2>4. How It Works</h2>
+      <p>
+        A <strong>scroll timeline</strong> maps scroll position (0% at scroll start, 100% at scroll end)
+        to animation progress. Unlike time-based animations, the playback position is determined by
+        how far the user has scrolled through the tracked element or viewport.
+      </p>
+      <p>
+        The CSS properties <code>scroll-timeline-name</code> and <code>scroll-timeline-axis</code>
+        declare the timeline. Then <code>animation-timeline</code> attaches it to an animation.
+        The <code>animation-range</code> property controls which portion of the scroll triggers
+        the animation's play phase.
+      </p>
+    </section>
+
+  </div>
+
+  <script>
+    // Detect support and show notice if feature is unavailable
+    if (!CSS.supports('animation-timeline', '--test')) {
+      document.getElementById('feature-notice').classList.add('visible');
+    }
+  </script>
+
+</body>
+</html>

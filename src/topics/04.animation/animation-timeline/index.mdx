@@ -1,0 +1,308 @@
+# CSS animation-timeline 滚动驱动动画
+
+## 概述
+
+`animation-timeline` 属性将动画与滚动进度绑定，实现**滚动驱动动画（Scroll-Driven Animations）**。当用户滚动页面时，动画自动播放，无需 JavaScript。
+
+## 核心概念
+
+滚动驱动动画通过将动画时间线替换为滚动位置来实现。传统动画基于时间（0s → 2s），滚动驱动动画基于滚动位置（0px → 1000px）。
+
+## 语法
+
+```css
+animation-timeline: <timeline>;
+```
+
+## 值
+
+### auto（默认）
+
+使用文档滚动时间线，动画与页面整体滚动进度关联。
+
+```css
+/* 等同于不设置，动画基于时间播放 */
+animation-timeline: auto;
+```
+
+### scroll()
+
+将动画与最近的可滚动祖先的滚动进度绑定。使用 `scroll()` 而无需命名滚动容器。
+
+```css
+/* 滚动最近祖先容器时触发动画 */
+animation-timeline: scroll();
+```
+
+可选参数指定滚动容器和轴向：
+
+```css
+animation-timeline: scroll(root block);    /* 根元素，块级轴 */
+animation-timeline: scroll(nearest block);  /* 最近祖先 */
+animation-timeline: scroll(self block);     /* 当前元素自身 */
+animation-timeline: scroll(inline);         /* 内联轴 */
+```
+
+### view()
+
+将动画与元素自身在视口中的**可见性进度**绑定。当元素进入或离开视口时触发动画。
+
+```css
+/* 元素进入视口时触发动画 */
+animation-timeline: view();
+```
+
+这是实现"滚动时元素进入视图触发动画"的核心功能。
+
+## scroll() 实现滚动链接动画
+
+`scroll()` 将动画直接绑定到滚动位置：
+
+```css
+.progress-bar {
+  animation: grow linear both;
+  animation-timeline: scroll();
+}
+
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+```
+
+### 完整示例：滚动进度条
+
+```html
+<div class="progress-bar"></div>
+```
+
+```css
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #3b82f6;
+  transform-origin: left center;
+  
+  animation: grow linear both;
+  animation-timeline: scroll(root block);
+}
+
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+```
+
+### 配合 scroll-timeline-name 命名滚动容器
+
+```css
+.scroll-container {
+  scroll-timeline-name: --my-scroll;
+  scroll-timeline-axis: block;
+}
+
+.element {
+  animation: slide linear both;
+  animation-timeline: --my-scroll;
+}
+
+@keyframes slide {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+```
+
+## view() 实现视图触发动画
+
+`view()` 根据元素在视口中的可见比例驱动动画：
+
+- 元素完全不可见 → 动画进度 0%
+- 元素完全可见 → 动画进度 100%
+
+### animation-range 控制动画区间
+
+`animation-range` 控制动画在滚动过程中的哪个区间播放：
+
+```css
+/* 元素进入视图时开始，完成于元素完全进入 */
+animation-range: entry 0% contain 100%;
+
+/* 常用区间 */
+/* entry    - 元素进入视口的边 */
+/* exit     - 元素离开视口的边 */
+/* contain  - 元素完全在视口内 */
+/* cover    - 元素覆盖整个视口 */
+```
+
+### 示例：元素进入视口时淡入
+
+```css
+.card {
+  animation: fade-in ease-out both;
+  animation-timeline: view();
+  animation-range: entry 0% contain 40%;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+### 交错动画
+
+通过 `animation-range` 实现交错效果：
+
+```css
+.card:nth-child(1) { animation-range: entry 0% contain 33%; }
+.card:nth-child(2) { animation-range: entry 10% contain 43%; }
+.card:nth-child(3) { animation-range: entry 20% contain 53%; }
+.card:nth-child(4) { animation-range: entry 30% contain 63%; }
+```
+
+## 实际应用场景
+
+### 1. 滚动进度指示器
+
+```css
+.progress-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  
+  animation: progress linear both;
+  animation-timeline: scroll(root block);
+}
+
+@keyframes progress {
+  to { transform: scaleX(1); }
+}
+```
+
+### 2. 视差滚动效果
+
+```css
+.background {
+  animation: parallax linear both;
+  animation-timeline: scroll();
+}
+
+@keyframes parallax {
+  to { transform: translateY(-50%); }
+}
+```
+
+### 3. 滚动时旋转的 dial/指针
+
+```css
+.dial-needle {
+  animation: rotate linear both;
+  animation-timeline: scroll();
+  animation-range: entry 0% contain 60%;
+  transform-origin: bottom center;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+```
+
+### 4. 元素进入视图时触发
+
+```css
+.reveal-element {
+  animation: reveal ease-out both;
+  animation-timeline: view();
+  animation-range: entry 0% contain 50%;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+```
+
+### 5. 滚动时图片放大
+
+```css
+.hero-image {
+  animation: zoom linear both;
+  animation-timeline: scroll();
+  animation-range: entry 0% contain 100%;
+}
+
+@keyframes zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.3); }
+}
+```
+
+## animation-range 详解
+
+| 范围值 | 含义 |
+|--------|------|
+| `entry 0%` | 元素刚进入视口时开始 |
+| `entry 100%` | 元素完全进入视口时完成 |
+| `exit 0%` | 元素开始离开视口时开始 |
+| `exit 100%` | 元素完全离开视口时完成 |
+| `contain 0%` | 元素刚完全进入视口时开始 |
+| `contain 100%` | 元素开始离开视口时完成 |
+| `cover 0%` | 元素刚覆盖视口时开始 |
+| `cover 100%` | 元素完全覆盖视口时完成 |
+
+### 组合使用
+
+```css
+/* 元素在视口中时播放，离开后停止 */
+animation-range: contain 0% contain 100%;
+
+/* 进入时从 0 开始，离开时到 0 */
+animation-range: entry 0% exit 0%;
+```
+
+## 与 JavaScript 对比
+
+| 特性 | CSS scroll-timeline | JavaScript |
+|------|---------------------|------------|
+| 性能 | 原生 GPU 加速 | 需手动优化 |
+| 代码量 | 极简 | 需要监听 scroll 事件 |
+| 流畅度 | 60fps 原生 | 可能卡顿 |
+| 兼容性 | 现代浏览器 | 全面 |
+
+## 浏览器支持
+
+Chrome 115+ 默认支持 scroll-driven animations。
+
+Firefox 123+ 支持 `scroll-timeline` 属性。
+
+Safari 技术预览版支持。
+
+**启用方式（Chrome 115 之前）**
+```
+chrome://flags/#scroll-driven-animations
+```
+
+## 参考
+
+- [Chrome 官方文档：Scroll-Driven Animations](https://developer.chrome.com/docs/css-ui/scroll-driven-animations/)
+- [MDN: animation-timeline](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline)
+- [CSS Scroll-Driven Animations Level 1](https://drafts.csswg.org/css-scroll-animations/)

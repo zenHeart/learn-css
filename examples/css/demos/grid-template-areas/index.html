@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS grid-template-areas 演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.6; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #f0883e; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; margin: 12px 0; }
+    
+    /* 网格组件 */
+    .grid-container {
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 200px;
+    }
+    
+    .grid-item {
+      background: linear-gradient(135deg, #58a6ff, #1f6feb);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      min-height: 60px;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    /* 各布局区域样式 */
+    .header-area { background: linear-gradient(135deg, #58a6ff, #1f6feb); }
+    .sidebar-area { background: linear-gradient(135deg, #3fb950, #238636); }
+    .main-area { background: linear-gradient(135deg, #f0883e, #bd561d); }
+    .aside-area { background: linear-gradient(135deg, #a371f7, #8957e5); }
+    .footer-area { background: linear-gradient(135deg, #f85149, #da3633); }
+    .hero-area { background: linear-gradient(135deg, #ffa657, #d29922); }
+    
+    /* 控件 */
+    .controls { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+    .control-group label { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+    .control-group select, .control-group textarea { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; padding: 8px 12px; font-size: 12px; font-family: 'SF Mono', Monaco, monospace; cursor: pointer; }
+    .control-group textarea { min-height: 100px; resize: vertical; }
+    
+    /* 布局预览 */
+    .layout-preview {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    /* 布局示例 */
+    .holy-grail-grid {
+      display: grid;
+      grid-template-columns: 150px 1fr 150px;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "header header header"
+        "sidebar main aside"
+        "footer footer footer";
+      gap: 12px;
+    }
+    
+    /* 杂志布局 */
+    .magazine-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        "hero hero sidebar"
+        "article1 article2 sidebar";
+      gap: 12px;
+    }
+    
+    /* 响应式布局 */
+    .responsive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "main"
+        "sidebar"
+        "footer";
+      gap: 12px;
+    }
+    
+    @media (min-width: 600px) {
+      .responsive-grid {
+        grid-template-columns: 200px 1fr;
+        grid-template-areas:
+          "header header"
+          "sidebar main"
+          "footer footer";
+      }
+    }
+    
+    /* 视觉化网格编辑器 */
+    .visual-editor {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: #21262d;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    
+    .visual-cell {
+      background: #161b22;
+      border: 1px dashed #30363d;
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 10px;
+      text-align: center;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .visual-cell.header { background: rgba(88, 166, 255, 0.3); border-color: #58a6ff; }
+    .visual-cell.sidebar { background: rgba(63, 185, 80, 0.3); border-color: #3fb950; }
+    .visual-cell.main { background: rgba(240, 136, 62, 0.3); border-color: #f0883e; }
+    .visual-cell.aside { background: rgba(163, 113, 247, 0.3); border-color: #a371f7; }
+    .visual-cell.footer { background: rgba(248, 81, 73, 0.3); border-color: #f85149; }
+    .visual-cell.hero { background: rgba(255, 166, 87, 0.3); border-color: #ffa657; }
+    
+    /* 模板显示 */
+    .template-display {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 11px;
+      background: #0d1117;
+      padding: 12px;
+      border-radius: 4px;
+      line-height: 1.8;
+    }
+    
+    .template-line { display: flex; gap: 8px; }
+    .template-quote { color: #6e7681; }
+    .template-area { padding: 2px 6px; border-radius: 3px; }
+    .template-area.header { background: rgba(88, 166, 255, 0.3); color: #58a6ff; }
+    .template-area.sidebar { background: rgba(63, 185, 80, 0.3); color: #3fb950; }
+    .template-area.main { background: rgba(240, 136, 62, 0.3); color: #f0883e; }
+    .template-area.aside { background: rgba(163, 113, 247, 0.3); color: #a371f7; }
+    .template-area.footer { background: rgba(248, 81, 73, 0.3); color: #f85149; }
+    .template-area.empty { background: #21262d; color: #6e7681; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS grid-template-areas 网格区域布局</h1>
+    <p class="subtitle">通过可视化方式定义 CSS Grid 布局</p>
+
+    <!-- 工作原理 -->
+    <div class="section">
+      <h2>工作原理</h2>
+      <p class="info">grid-template-areas 允许你用字符串形式在 CSS 中"画"出布局，每个名称对应一个网格区域</p>
+      
+      <div class="visual-editor" id="visual-editor">
+        <div class="visual-cell header">header</div>
+        <div class="visual-cell header">header</div>
+        <div class="visual-cell header">header</div>
+        <div class="visual-cell sidebar">sidebar</div>
+        <div class="visual-cell main">main</div>
+        <div class="visual-cell aside">aside</div>
+        <div class="visual-cell footer">footer</div>
+        <div class="visual-cell footer">footer</div>
+        <div class="visual-cell footer">footer</div>
+      </div>
+      
+      <div class="template-display">
+        <div class="template-line">
+          <span class="template-quote">" </span>
+          <span class="template-area header">header</span>
+          <span class="template-area header">header</span>
+          <span class="template-area header">header</span>
+          <span class="template-quote"> "</span>
+        </div>
+        <div class="template-line">
+          <span class="template-quote">" </span>
+          <span class="template-area sidebar">sidebar</span>
+          <span class="template-area main">main</span>
+          <span class="template-area aside">aside</span>
+          <span class="template-quote"> "</span>
+        </div>
+        <div class="template-line">
+          <span class="template-quote">" </span>
+          <span class="template-area footer">footer</span>
+          <span class="template-area footer">footer</span>
+          <span class="template-area footer">footer</span>
+          <span class="template-quote"> "</span>
+        </div>
+      </div>
+      
+      <div class="code-block">.container &#123;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+&#125;
+
+/* 将元素分配到区域 */
+.header &#123; grid-area: header; &#125;
+.sidebar &#123; grid-area: sidebar; &#125;
+.main &#123; grid-area: main; &#125;
+.aside &#123; grid-area: aside; &#125;
+.footer &#123; grid-area: footer; &#125;</div>
+    </div>
+
+    <!-- 圣杯布局 -->
+    <div class="section">
+      <h2>圣杯布局 (Holy Grail)</h2>
+      <p class="info">经典的 header + sidebar + main + aside + footer 两列布局</p>
+      
+      <div class="grid-container">
+        <div class="holy-grail-grid">
+          <div class="grid-item header-area" style="grid-area: header;">Header</div>
+          <div class="grid-item sidebar-area" style="grid-area: sidebar;">Sidebar</div>
+          <div class="grid-item main-area" style="grid-area: main; min-height: 150px;">Main Content</div>
+          <div class="grid-item aside-area" style="grid-area: aside;">Aside</div>
+          <div class="grid-item footer-area" style="grid-area: footer;">Footer</div>
+        </div>
+      </div>
+      
+      <div class="code-block">.holy-grail &#123;
+  display: grid;
+  grid-template-columns: 150px 1fr 150px;
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+  gap: 12px;
+&#125;</div>
+    </div>
+
+    <!-- 杂志布局 -->
+    <div class="section">
+      <h2>杂志布局</h2>
+      <p class="info">多列多行的复杂杂志式排版，特色内容占据多个单元格</p>
+      
+      <div class="grid-container">
+        <div class="magazine-grid">
+          <div class="grid-item hero-area" style="grid-area: hero; min-height: 100px;">Hero - 跨两列</div>
+          <div class="grid-item sidebar-area" style="grid-area: sidebar; min-height: 120px;">Sidebar</div>
+          <div class="grid-item" style="grid-area: article1; background: linear-gradient(135deg, #3fb950, #238636);">Article 1</div>
+          <div class="grid-item" style="grid-area: article2; background: linear-gradient(135deg, #ffa657, #d29922);">Article 2</div>
+        </div>
+      </div>
+      
+      <div class="code-block">.magazine &#123;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "hero hero sidebar"
+    "article1 article2 sidebar";
+  gap: 12px;
+&#125;</div>
+    </div>
+
+    <!-- 响应式布局 -->
+    <div class="section">
+      <h2>响应式布局</h2>
+      <p class="info">调整浏览器宽度查看布局变化（断点：600px）</p>
+      
+      <div class="grid-container">
+        <div class="responsive-grid" id="responsive-demo">
+          <div class="grid-item header-area" style="grid-area: header;">Header</div>
+          <div class="grid-item sidebar-area" style="grid-area: sidebar;">Sidebar</div>
+          <div class="grid-item main-area" style="grid-area: main; min-height: 120px;">Main Content</div>
+          <div class="grid-item footer-area" style="grid-area: footer;">Footer</div>
+        </div>
+      </div>
+      
+      <div class="code-block">/* 移动端：单列 */
+.responsive-grid &#123;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "main"
+    "sidebar"
+    "footer";
+&#125;
+
+/* 桌面端：两列 */
+@media (min-width: 600px) &#123;
+  .responsive-grid &#123;
+    grid-template-columns: 200px 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar main"
+      "footer footer";
+  &#125;
+&#125;</div>
+    </div>
+
+    <!-- 交互式编辑器 -->
+    <div class="section">
+      <h2>交互式网格编辑器</h2>
+      <p class="info">在下方选择布局模板，查看对应的 grid-template-areas 定义</p>
+      
+      <div class="controls">
+        <div class="control-group" style="flex: 1;">
+          <label>选择布局</label>
+          <select id="layout-select">
+            <option value="simple">简单三列</option>
+            <option value="holy-grail">圣杯布局</option>
+            <option value="magazine">杂志布局</option>
+            <option value="dashboard">仪表盘</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="visual-editor" id="layout-preview"></div>
+      
+      <div class="template-display" id="template-display"></div>
+    </div>
+
+    <!-- 点号表示空单元格 -->
+    <div class="section">
+      <h2>使用点号表示空单元格</h2>
+      <p class="info">用 `.` 或空格表示不放置任何元素的空单元格</p>
+      
+      <div class="grid-container">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-areas: 'header header .' 'sidebar main aside' '. footer footer'; gap: 8px;">
+          <div class="grid-item header-area" style="grid-area: header;">header</div>
+          <div class="grid-item sidebar-area" style="grid-area: sidebar;">sidebar</div>
+          <div class="grid-item main-area" style="grid-area: main; min-height: 80px;">main</div>
+          <div class="grid-item aside-area" style="grid-area: aside;">aside</div>
+          <div class="grid-item footer-area" style="grid-area: footer; grid-column: 2 / 4;">footer (跨两列)</div>
+        </div>
+      </div>
+      
+      <div class="code-block">grid-template-areas:
+  "header header ."      /* header 跨两列，第三列留空 */
+  "sidebar main aside"
+  ". footer footer";    /* 第一列留空，footer 跨两列 */</div>
+    </div>
+
+    <!-- 嵌套网格 -->
+    <div class="section">
+      <h2>嵌套网格</h2>
+      <p class="info">在网格区域内再创建新的网格，实现复杂布局</p>
+      
+      <div class="grid-container" style="padding: 8px;">
+        <div style="display: grid; grid-template-columns: 1fr 200px; grid-template-rows: auto 1fr auto; grid-template-areas: 'nav nav' 'main sidebar' 'footer footer'; gap: 8px; height: 300px;">
+          <div class="grid-item header-area" style="grid-area: nav; min-height: 50px;">导航栏</div>
+          <div style="grid-area: main; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="grid-item" style="background: linear-gradient(135deg, #58a6ff, #1f6feb);">卡片1</div>
+            <div class="grid-item" style="background: linear-gradient(135deg, #3fb950, #238636);">卡片2</div>
+            <div class="grid-item" style="background: linear-gradient(135deg, #f0883e, #bd561d); grid-column: 1 / 3;">卡片3 (跨两列)</div>
+          </div>
+          <div class="grid-item aside-area" style="grid-area: sidebar; min-height: 100px;">侧边栏</div>
+          <div class="grid-item footer-area" style="grid-area: footer; min-height: 40px;">页脚</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最佳实践 -->
+    <div class="section">
+      <h2>最佳实践</h2>
+      <ul style="font-size: 13px; color: #8b949e; line-height: 2; padding-left: 20px;">
+        <li>使用语义化的区域名称（header、sidebar、main、footer）</li>
+        <li>确保每个区域形成矩形（不能是 L 形或更复杂的形状）</li>
+        <li>使用 `.` 表示空单元格，不要留空格</li>
+        <li>结合媒体查询实现响应式布局</li>
+        <li>复杂布局可以拆分为多个嵌套的网格</li>
+        <li>使用 <code>gap</code> 属性控制区域之间的间距</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <script>
+    // 布局配置
+    const layouts = {
+      'simple': {
+        columns: 3,
+        template: [
+          ['header', 'header', 'header'],
+          ['sidebar', 'main', 'aside'],
+          ['footer', 'footer', 'footer']
+        ]
+      },
+      'holy-grail': {
+        columns: 3,
+        template: [
+          ['header', 'header', 'header'],
+          ['sidebar', 'main', 'aside'],
+          ['footer', 'footer', 'footer']
+        ]
+      },
+      'magazine': {
+        columns: 3,
+        template: [
+          ['hero', 'hero', 'sidebar'],
+          ['article1', 'article2', 'sidebar']
+        ]
+      },
+      'dashboard': {
+        columns: 3,
+        template: [
+          ['nav', 'nav', 'nav'],
+          ['sidebar', 'main', 'main'],
+          ['footer', 'footer', 'footer']
+        ]
+      }
+    };
+
+    const areaColors = {
+      'header': { bg: 'rgba(88, 166, 255, 0.3)', border: '#58a6ff' },
+      'sidebar': { bg: 'rgba(63, 185, 80, 0.3)', border: '#3fb950' },
+      'main': { bg: 'rgba(240, 136, 62, 0.3)', border: '#f0883e' },
+      'aside': { bg: 'rgba(163, 113, 247, 0.3)', border: '#a371f7' },
+      'footer': { bg: 'rgba(248, 81, 73, 0.3)', border: '#f85149' },
+      'hero': { bg: 'rgba(255, 166, 87, 0.3)', border: '#ffa657' },
+      'article1': { bg: 'rgba(88, 166, 255, 0.2)', border: '#58a6ff' },
+      'article2': { bg: 'rgba(63, 185, 80, 0.2)', border: '#3fb950' },
+      'nav': { bg: 'rgba(163, 113, 247, 0.3)', border: '#a371f7' }
+    };
+
+    const layoutSelect = document.getElementById('layout-select');
+    const layoutPreview = document.getElementById('layout-preview');
+    const templateDisplay = document.getElementById('template-display');
+
+    function renderLayout(layoutName) {
+      const layout = layouts[layoutName];
+      layoutPreview.innerHTML = '';
+      layoutPreview.style.gridTemplateColumns = `repeat(${layout.columns}, 1fr)`;
+      
+      let templateHTML = '';
+      
+      layout.template.forEach(row => {
+        templateHTML += '<div class="template-line"><span class="template-quote">" </span>';
+        row.forEach(cell => {
+          if (cell === '.') {
+            templateHTML += '<span class="template-area empty">.</span>';
+          } else {
+            const color = areaColors[cell] || { bg: '#21262d', border: '#30363d' };
+            templateHTML += `<span class="template-area" style="background: ${color.bg}; border-color: ${color.border}; color: ${color.border};">${cell}</span>`;
+          }
+        });
+        templateHTML += '<span class="template-quote"> "</span></div>';
+        
+        row.forEach(cell => {
+          const color = cell === '.' ? { bg: '#161b22', border: '#30363d' } : (areaColors[cell] || { bg: '#161b22', border: '#30363d' });
+          const div = document.createElement('div');
+          div.className = 'visual-cell';
+          div.style.background = color.bg;
+          div.style.borderColor = color.border;
+          div.textContent = cell === '.' ? '' : cell;
+          layoutPreview.appendChild(div);
+        });
+      });
+      
+      templateDisplay.innerHTML = templateHTML;
+    }
+
+    layoutSelect.addEventListener('change', (e) => {
+      renderLayout(e.target.value);
+    });
+
+    // 初始渲染
+    renderLayout('simple');
+
+    // 响应式布局提示
+    const responsiveDemo = document.getElementById('responsive-demo');
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 600) {
+          responsiveDemo.style.gridTemplateColumns = '200px 1fr';
+          responsiveDemo.style.gridTemplateAreas = '"header header" "sidebar main" "footer footer"';
+        } else {
+          responsiveDemo.style.gridTemplateColumns = '1fr';
+          responsiveDemo.style.gridTemplateAreas = '"header" "main" "sidebar" "footer"';
+        }
+      }
+    });
+    resizeObserver.observe(responsiveDemo.parentElement);
+  </script>
+</body>
+</html>

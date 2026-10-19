@@ -1,0 +1,274 @@
+# ScrollTimeline — CSS Scroll-Driven Animations
+
+<page-layout>
+  <keywords>scroll-timeline, scroll-driven animations, animation-timeline, CSS animation, scroll-linked</keywords>
+  <description>Link CSS animations to scroll progress using the scroll-timeline property and ScrollTimeline API.</description>
+</page-layout>
+
+## Overview
+
+**Scroll-driven animations** let you link an animation's progress directly to scroll position. Instead of time, the scroll offset acts as the timeline — as the user scrolls, the animation advances or reverses accordingly. This enables effects like progress bars that fill as you scroll, elements that rotate or scale based on scroll position, and parallax effects without a single line of JavaScript.
+
+The key players are:
+- `animation-timeline` — which timeline drives the animation (time-based by default, scroll-based with ScrollTimeline)
+- `scroll-timeline` — the named timeline tied to a scrollable element's scroll progress
+
+> **Reference:** [Chrome Blog — Scroll-Driven Animations](https://developer.chrome.com/blog/scroll-driven-animations/)
+
+---
+
+## Syntax
+
+### `animation-timeline`
+
+The `animation-timeline` property specifies the timeline that an animation uses. It replaces the implicit `animation-duration` timeline.
+
+```css
+.element {
+  animation-timeline: <scroll-timeline-name> | none;
+}
+```
+
+**Values:**
+- `none` — Uses the default document time-based timeline (default)
+- `<scroll-timeline-name>` — References a named `scroll-timeline` declared elsewhere
+
+### `scroll-timeline` (Shorthand)
+
+The `scroll-timeline` property is a shorthand for defining a scroll-linked timeline with its source and orientation.
+
+```css
+.element {
+  scroll-timeline: <scroll-timeline-name> [ vertical | horizontal | block | inline ];
+}
+```
+
+**Values:**
+- `<scroll-timeline-name>` — Identifier used by `animation-timeline` to reference this timeline
+- `vertical` — Track the vertical scroll position (default)
+- `horizontal` — Track the horizontal scroll position
+- `block` — Track scroll along the block axis (default)
+- `inline` — Track scroll along the inline axis
+
+### `scroll-timeline-name`
+
+Defines the unique name for referencing this scroll timeline.
+
+```css
+.element {
+  scroll-timeline-name: --my-progress-bar;
+}
+```
+
+### `scroll-timeline-axis`
+
+Specifies which scroll axis to track (used when not using the shorthand).
+
+```css
+.element {
+  scroll-timeline-axis: block; /* block | inline | vertical | horizontal */
+}
+```
+
+### Full Declaration Example
+
+```css
+@keyframes fill-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.progress-bar {
+  animation-name: fill-progress;
+  animation-timing-function: linear;
+  animation-timeline: --page-scroll;
+
+  scroll-timeline-name: --page-scroll;
+  scroll-timeline-axis: block;
+}
+```
+
+---
+
+## The ScrollTimeline API
+
+Beyond the CSS-only shorthand, the Web Animations API provides a JavaScript `ScrollTimeline` constructor for programmatic control.
+
+### Creating a ScrollTimeline in JavaScript
+
+```javascript
+const timeline = new ScrollTimeline({
+  source: document.scrollingElement, // or a specific scrollable element
+  axis: 'block', // 'block' | 'inline' | 'vertical' | 'horizontal'
+});
+
+// Use it with element.animate()
+element.animate(keyframes, {
+  timeline,
+  fill: 'both',
+  duration: 1, // progress is 0–1, not a time value
+});
+```
+
+### Key Properties
+
+| Property | Description |
+|---|---|
+| `source` | The scrollable element (`Element` or `null` for viewport) |
+| `axis` | The scroll axis to track |
+| `currentTime` | Returns the progress value (0 to 1) |
+
+---
+
+## Use Cases
+
+### 1. Progress Indicator
+
+The classic use case — a progress bar at the top of the page that fills as you scroll down.
+
+```css
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #3b82f6;
+  transform-origin: left center;
+
+  animation-name: grow;
+  animation-timing-function: linear;
+  animation-timeline: --scroll-progress;
+
+  scroll-timeline-name: --scroll-progress;
+  scroll-timeline-axis: block;
+}
+```
+
+### 2. Parallax Effects
+
+Move background and foreground layers at different rates as the user scrolls.
+
+```css
+@keyframes parallax-bg {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-30%); }
+}
+
+.hero-background {
+  animation-name: parallax-bg;
+  animation-timing-function: linear;
+  animation-timeline: --page-scroll;
+  /* ... scroll-timeline-name/axis declarations ... */
+}
+```
+
+### 3. Reveal on Scroll
+
+Elements that fade and slide in as they enter the viewport.
+
+```css
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-card {
+  animation-name: reveal;
+  animation-timing-function: ease-out;
+  animation-timeline: --card-in-view;
+
+  scroll-timeline-name: --card-in-view;
+  scroll-timeline-axis: block;
+}
+```
+
+### 4. Scroll-Linked Rotation
+
+Rotate an element (like a dial or compass) based on scroll position.
+
+```css
+@keyframes rotate-dial {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
+
+.dial {
+  animation-name: rotate-dial;
+  animation-timeline: --page-scroll;
+  /* ... */
+}
+```
+
+---
+
+## Scroll Timeline Scope
+
+A `scroll-timeline-name` is in scope when referenced by:
+
+1. **Descendants** of the element that declared the `scroll-timeline`
+2. **Siblings and sibling subsequences** that come after the declaring element
+
+This means you can declare a scroll timeline on a parent and have children reference it.
+
+```html
+<article id="scroll-source">
+  <div class="animated-child"></div>
+</article>
+
+<style>
+  #scroll-source {
+    scroll-timeline-name: --section-scroll;
+    scroll-timeline-axis: block;
+    overflow: auto;
+    height: 100vh;
+  }
+
+  .animated-child {
+    animation-timeline: --section-scroll;
+    /* animation plays as #scroll-source is scrolled */
+  }
+</style>
+```
+
+---
+
+## Browser Support
+
+| Browser | Support |
+|---|---|
+| Chrome | ✅ Supported (since Chrome 115) behind flag: `chrome://flags/#scroll-driven-animations` |
+| Edge | ✅ Same as Chrome (Chromium-based) |
+| Safari | 🔜 Under consideration |
+| Firefox | 🔜 Under consideration |
+
+**Status:** As of 2024, scroll-driven animations are behind an origin trial or flag in Chromium browsers. The feature is specced in the [CSS Animations Level 2](https://drafts.csswg.org/css-animations-2/) specification.
+
+> To enable in Chrome, visit `chrome://flags/#scroll-driven-animations` and toggle it on, or use an [origin trial token](https://developer.chrome.com/blog/scroll-driven-animations/) for production testing.
+
+---
+
+## Polyfills and Fallbacks
+
+- **[scroll-timeline-polyfill](https://github.com/flackr/scroll-timeline)** — A community polyfill that implements the ScrollTimeline API using JavaScript
+- For production, consider a CSS-only progressive enhancement approach: the scroll-linked effects enhance on supported browsers while the page remains fully functional without them
+
+---
+
+## See Also
+
+- [Chrome Blog — Scroll-Driven Animations](https://developer.chrome.com/blog/scroll-driven-animations/)
+- [CSS Animations Level 2 Spec](https://drafts.csswg.org/css-animations-2/)
+- [MDN — animation-timeline](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline)
+- [MDN — scroll-timeline](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-timeline)
