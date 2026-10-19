@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 层叠上下文与可见性判断</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; padding: 2rem; }
+    h1 { font-size: 1.8rem; color: #fff; margin-bottom: 1.5rem; }
+    h2 { font-size: 1.2rem; color: #00d4ff; margin: 1.5rem 0 0.8rem; }
+    h3 { font-size: 1rem; color: #ffd700; margin: 1rem 0 0.5rem; }
+
+    .tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 0.85rem; transition: all 0.2s; }
+    .tab-btn:hover { border-color: #00d4ff; color: #00d4ff; }
+    .tab-btn.active { background: #00d4ff; color: #0a0a0a; font-weight: bold; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 1rem 0; }
+    .mini-card { background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; }
+    .mini-card h4 { font-size: 0.85rem; color: #00d4ff; margin-bottom: 6px; }
+    .mini-card p { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
+
+    .highlight { color: #00d4ff; font-weight: bold; }
+    .warning { color: #ff6b6b; }
+    .success { color: #4ade80; }
+
+    pre { background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px; overflow-x: auto; font-size: 0.8rem; line-height: 1.6; margin: 0.8rem 0; }
+    code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+    .comment { color: #666; }
+    .keyword { color: #ff79c6; }
+    .string { color: #f1fa8c; }
+    .cmd { color: #50fa7b; }
+
+    table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.85rem; }
+    th { background: #111; color: #00d4ff; padding: 8px 12px; text-align: left; border: 1px solid #2a2a2a; }
+    td { padding: 8px 12px; border: 1px solid #2a2a2a; color: #ccc; }
+
+    .input-group { display: flex; gap: 8px; margin: 1rem 0; flex-wrap: wrap; }
+    .input-group input, .input-group select { background: #111; border: 1px solid #333; color: #e0e0e0; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; flex: 1; min-width: 200px; }
+    .input-group input:focus, .input-group select:focus { outline: none; border-color: #00d4ff; }
+    .btn { background: #00d4ff; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+    .btn:hover { opacity: 0.9; }
+    .btn.danger { background: #ff6b6b; color: white; }
+    .btn.success { background: #4ade80; color: #0a0a0a; }
+    .btn.secondary { background: #333; color: #e0e0e0; }
+
+    /* Demo Area Styles */
+    .demo-stage { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; min-height: 300px; position: relative; padding: 20px; margin: 1rem 0; overflow: hidden; }
+    .demo-box { padding: 16px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: box-shadow 0.2s; position: absolute; }
+    .demo-box:hover { box-shadow: 0 0 0 2px #fff; }
+    .box-a { background: #e74c3c; top: 20px; left: 20px; width: 120px; height: 80px; }
+    .box-b { background: #3498db; top: 60px; left: 60px; width: 120px; height: 80px; }
+    .box-c { background: #2ecc71; top: 100px; left: 100px; width: 120px; height: 80px; }
+
+    .result-panel { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1rem; margin: 1rem 0; font-family: monospace; font-size: 0.85rem; }
+    .result-panel .ok { color: #4ade80; }
+    .result-panel .fail { color: #ff6b6b; }
+    .result-panel .info { color: #ffd700; }
+
+    .quiz-question { background: #1a1a1a; border-left: 3px solid #00d4ff; padding: 1rem; margin: 1rem 0; }
+    .quiz-question p { margin-bottom: 0.5rem; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option { background: #111; border: 1px solid #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .quiz-option:hover { border-color: #00d4ff; }
+    .quiz-option.selected { border-color: #00d4ff; background: #00d4ff20; }
+    .quiz-option.correct { border-color: #4ade80; background: #4ade8020; }
+    .quiz-option.wrong { border-color: #ff6b6b; background: #ff6b6b20; }
+
+    .formula-box { background: #0d0d0d; border: 1px solid #333; border-radius: 8px; padding: 1.2rem; text-align: center; margin: 1rem 0; }
+    .formula-box .formula { font-size: 1.5rem; color: #00d4ff; font-family: monospace; margin: 0.5rem 0; }
+    .formula-box .desc { font-size: 0.85rem; color: #888; }
+
+    .flow-chart { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+    .flow-step { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .flow-step .num { background: #00d4ff; color: #0a0a0a; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; flex-shrink: 0; }
+    .flow-step .text { color: #ccc; }
+    .flow-arrow { color: #00d4ff; font-size: 1.2rem; margin-left: 11px; }
+
+    .layer-visual { display: flex; flex-direction: column; gap: 2px; margin: 1rem 0; }
+    .layer-bar { height: 28px; display: flex; align-items: center; padding: 0 12px; font-size: 0.8rem; border-radius: 4px; color: #0a0a0a; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>CSS 层叠上下文与组件可见性判断</h1>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="overview">📚 概念总览</button>
+  <button class="tab-btn" data-tab="stacking">🔢 层叠顺序</button>
+  <button class="tab-btn" data-tab="context">🎯 层叠上下文</button>
+  <button class="tab-btn" data-tab="visibility">👁️ 可见性检测</button>
+  <button class="tab-btn" data-tab="demo">🎮 交互演示</button>
+  <button class="tab-btn" data-tab="quiz">📝 自测题</button>
+</div>
+
+<!-- 概念总览 -->
+<div id="tab-overview" class="tab-content active">
+  <div class="card">
+    <h2>什么是层叠上下文（Stacking Context）</h2>
+    <p style="color: #aaa; line-height: 1.6; margin: 1rem 0;">
+      层叠上下文是 HTML 文档中的一个<strong style="color:#fff">三维概念</strong>。同一个层叠上下文内的元素，按照从低到高的顺序排列：background/border → z-index负值 → block → float → inline → z-index:0 → z-index正数。
+    </p>
+    <p style="color: #aaa; line-height: 1.6; margin: 1rem 0;">
+      <strong style="color:#ff6b6b">关键原则</strong>：子元素无论 z-index 多大，都无法超越父层叠上下文的边界。
+    </p>
+  </div>
+
+  <div class="formula-box">
+    <div class="desc">层叠顺序公式（从低到高）</div>
+    <div class="formula">bg/border &lt; z-index:负 &lt; block &lt; float &lt; inline &lt; z-index:0 &lt; z-index:正</div>
+    <div class="desc">z-index 只在同一层叠上下文内比较才有意义</div>
+  </div>
+
+  <div class="flow-chart">
+    <h3>判断元素可见性流程</h3>
+    <div class="flow-step"><span class="num">1</span><span class="text">检查 display:none / visibility:hidden / opacity:0</span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="num">2</span><span class="text">检查元素尺寸 getBoundingClientRect(width/height > 0)</span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="num">3</span><span class="text">检查元素是否在视口内</span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="num">4</span><span class="text">使用 elementFromPoint 检测是否被遮挡</span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="num">5</span><span class="text">比较层叠上下文和 z-index</span></div>
+  </div>
+
+  <table>
+    <tr><th colspan="3">触发层叠上下文的 CSS 属性</th></tr>
+    <tr><th>属性</th><th>条件</th><th>说明</th></tr>
+    <tr><td>position + z-index</td><td>fixed/absolute + z-index ≠ auto</td><td>定位元素</td></tr>
+    <tr><td>opacity</td><td>&lt; 1</td><td>透明元素</td></tr>
+    <tr><td>transform</td><td>≠ none</td><td>变换元素</td></tr>
+    <tr><td>filter</td><td>≠ none</td><td>滤镜元素</td></tr>
+    <tr><td>mix-blend-mode</td><td>≠ normal</td><td>混合模式</td></tr>
+    <tr><td>isolation</td><td>isolate</td><td>隔离属性</td></tr>
+  </table>
+</div>
+
+<!-- 层叠顺序 -->
+<div id="tab-stacking" class="tab-content">
+  <div class="card">
+    <h2>层叠顺序详解</h2>
+    <p style="color: #aaa; line-height: 1.6; margin: 1rem 0;">
+      在同一个层叠上下文中，元素按照以下顺序层叠（从低到高）：
+    </p>
+    <div class="layer-visual">
+      <div class="layer-bar" style="background: #4a4a4a;">1. background / border（层叠上下文根部）</div>
+      <div class="layer-bar" style="background: #e74c3c;">2. z-index: 负值（最底层）</div>
+      <div class="layer-bar" style="background: #3498db;">3. block 流式布局子元素</div>
+      <div class="layer-bar" style="background: #9b59b6;">4. float 子元素</div>
+      <div class="layer-bar" style="background: #f39c12;">5. inline / inline-block 子元素</div>
+      <div class="layer-bar" style="background: #1abc9c;">6. z-index: auto / z-index: 0</div>
+      <div class="layer-bar" style="background: #2ecc71;">7. z-index: 正值（最顶层）</div>
+    </div>
+
+    <h3>关键点</h3>
+    <ul style="color: #aaa; line-height: 1.8; padding-left: 1.5rem;">
+      <li>z-index 负值在 background 之后，但在 block 布局元素之前</li>
+      <li>float 元素比 inline 元素低，但比 block 元素高</li>
+      <li>z-index: auto 等同于 z-index: 0 在同一层叠上下文中</li>
+      <li>没有创建层叠上下文的父元素，其子元素与普通文档流元素一起比较</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>常见 z-index 陷阱</h2>
+    <div class="quiz-question">
+      <p><strong>问题</strong>：为什么 z-index: 9999 的元素还是被遮挡？</p>
+      <pre><code><span class="comment">// HTML</span>
+&lt;div class=<span class="string">"parent"</span>&gt;
+  &lt;div class=<span class="string">"child"</span>&gt;z-index: 9999&lt;/div&gt;
+&lt;/div&gt;
+
+<span class="comment">// CSS</span>
+.parent {
+  <span class="keyword">position</span>: relative;
+  <span class="comment">/* 没有 z-index，不创建层叠上下文 */</span>
+}
+.child {
+  <span class="keyword">position</span>: absolute;
+  <span class="keyword">z-index</span>: <span class="highlight">9999</span>;
+}
+
+<span class="comment">// 另一个元素</span>
+.other {
+  <span class="keyword">position</span>: relative;
+  <span class="keyword">z-index</span>: <span class="highlight">100</span>; <span class="comment">/* 在 child 之上 */</span>
+}</code></pre>
+      <p class="warning">⚠️ 关键：child 的 z-index 再高，也只能在 parent 的层叠上下文内层叠</p>
+    </div>
+  </div>
+</div>
+
+<!-- 层叠上下文 -->
+<div id="tab-context" class="tab-content">
+  <div class="card">
+    <h2>创建层叠上下文的条件</h2>
+    <table>
+      <tr><th>属性</th><th>触发值</th><th>说明</th></tr>
+      <tr><td>position + z-index</td><td>fixed/absolute + z-index ≠ auto</td><td>常见场景</td></tr>
+      <tr><td>z-index</td><td>任意非 auto 值（flex 子元素）</td><td>flex/grid 子元素</td></tr>
+      <tr><td>opacity</td><td>&lt; 1</td><td>透明元素</td></tr>
+      <tr><td>transform</td><td>≠ none</td><td>含 translateZ(0)</td></tr>
+      <tr><td>filter</td><td>≠ none</td><td>如 blur()</td></tr>
+      <tr><td>mix-blend-mode</td><td>≠ normal</td><td>混合模式</td></tr>
+      <tr><td>isolation</td><td>isolate</td><td>创建隔离层</td></tr>
+      <tr><td>contain</td><td>layout/paint/strict</td><td>布局包含</td></tr>
+      <tr><td>will-change</td><td>触发组合层</td><td>GPU 加速</td></tr>
+      <tr><td>backdrop-filter</td><td>≠ none</td><td>背景滤镜</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>跨层叠上下文示例</h2>
+    <div class="demo-stage" id="context-demo">
+      <div id="ctx-parent-a" class="demo-box box-a" style="z-index: 1; opacity: 0.95;">
+        A (z:1, opacity:0.95)
+        <div id="ctx-child-a" style="position: absolute; top: 50px; left: 60px; background: #c0392b; padding: 8px; border-radius: 4px; z-index: 9999;">
+          child (z:9999)
+        </div>
+      </div>
+      <div id="ctx-parent-b" class="demo-box box-b" style="z-index: 0;">
+        B (z:0)
+      </div>
+      <div id="ctx-box-c" class="demo-box box-c" style="position: relative; z-index: 50;">
+        C (z:50)
+      </div>
+    </div>
+    <div class="input-group">
+      <button class="btn secondary" onclick="logContextDemo()">🔍 检测层叠顺序</button>
+      <button class="btn" onclick="resetContextDemo()">🔄 重置</button>
+    </div>
+    <div class="result-panel" id="ctx-result">
+      点击"检测层叠顺序"查看分析结果
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>层叠上下文边界法则</h2>
+    <pre><code><span class="comment">// 法则：子元素的 z-index 再高，也不能超出父层叠上下文</span>
+
+<span class="highlight">层叠上下文 A</span> (z-index: 1)
+  └── child (z-index: 9999)  ← 永远在 A 之内
+      └── grandchild (z-index: 999999)  ← 永远在 child 之内
+
+<span class="highlight">层叠上下文 B</span> (z-index: 0)
+  └── 任何元素  ← 都在 A 的 z-index: 1 之上
+
+<span class="comment">// 结果：B 内的任何元素都在 A 的 child (z-index: 9999) 之上！</span></code></pre>
+  </div>
+</div>
+
+<!-- 可见性检测 -->
+<div id="tab-visibility" class="tab-content">
+  <div class="card">
+    <h2>checkVisibility() API（现代浏览器）</h2>
+    <pre><code><span class="comment">// 检查元素是否可见</span>
+<span class="keyword">if</span> (element.checkVisibility()) {
+  console.log(<span class="string">'元素可见'</span>);
+}
+
+<span class="comment">// 带 CSS 属性检查</span>
+<span class="keyword">if</span> (element.checkVisibility({
+  checkOpacity: <span class="highlight">true</span>,
+  checkVisibilityCSS: <span class="highlight">true</span>
+})) {
+  console.log(<span class="string">'考虑 opacity 和 visibility 后可见'</span>);
+}</code></pre>
+    <button class="btn" onclick="testCheckVisibility()">🧪 测试 checkVisibility</button>
+  </div>
+
+  <div class="card">
+    <h2>getBoundingClientRect 检测</h2>
+    <pre><code><span class="keyword">function</span> <span class="highlight">isElementInViewport</span>(el) {
+  <span class="keyword">const</span> rect = el.getBoundingClientRect();
+  <span class="keyword">return</span> (
+    rect.top &lt; window.innerHeight &amp;&amp;
+    rect.bottom &gt; <span class="highlight">0</span> &amp;&amp;
+    rect.left &lt; window.innerWidth &amp;&amp;
+    rect.right &gt; <span class="highlight">0</span>
+  );
+}</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>elementFromPoint 检测遮挡</h2>
+    <pre><code><span class="keyword">function</span> <span class="highlight">isElementObscured</span>(el) {
+  <span class="keyword">const</span> rect = el.getBoundingClientRect();
+  <span class="keyword">const</span> centerX = rect.left + rect.width / <span class="highlight">2</span>;
+  <span class="keyword">const</span> centerY = rect.top + rect.height / <span class="highlight">2</span>;
+  
+  <span class="keyword">const</span> topElement = document.elementFromPoint(centerX, centerY);
+  
+  <span class="keyword">return</span> !topElement || 
+         (topElement !== el &amp;&amp; !el.contains(topElement));
+}</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>getComputedStyle 检测隐藏</h2>
+    <pre><code><span class="keyword">function</span> <span class="highlight">isStyleHidden</span>(el) {
+  <span class="keyword">const</span> style = window.getComputedStyle(el);
+  <span class="keyword">return</span> (
+    style.display === <span class="string">'none'</span> ||
+    style.visibility === <span class="string">'hidden'</span> ||
+    style.opacity === <span class="string">'0'</span>
+  );
+}</code></pre>
+  </div>
+</div>
+
+<!-- 交互演示 -->
+<div id="tab-demo" class="tab-content">
+  <div class="card">
+    <h2>层叠顺序交互演示</h2>
+    <p style="color: #aaa; margin-bottom: 1rem;">点击不同元素，检测其层叠顺序和可见性状态</p>
+    <div class="demo-stage" id="interactive-demo">
+      <div id="demo-bg" class="demo-box" style="background: #4a4a4a; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; z-index: auto;">
+        背景层
+      </div>
+      <div id="demo-neg" class="demo-box box-a" style="z-index: -1;">
+        z-index: -1
+      </div>
+      <div id="demo-block" class="demo-box box-b" style="position: static;">
+        block 布局
+      </div>
+      <div id="demo-float" class="demo-box" style="background: #9b59b6; top: 20px; left: 180px; width: 100px; height: 60px; float: left;">
+        float
+      </div>
+      <div id="demo-inline" class="demo-box box-c" style="display: inline-block;">
+        inline-block
+      </div>
+      <div id="demo-z0" class="demo-box" style="background: #1abc9c; top: 100px; left: 150px; width: 100px; height: 60px; position: relative; z-index: 0;">
+        z-index: 0
+      </div>
+      <div id="demo-z100" class="demo-box" style="background: #2ecc71; top: 140px; left: 200px; width: 100px; height: 60px; position: relative; z-index: 100;">
+        z-index: 100
+      </div>
+    </div>
+    <div class="result-panel" id="demo-result">
+      👆 点击上方任意色块查看检测结果
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>完整可见性检测演示</h2>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 1rem 0;">
+      <div id="test-display-none" style="background: #e74c3c; padding: 12px; width: 100px; text-align: center; cursor: pointer;" onclick="detectVisibility(this)">display: block</div>
+      <div id="test-opacity-0" style="background: #3498db; padding: 12px; width: 100px; text-align: center; opacity: 0; cursor: pointer;" onclick="detectVisibility(this)">opacity: 0</div>
+      <div id="test-visibility-hidden" style="background: #2ecc71; padding: 12px; width: 100px; text-align: center; visibility: hidden; cursor: pointer;" onclick="detectVisibility(this)">visibility: visible</div>
+      <div id="test-normal" style="background: #f39c12; padding: 12px; width: 100px; text-align: center; cursor: pointer;" onclick="detectVisibility(this)">完全可见</div>
+    </div>
+    <button class="btn secondary" onclick="runAllVisibilityTests()">🔍 运行全部检测</button>
+    <div class="result-panel" id="visibility-result">点击按钮运行检测</div>
+  </div>
+</div>
+
+<!-- 自测题 -->
+<div id="tab-quiz" class="tab-content">
+  <div class="card">
+    <h2>判断题</h2>
+    <div class="quiz-question">
+      <p><strong>1.</strong> 子元素的 z-index: 9999 一定比父元素的 z-index: 1 在上层？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">✓ 正确</div>
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">✗ 错误</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：错误 — 子元素无法超越父层叠上下文的边界</p>
+    </div>
+
+    <div class="quiz-question">
+      <p><strong>2.</strong> opacity: 0.9 会创建新的层叠上下文吗？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">✓ 是</div>
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">✗ 否</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：是 — opacity &lt; 1 就会创建新层叠上下文</p>
+    </div>
+
+    <div class="quiz-question">
+      <p><strong>3.</strong> position: static 时 z-index 会生效吗？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">✓ 会</div>
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">✗ 不会</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：不会 — z-index 只对 position 为 relative/absolute/fixed/sticky 生效</p>
+    </div>
+
+    <div class="quiz-question">
+      <p><strong>4.</strong> 使用 elementFromPoint 检测元素中心点，如果返回元素本身，说明元素可见且未被遮挡？</p>
+      <div class="quiz-options">
+        <div class="quiz-option" data-answer="correct" onclick="selectAnswer(this)">✓ 正确</div>
+        <div class="quiz-option" data-answer="wrong" onclick="selectAnswer(this)">✗ 不完全对</div>
+      </div>
+      <p class="info" style="margin-top: 8px; display: none;">答案：正确 — 中心点命中自己且没有 display:none 等问题时成立</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>排序题</h2>
+    <div class="quiz-question">
+      <p><strong>5.</strong> 按层叠顺序从低到高排列：① z-index: -1 ② block ③ z-index: 0 ④ z-index: 5</p>
+      <div class="input-group" style="flex-direction: column; gap: 4px;">
+        <input type="text" id="sort-answer" placeholder="输入顺序，如：①②③④" style="width: 100%;">
+      </div>
+      <button class="btn" onclick="checkSortAnswer()" style="margin-top: 8px;">✅ 检查答案</button>
+      <p class="info" id="sort-result" style="display: none; margin-top: 8px;">答案：①②③④</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Quiz interactions
+  function selectAnswer(el) {
+    const question = el.closest('.quiz-question');
+    question.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.classList.remove('selected');
+    });
+    el.classList.add('selected');
+    
+    const answer = el.dataset.answer;
+    if (answer === 'correct') {
+      el.classList.add('correct');
+    } else if (answer === 'wrong') {
+      el.classList.add('wrong');
+      question.querySelectorAll('.quiz-option').forEach(opt => {
+        if (opt.dataset.answer === 'correct') {
+          opt.classList.add('correct');
+        }
+      });
+    }
+    
+    const info = question.querySelector('.info');
+    if (info) info.style.display = 'block';
+  }
+
+  function checkSortAnswer() {
+    const input = document.getElementById('sort-answer').value.trim();
+    const result = document.getElementById('sort-result');
+    if (input === '①②③④' || input === '1,2,3,4' || input === '1 2 3 4') {
+      result.textContent = '✅ 正确！顺序：z-index:-1 < block < z-index:0 < z-index:5';
+      result.className = 'info success';
+    } else {
+      result.textContent = '❌ 错误，答案：①②③④';
+      result.className = 'info warning';
+    }
+    result.style.display = 'block';
+  }
+
+  function logContextDemo() {
+    const parentA = document.getElementById('ctx-parent-a');
+    const childA = document.getElementById('ctx-child-a');
+    const parentB = document.getElementById('ctx-parent-b');
+    const boxC = document.getElementById('ctx-box-c');
+    
+    const result = [];
+    result.push('层叠顺序分析：');
+    result.push('');
+    result.push('A (z-index:1, opacity:0.95) — 创建层叠上下文');
+    result.push('  → child (z-index:9999) — 在 A 的层叠边界内');
+    result.push('');
+    result.push('B (z-index:0) — 在根层叠上下文');
+    result.push('');
+    result.push('C (z-index:50, position:relative) — 在根层叠上下文');
+    result.push('');
+    result.push('层叠结果（从低到高）：');
+    result.push('1. A 的背景层（opacity 触发层叠上下文）');
+    result.push('2. A 的 child (z-index:9999) — 但受 A 的 z-index:1 限制');
+    result.push('3. B (z-index:0) — 超出 A child 的 z-index，但受 B 的父层叠上下文限制');
+    result.push('4. C (z-index:50) — 最终显示在最上层');
+    
+    document.getElementById('ctx-result').innerHTML = result.map(r => {
+      if (r.includes('child') && r.includes('9999')) return `<span class="warning">${r}</span>`;
+      if (r.includes('最高') || r.includes('C (z-index:50)')) return `<span class="success">${r}</span>`;
+      return r;
+    }).join('<br>');
+  }
+
+  function resetContextDemo() {
+    document.getElementById('ctx-result').innerHTML = '点击"检测层叠顺序"查看分析结果';
+  }
+
+  function testCheckVisibility() {
+    const tests = document.querySelectorAll('#interactive-demo .demo-box');
+    let results = [];
+    tests.forEach(el => {
+      if (typeof el.checkVisibility === 'function') {
+        const visible = el.checkVisibility();
+        results.push(`<span class="${visible ? 'ok' : 'fail'}">${el.id}: ${visible}</span>`);
+      } else {
+        results.push(`<span class="info">${el.id}: API not supported</span>`);
+      }
+    });
+    alert('可见性检测结果：\n' + results.map(r => r.replace(/<[^>]+>/g, '')).join('\n'));
+  }
+
+  // Demo: interactive stacking
+  document.querySelectorAll('.demo-box').forEach(box => {
+    box.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const id = this.id;
+      let info = '';
+      
+      if (id === 'demo-neg') {
+        info = '<span class="highlight">z-index: -1</span> 在最底层，低于 block 布局元素';
+      } else if (id === 'demo-block') {
+        info = '<span class="highlight">block 布局</span> 在 z-index 负值之上，低于 inline/inline-block';
+      } else if (id === 'demo-float') {
+        info = '<span class="highlight">float</span> 在 block 之上，低于 inline-block';
+      } else if (id === 'demo-inline') {
+        info = '<span class="highlight">inline-block</span> 在 float 之上，低于 z-index:0';
+      } else if (id === 'demo-z0') {
+        info = '<span class="highlight">z-index: 0</span> 在 inline-block 之上';
+      } else if (id === 'demo-z100') {
+        info = '<span class="highlight">z-index: 100</span> 在 z-index: 0 之上（最高）';
+      } else if (id === 'demo-bg') {
+        info = '<span class="highlight">background</span> 在最底层（层叠上下文根）';
+      }
+      
+      document.getElementById('demo-result').innerHTML = info;
+    });
+  });
+
+  // Visibility detection
+  function detectVisibility(el) {
+    const result = document.getElementById('visibility-result');
+    let checks = [];
+    
+    const style = window.getComputedStyle(el);
+    checks.push(`display: <span class="${style.display === 'none' ? 'fail' : 'ok'}">${style.display}</span>`);
+    checks.push(`visibility: <span class="${style.visibility === 'hidden' ? 'fail' : 'ok'}">${style.visibility}</span>`);
+    checks.push(`opacity: <span class="${style.opacity === '0' ? 'fail' : 'ok'}">${style.opacity}</span>`);
+    
+    if (typeof el.checkVisibility === 'function') {
+      checks.push(`checkVisibility(): <span class="${el.checkVisibility() ? 'ok' : 'fail'}">${el.checkVisibility()}</span>`);
+    } else {
+      checks.push(`checkVisibility(): <span class="info">API not supported</span>`);
+    }
+    
+    const rect = el.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    checks.push(`视口内: <span class="${inView ? 'ok' : 'fail'}">${inView}</span>`);
+    
+    result.innerHTML = `<span class="highlight">${el.style.background || 'Element'}</span> 检测结果：<br>` + checks.join('<br>');
+  }
+
+  function runAllVisibilityTests() {
+    const tests = ['test-display-none', 'test-opacity-0', 'test-visibility-hidden', 'test-normal'];
+    let results = [];
+    tests.forEach(id => {
+      const el = document.getElementById(id);
+      const style = window.getComputedStyle(el);
+      const visible = style.display !== 'none' && 
+                      style.visibility !== 'hidden' && 
+                      style.opacity !== '0';
+      results.push(`<span class="${visible ? 'ok' : 'fail'}">${id}</span>: display=${style.display}, visibility=${style.visibility}, opacity=${style.opacity}`);
+    });
+    document.getElementById('visibility-result').innerHTML = '全部检测结果：<br>' + results.join('<br>');
+  }
