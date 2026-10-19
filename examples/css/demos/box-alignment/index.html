@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Box Alignment 演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #f0f6fc; }
+    .subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 16px; color: #f0f6fc; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    .info { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.6; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; background: #0d1117; padding: 2px 6px; border-radius: 3px; color: #f0883e; }
+    .code-block { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; margin: 12px 0; }
+    
+    /* 控件 */
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 4px; }
+    .control-group label { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+    .control-group select { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; padding: 6px 10px; font-size: 12px; min-width: 150px; cursor: pointer; }
+    .control-group select:focus { outline: none; border-color: #58a6ff; }
+    
+    /* 演示容器 */
+    .demo-wrapper { background: #0d1117; border-radius: 8px; padding: 16px; min-height: 200px; }
+    .demo-area { background: #161b22; border: 2px dashed #30363d; border-radius: 6px; min-height: 160px; padding: 12px; }
+    .demo-area.wrap { flex-wrap: wrap; }
+    
+    /* Flex 演示项目 */
+    .demo-item { width: 60px; height: 60px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); flex-shrink: 0; }
+    .demo-item:nth-child(2) { height: 80px; background: linear-gradient(135deg, #3fb950, #238636); }
+    .demo-item:nth-child(3) { height: 50px; background: linear-gradient(135deg, #f0883e, #bd561d); }
+    .demo-item:nth-child(4) { height: 70px; background: linear-gradient(135deg, #a371f7, #8957e5); }
+    .demo-item:nth-child(5) { height: 55px; background: linear-gradient(135deg, #f85149, #da3633); }
+    
+    /* Flex 容器 */
+    .flex-container { display: flex; }
+    
+    /* Grid 演示 */
+    .grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid-item { background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 4px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; }
+    .grid-item:nth-child(2) { background: linear-gradient(135deg, #3fb950, #238636); }
+    .grid-item:nth-child(3) { background: linear-gradient(135deg, #f0883e, #bd561d); }
+    .grid-item:nth-child(4) { background: linear-gradient(135deg, #a371f7, #8957e5); }
+    .grid-item:nth-child(5) { background: linear-gradient(135deg, #f85149, #da3633); }
+    .grid-item:nth-child(6) { background: linear-gradient(135deg, #ffa657, #d29922); }
+    
+    /* 基线对齐演示 */
+    .baseline-demo { display: flex; align-items: baseline; gap: 16px; padding: 16px; background: #0d1117; border-radius: 6px; }
+    .baseline-demo .text-large { font-size: 28px; background: #58a6ff; padding: 8px 16px; border-radius: 4px; }
+    .baseline-demo .text-small { font-size: 12px; background: #3fb950; padding: 8px 16px; border-radius: 4px; }
+    .baseline-demo .text-medium { font-size: 18px; background: #f0883e; padding: 8px 16px; border-radius: 4px; }
+    
+    /* 交叉轴对齐对比 */
+    .axis-demo { display: flex; flex-direction: column; gap: 24px; }
+    .axis-section h3 { font-size: 13px; color: #8b949e; margin-bottom: 8px; }
+    .axis-section h3 code { color: #58a6ff; }
+    .axis-row { display: flex; gap: 16px; }
+    .axis-item { width: 100px; height: 80px; background: #161b22; border: 1px dashed #30363d; border-radius: 4px; display: flex; }
+    .axis-item .inner { width: 30px; height: 30px; background: #58a6ff; border-radius: 4px; }
+    
+    /* 交互式表格 */
+    .props-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .props-table th, .props-table td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }
+    .props-table th { color: #8b949e; font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    .props-table td:first-child { font-weight: 500; color: #f0f6fc; }
+    .props-table td code { color: #f0883e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Box Alignment 盒模型对齐</h1>
+    <p class="subtitle">统一各种 CSS 布局模型对齐方式的模块</p>
+
+    <!-- 属性概览 -->
+    <div class="section">
+      <h2>属性概览</h2>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>属性</th>
+            <th>作用轴</th>
+            <th>适用布局</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>justify-content</code></td>
+            <td>主轴</td>
+            <td>flex, grid</td>
+            <td>内容在主轴上的对齐</td>
+          </tr>
+          <tr>
+            <td><code>align-items</code></td>
+            <td>交叉轴</td>
+            <td>flex, grid</td>
+            <td>单行内容在交叉轴对齐</td>
+          </tr>
+          <tr>
+            <td><code>align-content</code></td>
+            <td>交叉轴</td>
+            <td>flex, grid</td>
+            <td>多行内容在交叉轴对齐</td>
+          </tr>
+          <tr>
+            <td><code>justify-items</code></td>
+            <td>主轴</td>
+            <td>grid</td>
+            <td>网格项主轴对齐</td>
+          </tr>
+          <tr>
+            <td><code>justify-self</code></td>
+            <td>主轴</td>
+            <td>block, grid</td>
+            <td>单个项目自身主轴对齐</td>
+          </tr>
+          <tr>
+            <td><code>align-self</code></td>
+            <td>交叉轴</td>
+            <td>flex, grid</td>
+            <td>单个项目自身交叉轴对齐</td>
+          </tr>
+          <tr>
+            <td><code>place-items</code></td>
+            <td>两轴</td>
+            <td>flex, grid</td>
+            <td>align-items + justify-items 简写</td>
+          </tr>
+          <tr>
+            <td><code>place-content</code></td>
+            <td>两轴</td>
+            <td>flex, grid</td>
+            <td>align-content + justify-content 简写</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Flex 主轴对齐 -->
+    <div class="section">
+      <h2>justify-content 主轴对齐</h2>
+      <p class="info"><code>justify-content</code> 控制 flex 项目在主轴（默认水平）上的对齐方式</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>justify-content</label>
+          <select id="justify-content-select">
+            <option value="flex-start">flex-start</option>
+            <option value="flex-end">flex-end</option>
+            <option value="center">center</option>
+            <option value="space-between">space-between</option>
+            <option value="space-around">space-around</option>
+            <option value="space-evenly">space-evenly</option>
+          </select>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <div class="demo-area flex-container" id="jc-demo">
+          <div class="demo-item">1</div>
+          <div class="demo-item">2</div>
+          <div class="demo-item">3</div>
+          <div class="demo-item">4</div>
+          <div class="demo-item">5</div>
+        </div>
+      </div>
+      <div class="code-block">.container {
+  display: flex;
+  justify-content: <span id="jc-value">flex-start</span>;
+}</div>
+    </div>
+
+    <!-- Flex 交叉轴对齐 -->
+    <div class="section">
+      <h2>align-items 交叉轴对齐</h2>
+      <p class="info"><code>align-items</code> 控制 flex 项目在交叉轴（默认垂直）上的对齐方式</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>align-items</label>
+          <select id="align-items-select">
+            <option value="stretch">stretch</option>
+            <option value="flex-start">flex-start</option>
+            <option value="flex-end">flex-end</option>
+            <option value="center">center</option>
+            <option value="baseline">baseline</option>
+          </select>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <div class="demo-area flex-container" id="ai-demo" style="align-items: stretch;">
+          <div class="demo-item">1</div>
+          <div class="demo-item">2</div>
+          <div class="demo-item">3</div>
+          <div class="demo-item">4</div>
+          <div class="demo-item">5</div>
+        </div>
+      </div>
+      <div class="code-block">.container {
+  display: flex;
+  align-items: <span id="ai-value">stretch</span>;
+}</div>
+    </div>
+
+    <!-- align-content 多行对齐 -->
+    <div class="section">
+      <h2>align-content 多行对齐</h2>
+      <p class="info"><code>align-content</code> 控制 flex 项目在交叉轴上有多行时的对齐（需要 flex-wrap: wrap）</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>align-content</label>
+          <select id="align-content-select">
+            <option value="stretch">stretch</option>
+            <option value="flex-start">flex-start</option>
+            <option value="flex-end">flex-end</option>
+            <option value="center">center</option>
+            <option value="space-between">space-between</option>
+            <option value="space-around">space-around</option>
+          </select>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <div class="demo-area flex-container wrap" id="ac-demo" style="flex-wrap: wrap; align-content: stretch;">
+          <div class="demo-item" style="width: 80px;">1</div>
+          <div class="demo-item" style="width: 80px;">2</div>
+          <div class="demo-item" style="width: 80px;">3</div>
+          <div class="demo-item" style="width: 80px;">4</div>
+          <div class="demo-item" style="width: 80px;">5</div>
+          <div class="demo-item" style="width: 80px;">6</div>
+          <div class="demo-item" style="width: 80px;">7</div>
+          <div class="demo-item" style="width: 80px;">8</div>
+          <div class="demo-item" style="width: 80px;">9</div>
+        </div>
+      </div>
+      <div class="code-block">.container {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: <span id="ac-value">stretch</span>;
+}</div>
+    </div>
+
+    <!-- 基线对齐 -->
+    <div class="section">
+      <h2>基线对齐 (baseline)</h2>
+      <p class="info"><code>align-items: baseline</code> 使所有项目按文字基线对齐，适用于混合字体大小</p>
+      <div class="demo-wrapper">
+        <div class="baseline-demo">
+          <div class="text-large">大字标题</div>
+          <div class="text-medium">中等文字</div>
+          <div class="text-small">小号说明文字基线对齐示例</div>
+          <div class="text-large">另一个标题</div>
+        </div>
+      </div>
+      <div class="code-block">.container {
+  display: flex;
+  align-items: baseline;  /* 所有项目文字基线对齐 */
+}</div>
+    </div>
+
+    <!-- Grid 对齐 -->
+    <div class="section">
+      <h2>Grid 布局对齐</h2>
+      <p class="info">Grid 布局同时支持 justify-items/align-items 和 justify-content/align-content</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>justify-items</label>
+          <select id="ji-select">
+            <option value="stretch">stretch</option>
+            <option value="start">start</option>
+            <option value="end">end</option>
+            <option value="center">center</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>align-items</label>
+          <select id="gi-select">
+            <option value="stretch">stretch</option>
+            <option value="start">start</option>
+            <option value="end">end</option>
+            <option value="center">center</option>
+          </select>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <div class="grid-demo" id="grid-demo" style="justify-items: stretch; align-items: stretch;">
+          <div class="grid-item">1</div>
+          <div class="grid-item">2</div>
+          <div class="grid-item">3</div>
+          <div class="grid-item">4</div>
+          <div class="grid-item">5</div>
+          <div class="grid-item">6</div>
+        </div>
+      </div>
+      <div class="code-block">.grid-container {
+  display: grid;
+  justify-items: <span id="ji-value">stretch</span>;
+  align-items: <span id="gi-value">stretch</span>;
+}</div>
+    </div>
+
+    <!-- place-items 简写 -->
+    <div class="section">
+      <h2>place-items 简写</h2>
+      <p class="info"><code>place-items</code> 是 <code>align-items</code> 和 <code>justify-items</code> 的简写</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>place-items 值</label>
+          <select id="pi-select">
+            <option value="stretch">stretch</option>
+            <option value="center">center</option>
+            <option value="start end">start end</option>
+            <option value="end start">end start</option>
+            <option value="baseline">baseline</option>
+          </select>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <div class="grid-demo" id="pi-demo" style="place-items: stretch;">
+          <div class="grid-item">1</div>
+          <div class="grid-item">2</div>
+          <div class="grid-item">3</div>
+          <div class="grid-item">4</div>
+          <div class="grid-item">5</div>
+          <div class="grid-item">6</div>
+        </div>
+      </div>
+      <div class="code-block">.container {
+  place-items: <span id="pi-value">stretch</span>;
+  /* 等同于 align-items + justify-items */
+}</div>
+    </div>
+
+    <!-- 典型布局示例 -->
+    <div class="section">
+      <h2>典型布局示例</h2>
+      
+      <h3 style="font-size: 13px; color: #8b949e; margin: 16px 0 8px;">1. 水平垂直居中</h3>
+      <div class="demo-wrapper" style="min-height: 120px;">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100px; background: #161b22; border-radius: 6px;">
+          <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #58a6ff, #1f6feb); border-radius: 8px;"></div>
+        </div>
+      </div>
+      <div class="code-block">.center-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}</div>
+
+      <h3 style="font-size: 13px; color: #8b949e; margin: 16px 0 8px;">2. Space Between（导航栏）</h3>
+      <div class="demo-wrapper" style="min-height: 60px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 16px; height: 50px; background: #161b22; border-radius: 6px;">
+          <span style="color: white; font-size: 14px;">Logo</span>
+          <div style="display: flex; gap: 16px;">
+            <span style="color: #c9d1d9; font-size: 13px;">首页</span>
+            <span style="color: #c9d1d9; font-size: 13px;">关于</span>
+            <span style="color: #c9d1d9; font-size: 13px;">联系</span>
+          </div>
+        </div>
+      </div>
+      <div class="code-block">.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}</div>
+
+      <h3 style="font-size: 13px; color: #8b949e; margin: 16px 0 8px;">3. 多列均匀分布</h3>
+      <div class="demo-wrapper" style="min-height: 80px;">
+        <div style="display: flex; justify-content: space-evenly; align-items: stretch; gap: 16px; padding: 12px; background: #161b22; border-radius: 6px;">
+          <div style="flex: 1; background: #58a6ff; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">列1</div>
+          <div style="flex: 1; background: #3fb950; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">列2</div>
+          <div style="flex: 1; background: #f0883e; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">列3</div>
+        </div>
+      </div>
+      <div class="code-block">.equal-columns {
+  display: flex;
+  justify-content: space-evenly;
+}</div>
+    </div>
+
+  </div>
+
+  <script>
+    // justify-content 演示
+    const jcSelect = document.getElementById('justify-content-select');
+    const jcDemo = document.getElementById('jc-demo');
+    const jcValue = document.getElementById('jc-value');
+    
+    jcSelect.addEventListener('change', (e) => {
+      jcDemo.style.justifyContent = e.target.value;
+      jcValue.textContent = e.target.value;
+    });
+
+    // align-items 演示
+    const aiSelect = document.getElementById('align-items-select');
+    const aiDemo = document.getElementById('ai-demo');
+    const aiValue = document.getElementById('ai-value');
+    
+    aiSelect.addEventListener('change', (e) => {
+      aiDemo.style.alignItems = e.target.value;
+      aiValue.textContent = e.target.value;
+    });
+
+    // align-content 演示
+    const acSelect = document.getElementById('align-content-select');
+    const acDemo = document.getElementById('ac-demo');
+    const acValue = document.getElementById('ac-value');
+    
+    acSelect.addEventListener('change', (e) => {
+      acDemo.style.alignContent = e.target.value;
+      acValue.textContent = e.target.value;
+    });
+
+    // Grid justify-items/align-items
+    const jiSelect = document.getElementById('ji-select');
+    const giSelect = document.getElementById('gi-select');
+    const gridDemo = document.getElementById('grid-demo');
+    const jiValue = document.getElementById('ji-value');
+    const giValue = document.getElementById('gi-value');
+    
+    function updateGridItems() {
+      gridDemo.style.justifyItems = jiSelect.value;
+      gridDemo.style.alignItems = giSelect.value;
+      jiValue.textContent = jiSelect.value;
+      giValue.textContent = giSelect.value;
+    }
+    
+    jiSelect.addEventListener('change', updateGridItems);
+    giSelect.addEventListener('change', updateGridItems);
+
+    // place-items 简写
+    const piSelect = document.getElementById('pi-select');
+    const piDemo = document.getElementById('pi-demo');
+    const piValue = document.getElementById('pi-value');
+    
+    piSelect.addEventListener('change', (e) => {
+      piDemo.style.placeItems = e.target.value;
+      piValue.textContent = e.target.value;
+    });
+  </script>
+</body>
+</html>
