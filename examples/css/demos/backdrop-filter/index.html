@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>backdrop-filter 交互演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .demo-area {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .demo-section { margin-bottom: 20px; }
+    .demo-title {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .scene {
+      position: relative;
+      height: 300px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 100%);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .bg-shapes {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+    .shape-1 {
+      width: 200px; height: 200px;
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      top: -50px; left: -50px;
+    }
+    .shape-2 {
+      width: 150px; height: 150px;
+      background: linear-gradient(135deg, #48dbfb, #ff9ff3);
+      top: 50px; right: -30px;
+    }
+    .shape-3 {
+      width: 180px; height: 180px;
+      background: linear-gradient(135deg, #1dd1a1, #5f27cd);
+      bottom: -60px; left: 30%;
+    }
+    .glass-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      text-align: center;
+      backdrop-filter: var(--backdrop-filter, blur(20px));
+      -webkit-backdrop-filter: var(--backdrop-filter, blur(20px));
+    }
+    .glass-panel h3 { margin-bottom: 8px; font-weight: 500; }
+    .glass-panel p { font-size: 0.85rem; opacity: 0.8; }
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .control-row label {
+      width: 100px;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+    .control-row input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .control-row span {
+      width: 60px;
+      font-size: 0.85rem;
+      color: #667eea;
+      text-align: right;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .filter-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #667eea;
+    }
+    .filter-item.active {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+    .filter-item .preview {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      backdrop-filter: var(--preview-filter);
+      -webkit-backdrop-filter: var(--preview-filter);
+    }
+    .filter-item .name {
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .filter-value {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 4px;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .comparison-item {
+      text-align: center;
+    }
+    .comparison-item h4 {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .comparison-panel {
+      height: 120px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 0.85rem;
+    }
+    .comparison-panel.with-filter {
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .info-box {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .info-box.warning {
+      background: rgba(255, 186, 0, 0.1);
+      border-color: rgba(255, 186, 0, 0.3);
+    }
+    .code-block {
+      background: #0d0d15;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      color: #a8a8a8;
+    }
+    .code-block .keyword { color: #c678dd; }
+    .code-block .property { color: #e06c75; }
+    .code-block .value { color: #98c379; }
+    .quiz {
+      margin-top: 16px;
+    }
+    .quiz-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .quiz-item h4 {
+      font-size: 0.9rem;
+      color: #ddd;
+      margin-bottom: 8px;
+    }
+    .quiz-item label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+    .quiz-item input[type="radio"] {
+      accent-color: #667eea;
+    }
+    .quiz-item.correct label:nth-child(1) { color: #1dd1a1; }
+    .quiz-item.wrong label:nth-child(1) { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <h1>backdrop-filter 交互演示</h1>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="demo">概念总览</button>
+    <button class="tab-btn" data-tab="functions">滤镜函数</button>
+    <button class="tab-btn" data-tab="glassmorphism">玻璃拟态</button>
+    <button class="tab-btn" data-tab="comparison">对比实验</button>
+    <button class="tab-btn" data-tab="quiz">自测题</button>
+  </div>
+
+  <!-- 概念总览 -->
+  <div id="demo" class="tab-content active">
+    <div class="demo-area">
+      <div class="info-box">
+        <strong>backdrop-filter</strong> 允许你对元素<strong>后方</strong>的内容应用视觉效果（如模糊、颜色变换）。
+        与 <code>filter</code> 影响元素自身不同，backdrop-filter 影响的是元素背后的内容。
+      </div>
+
+      <div class="scene">
+        <div class="bg-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
+        </div>
+        <div class="glass-panel" id="glassPanel">
+          <h3>玻璃面板</h3>
+          <p>调整下方滑块，体验不同的 backdrop-filter 效果</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-row">
+          <label>模糊 blur()</label>
+          <input type="range" id="blurSlider" min="0" max="30" value="20">
+          <span id="blurValue">20px</span>
+        </div>
+        <div class="control-row">
+          <label>亮度 brightness()</label>
+          <input type="range" id="brightnessSlider" min="50" max="200" value="100">
+          <span id="brightnessValue">100%</span>
+        </div>
+        <div class="control-row">
+          <label>饱和度 saturate()</label>
+          <input type="range" id="saturateSlider" min="0" max="200" value="100">
+          <span id="saturateValue">100%</span>
+        </div>
+        <div class="control-row">
+          <label>对比度 contrast()</label>
+          <input type="range" id="contrastSlider" min="50" max="200" value="100">
+          <span id="contrastValue">100%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 滤镜函数 -->
+  <div id="functions" class="tab-content">
+    <div class="demo-area">
+      <div class="info-box">
+        backdrop-filter 支持多种滤镜函数，可以组合使用以创建丰富的视觉效果。
+      </div>
+
+      <div class="filter-grid">
+        <div class="filter-item" data-filter="blur(0px)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: blur(0px);"></div>
+          <div class="name">无效果</div>
+          <div class="filter-value">none</div>
+        </div>
+        <div class="filter-item" data-filter="blur(10px)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: blur(10px);"></div>
+          <div class="name">模糊</div>
+          <div class="filter-value">blur(10px)</div>
+        </div>
+        <div class="filter-item" data-filter="brightness(1.5)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: brightness(1.5);"></div>
+          <div class="name">亮度</div>
+          <div class="filter-value">brightness(1.5)</div>
+        </div>
+        <div class="filter-item" data-filter="contrast(1.5)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: contrast(1.5);"></div>
+          <div class="name">对比度</div>
+          <div class="filter-value">contrast(1.5)</div>
+        </div>
+        <div class="filter-item" data-filter="grayscale(100%)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: grayscale(100%);"></div>
+          <div class="name">灰度</div>
+          <div class="filter-value">grayscale(100%)</div>
+        </div>
+        <div class="filter-item" data-filter="hue-rotate(90deg)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: hue-rotate(90deg);"></div>
+          <div class="name">色相旋转</div>
+          <div class="filter-value">hue-rotate(90deg)</div>
+        </div>
+        <div class="filter-item" data-filter="invert(100%)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: invert(100%);"></div>
+          <div class="name">反转</div>
+          <div class="filter-value">invert(100%)</div>
+        </div>
+        <div class="filter-item" data-filter="opacity(0.5)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: opacity(0.5);"></div>
+          <div class="name">透明度</div>
+          <div class="filter-value">opacity(0.5)</div>
+        </div>
+        <div class="filter-item" data-filter="saturate(2)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: saturate(2);"></div>
+          <div class="name">饱和度</div>
+          <div class="filter-value">saturate(2)</div>
+        </div>
+        <div class="filter-item" data-filter="sepia(100%)" onclick="selectFilter(this)">
+          <div class="preview" style="--preview-filter: sepia(100%);"></div>
+          <div class="name">棕褐色</div>
+          <div class="filter-value">sepia(100%)</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <span class="keyword">.glass</span> {
+          <span class="property">backdrop-filter</span>: <span class="value" id="codePreview">blur(20px) brightness(100%) saturate(100%)</span>;
+          <span class="property">-webkit-backdrop-filter</span>: <span class="value" id="codePreview2">blur(20px) brightness(100%) saturate(100%)</span>;
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- 玻璃拟态 -->
+  <div id="glassmorphism" class="tab-content">
+    <div class="demo-area">
+      <div class="info-box">
+        <strong>玻璃拟态（Glassmorphism）</strong>是 modern UI 的热门风格，核心就是 backdrop-filter: blur()。模糊效果让背景内容隐约可见，营造出玻璃的质感。
+      </div>
+
+      <div class="scene" style="height: 400px;">
+        <div class="bg-shapes">
+          <div class="shape shape-1" style="width: 300px; height: 300px;"></div>
+          <div class="shape-2" style="width: 250px; height: 250px; top: 100px; right: -80px;"></div>
+          <div class="shape-3" style="width: 280px; height: 280px; bottom: -80px;"></div>
+        </div>
+
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+          <h2 style="margin-bottom: 24px; font-weight: 300;">Glassmorphism 示例</h2>
+
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+            <div class="glass-panel" style="width: 180px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+              <h4>模糊 10px</h4>
+              <p style="font-size: 0.75rem;">轻微模糊效果</p>
+            </div>
+            <div class="glass-panel" style="width: 180px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+              <h4>模糊 20px</h4>
+              <p style="font-size: 0.75rem;">中等模糊效果</p>
+            </div>
+            <div class="glass-panel" style="width: 180px; backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);">
+              <h4>模糊 30px</h4>
+              <p style="font-size: 0.75rem;">强烈模糊效果</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <span class="comment">/* 玻璃拟态基础样式 */</span><br>
+        <span class="keyword">.glass</span> {<br>
+        &nbsp;&nbsp;<span class="property">background</span>: <span class="value">rgba(255, 255, 255, 0.1)</span>;<br>
+        &nbsp;&nbsp;<span class="property">backdrop-filter</span>: <span class="value">blur(20px)</span>;<br>
+        &nbsp;&nbsp;<span class="property">-webkit-backdrop-filter</span>: <span class="value">blur(20px)</span>;<br>
+        &nbsp;&nbsp;<span class="property">border</span>: <span class="value">1px solid rgba(255, 255, 255, 0.2)</span>;<br>
+        &nbsp;&nbsp;<span class="property">border-radius</span>: <span class="value">16px</span>;<br>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- 对比实验 -->
+  <div id="comparison" class="tab-content">
+    <div class="demo-area">
+      <div class="info-box">
+        <strong>filter vs backdrop-filter</strong>：两者都会影响视觉呈现，但作用对象不同。
+      </div>
+
+      <div class="scene" style="height: 200px; margin-bottom: 16px;">
+        <div class="bg-shapes">
+          <div class="shape shape-1" style="width: 120px; height: 120px; top: 20px; left: 20px;"></div>
+          <div class="shape-2" style="width: 100px; height: 100px; top: 30px; right: 30px;"></div>
+        </div>
+
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 20px;">
+          <div style="text-align: center;">
+            <div class="comparison-panel">
+              <span>filter: blur(15px)<br>（影响自身）</span>
+            </div>
+          </div>
+          <div style="text-align: center;">
+            <div class="comparison-panel with-filter">
+              <span>backdrop-filter: blur(15px)<br>（影响后方）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box warning">
+        <strong>注意</strong>：backdrop-filter 需要元素有背景（即使是半透明）才能看到效果。如果背景是完全透明的，则看不到任何模糊效果。
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-item">
+          <h4>filter</h4>
+          <div style="width: 100%; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+            <div style="width: 60px; height: 60px; background: white; border-radius: 8px; filter: blur(5px);"></div>
+          </div>
+          <p style="font-size: 0.75rem; color: #666; margin-top: 8px;">白色方块自身模糊</p>
+        </div>
+        <div class="comparison-item">
+          <h4>backdrop-filter</h4>
+          <div style="width: 100%; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.3); border-radius: 8px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);"></div>
+          </div>
+          <p style="font-size: 0.75rem; color: #666; margin-top: 8px;">半透明方块后方背景模糊</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自测题 -->
+  <div id="quiz" class="tab-content">
+    <div class="demo-area">
+      <div class="quiz">
+        <div class="quiz-item" data-correct="2">
+          <h4>1. backdrop-filter 和 filter 的主要区别是什么？</h4>
+          <label><input type="radio" name="q1" value="1"> 没有区别</label>
+          <label><input type="radio" name="q1" value="2"> filter 影响自身，backdrop-filter 影响后方内容</label>
+          <label><input type="radio" name="q1" value="3"> backdrop-filter 性能更好</label>
+        </div>
+        <div class="quiz-item" data-correct="3">
+          <h4>2. 以下哪个浏览器不需要前缀？</h4>
+          <label><input type="radio" name="q2" value="1"> Safari 9+</label>
+          <label><input type="radio" name="q2" value="2"> Chrome 76+</label>
+          <label><input type="radio" name="q2" value="3"> Firefox 103+</label>
+        </div>
+        <div class="quiz-item" data-correct="1">
+          <h4>3. 创建玻璃拟态效果最常用的函数是？</h4>
+          <label><input type="radio" name="q3" value="1"> blur()</label>
+          <label><input type="radio" name="q3" value="2"> grayscale()</label>
+          <label><input type="radio" name="q3" value="3"> invert()</label>
+        </div>
+        <div class="quiz-item" data-correct="2">
+          <h4>4. backdrop-filter 在什么情况下可能不生效？</h4>
+          <label><input type="radio" name="q4" value="1"> 元素有背景色</label>
+          <label><input type="radio" name="q4" value="2"> 元素背景完全透明</label>
+          <label><input type="radio" name="q4" value="3"> 元素有 border</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Sliders
+    const glassPanel = document.getElementById('glassPanel');
+
+    function updateFilter() {
+      const blur = document.getElementById('blurSlider').value;
+      const brightness = document.getElementById('brightnessSlider').value;
+      const saturate = document.getElementById('saturateSlider').value;
+      const contrast = document.getElementById('contrastSlider').value;
+
+      document.getElementById('blurValue').textContent = blur + 'px';
+      document.getElementById('brightnessValue').textContent = brightness + '%';
+      document.getElementById('saturateValue').textContent = saturate + '%';
+      document.getElementById('contrastValue').textContent = contrast + '%';
+
+      const filter = `blur(${blur}px) brightness(${brightness}%) saturate(${saturate}%) contrast(${contrast}%)`;
+      glassPanel.style.setProperty('--backdrop-filter', filter);
+
+      document.getElementById('codePreview').textContent = filter;
+      document.getElementById('codePreview2').textContent = filter;
+    }
+
+    document.getElementById('blurSlider').addEventListener('input', updateFilter);
+    document.getElementById('brightnessSlider').addEventListener('input', updateFilter);
+    document.getElementById('saturateSlider').addEventListener('input', updateFilter);
+    document.getElementById('contrastSlider').addEventListener('input', updateFilter);
+
+    // Filter selection
+    function selectFilter(el) {
+      document.querySelectorAll('.filter-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
+
+      const filter = el.dataset.filter;
+      glassPanel.style.setProperty('--backdrop-filter', filter);
+      document.getElementById('codePreview').textContent = filter;
+      document.getElementById('codePreview2').textContent = filter;
+
+      // Update slider to match
+      if (filter.includes('blur')) {
+        const match = filter.match(/blur\(([\d.]+)px\)/);
+        if (match) document.getElementById('blurSlider').value = parseInt(match[1]);
+      }
+      updateFilter();
+    }
+
+    // Quiz
+    document.querySelectorAll('.quiz-item').forEach(item => {
+      item.querySelectorAll('input').forEach(input => {
+        input.addEventListener('change', () => {
+          const correct = item.dataset.correct;
+          item.classList.remove('correct', 'wrong');
+          if (input.value === correct) {
+            item.classList.add('correct');
+          } else {
+            item.classList.add('wrong');
+            setTimeout(() => {
+              item.classList.remove('wrong');
+            }, 1000);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

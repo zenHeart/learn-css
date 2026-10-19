@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input 样式完全指南</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+    .container{max-width:1200px;margin:0 auto}
+    h1{text-align:center;color:#fff;font-size:2rem;margin-bottom:10px}
+    .subtitle{text-align:center;color:rgba(255,255,255,0.9);margin-bottom:30px}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,0.1);padding:8px;border-radius:12px;margin-bottom:24px}
+    .tab-btn{padding:10px 20px;border:none;background:transparent;color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    .tab-btn:hover{background:rgba(255,255,255,0.2);color:#fff}
+    .tab-btn.active{background:#fff;color:#667eea}
+    .tab-content{display:none;background:#fff;border-radius:16px;padding:32px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+    .tab-content.active{display:block}
+    .section-title{font-size:1.5rem;color:#333;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #667eea}
+    .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-bottom:32px}
+    .demo-card{background:#f8f9fa;border-radius:12px;padding:20px}
+    .demo-card h3{font-size:1rem;color:#666;margin-bottom:16px}
+    .input-group{margin-bottom:16px}
+    .input-group label{display:block;font-size:14px;color:#666;margin-bottom:8px;font-weight:500}
+    .basic-input{width:100%;padding:12px 16px;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;transition:all 0.2s}
+    .basic-input:focus{border-color:#667eea;outline:none;box-shadow:0 0 0 3px rgba(102,126,234,0.2)}
+    .basic-input::placeholder{color:#c7c7cc}
+    .float-label{position:relative}
+    .float-label input,.float-label textarea{width:100%;padding:24px 16px 8px;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;transition:all 0.2s}
+    .float-label textarea{min-height:100px;resize:vertical;padding-top:32px}
+    .float-label label{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;color:#8e8e93;pointer-events:none;transition:all 0.2s}
+    .float-label textarea~label{top:24px}
+    .float-label input:focus~label,.float-label input:not(:placeholder-shown)~label,.float-label textarea:focus~label,.float-label textarea:not(:placeholder-shown)~label{top:12px;font-size:12px;color:#667eea;transform:none}
+    .float-label input:focus,.float-label textarea:focus{border-color:#667eea;outline:none}
+    .input-icon-wrapper{position:relative}
+    .input-icon-wrapper input{width:100%;padding:12px 16px 12px 44px;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;transition:all 0.2s}
+    .input-icon-wrapper .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#8e8e93;transition:color 0.2s}
+    .input-icon-wrapper input:focus{border-color:#667eea;outline:none}
+    .input-icon-wrapper input:focus~.icon{color:#667eea}
+    .search-input{width:100%;max-width:320px;padding:12px 16px 12px 44px;border:1px solid #e5e5ea;border-radius:24px;font-size:14px;background:#f2f2f7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238e8e93' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 16px center;transition:all 0.2s;appearance:none;-webkit-appearance:none}
+    .search-input:focus{background-color:#fff;border-color:#667eea;outline:none}
+    .password-field{position:relative;width:100%;max-width:320px}
+    .password-field input{width:100%;padding:12px 48px 12px 16px;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;transition:all 0.2s}
+    .password-field input:focus{border-color:#667eea;outline:none}
+    .password-field .toggle-visibility{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#8e8e93}
+    .password-field .toggle-visibility:hover{color:#667eea}
+    .password-field .toggle-visibility svg{width:20px;height:20px;display:block}
+    .number-input-wrapper{display:flex;align-items:center;gap:8px;width:fit-content}
+    .number-input-wrapper input{width:100px;height:40px;text-align:center;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;-moz-appearance:textfield}
+    .number-input-wrapper input::-webkit-inner-spin-button,.number-input-wrapper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .number-input-wrapper button{width:36px;height:36px;border:1px solid #d1d1d6;border-radius:8px;background:#fff;font-size:18px;cursor:pointer;transition:all 0.2s}
+    .number-input-wrapper button:hover{background:#f2f2f7;border-color:#667eea;color:#667eea}
+    .checkbox-wrapper{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;padding:12px;background:#fff;border-radius:8px;border:1px solid #e5e5ea;transition:all 0.2s}
+    .checkbox-wrapper:hover{border-color:#667eea}
+    .checkbox-wrapper input[type="checkbox"]{position:absolute;opacity:0;width:0;height:0}
+    .checkbox-wrapper .checkmark{width:22px;height:22px;border:2px solid #d1d1d6;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+    .checkbox-wrapper .checkmark svg{width:14px;height:14px;color:#fff;opacity:0;transform:scale(0.5);transition:all 0.2s}
+    .checkbox-wrapper input[type="checkbox"]:checked+.checkmark{background:#667eea;border-color:#667eea}
+    .checkbox-wrapper input[type="checkbox"]:checked+.checkmark svg{opacity:1;transform:scale(1)}
+    .checkbox-wrapper .label-text{font-size:14px;color:#333}
+    .radio-wrapper{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;padding:12px;background:#fff;border-radius:8px;border:1px solid #e5e5ea;transition:all 0.2s}
+    .radio-wrapper:hover{border-color:#667eea}
+    .radio-wrapper input[type="radio"]{position:absolute;opacity:0;width:0;height:0}
+    .radio-wrapper .radiomark{width:22px;height:22px;border:2px solid #d1d1d6;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+    .radio-wrapper .radiomark::after{content:'';width:10px;height:10px;border-radius:50%;background:#667eea;transform:scale(0);transition:transform 0.2s}
+    .radio-wrapper input[type="radio"]:checked+.radiomark{border-color:#667eea}
+    .radio-wrapper input[type="radio"]:checked+.radiomark::after{transform:scale(1)}
+    .switch-wrapper{display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px;background:#fff;border-radius:8px;border:1px solid #e5e5ea}
+    .switch-wrapper input[type="checkbox"]{position:absolute;opacity:0;width:0;height:0}
+    .switch{width:52px;height:32px;background:#e5e5ea;border-radius:16px;position:relative;transition:background-color 0.3s;flex-shrink:0}
+    .switch::after{content:'';position:absolute;left:2px;top:2px;width:28px;height:28px;background:#fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.2);transition:transform 0.3s}
+    .switch-wrapper input[type="checkbox"]:checked+.switch{background:#667eea}
+    .switch-wrapper input[type="checkbox"]:checked+.switch::after{transform:translateX(20px)}
+    .range-wrapper{width:100%;max-width:300px}
+    .range-wrapper .range-value{text-align:center;font-size:24px;font-weight:600;color:#667eea;margin-bottom:12px}
+    .range-wrapper input[type="range"]{width:100%;height:6px;background:#e5e5ea;border-radius:3px;outline:none;appearance:none;-webkit-appearance:none}
+    .range-wrapper input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:24px;height:24px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(102,126,234,0.4);transition:transform 0.2s}
+    .range-wrapper input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.1)}
+    .select-wrapper{position:relative;width:100%;max-width:300px}
+    .select-wrapper select{width:100%;height:44px;padding:0 40px 0 16px;border:1px solid #d1d1d6;border-radius:8px;font-size:16px;background:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;transition:all 0.2s}
+    .select-wrapper select:focus{border-color:#667eea;outline:none}
+    .select-wrapper::after{content:'';position:absolute;right:16px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #8e8e93;pointer-events:none}
+    .textarea-demo{width:100%;min-height:120px;padding:12px 16px;border:1px solid #d1d1d6;border-radius:8px;font-size:14px;font-family:inherit;line-height:1.5;resize:vertical;transition:all 0.2s}
+    .textarea-demo:focus{border-color:#667eea;outline:none}
+    .file-upload-wrapper{display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px;border:2px dashed #d1d1d6;border-radius:12px;background:#f8f9fa;transition:all 0.2s;cursor:pointer}
+    .file-upload-wrapper:hover,.file-upload-wrapper.dragover{border-color:#667eea;background:rgba(102,126,234,0.05)}
+    .file-upload-wrapper input[type="file"]{display:none}
+    .file-upload-icon{width:48px;height:48px;color:#667eea}
+    .file-upload-text{font-size:14px;color:#666;text-align:center}
+    .file-upload-text strong{color:#667eea}
+    .validation-demo{display:flex;flex-direction:column;gap:16px}
+    .validation-input{width:100%;padding:12px 16px;border:2px solid #d1d1d6;border-radius:8px;font-size:16px;transition:all 0.2s}
+    .validation-input:focus{outline:none}
+    .validation-input.valid{border-color:#34c759;background:rgba(52,199,89,0.05)}
+    .validation-input.invalid{border-color:#ff3b30;background:rgba(255,59,48,0.05)}
+    .validation-message{font-size:13px;display:flex;align-items:center;gap:6px}
+    .validation-message.success{color:#34c759}
+    .validation-message.error{color:#ff3b30}
+    .quiz-container{background:#f8f9fa;border-radius:12px;padding:24px}
+    .quiz-question{font-size:1.1rem;font-weight:600;margin-bottom:16px;color:#333}
+    .quiz-options{display:flex;flex-direction:column;gap:12px}
+    .quiz-option{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff;border:2px solid #e5e5ea;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    .quiz-option:hover{border-color:#667eea}
+    .quiz-option.selected{border-color:#667eea;background:rgba(102,126,234,0.1)}
+    .quiz-option.correct{border-color:#34c759;background:rgba(52,199,89,0.1)}
+    .quiz-option.incorrect{border-color:#ff3b30;background:rgba(255,59,48,0.1)}
+    .quiz-submit{margin-top:20px;padding:12px 32px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;transition:all 0.2s}
+    .quiz-submit:hover{background:#5a67d2}
+    .quiz-submit:disabled{opacity:0.5;cursor:not-allowed}
+    .quiz-result{margin-top:16px;padding:16px;border-radius:8px;font-weight:500}
+    .quiz-result.success{background:rgba(52,199,89,0.1);color:#34c759}
+    .quiz-result.error{background:rgba(255,59,48,0.1);color:#ff3b30}
+    @media(max-width:768px){.container{padding:0 16px}h1{font-size:1.8rem}.tab-content{padding:20px}.demo-grid{grid-template-columns:1fr}.tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}.tab-btn{white-space:nowrap}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Input 样式完全指南</h1>
+    <p class="subtitle">交互式演示 - 掌握所有 Input 样式技巧</p>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="basic">基础样式</button>
+      <button class="tab-btn" data-tab="checkbox-radio">Checkbox & Radio</button>
+      <button class="tab-btn" data-tab="switch-range">Switch & Range</button>
+      <button class="tab-btn" data-tab="select-file">Select & File</button>
+      <button class="tab-btn" data-tab="validation">验证状态</button>
+      <button class="tab-btn" data-tab="quiz">自测题</button>
+    </div>
+
+    <div class="tab-content active" id="basic">
+      <h2 class="section-title">基础 Input 样式</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>文本输入框</h3>
+          <div class="input-group">
+            <label>默认样式</label>
+            <input type="text" class="basic-input" placeholder="请输入文字...">
+          </div>
+          <div class="input-group">
+            <label>禁用状态</label>
+            <input type="text" class="basic-input" placeholder="禁用输入框" disabled>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>浮动标签 (Floating Label)</h3>
+          <div class="float-label">
+            <input type="text" id="float1" placeholder=" ">
+            <label for="float1">用户名</label>
+          </div>
+          <br><br>
+          <div class="float-label">
+            <textarea id="float2" placeholder=" "></textarea>
+            <label for="float2">评论</label>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>带图标的输入框</h3>
+          <div class="input-icon-wrapper">
+            <input type="text" placeholder="搜索...">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>搜索框</h3>
+          <input type="search" class="search-input" placeholder="搜索...">
+        </div>
+        <div class="demo-card">
+          <h3>密码输入框</h3>
+          <div class="password-field">
+            <input type="password" id="pwdDemo" placeholder="请输入密码" value="123456">
+            <button type="button" class="toggle-visibility" onclick="togglePwd()">
+              <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>数字输入框</h3>
+          <div class="number-input-wrapper">
+            <button onclick="adjustNum(-1)">-</button>
+            <input type="number" id="numDemo" value="0" min="0" max="100">
+            <button onclick="adjustNum(1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="checkbox-radio">
+      <h2 class="section-title">Checkbox 与 Radio 样式</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Checkbox 多选框</h3>
+          <label class="checkbox-wrapper">
+            <input type="checkbox">
+            <span class="checkmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="label-text">同意用户协议</span>
+          </label>
+          <br><br>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" checked>
+            <span class="checkmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="label-text">已选中</span>
+          </label>
+          <br><br>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" disabled>
+            <span class="checkmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="label-text">禁用</span>
+          </label>
+        </div>
+        <div class="demo-card">
+          <h3>Radio 单选框</h3>
+          <label class="radio-wrapper">
+            <input type="radio" name="demo" checked>
+            <span class="radiomark"></span>
+            <span class="label-text">选项 A</span>
+          </label>
+          <br><br>
+          <label class="radio-wrapper">
+            <input type="radio" name="demo">
+            <span class="radiomark"></span>
+            <span class="label-text">选项 B</span>
+          </label>
+          <br><br>
+          <label class="radio-wrapper">
+            <input type="radio" name="demo">
+            <span class="radiomark"></span>
+            <span class="label-text">选项 C</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="switch-range">
+      <h2 class="section-title">Switch 开关与 Range 滑块</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Switch 开关</h3>
+          <label class="switch-wrapper">
+            <input type="checkbox">
+            <span class="switch"></span>
+            <span class="label-text">接收通知</span>
+          </label>
+          <br><br>
+          <label class="switch-wrapper">
+            <input type="checkbox" checked>
+            <span class="switch"></span>
+            <span class="label-text">深色模式</span>
+          </label>
+        </div>
+        <div class="demo-card">
+          <h3>Range 滑块</h3>
+          <div class="range-wrapper">
+            <div class="range-value" id="rangeVal">50</div>
+            <input type="range" id="rangeDemo" min="0" max="100" value="50">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="select-file">
+      <h2 class="section-title">Select 下拉框与 File 文件上传</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>Select 下拉框</h3>
+          <div class="select-wrapper">
+            <select>
+              <option>请选择城市</option>
+              <option>北京</option>
+              <option>上海</option>
+              <option>广州</option>
+              <option>深圳</option>
+            </select>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>Textarea 多行文本</h3>
+          <textarea class="textarea-demo" placeholder="请输入评论..."></textarea>
+        </div>
+        <div class="demo-card">
+          <h3>File 文件上传</h3>
+          <div class="file-upload-wrapper" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" onchange="updateFileName()">
+            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div class="file-upload-text"><strong>点击上传</strong> 或拖拽文件</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="validation">
+      <h2 class="section-title">验证状态样式</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3>邮箱验证</h3>
+          <div class="validation-demo">
+            <input type="email" class="validation-input" id="emailInput" placeholder="请输入邮箱" oninput="validateEmail()">
+            <div class="validation-message" id="emailMsg"></div>
+          </div>
+        </div>
+        <div class="demo-card">
+          <h3>密码强度</h3>
+          <div class="validation-demo">
+            <input type="password" class="validation-input" id="pwdInput" placeholder="请输入密码" oninput="validatePwd()">
+            <div class="validation-message" id="pwdMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="quiz">
+      <h2 class="section-title">自测题</h2>
+      <div class="quiz-container">
+        <div class="quiz-question">1. 如何完全重置 input 的默认浏览器样式？</div>
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="true" onclick="selectOpt(this)"><span>A. </span> appearance: none</div>
+          <div class="quiz-option" onclick="selectOpt(this)"><span>B. </span> display: none</div>
+          <div class="quiz-option" onclick="selectOpt(this)"><span>C. </span> visibility: hidden</div>
+          <div class="quiz-option" onclick="selectOpt(this)"><span>D. </span> opacity: 0</div>
+        </div>
+        <button class="quiz-submit" onclick="checkAns()">提交答案</button>
+        <div class="quiz-result" id="quizRes" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    function togglePwd() {
+      const input = document.getElementById('pwdDemo');
+      const show = document.querySelector('.icon-show');
+      const hide = document.querySelector('.icon-hide');
+      if (input.type === 'password') { input.type = 'text'; show.style.display = 'none'; hide.style.display = 'block'; }
+      else { input.type = 'password'; show.style.display = 'block'; hide.style.display = 'none'; }
+    }
+
+    function adjustNum(delta) {
+      const input = document.getElementById('numDemo');
+      let v = parseInt(input.value) || 0;
+      input.value = Math.min(100, Math.max(0, v + delta));
+    }
+
+    document.getElementById('rangeDemo').addEventListener('input', e => {
+      document.getElementById('rangeVal').textContent = e.target.value;
+    });
+
+    function updateFileName() {
+      const f = document.getElementById('fileInput').files[0];
+      if (f) alert('已选择: ' + f.name);
+    }
+
+    function validateEmail() {
+      const input = document.getElementById('emailInput');
+      const msg = document.getElementById('emailMsg');
+      const v = input.value.trim();
+      if (!v) { input.classList.remove('valid','invalid'); msg.innerHTML = ''; return; }
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      input.classList.toggle('valid', ok);
+      input.classList.toggle('invalid', !ok);
+      msg.innerHTML = ok ? '✓ 格式正确' : '✗ 请输入有效邮箱';
+      msg.className = 'validation-message ' + (ok ? 'success' : 'error');
+    }
+
+    function validatePwd() {
+      const input = document.getElementById('pwdInput');
+      const msg = document.getElementById('pwdMsg');
+      const v = input.value;
+      if (!v) { input.classList.remove('valid','invalid'); msg.innerHTML = ''; return; }
+      const ok = v.length >= 6;
+      input.classList.toggle('valid', ok);
+      input.classList.toggle('invalid', !ok);
+      msg.innerHTML = ok ? '✓ 密码有效' : '✗ 密码至少6位';
+      msg.className = 'validation-message ' + (ok ? 'success' : 'error');
+    }
+
+    let selectedOpt = null;
+    function selectOpt(el) {
+      document.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedOpt = el;
+    }
+
+    function checkAns() {
+      if (!selectedOpt) { alert('请选择答案'); return; }
+      const isCorrect = selectedOpt.dataset.correct === 'true';
+      selectedOpt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      const res = document.getElementById('quizRes');
+      res.style.display = 'block';
+      res.className = 'quiz-result ' + (isCorrect ? 'success' : 'error');
+      res.textContent = isCorrect ? '正确！appearance: none 可移除浏览器默认样式' : '错误，正确答案是 A';
+    }
+  </script>
+</body>
+</html>

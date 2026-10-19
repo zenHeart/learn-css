@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSSOM 操作方法演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1e; color: #e0e0e0; min-height: 100vh; padding: 24px; }
+    h1 { text-align: center; color: #fff; margin-bottom: 8px; font-size: 1.6rem; }
+    .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 0.9rem; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; justify-content: center; }
+    .tab-btn { background: #1a1a2e; border: 1px solid #333; color: #aaa; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .tab-btn:hover { background: #252540; color: #fff; }
+    .tab-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    .tab-content { display: none; background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .tab-content.active { display: block; }
+
+    .section-title { color: #a78bfa; margin-bottom: 12px; font-size: 0.95rem; }
+    .desc { color: #888; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.5; }
+    .code-snippet { background: #111; border: 1px solid #333; border-radius: 8px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #9dffcc; margin-bottom: 12px; overflow-x: auto; white-space: pre; }
+
+    .demo-box { background: #2d2d4a; border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; min-height: 120px; color: #fff; font-weight: 500; transition: all 0.3s; }
+    .demo-box.small { width: 80px; height: 80px; padding: 8px; font-size: 0.75rem; text-align: center; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .btn { background: #4f46e5; color: #fff; border: none; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s; }
+    .btn:hover { background: #6366f1; }
+    .btn.secondary { background: #333; }
+    .btn.secondary:hover { background: #444; }
+    .btn.danger { background: #dc2626; }
+    .btn.danger:hover { background: #ef4444; }
+
+    .output-box { background: #0d0d1a; border: 1px solid #333; border-radius: 8px; padding: 10px; max-height: 140px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #9dffcc; }
+    .output-box .entry { padding: 2px 0; border-bottom: 1px solid #222; }
+    .output-box .entry:last-child { border-bottom: none; }
+
+    .input-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+    .input-row input[type="text"] { background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 0.8rem; width: 140px; }
+    .input-row input[type="checkbox"] { width: 16px; height: 16px; }
+    .input-row label { font-size: 0.8rem; color: #aaa; }
+
+    .info-tag { display: inline-block; background: #333; color: #fbbf24; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; margin-bottom: 8px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .computed-item { background: #111; border-radius: 8px; padding: 8px 12px; }
+    .computed-item .label { color: #888; font-size: 0.75rem; }
+    .computed-item .value { color: #a3e635; font-family: monospace; font-size: 0.8rem; }
+
+    #rect-viewport { position: relative; width: 100%; height: 160px; background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+    #demo-rect-box { position: absolute; width: 60px; height: 60px; background: linear-gradient(135deg, #4f46e5, #a78bfa); border-radius: 8px; cursor: move; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; user-select: none; box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+
+    .rect-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+    .rect-info-item { background: #111; border-radius: 6px; padding: 6px 8px; text-align: center; }
+    .rect-info-item .label { font-size: 0.7rem; color: #888; }
+    .rect-info-item .value { font-size: 0.85rem; color: #a3e635; font-family: monospace; }
+
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>CSSOM 操作方法演示</h1>
+  <p class="subtitle">JavaScript CSS 样式编程接口实战</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="style">style.property</button>
+    <button class="tab-btn" data-tab="csstext">cssText</button>
+    <button class="tab-btn" data-tab="setproperty">setProperty</button>
+    <button class="tab-btn" data-tab="getproperty">getPropertyValue</button>
+    <button class="tab-btn" data-tab="removeproperty">removeProperty</button>
+    <button class="tab-btn" data-tab="computed">getComputedStyle</button>
+    <button class="tab-btn" data-tab="rect">getBoundingClientRect</button>
+  </div>
+
+  <!-- style.property -->
+  <div class="tab-content active" id="tab-style">
+    <div class="section-title">1.1 直接属性访问</div>
+    <p class="desc">通过点符号直接读写 CSS 属性，属性名使用驼峰命名法。</p>
+    <div class="code-snippet">element.style.backgroundColor = '#2ecc71';
+element.style.fontSize = '16px';</div>
+    <div class="demo-box" id="demo-style-box">演示盒子</div>
+    <div class="btn-row">
+      <button class="btn" onclick="setColor()">设置颜色</button>
+      <button class="btn" onclick="setSize()">设置尺寸</button>
+      <button class="btn secondary" onclick="resetStyle()">重置</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="input-bg" value="#e74c3c" placeholder="背景色">
+      <input type="text" id="input-fs" value="20px" placeholder="字号">
+      <button class="btn" onclick="applyCustomStyle()">应用自定义</button>
+    </div>
+    <div class="output-box" id="output-style"></div>
+  </div>
+
+  <!-- cssText -->
+  <div class="tab-content" id="tab-csstext">
+    <div class="section-title">1.2 cssText 批量设置</div>
+    <p class="desc">一次性设置或读取整个行内样式字符串，等效于操作 HTML style 属性内容。</p>
+    <div class="code-snippet">element.style.cssText = 'width:200px; height:200px; background:red;';
+console.log(element.style.cssText);</div>
+    <div class="demo-box" id="demo-csstext-box">演示盒子</div>
+    <div class="btn-row">
+      <button class="btn" onclick="setCssTextBatch()">批量设置样式</button>
+      <button class="btn secondary" onclick="getCssText()">获取当前 cssText</button>
+      <button class="btn secondary" onclick="resetStyle2()">重置</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="csstext-input" value="width:150px;height:150px;background:#f39c12;color:#fff;border-radius:12px;" style="width:300px;">
+      <button class="btn" onclick="applyCssText()">应用 cssText</button>
+    </div>
+    <div class="output-box" id="output-csstext"></div>
+  </div>
+
+  <!-- setProperty -->
+  <div class="tab-content" id="tab-setproperty">
+    <div class="section-title">1.3 setProperty() 设置带优先级的属性</div>
+    <p class="desc">以编程方式设置 CSS 属性，可选添加 <code>!important</code> 优先级标记。</p>
+    <div class="code-snippet">element.style.setProperty('color', '#fff');
+element.style.setProperty('opacity', '0.5', 'important');</div>
+    <span class="info-tag" id="setproperty-info">Click buttons to compare</span>
+    <div class="demo-box" id="demo-setproperty-box">演示盒子</div>
+    <div class="btn-row">
+      <button class="btn" onclick="setPropertyDemo()">普通设置</button>
+      <button class="btn" onclick="setPropertyImportant()">设置 !important</button>
+      <button class="btn secondary" onclick="resetStyle3()">重置</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="prop-name" value="background-color" placeholder="属性名">
+      <input type="text" id="prop-value" value="#e67e22" placeholder="属性值">
+      <label><input type="checkbox" id="prop-important"> !important</label>
+      <button class="btn" onclick="applySetProperty()">应用</button>
+    </div>
+    <div class="output-box" id="output-setproperty"></div>
+  </div>
+
+  <!-- getPropertyValue -->
+  <div class="tab-content" id="tab-getproperty">
+    <div class="section-title">1.4 getPropertyValue() 获取属性值</div>
+    <p class="desc">从行内样式中读取指定属性的值，返回字符串。注意：只能读取行内样式，无法读取计算样式。</p>
+    <div class="code-snippet">var val = element.style.getPropertyValue('color');
+console.log(val);</div>
+    <div class="demo-box small" id="demo-getproperty-box" style="background:#3498db;color:#fff;font-size:14px;">box</div>
+    <div class="btn-row">
+      <button class="btn" onclick="getPropertyDemo()">遍历行内属性</button>
+      <button class="btn secondary" onclick="getAllProperties()">for...of 遍历</button>
+    </div>
+    <div class="input-row">
+      <input type="text" id="query-prop" value="background-color" placeholder="属性名">
+      <button class="btn" onclick="queryProperty()">查询</button>
+      <button class="btn secondary" onclick="queryPropertyPreset('color')">color</button>
+      <button class="btn secondary" onclick="queryPropertyPreset('width')">width</button>
+      <button class="btn secondary" onclick="queryPropertyPreset('font-size')">font-size</button>
+    </div>
+    <div class="output-box" id="output-getproperty"></div>
+  </div>
+
+  <!-- removeProperty -->
+  <div class="tab-content" id="tab-removeproperty">
+    <div class="section-title">1.5 removeProperty() 移除属性</div>
+    <p class="desc">从元素行内样式中删除指定属性，返回被删除的值。注意：会同时移除该属性的 !important 声明。</p>
+    <div class="code-snippet">var old = element.style.removeProperty('color');
+console.log('removed:', old);</div>
+    <span class="info-tag">待移除属性: <span id="pending-remove">none</span></span>
+    <div class="demo-box" id="demo-removeproperty-box" style="background:#e74c3c;opacity:0.7;color:#fff;padding:20px;border-radius:12px;">演示：opacity:0.7, background:#e74c3c</div>
+    <div class="btn-row">
+      <button class="btn" onclick="removePropertyDemo()">移除 opacity</button>
+      <button class="btn" onclick="removePropertyBg()">移除 background-color</button>
+      <button class="btn secondary" onclick="resetStyle4()">重置</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="removePropSelect('opacity')">选中 opacity</button>
+      <button class="btn secondary" onclick="removePropSelect('color')">选中 color</button>
+      <button class="btn secondary" onclick="removePropSelect('border-radius')">选中 border-radius</button>
+      <button class="btn danger" onclick="applyRemoveProperty()">执行移除</button>
+    </div>
+    <div class="output-box" id="output-removeproperty"></div>
+  </div>
+
+  <!-- getComputedStyle -->
+  <div class="tab-content" id="tab-computed">
+    <div class="section-title">2. window.getComputedStyle() 获取计算样式</div>
+    <p class="desc">获取元素经过所有样式表和继承计算后的最终样式（只读）。第二个参数可指定伪元素。</p>
+    <div class="code-snippet">var computed = window.getComputedStyle(element);
+var before = window.getComputedStyle(element, '::before');</div>
+    <div class="demo-box" id="demo-computed-box" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:24px;border-radius:16px;flex-direction:column;gap:8px;">
+      <div style="font-size:1.2em;font-weight:bold;">Computed Style Demo</div>
+      <div style="font-size:0.85em;opacity:0.8;">带渐变背景的盒子</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="getComputedDemo()">获取计算样式</button>
+      <button class="btn secondary" onclick="getPseudoElement()">获取 ::before</button>
+    </div>
+    <div id="computed-results" style="display:none;margin-bottom:12px;">
+      <div id="computed-grid" class="grid-2"></div>
+    </div>
+    <div class="output-box" id="output-computed"></div>
+  </div>
+
+  <!-- getBoundingClientRect -->
+  <div class="tab-content" id="tab-rect">
+    <div class="section-title">3. getBoundingClientRect() 元素尺寸与位置</div>
+    <p class="desc">返回元素相对于视口的位置和尺寸信息。拖动下方盒子查看实时数值变化。</p>
+    <div class="code-snippet">var rect = element.getBoundingClientRect();
+console.log(rect.width, rect.height, rect.top, rect.left);</div>
+    <div class="rect-info">
+      <div class="rect-info-item"><div class="label">top</div><div class="value" id="rect-top">0</div></div>
+      <div class="rect-info-item"><div class="label">left</div><div class="value" id="rect-left">0</div></div>
+      <div class="rect-info-item"><div class="label">right</div><div class="value" id="rect-right">0</div></div>
+      <div class="rect-info-item"><div class="label">bottom</div><div class="value" id="rect-bottom">0</div></div>
+      <div class="rect-info-item"><div class="label">width</div><div class="value" id="rect-width">0</div></div>
+      <div class="rect-info-item"><div class="label">height</div><div class="value" id="rect-height">0</div></div>
+    </div>
+    <div id="rect-viewport">
+      <div id="demo-rect-box" style="left:20px;top:20px;">DRAG</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="getBoundingDemo()">获取 rect</button>
+      <button class="btn secondary" onclick="resetRect()">重置位置</button>
+      <button class="btn secondary" onclick="startDrag()">启用拖拽</button>
+    </div>
+    <div class="output-box" id="output-rect"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

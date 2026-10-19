@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MongoDB 测试数据存储指南</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%);min-height:100vh;padding:20px}
+    .container{max-width:1200px;margin:0 auto}
+    h1{text-align:center;color:#fff;font-size:2rem;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,0.2)}
+    .subtitle{text-align:center;color:rgba(255,255,255,0.9);margin-bottom:30px}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,0.1);padding:8px;border-radius:12px;margin-bottom:24px}
+    .tab-btn{padding:10px 20px;border:none;background:transparent;color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    .tab-btn:hover{background:rgba(255,255,255,0.2);color:#fff}
+    .tab-btn.active{background:#fff;color:#11998e}
+    .tab-content{display:none;background:#fff;border-radius:16px;padding:32px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+    .tab-content.active{display:block}
+    .section-title{font-size:1.5rem;color:#333;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #38ef7d}
+    .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-bottom:32px}
+    .demo-card{background:#f8f9fa;border-radius:12px;padding:20px}
+    .demo-card h3{font-size:1rem;color:#666;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .demo-card h3 .icon{width:24px;height:24px;color:#11998e}
+    .code-block{background:#1e1e1e;border-radius:8px;padding:16px;overflow-x:auto;margin-bottom:16px}
+    .code-block pre{margin:0;color:#d4d4d4;font-size:13px;line-height:1.5}
+    .code-block .keyword{color:#569cd6}
+    .code-block .string{color:#ce9178}
+    .code-block .function{color:#dcdcaa}
+    .code-block .comment{color:#6a9955}
+    .btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s}
+    .btn-primary{background:#11998e;color:#fff}
+    .btn-primary:hover{background:#0d7a70;transform:translateY(-1px)}
+    .btn-secondary{background:#e5e5ea;color:#333}
+    .btn-secondary:hover{background:#d1d1d6}
+    .output-area{background:#f8f9fa;border-radius:8px;padding:16px;min-height:100px;max-height:300px;overflow:auto;font-family:'Monaco','Menlo',monospace;font-size:13px;white-space:pre-wrap}
+    .output-area .success{color:#34c759}
+    .output-area .error{color:#ff3b30}
+    .output-area .info{color:#007aff}
+    .output-area .timestamp{color:#8e8e93;font-size:11px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600}
+    .badge-js{background:#f7df1e;color:#000}
+    .badge-mongo{background:#47a248;color:#fff}
+    .badge-jest{background:#c21325;color:#fff}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:14px;color:#666;margin-bottom:8px;font-weight:500}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid #d1d1d6;border-radius:8px;font-size:14px;transition:border-color 0.2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#11998e;outline:none}
+    .form-row{display:flex;gap:16px;flex-wrap:wrap}
+    .form-row .form-group{flex:1;min-width:200px}
+    .json-viewer{background:#1e1e1e;border-radius:8px;padding:16px;overflow:auto;max-height:400px}
+    .json-viewer pre{margin:0;color:#d4d4d4;font-size:13px}
+    .json-key{color:#9cdcfe}
+    .json-string{color:#ce9178}
+    .json-number{color:#b5cea8}
+    .json-boolean{color:#569cd6}
+    .json-null{color:#569cd6}
+    .quiz-container{background:#f8f9fa;border-radius:12px;padding:24px;margin-top:24px}
+    .quiz-question{font-size:1.1rem;font-weight:600;margin-bottom:16px;color:#333}
+    .quiz-options{display:flex;flex-direction:column;gap:12px}
+    .quiz-option{padding:12px 16px;background:#fff;border:2px solid #e5e5ea;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    .quiz-option:hover{border-color:#11998e}
+    .quiz-option.correct{border-color:#34c759;background:rgba(52,199,89,0.1)}
+    .quiz-option.incorrect{border-color:#ff3b30;background:rgba(255,59,48,0.1)}
+    .quiz-result{margin-top:16px;padding:12px;border-radius:8px;font-weight:500}
+    .quiz-result.pass{background:rgba(52,199,89,0.1);color:#34c759}
+    .quiz-result.fail{background:rgba(255,59,48,0.1);color:#ff3b30}
+    .flex-center{display:flex;align-items:center;justify-content:center;gap:8px}
+    .mt-4{margin-top:16px}
+    .mb-4{margin-bottom:16px}
+    @media(max-width:768px){.container{padding:0 16px} .tab-content{padding:20px} h1{font-size:1.5rem} .demo-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🍃 MongoDB 测试数据存储指南</h1>
+    <p class="subtitle">掌握 Factory 模式、数据播种工具与 Jest 集成</p>
+    
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="factory">Factory 模式</button>
+      <button class="tab-btn" data-tab="seeding">数据播种</button>
+      <button class="tab-btn" data-tab="jest">Jest 集成</button>
+      <button class="tab-btn" data-tab="demo">交互演示</button>
+      <button class="tab-btn" data-tab="quiz">小测验</button>
+    </div>
+    
+    <!-- Factory 模式 -->
+    <div class="tab-content active" id="factory">
+      <h2 class="section-title">Factory 模式</h2>
+      <p class="mb-4">Factory 模式用于生成结构化的测试数据，避免手动创建每个文档。</p>
+      
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3><span class="icon">📦</span> UserFactory</h3>
+          <div class="code-block">
+            <pre><span class="keyword">class</span> <span class="function">UserFactory</span> {
+  <span class="keyword">static</span> <span class="function">create</span>(data = {}) {
+    <span class="keyword">return</span> {
+      name: data.name || <span class="keyword">this</span>.randomName(),
+      email: data.email || <span class="keyword">this</span>.randomEmail(),
+      age: data.age || <span class="keyword">this</span>.randomAge(),
+      createdAt: <span class="keyword">new</span> <span class="function">Date</span>()
+    };
+  }
+  
+  <span class="keyword">static</span> <span class="function">createMany</span>(count) {
+    <span class="keyword">return</span> Array.<span class="function">from</span>(
+      { length: count }, 
+      () => <span class="keyword">this</span>.<span class="function">create</span>()
+    );
+  }
+}</pre>
+          </div>
+          <button class="btn btn-primary" onclick="generateUsers()">生成 5 个用户</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3><span class="icon">🛒</span> OrderFactory</h3>
+          <div class="code-block">
+            <pre><span class="keyword">class</span> <span class="function">OrderFactory</span> {
+  <span class="keyword">static</span> <span class="function">create</span>(data = {}) {
+    <span class="keyword">return</span> {
+      orderNo: <span class="string">`ORD${Date.now()}`</span>,
+      userId: data.userId,
+      items: data.items || [],
+      totalAmount: <span class="keyword">this</span>.<span class="function">calcTotal</span>(),
+      status: data.status || <span class="string">'pending'</span>
+    };
+  }
+}</pre>
+          </div>
+          <button class="btn btn-primary" onclick="generateOrders()">生成 3 个订单</button>
+        </div>
+      </div>
+      
+      <h3 style="margin:24px 0 16px">生成结果</h3>
+      <div class="json-viewer" id="factoryOutput">
+        <pre>点击按钮生成测试数据...</pre>
+      </div>
+    </div>
+    
+    <!-- 数据播种 -->
+    <div class="tab-content" id="seeding">
+      <h2 class="section-title">数据播种工具</h2>
+      <p class="mb-4">使用 mongo-seeding 从 JSON/JS 文件播种数据到 MongoDB。</p>
+      
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3><span class="icon">📁</span> 数据文件结构</h3>
+          <div class="code-block">
+            <pre><span class="comment">// data/users.json</span>
+[
+  {
+    <span class="json-key">"_id"</span>: <span class="json-string">"user-1"</span>,
+    <span class="json-key">"name"</span>: <span class="json-string">"张三"</span>,
+    <span class="json-key">"email"</span>: <span class="json-string">"zhangsan@example.com"</span>
+  }
+]</pre>
+          </div>
+        </div>
+        
+        <div class="demo-card">
+          <h3><span class="icon">⚙️</span> 播种配置</h3>
+          <div class="code-block">
+            <pre><span class="keyword">const</span> { Seeder } = <span class="function">require</span>(<span class="string">'mongo-seeding'</span>);
+
+<span class="keyword">const</span> seeder = <span class="keyword">new</span> <span class="function">Seeder</span>({
+  mongodb: {
+    host: <span class="string">'localhost'</span>,
+    port: <span class="string">27017</span>,
+    database: <span class="string">'test'</span>
+  }
+});</pre>
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin:24px 0 16px">模拟播种流程</h3>
+      <div class="demo-card">
+        <div class="form-row mb-4">
+          <div class="form-group">
+            <label>数据库名称</label>
+            <input type="text" id="dbName" value="test_db" placeholder="数据库名称">
+          </div>
+          <div class="form-group">
+            <label>集合名称</label>
+            <input type="text" id="collectionName" value="users" placeholder="集合名称">
+          </div>
+          <div class="form-group">
+            <label>插入数量</label>
+            <input type="number" id="insertCount" value="10" min="1" max="100">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="simulateSeeding()">执行播种</button>
+      </div>
+      
+      <div class="json-viewer mt-4" id="seedingOutput">
+        <pre>配置并点击"执行播种"开始...</pre>
+      </div>
+    </div>
+    
+    <!-- Jest 集成 -->
+    <div class="tab-content" id="jest">
+      <h2 class="section-title">Jest 集成</h2>
+      <p class="mb-4">使用 @shelf/jest-mongodb 进行完整的 MongoDB 集成测试。</p>
+      
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3><span class="icon">📝</span> jest.config.js</h3>
+          <div class="code-block">
+            <pre><span class="comment">// jest.config.js</span>
+<span class="keyword">module</span>.<span class="keyword">exports</span> = {
+  <span class="json-key">preset</span>: <span class="json-string">'@shelf/jest-mongodb'</span>
+};</pre>
+          </div>
+          <span class="badge badge-jest">Jest</span>
+          <span class="badge badge-mongo">MongoDB</span>
+        </div>
+        
+        <div class="demo-card">
+          <h3><span class="icon">🧪</span> 测试示例</h3>
+          <div class="code-block">
+            <pre><span class="keyword">describe</span>(<span class="string">'CRUD 测试'</span>, () => {
+  <span class="keyword">let</span> db;
+  
+  <span class="function">beforeAll</span>(<span class="keyword">async</span> () => {
+    db = <span class="keyword">await</span> <span class="function">connectToDb</span>();
+  });
+  
+  <span class="function">test</span>(<span class="string">'创建用户'</span>, <span class="keyword">async</span> () => {
+    <span class="keyword">const</span> user = { name: <span class="string">'测试'</span> };
+    <span class="keyword">const</span> result = <span class="keyword">await</span> db.<span class="function">insertOne</span>(user);
+    <span class="function">expect</span>(result.insertedId).<span class="function">toBeDefined</span>();
+  });
+});</pre>
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin:24px 0 16px">模拟测试运行</h3>
+      <div class="demo-card">
+        <div class="form-group">
+          <label>选择测试场景</label>
+          <select id="testScenario">
+            <option value="create">创建用户 (create)</option>
+            <option value="read">查询用户 (read)</option>
+            <option value="update">更新用户 (update)</option>
+            <option value="delete">删除用户 (delete)</option>
+            <option value="batch">批量操作 (batch)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="runJestTest()">运行测试</button>
+      </div>
+      
+      <div class="output-area mt-4" id="jestOutput">
+        <pre>选择测试场景并点击"运行测试"...</pre>
+      </div>
+    </div>
+    
+    <!-- 交互演示 -->
+    <div class="tab-content" id="demo">
+      <h2 class="section-title">交互式演示</h2>
+      <p class="mb-4">实时体验 MongoDB 测试数据的创建、查询和操作。</p>
+      
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h3><span class="icon">➕</span> 插入文档</h3>
+          <div class="form-group">
+            <label>文档名称</label>
+            <input type="text" id="docName" placeholder="如: 张三">
+          </div>
+          <div class="form-group">
+            <label>文档类型</label>
+            <select id="docType">
+              <option value="user">用户 (User)</option>
+              <option value="order">订单 (Order)</option>
+              <option value="product">产品 (Product)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="insertDocument()">插入文档</button>
+        </div>
+        
+        <div class="demo-card">
+          <h3><span class="icon">🔍</span> 查询文档</h3>
+          <div class="form-group">
+            <label>查询条件</label>
+            <input type="text" id="queryCondition" placeholder="如: name='张三'" disabled>
+          </div>
+          <div class="form-group">
+            <label>集合</label>
+            <select id="queryCollection">
+              <option value="users">users</option>
+              <option value="orders">orders</option>
+              <option value="products">products</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" onclick="queryDocuments()">查询全部</button>
+        </div>
+      </div>
+      
+      <h3 style="margin:24px 0 16px">模拟数据库状态</h3>
+      <div class="json-viewer" id="dbState">
+        <pre id="dbStateContent">数据库为空，点击上方按钮添加数据...</pre>
+      </div>
+      
+      <h3 style="margin:24px 0 16px">操作日志</h3>
+      <div class="output-area" id="opLog" style="max-height:200px">
+        <pre>等待操作...</pre>
+      </div>
+    </div>
+    
+    <!-- 小测验 -->
+    <div class="tab-content" id="quiz">
+      <h2 class="section-title">知识小测验</h2>
+      <p class="mb-4">检验你对 MongoDB 测试数据的理解程度。</p>
+      
+      <div class="quiz-container">
+        <div class="quiz-question" id="quizQuestion">Q1: Factory 模式的主要作用是什么？</div>
+        <div class="quiz-options" id="quizOptions">
+          <div class="quiz-option" onclick="selectAnswer(0, false)">A. 连接到 MongoDB 数据库</div>
+          <div class="quiz-option" onclick="selectAnswer(1, true)">B. 生成结构化的测试数据</div>
+          <div class="quiz-option" onclick="selectAnswer(2, false)">C. 执行数据库备份</div>
+          <div class="quiz-option" onclick="selectAnswer(3, false)">D. 管理数据库用户权限</div>
+        </div>
+        <div class="quiz-result" id="quizResult" style="display:none"></div>
+      </div>
+      
+      <div class="flex-center mt-4">
+        <span class="badge badge-mongo" id="scoreBadge">得分: 0/5</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模拟数据库
+    const mockDb = {
+      users: [],
+      orders: [],
+      products: []
+    };
+    
+    // 工具函数
+    const utils = {
+      randomName() {
+        const names = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+        return names[Math.floor(Math.random() * names.length)];
+      },
+      randomEmail() {
+        return `user${Date.now()}@example.com`;
+      },
+      randomAge() {
+        return Math.floor(Math.random() * 50) + 18;
+      },
+      randomPrice() {
+        return Math.floor(Math.random() * 1000) + 10;
+      },
+      formatJson(obj) {
+        return JSON.stringify(obj, null, 2)
+          .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+          .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+          .replace(/: (\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+          .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+          .replace(/: (null)/g, ': <span class="json-null">$1</span>');
+      },
+      log(message, type = 'info') {
+        const logArea = document.getElementById('opLog') || document.getElementById('factoryOutput');
+        const timestamp = new Date().toLocaleTimeString();
+        const span = document.createElement('span');
+        span.className = type;
+        span.innerHTML = `[${timestamp}] ${message}\n`;
+        logArea.querySelector('pre').prepend(span);
+      }
+    };
+    
+    // Factory 类
+    class UserFactory {
+      static create(data = {}) {
+        return {
+          _id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          name: data.name || utils.randomName(),
+          email: data.email || utils.randomEmail(),
+          age: data.age || utils.randomAge(),
+          avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
+          bio: ['热爱编程', '喜欢音乐', '运动爱好者', '阅读爱好者'][Math.floor(Math.random() * 4)],
+          createdAt: new Date().toISOString()
+        };
+      }
+      static createMany(count) {
+        return Array.from({ length: count }, () => this.create());
+      }
+    }
+    
+    class OrderFactory {
+      static create(data = {}) {
+        const items = Array.from({ length: Math.floor(Math.random() * 5) + 1 }, (_, i) => ({
+          productId: `PROD${Math.random().toString(36).substr(2, 8)}`,
+          name: `商品${i + 1}`,
+          price: utils.randomPrice(),
+          quantity: Math.floor(Math.random() * 5) + 1
+        }));
+        const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        return {
+          _id: `order-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          orderNo: `ORD${Date.now()}`,
+          userId: data.userId || null,
+          items,
+          totalAmount,
+          status: ['pending', 'processing', 'shipped', 'completed'][Math.floor(Math.random() * 4)],
+          createdAt: new Date().toISOString()
+        };
+      }
+      static createMany(count) {
+        return Array.from({ length: count }, () => this.create());
+      }
+    }
+    
+    class ProductFactory {
+      static create(data = {}) {
+        return {
+          _id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          name: data.name || `产品${Math.floor(Math.random() * 1000)}`,
+          price: data.price || utils.randomPrice(),
+          category: ['电子产品', '服装', '食品', '图书'][Math.floor(Math.random() * 4)],
+          stock: Math.floor(Math.random() * 100),
+          createdAt: new Date().toISOString()
+        };
+      }
+      static createMany(count) {
+        return Array.from({ length: count }, () => this.create());
+      }
+    }
+    
+    // Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+    
+    // 生成用户
+    function generateUsers() {
+      const users = UserFactory.createMany(5);
+      mockDb.users.push(...users);
+      document.getElementById('factoryOutput').innerHTML = 
+        `<pre>${utils.formatJson(users)}</pre>`;
+      utils.log(`✅ 生成了 ${users.length} 个用户`, 'success');
+      updateDbState();
+    }
+    
+    // 生成订单
+    function generateOrders() {
+      const orders = OrderFactory.createMany(3);
+      orders.forEach(order => {
+        order.userId = mockDb.users.length > 0 
+          ? mockDb.users[Math.floor(Math.random() * mockDb.users.length)]._id 
+          : null;
+      });
+      mockDb.orders.push(...orders);
+      document.getElementById('factoryOutput').innerHTML = 
+        `<pre>${utils.formatJson(orders)}</pre>`;
+      utils.log(`✅ 生成了 ${orders.length} 个订单`, 'success');
+      updateDbState();
+    }
+    
+    // 模拟播种
+    function simulateSeeding() {
+      const dbName = document.getElementById('dbName').value;
+      const collectionName = document.getElementById('collectionName').value;
+      const count = parseInt(document.getElementById('insertCount').value) || 10;
+      
+      let data;
+      if (collectionName === 'users') {
+        data = UserFactory.createMany(count);
+        mockDb.users.push(...data);
+      } else if (collectionName === 'orders') {
+        data = OrderFactory.createMany(count);
+        mockDb.orders.push(...data);
+      } else {
+        data = ProductFactory.createMany(count);
+        mockDb.products.push(...data);
+      }
+      
+      const output = {
+        status: 'success',
+        message: `Successfully seeded ${count} documents`,
+        database: dbName,
+        collection: collectionName,
+        insertedCount: count,
+        data: data.slice(0, 3)
+      };
+      
+      document.getElementById('seedingOutput').innerHTML = 
+        `<pre>${utils.formatJson(output)}</pre>`;
+      utils.log(`📥 播种完成: ${dbName}.${collectionName} (${count} 条)`, 'success');
+      updateDbState();
+    }
+    
+    // 运行 Jest 测试
+    function runJestTest() {
+      const scenario = document.getElementById('testScenario').value;
+      const tests = {
+        create: {
+          name: 'create',
+          fullName: '用户创建测试',
+          code: `test('创建用户', async () => {
+  const user = { name: '张三', age: 25 };
+  const result = await db.collection('users').insertOne(user);
+  expect(result.insertedId).toBeDefined();
+});`,
+          result: '✓ PASS'
+        },
+        read: {
+          name: 'read',
+          fullName: '用户查询测试',
+          code: `test('查询用户', async () => {
+  const user = await db.collection('users').findOne({ name: '张三' });
+  expect(user).toBeDefined();
+  expect(user.name).toBe('张三');
+});`,
+          result: '✓ PASS'
+        },
+        update: {
+          name: 'update',
+          fullName: '用户更新测试',
+          code: `test('更新用户', async () => {
+  const result = await db.collection('users').updateOne(
+    { name: '张三' },
+    { $set: { age: 30 } }
+  );
+  expect(result.modifiedCount).toBeGreaterThan(0);
+});`,
+          result: '✓ PASS'
+        },
+        delete: {
+          name: 'delete',
+          fullName: '用户删除测试',
+          code: `test('删除用户', async () => {
+  const result = await db.collection('users').deleteOne({ name: '张三' });
+  expect(result.deletedCount).toBe(1);
+});`,
+          result: '✓ PASS'
+        },
+        batch: {
+          name: 'batch',
+          fullName: '批量操作测试',
+          code: `test('批量插入', async () => {
+  const users = Array.from({ length: 100 }, (_, i) => ({
+    name: \`用户\${i}\`,
+    age: 20 + i
+  }));
+  const result = await db.collection('users').insertMany(users);
+  expect(result.insertedCount).toBe(100);
+});`,
+          result: '✓ PASS'
+        }
+      };
+      
+      const test = tests[scenario];
+      const output = {
+        'PASS': test.result,
+        'Test Suites': '1 passed',
+        'Tests': '1 passed',
+        'Snapshots': '0 total',
+        'Time': '245ms',
+        'Runtime': 'jest-mongodb',
+        'Test Code': test.code
+      };
+      
+      document.getElementById('jestOutput').innerHTML = 
+        `<pre>${utils.formatJson(output)}</pre>`;
+      utils.log(`🧪 运行测试: ${test.fullName} - ${test.result}`, 'success');
+    }
+    
+    // 插入文档
+    function insertDocument() {
+      const docName = document.getElementById('docName').value;
+      const docType = document.getElementById('docType').value;
+      
+      let doc;
+      if (docType === 'user') {
+        doc = UserFactory.create({ name: docName || undefined });
+        mockDb.users.push(doc);
+      } else if (docType === 'order') {
+        doc = OrderFactory.create({ userId: mockDb.users[0]?._id });
+        mockDb.orders.push(doc);
+      } else {
+        doc = ProductFactory.create({ name: docName || undefined });
+        mockDb.products.push(doc);
+      }
+      
+      document.getElementById('dbState').innerHTML = 
+        `<pre>${utils.formatJson({ inserted: doc })}</pre>`;
+      utils.log(`➕ 插入 ${docType}: ${doc._id}`, 'success');
+      updateDbState();
+    }
+    
+    // 查询文档
+    function queryDocuments() {
+      const collection = document.getElementById('queryCollection').value;
+      const data = mockDb[collection] || [];
+      
+      document.getElementById('dbState').innerHTML = 
+        `<pre>${utils.formatJson({ count: data.length, data })}</pre>`;
+      utils.log(`🔍 查询 ${collection}: ${data.length} 条记录`, 'info');
+    }
+    
+    // 更新数据库状态显示
+    function updateDbState() {
+      const state = {
+        users: mockDb.users.length,
+        orders: mockDb.orders.length,
+        products: mockDb.products.length,
+        total: mockDb.users.length + mockDb.orders.length + mockDb.products.length
+      };
+      const content = document.getElementById('dbStateContent');
+      if (content) {
+        content.textContent = JSON.stringify(state, null, 2);
+      }
+    }
+    
+    // 小测验
+    const quizData = [
+      {
+        question: 'Q1: Factory 模式的主要作用是什么？',
+        options: ['连接到 MongoDB 数据库', '生成结构化的测试数据', '执行数据库备份', '管理数据库用户权限'],
+        correct: 1
+      },
+      {
+        question: 'Q2: mongo-seeding 支持哪些文件格式？',
+        options: ['只有 JSON', '只有 CSV', 'JSON 和 JS', 'XML 和 YAML'],
+        correct: 2
+      },
+      {
+        question: 'Q3: @shelf/jest-mongodb 的 preset 配置是什么？',
+        options: ['jest-puppeteer', '@shelf/jest-mongodb', '@jest/mongodb', 'jest-mongodb-preset'],
+        correct: 1
+      },
+      {
+        question: 'Q4: 批量插入数据时，推荐的做法是？',
+        options: ['逐条插入', '使用 insertMany', '使用 insertOne 循环', '直接操作文件'],
+        correct: 1
+      },
+      {
+        question: 'Q5: 为什么测试数据要使用固定种子？',
+        options: ['加快插入速度', '使数据可复现', '减少内存使用', '提高安全性'],
+        correct: 1
+      }
+    ];
+    
+    let currentQuiz = 0;
+    let score = 0;
+    
+    function selectAnswer(index, isCorrect) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach((opt, i) => {
+        opt.classList.remove('correct', 'incorrect');
+        opt.style.pointerEvents = 'none';
+        if (i === quizData[currentQuiz].correct) {
+          opt.classList.add('correct');
+        } else if (i === index && !isCorrect) {
+          opt.classList.add('incorrect');
+        }
+      });
+      
+      if (isCorrect) {
+        score++;
+        document.getElementById('scoreBadge').textContent = `得分: ${score}/${quizData.length}`;
+        document.getElementById('quizResult').style.display = 'block';
+        document.getElementById('quizResult').className = 'quiz-result pass';
+        document.getElementById('quizResult').textContent = '🎉 回答正确！';
+      } else {
+        document.getElementById('quizResult').style.display = 'block';
+        document.getElementById('quizResult').className = 'quiz-result fail';
+        document.getElementById('quizResult').textContent = '❌ 回答错误，正确答案是: ' + 
+          quizData[currentQuiz].options[quizData[currentQuiz].correct];
+      }
+      
+      setTimeout(() => {
+        currentQuiz++;
+        if (currentQuiz < quizData.length) {
+          loadQuiz();
+        }
+      }, 1500);
+    }
+    
+    function loadQuiz() {
+      const q = quizData[currentQuiz];
+      document.getElementById('quizQuestion').textContent = q.question;
+      document.getElementById('quizResult').style.display = 'none';
+      const optionsHtml = q.options.map((opt, i) => 
+        `<div class="quiz-option" onclick="selectAnswer(${i}, ${i === q.correct})">${String.fromCharCode(65 + i)}. ${opt}</div>`
+      ).join('');
+      document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+    
+    // 初始化
+    loadQuiz();
+  </script>
+</body>
+</html>

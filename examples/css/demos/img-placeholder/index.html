@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>img 标签背景色占位演示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .demo-section {
+      margin-bottom: 48px;
+    }
+
+    .demo-title {
+      font-size: 16px;
+      color: #4fc3f7;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-title::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      background: #4fc3f7;
+      border-radius: 50%;
+    }
+
+    .problem-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .problem-box h3 {
+      color: #ef5350;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .problem-box p {
+      color: #888;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ========== Demo 1: Direct img bg (wrong) ========== */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .demo-card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .demo-card h4 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #aaa;
+    }
+
+    .demo-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    /* Wrong approach */
+    .img-wrong {
+      width: 100%;
+      height: 150px;
+      background-color: #e0e0e0; /* Won't work as expected */
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .img-wrong img {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Correct approach */
+    .img-correct {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #e0e0e0;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .img-correct img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .img-correct img.loaded {
+      opacity: 1;
+    }
+
+    /* ========== Demo 2: Loading skeleton ========== */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        #2a2a2a 0%,
+        #3a3a3a 50%,
+        #2a2a2a 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    .skeleton-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .skeleton-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .skeleton-img.loaded {
+      opacity: 1;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ========== Demo 3: Avatar placeholder ========== */
+    .avatar-demo {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #3a3a3a;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .avatar img.loaded {
+      opacity: 1;
+    }
+
+    .avatar.large {
+      width: 120px;
+      height: 120px;
+    }
+
+    .avatar.small {
+      width: 48px;
+      height: 48px;
+    }
+
+    /* ========== Demo 4: Error state ========== */
+    .error-state {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .error-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    .error-placeholder .icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    .error-placeholder .text {
+      font-size: 14px;
+    }
+
+    .error-state img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .error-state img.hidden {
+      display: none;
+    }
+
+    /* ========== Demo 5: Hover zoom ========== */
+    .img-hover-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .img-hover-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .img-hover-wrapper img.loaded {
+      opacity: 1;
+    }
+
+    .img-hover-wrapper:hover img {
+      transform: scale(1.05);
+    }
+
+    /* ========== Controls ========== */
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      padding: 8px 16px;
+      background: #333;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      background: #444;
+      border-color: #555;
+    }
+
+    .control-btn.active {
+      background: #4fc3f7;
+      border-color: #4fc3f7;
+      color: #000;
+    }
+
+    .control-btn.danger {
+      background: #c62828;
+      border-color: #c62828;
+    }
+
+    /* ========== Toast ========== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #1b5e20;
+      border-color: #2e7d32;
+    }
+
+    .toast.error {
+      background: #b71c1c;
+      border-color: #c62828;
+    }
+
+    .info-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .info-box code {
+      background: #2a2a2a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #4fc3f7;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+
+  <h1>img 标签无图片时背景色控制</h1>
+  <p class="subtitle">学习如何使用 CSS 控制 img 标签在无图片或加载失败时的背景色占位</p>
+
+  <!-- Demo 1: Wrong vs Correct -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 1: 错误方案 vs 正确方案</div>
+    <div class="problem-box">
+      <h3>⚠️ 问题说明</h3>
+      <p>直接给 img 元素设置 background-color 在图片加载失败时不会显示，
+         因为 img 是替换元素，其渲染由 src 内容决定。需要使用 wrapper 元素来实现背景色占位。</p>
+    </div>
+    
+    <div class="demo-grid">
+      <div class="demo-card">
+        <h4>❌ 错误方案</h4>
+        <div class="demo-label">直接在 img 上设置 background-color</div>
+        <div class="img-wrong">
+          <img src="invalid-url-12345.jpg" alt="无效图片">
+        </div>
+        <div class="info-box">
+          图片加载失败，但背景色未显示。<br>
+          浏览器显示默认破碎图标。
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h4>✅ 正确方案</h4>
+        <div class="demo-label">使用 wrapper + background-color</div>
+        <div class="img-correct">
+          <img src="invalid-url-12345.jpg" alt="无效图片"
+               onload="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="info-box">
+          使用 wrapper 作为背景色容器，<br>
+          图片绝对定位覆盖。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 2: Loading Skeleton -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 2: 骨架屏加载动画</div>
+    <div class="demo-grid">
+      <div class="demo-card">
+        <h4>骨架屏效果</h4>
+        <div class="skeleton-wrapper">
+          <div class="skeleton"></div>
+          <img class="skeleton-img" src="https://picsum.photos/800/450?random=1" 
+               alt="加载中..."
+               onload="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="info-box">
+          使用 shimmer 动画模拟加载中状态，<br>
+          图片加载完成后淡入显示。
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h4>淡入动画</h4>
+        <div class="skeleton-wrapper">
+          <div class="skeleton"></div>
+          <img class="skeleton-img" src="https://picsum.photos/800/450?random=2"
+               alt="加载中..."
+               onload="this.classList.add('loaded'); this.parentElement.querySelector('.skeleton').style.display='none'"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="info-box">
+          点击按钮模拟加载延迟，<br>
+          观察骨架屏到图片的过渡。
+        </div>
+        <div class="controls">
+          <button class="control-btn" onclick="reloadImage(this)">重新加载</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 3: Avatar Placeholder -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 3: 头像占位</div>
+    <div class="demo-card">
+      <div class="avatar-demo">
+        <div class="avatar large">
+          <img src="invalid-avatar.jpg" alt="大头像"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="avatar">
+          <img src="https://picsum.photos/200?random=10" alt="中头像"
+               onload="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="avatar small">
+          <img src="https://picsum.photos/100?random=11" alt="小头像"
+               onload="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="info-box" style="margin-top: 16px;">
+        圆形头像占位：大/中/小三种尺寸。<br>
+        左侧为加载失败的占位效果，右侧为加载成功。
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 4: Error State -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 4: 自定义错误状态</div>
+    <div class="demo-grid">
+      <div class="demo-card">
+        <h4>图片加载失败</h4>
+        <div class="error-state">
+          <div class="error-placeholder">
+            <div class="icon">🖼️</div>
+            <div class="text">图片加载失败</div>
+          </div>
+          <img src="error-test.jpg" alt="错误图片"
+               onerror="this.classList.add('hidden')">
+        </div>
+        <div class="info-box">
+          使用 ::after 或绝对定位元素显示错误占位，<br>
+          当图片加载失败时显示友好的错误提示。
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h4>空 src 状态</h4>
+        <div class="error-state">
+          <div class="error-placeholder">
+            <div class="icon">📷</div>
+            <div class="text">暂无图片</div>
+          </div>
+          <img src="" alt="空图片">
+        </div>
+        <div class="info-box">
+          当 src 为空时，浏览器会尝试加载当前页面 URL，<br>
+          导致不必要的请求。建议设置 placeholder。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 5: Hover Zoom -->
+  <div class="demo-section">
+    <div class="demo-title">Demo 5: 背景色 + Hover 缩放</div>
+    <div class="demo-grid">
+      <div class="demo-card">
+        <h4>Hover 效果</h4>
+        <div class="img-hover-wrapper">
+          <img src="https://picsum.photos/800/450?random=5" alt="示例图片"
+               onload="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="info-box">
+          鼠标悬停时图片放大，wrapper 的背景色<br>
+          作为占位底色，视觉效果流畅。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 2000);
+    }
+
+    function reloadImage(btn) {
+      const wrapper = btn.closest('.demo-card').querySelector('.skeleton-wrapper');
+      const img = wrapper.querySelector('img');
+      const skeleton = wrapper.querySelector('.skeleton');
+      
+      // Reset state
+      skeleton.style.display = 'block';
+      skeleton.style.animation = 'none';
+      skeleton.offsetHeight; // Trigger reflow
+      skeleton.style.animation = 'shimmer 1.5s infinite';
+      img.classList.remove('loaded');
+      img.style.display = 'block';
+      
+      // Randomize src to force reload
+      img.src = 'https://picsum.photos/800/450?random=' + Math.random();
+      
+      img.onload = function() {
+        this.classList.add('loaded');
+        skeleton.style.display = 'none';
+        showToast('✓ 图片加载成功', 'success');
+      };
+      
+      img.onerror = function() {
+        this.style.display = 'none';
+        showToast('✗ 图片加载失败', 'error');
+      };
+    }
+
+    // Initialize loaded images
+    document.querySelectorAll('img[src]').forEach(img => {
+      if (img.complete && img.naturalHeight !== 0) {
+        img.classList.add('loaded');
+      }
+    });
+  </script>
+</body>
+</html>
